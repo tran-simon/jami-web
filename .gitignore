@@ -4,3 +4,6 @@ package-lock.json
 jaas-client/package-lock.json
 jaas-client/node_modules/
 jaas-client/build/
+
+.env
+dring.node
