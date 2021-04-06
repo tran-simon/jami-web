@@ -2,10 +2,11 @@ import React from 'react'
 import Button from '@material-ui/core/Button';
 import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
-import { useHistory } from "react-router-dom";
+//import { useHistory } from "react-router-dom";
+import authManager from '../AuthManager'
 
 export default function Header() {
-    const history = useHistory();
+    //const history = useHistory();
 
     const [anchorEl, setAnchorEl] = React.useState(null);
 
@@ -18,15 +19,16 @@ export default function Header() {
     };
 
     const disconnect = () => {
-        let path = `/`;
-        history.push(path);
+        authManager.disconnect()
+        //let path = `/`;
+        //history.push(path);
     }
 
     return (
         <div>
             <Button aria-controls="simple-menu" aria-haspopup="true" onClick={handleClick}>
                 Menu
-      </Button>
+            </Button>
             <Menu
                 id="simple-menu"
                 anchorEl={anchorEl}

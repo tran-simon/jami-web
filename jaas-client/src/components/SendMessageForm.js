@@ -1,5 +1,6 @@
 import React from 'react'
-import InputEmoji from "react-input-emoji";
+import TextField from '@material-ui/core/TextField'
+//import InputEmoji from "react-input-emoji";
 
 class SendMessageForm extends React.Component {
 
@@ -25,7 +26,6 @@ class SendMessageForm extends React.Component {
         this.setState({
             message: ''
         })
-
     }
 
     render() {
@@ -33,7 +33,7 @@ class SendMessageForm extends React.Component {
             <div
                 //onSubmit={this.handleSubmit}
                 className="send-message-form">
-                <InputEmoji
+                <TextField
                     disabled={this.props.disabled}
                     onChange={this.handleChange}
                     value={this.state.message}

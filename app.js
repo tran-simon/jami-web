@@ -1,49 +1,48 @@
-require('dotenv/config');
+const env = require('dotenv/config')
 
 const express = require('express')
-const app = express();
-const server = require('http').Server(app);
+const http = require('http')
 const session = require('express-session')
-const io = require('socket.io')(server);
-const path = require('path');
+//const cookieParser = require('cookie-parser')
+//const io = require('socket.io')(server)
+const path = require('path')
+const passport = require('passport')
+    , LocalStrategy = require('passport-local').Strategy
 
-//const redis = require('redis')
-const redis = require('redis-url').connect();
+const redis = require('redis-url').connect()
 const RedisStore = require('connect-redis')(session)
-/*var passportSocketIo = require('passport.socketio');*/
-//const cookieParser = require('cookie-parser');
-const cookieParser = require('cookie-parser')(process.env.SECRET_KEY_BASE); // <- your secret here
+/*const passportSocketIo = require('passport.socketio')*/
 
-var indexRouter = require('./routes/index');
+const indexRouter = require('./routes/index')
+
 //const cors = require('cors')
 
-var parser = require('fast-xml-parser');
+const parser = require('fast-xml-parser')
 
-const RingDaemon = require('./RingDaemon.js');
-const passport = require('passport')
-    , LocalStrategy = require('passport-local').Strategy;
+const JamiRestApi = require('./routes/jami')
+const JamiDaemon = require('./JamiDaemon')
 
-const sessionStore = new RedisStore({ client: redis });
+//const sessionStore = new RedisStore({ client: redis })
+const sessionStore = new session.MemoryStore()
 
+const app = express()
 
 /*
     Configuation for Passeport Js
 */
+//app.use(cookieParser(process.env.SECRET_KEY_BASE));
+app.disable('x-powered-by');
 
-// app.use(express.static('public'));
-// app.use(cookieParser());
-// app.use(bodyParser());
 app.use(session({
-    store: sessionStore,
+    //store: sessionStore,
     resave: false,
-    saveUninitialized: false,
+    saveUninitialized: true,
     cookie: {
-        secure: process.env.ENVIRONMENT !== 'development' && process.env.ENVIRONMENT !== 'test',
+        secure: false,//process.env.ENVIRONMENT !== 'development' && process.env.ENVIRONMENT !== 'test',
         maxAge: 2419200000
     },
     secret: process.env.SECRET_KEY_BASE
 }));
-
 app.use(passport.initialize());
 app.use(passport.session());
 // app.use(app.router);
@@ -78,54 +77,22 @@ io.use(passportSocketIo.authorize({
     tempAccounts holds users accounts while tempting to authenticate them on Jams.
     connectedUsers  holds users accounts after they got authenticated by Jams.
 
-    Users should be removed from connectedUsers when receiving a disconnect 
+    Users should be removed from connectedUsers when receiving a disconnect
     web socket call
 
 */
 const tempAccounts = {};
 const connectedUsers = {};
 
-const callbackMap = {
-    "IncomingAccountMessage": (accountId, from, message) => {
-        console.log("Received message: " + accountId + " " + from + " " + message["text/plain"]);
+const jami = new JamiDaemon();
+const apiRouter = new JamiRestApi(jami).getRouter()
 
-        if (parser.validate(message["text/plain"]) === true) {
-            console.log(message["text/plain"]);
-        } else {
-
-            user = connectedUsers[accountId];
-            console.log(user.socketId)
-            io.to(user.socketId).emit('receivedMessage', message["text/plain"]);
-            //io.emit('receivedMessage', message["text/plain"]);
-        }
-    },
-    "RegistrationStateChanged": (accountId, state, /*int*/ code, detail) => {
-        console.log("RegistrationStateChanged: " + accountId + " " + state + " " + code + " " + detail);
-        if (state === "REGISTERED") {
-            if (tempAccounts[accountId]) {
-
-                const ctx = tempAccounts[accountId];
-                ctx.newUser.accountId = accountId;
-                ctx.newUser.jamiId = jami.dring.getAccountDetails(accountId).get("Account.username");
-                //connectedUsers[accountId] = ctx.newUser;
-                ctx.done(null, ctx.newUser);
-                delete tempAccounts[accountId];
-            }
-        } else if (state === "ERROR_AUTH") {
-            done(null, false);
-            //remove account
-        }
-    }
-}
-const jami = new RingDaemon(callbackMap);
-
-passport.serializeUser(function (user, done) {
+passport.serializeUser((user, done) => {
     console.log(user)
     connectedUsers[user.accountId] = user;
     console.log("=============================SerializeUser called " + user.accountId)
     done(null, user.accountId);
 });
-
 
 const deserializeUser = (id, done) => {
     console.log("=============================DeserializeUser called on: " + id + " " + connectedUsers[id])
@@ -135,25 +102,20 @@ passport.deserializeUser(deserializeUser);
 
 //var tempAccountId = '';
 
-passport.use(new LocalStrategy(
+const jamsStrategy = new LocalStrategy(
     (username, password, done) => {
+
         const newUser = {};
         newUser.username = username;
-        //newUser.socketid = 
+        //newUser.socketid =
 
-        const template = jami.dring.getAccountTemplate("RING");
+        const accountId = jami.addAccount({
+            'managerUri': 'https://jams.savoirfairelinux.com',
+            'managerUsername': username,
+            'archivePassword': password
+        });
 
-        /*
-            For test purpose we are not checking if a user can SSO using Jams,
-            instead we juste create a new user an get he's or her's newly created accountId
-        */
-        template.set("Account.managerUri", "https://jams.savoirfairelinux.com");
-        template.set("Account.managerUsername", username);
-        template.set("Account.archivePassword", password);
-
-        const accountId = jami.dring.addAccount(template);
-
-        const newProps = jami.getAccountDetails(accountId);
+        const newProps = jami.getAccount(accountId).details;
         console.log(newProps);
         //Object.entries(newProps).forEach(v => console.log(v[0], v[1]))
         //tempAccountId = accountId;
@@ -175,23 +137,62 @@ passport.use(new LocalStrategy(
             return done(null, user);
         });*/
     }
-));
+);
+jamsStrategy.name = "jams";
 
-app.post('/api/login', passport.authenticate('local'), function (req, res) {
-    res.json({ loggedin: true });
+const localStrategy = new LocalStrategy(
+    (username, password, done) => {
+        console.log("localStrategy: " + username + " " + password);
+
+        const newUser = {};
+        newUser.accountId = jami.getAccountList()[0].getId();
+        console.log("Local AccountId: " + newUser.accountId);
+        connectedUsers[newUser.accountId] = newUser;
+        done(null, newUser);
+    }
+);
+
+passport.use(jamsStrategy);
+passport.use(localStrategy);
+
+const secured = (req, res, next) => {
+    console.log(`isSecured ${req.user}`);
+    if (req.user && req.user.accountId) {
+        return next();
+    }
+    res.status(401).end()
+};
+const securedRedirect = (req, res, next) => {
+    if (req.user && req.user.accountId) {
+        return next();
+    }
+    req.session.returnTo = req.originalUrl;
+    res.redirect('/login');
+};
+
+app.post('/auth', passport.authenticate('jams'), (req, res) => {
+    res.json({ loggedin: true })
 });
+app.post('/api/localLogin', passport.authenticate('local'), (req, res) => {
+    res.json({ loggedin: true })
+});
+
+app.use('/api', secured, apiRouter);
+
 app.use('/', indexRouter);
 
 /* GET React App */
 
 app.use(express.static(path.join(__dirname, 'public')))
 
-app.use(function (req, res, next) {
+app.use((req, res, next) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
+const server = http.Server(app);
 server.listen(3000);
 
+/*
 io.on('connection', (socket) => {
     console.log("Client just connected !")
     socket.on('SendMessage', (data) => {
@@ -201,7 +202,6 @@ io.on('connection', (socket) => {
         jami.dring.sendAccountTextMessage(socket.session.user.accountId, data.destinationId, msgMap);
     });
 });
-
 
 io.use((socket, next) => {
     cookieParser(socket.handshake, {}, (err) => {
@@ -233,8 +233,6 @@ io.use((socket, next) => {
                     user.socketId = socket.id;
                     socket.session.user = user;
                     console.log("User added to session --------> " + user.accountId);
-                    /*data[auth.userProperty] = user;
-                    data[auth.userProperty].logged_in = true;*/
                     //auth.success(data, accept);
                     next(err, true);
                 });
@@ -242,3 +240,4 @@ io.use((socket, next) => {
         });
     });
 });
+*/

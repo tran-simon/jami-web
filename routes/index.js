@@ -1,15 +1,9 @@
-var express = require('express');
-var router = express.Router();
-var path = require('path');
-
-// /* GET home page. */
-// router.get('/', function (req, res, next) {
-//     console.log("Request get index");
-//     res.render('index', { title: 'Express' });
-// });
+const express = require('express');
+const router = express.Router();
+const path = require('path');
 
 /* GET React App */
-router.get(['/app', '/app/*'], function (req, res, next) {
+router.get(['/app', '/app/*'], (req, res, next) => {
     res.sendFile(path.join(__dirname, '../public', 'index.html'));
 });
 

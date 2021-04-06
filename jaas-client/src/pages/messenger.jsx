@@ -4,11 +4,11 @@ import ContactList from '../components/ContactList'
 import MessageList from '../components/MessageList'
 import SendMessageForm from '../components/SendMessageForm'
 import NewContactForm from '../components/NewContactForm'
-import Sound from 'react-sound';
+//import Sound from 'react-sound';
 import io from "socket.io-client";
-var socket = io.connect('http://localhost:3000');
+//const socket = io.connect('http://localhost:3000');
 
-class Jaas extends React.Component {
+class JamiMessenger extends React.Component {
 
   constructor() {
     super()
@@ -17,11 +17,10 @@ class Jaas extends React.Component {
       sound: false
     }
 
-    socket.on('connect', () => {
+    /*socket.on('connect', () => {
       console.log("Success !")
-    })
+    })*/
 
-    //import io from 'socket.io-client';
 
     //this.socket = socketIOClient(ENDPOINT);
     //this.socket.on("FromAPI", data => {
@@ -33,8 +32,8 @@ class Jaas extends React.Component {
   }
 
   componentDidMount() {
-    socket.on('receivedMessage', (data) => {
-      var message = {
+    /*socket.on('receivedMessage', (data) => {
+      const message = {
         senderId: '65f6674b26e5af6ed0b4e92a13b80ff4bbfdf1e8',
         text: data
       }
@@ -42,7 +41,7 @@ class Jaas extends React.Component {
         messages: [...this.state.messages, message],
         sound: true
       })
-    });
+    });*/
   }
 
   sendMessage(text) {
@@ -51,7 +50,7 @@ class Jaas extends React.Component {
       destinationId: '65f6674b26e5af6ed0b4e92a13b80ff4bbfdf1e8',
       text: text
     }
-    socket.emit("SendMessage", data);
+    //socket.emit("SendMessage", data);
     console.log(data.text);
     this.setState({
       messages: [...this.state.messages, data],
@@ -79,4 +78,4 @@ class Jaas extends React.Component {
   }
 }
 
-export default Jaas;
+export default JamiMessenger;
