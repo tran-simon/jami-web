@@ -21,7 +21,7 @@ class AccountPreferences extends React.Component {
     const isJamiAccount = account.getType() === Account.TYPE_JAMI
     return (
       <React.Fragment>
-        <Typography variant="h2" component="h2">Jami account</Typography>
+        <Typography variant="h2" component="h2">{isJamiAccount ? "Jami account" : "SIP account"}</Typography>
 
         {isJamiAccount &&
           <JamiIdCard account={account} />}

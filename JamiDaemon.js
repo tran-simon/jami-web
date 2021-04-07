@@ -18,6 +18,7 @@
  *  along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 const Account = require('./model/Account')
+const Conversation = require('./model/Conversation')
 
 "use strict";
 class JamiDaemon {
@@ -36,9 +37,9 @@ class JamiDaemon {
                         }
                     }
                     newAccounts.push(new Account(accountId,
-                        this.mapToJs(this.dring.getAccountDetails(accountId))
-                        //this.mapToJs(this.dring.getVolatileDetails(accountId)),
-                        ))
+                        this.mapToJs(this.dring.getAccountDetails(accountId)),
+                        this.mapToJs(this.dring.getVolatileAccountDetails(accountId))
+                    ))
                 })
                 this.accounts = newAccounts
             },
@@ -97,7 +98,75 @@ class JamiDaemon {
                 }
             },
             "RegisteredNameFound": (accountId, state, address, name) => {
-                console.log("RegistrationStateChanged: " + accountId + " " + state + " " + address + " " + name)
+                console.log(`RegisteredNameFound: ${accountId} ${state} ${address} ${name}`)
+            },
+            "conversationReady": (accountId, conversationId) => {
+                console.log(`conversationReady: ${accountId} ${conversationId}`)
+                const account = this.getAccount(accountId)
+                if (!account) {
+                    console.log(`Unknown account ${accountId}`)
+                    return
+                }
+                let conversation = account.getConversation(conversationId)
+                if (!conversation) {
+                    const members = this.dring.getConversationMembers(accountId, conversationId)
+                    console.log(members)
+                    conversation = new Conversation(conversationId, members)
+                    account.addConversation(conversation)
+                }
+            },
+            "conversationRemoved": (accountId, conversationId) => {
+                console.log(`conversationRemoved: ${accountId} ${conversationId}`)
+                const account = this.getAccount(accountId)
+                if (!account) {
+                    console.log(`Unknown account ${accountId}`)
+                    return
+                }
+                account.removeConversation(conversationId)
+            },
+            "conversationLoaded": (accountId, conversationId) => {
+                console.log(`conversationLoaded: ${accountId} ${conversationId}`)
+                const account = this.getAccount(accountId)
+                if (!account) {
+                    console.log(`Unknown account ${accountId}`)
+                    return
+                }
+            },
+            "messageReceived": (accountId, conversationId, message) => {
+                console.log(`messageReceived: ${accountId} ${conversationId}`)
+                const account = this.getAccount(accountId)
+                if (!account) {
+                    console.log(`Unknown account ${accountId}`)
+                    return
+                }
+                const conversation = account.getConversation(conversationId)
+                if (!conversation) {
+                    conversation.addMessage(message)
+                }
+            },
+            "conversationRequestReceived": (accountId, conversationId, request) => {
+                console.log(`conversationRequestReceived: ${accountId} ${conversationId}`)
+                const account = this.getAccount(accountId)
+                if (!account) {
+                    console.log(`Unknown account ${accountId}`)
+                    return
+                }
+            },
+            "conversationMemberEvent": (accountId, conversationId, member, event) => {
+                console.log(`conversationMemberEvent: ${accountId} ${conversationId}`)
+                const account = this.getAccount(accountId)
+                if (!account) {
+                    console.log(`Unknown account ${accountId}`)
+                    return
+                }
+            },
+            "onConversationError": (accountId, conversationId, code, what) => {
+                console.log(`onConversationError: ${accountId} ${conversationId}`)
+                const account = this.getAccount(accountId)
+                if (!account) {
+                    console.log(`Unknown account ${accountId}`)
+                    return
+                }
             }
         })
         this.stringVectToArr(this.dring.getAccountList()).forEach(accountId => {
@@ -147,7 +216,7 @@ class JamiDaemon {
 // private
 
     boolToStr(bool) {
-        return bool ? "TRUE" : "FALSE";
+        return bool ? "true" : "false";
     }
 
     accountDetailsToNative(account) {
