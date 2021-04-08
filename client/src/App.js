@@ -8,7 +8,7 @@ import React from 'react';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import authManager from './AuthManager'
 //import logo from './logo.svg';
-import './App.css';
+import './App.scss';
 
 import { BrowserRouter as Router, Route, Switch, Link, Redirect } from 'react-router-dom';
 
