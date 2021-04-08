@@ -27,7 +27,10 @@
   },
   "devDependencies": {
     "llnode": "^3.2.0",
-    "nodemon": "^2.0.7"
+    "nodemon": "^2.0.7",
+    "react-hot-loader": "^4.13.0",
+    "webpack-dev-middleware": "^4.1.0",
+    "webpack-hot-middleware": "^2.25.0"
   },
   "scripts": {
     "start": "node app.js",

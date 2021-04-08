@@ -22,11 +22,20 @@ const parser = require('fast-xml-parser')
 const JamiRestApi = require('./routes/jami')
 const JamiDaemon = require('./JamiDaemon')
 
+const webpack = require('webpack')
+const webpackConfig = require('./client/webpack.config.js')
+const compiler = webpack(webpackConfig)
+
 //const sessionStore = new RedisStore({ client: redis })
 const sessionStore = new session.MemoryStore()
 
 const app = express()
-
+app.use(
+    require('webpack-dev-middleware')(compiler, {
+      publicPath: webpackConfig.output.publicPath
+    })
+  );
+  app.use(require('webpack-hot-middleware')(compiler));
 /*
     Configuation for Passeport Js
 */
