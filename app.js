@@ -183,10 +183,10 @@ app.use('/', indexRouter);
 
 /* GET React App */
 
-app.use(express.static(path.join(__dirname, 'public')))
+app.use(express.static(path.join(__dirname, 'client', 'dist')))
 
 app.use((req, res, next) => {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+    res.sendFile(path.join(__dirname, 'client', 'dist', 'index.html'));
 });
 
 const server = http.Server(app);

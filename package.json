@@ -1,5 +1,5 @@
 {
-  "name": "jaas-server",
+  "name": "jami-web-server",
   "version": "1.0.0",
   "description": "Jaas Web API that handles client requests to Jami daemon",
   "main": "index.js",
@@ -8,7 +8,6 @@
     "connect-redis": "^4.0.4",
     "cookie-parser": "^1.4.5",
     "cors": "^2.8.5",
-    "css-loader": "^3.6.0",
     "dotenv": "^8.2.0",
     "env": "0.0.2",
     "express": "^4.17.1",
@@ -16,7 +15,7 @@
     "express-ws": "^4.0.0",
     "fast-xml-parser": "^3.17.4",
     "faye": "^1.3.0",
-    "jaas-client": "file:jaas-client",
+    "jami-web-client": "file:client",
     "mongoose": "^5.9.19",
     "passport": "^0.4.1",
     "passport-local": "^1.0.0",
@@ -24,19 +23,15 @@
     "passport.socketio": "^3.7.0",
     "path": "^0.12.7",
     "redis-url": "^1.2.1",
-    "socket.io": "^2.3.0",
-    "style-loader": "^1.2.1"
+    "socket.io": "^2.3.0"
   },
   "devDependencies": {
-    "@babel/core": "^7.10.3",
-    "@babel/preset-react": "^7.10.1",
-    "babel-loader": "8.1.0",
-    "webpack": "4.43.0",
-    "webpack-cli": "3.3.12"
+    "llnode": "^3.2.0",
+    "nodemon": "^2.0.7"
   },
   "scripts": {
     "start": "node app.js",
-    "build": "npx webpack && cp -R jaas-client/dist/*  public/"
+    "build": "cd client && npx webpack"
   },
   "author": "Larbi Gharib",
   "license": "ISC"
