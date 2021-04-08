@@ -6,13 +6,18 @@ import SendMessageForm from '../components/SendMessageForm'
 import NewContactForm from '../components/NewContactForm'
 //import Sound from 'react-sound';
 import io from "socket.io-client";
+import ConversationList from '../components/ConversationList';
+import CircularProgress from '@material-ui/core/CircularProgress';
 //const socket = io.connect('http://localhost:3000');
+import authManager from '../AuthManager'
 
 class JamiMessenger extends React.Component {
 
-  constructor() {
-    super()
+  constructor(props) {
+    super(props)
+    this.accountId = props.accountId || props.match.params.accountId
     this.state = {
+      conversations: undefined,
       messages: [],
       sound: false
     }
@@ -29,9 +34,18 @@ class JamiMessenger extends React.Component {
     //  })
     //});
     this.sendMessage = this.sendMessage.bind(this)
+    this.controller = new AbortController()
   }
 
   componentDidMount() {
+    if (this.req === undefined) {
+      this.req = authManager.fetch(`/api/accounts/${this.accountId}/conversations`, {signal: this.controller.signal})
+        .then(res => res.json())
+        .then(result => {
+          console.log(result)
+          this.setState({conversations: result})
+        })
+    }
     /*socket.on('receivedMessage', (data) => {
       const message = {
         senderId: '65f6674b26e5af6ed0b4e92a13b80ff4bbfdf1e8',
@@ -42,6 +56,11 @@ class JamiMessenger extends React.Component {
         sound: true
       })
     });*/
+  }
+
+  componentWillUnmount(){
+    this.controller.abort()
+    this.req = undefined
   }
 
   sendMessage(text) {
@@ -61,7 +80,7 @@ class JamiMessenger extends React.Component {
     return (
       <div className="app" >
         <Header />
-        <ContactList />
+        {this.state.conversations ? <ConversationList conversations={this.state.conversations} /> : <CircularProgress />}
         <MessageList messages={this.state.messages} />
         <SendMessageForm sendMessage={this.sendMessage} />
         <NewContactForm />

@@ -1,14 +1,12 @@
+import List from '@material-ui/core/List'
 import React from 'react'
 
 class ContactList extends React.Component {
     render() {
-
         return (
-            <div className="rooms-list">
-                <ul>
-                    <h3>Liste de contacts</h3>
-                </ul>
-            </div>
+            <List>
+
+            </List>
         )
     }
 }

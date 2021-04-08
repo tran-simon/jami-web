@@ -37,8 +37,8 @@ class SendMessageForm extends React.Component {
                     disabled={this.props.disabled}
                     onChange={this.handleChange}
                     value={this.state.message}
-                    cleanOnEnter
-                    onEnter={this.handleSubmit}
+                    //cleanOnEnter
+                    //onEnter={this.handleSubmit}
                     placeholder="Écris ton message et cliques sur Entrer"
                     height="35"
                 />

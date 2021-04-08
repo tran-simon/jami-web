@@ -1,7 +1,7 @@
 class Conversation {
     constructor(id, members) {
         this.id = id
-        this.members = members
+        this.members = members || []
         this.messages = []
     }
 
@@ -12,12 +12,11 @@ class Conversation {
     getId() { return this.id }
 
     getDisplayName() {
-        return this.details["Account.displayName"] || this.getDisplayUri()
+        if (this.members.length !== 0) {
+            return this.members[0].getDisplayName()
+        }
+        return this.getDisplayUri()
     }
-
-    getUri() { return this.details["Account.username"] }
-
-    getRegisteredName() { return this.volatileDetails["Account.registeredName"] }
 
     getObject() {
         return {
@@ -31,7 +30,7 @@ class Conversation {
     }
 
     getDisplayUri() {
-        return this.getRegisteredName() || this.getUri()
+        return this.getId()
     }
 
     addMessage(message) {

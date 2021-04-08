@@ -33,9 +33,9 @@ class App extends React.Component {
         <Router>
           <Switch>
             <Route exact path="/"><Redirect to="/account" /></Route>
-            <Route path="/account/:accountId" component={AccountSettings} />
+            <Route path="/account/:accountId" component={JamiMessenger} />
+            <Route path="/account/:accountId/settings" component={AccountSettings} />
             <Route path="/account" component={AccountSelection} />
-            <Route path="/messaging" component={JamiMessenger} />
             <Route component={NotFoundPage} />
           </Switch>
         </Router>
