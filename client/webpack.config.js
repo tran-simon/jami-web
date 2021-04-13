@@ -21,7 +21,11 @@ module.exports = {
                 use: {
                     loader: 'babel-loader',
                     options: {
-                        presets: ['@babel/preset-env', '@babel/preset-react']
+                        presets: [['@babel/preset-env', {
+                            useBuiltIns: 'entry',
+                            corejs:{ version: "3.10", proposals: true },
+                            targets: { esmodules: true }
+                        }], '@babel/preset-react']
                     }
                 }
             },
