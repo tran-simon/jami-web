@@ -1,51 +1,51 @@
 import React from 'react'
-import TextField from '@material-ui/core/TextField'
-//import InputEmoji from "react-input-emoji";
+import { makeStyles } from '@material-ui/core/styles';
+import { IconButton, InputBase, Paper } from '@material-ui/core'
+import SendIcon from '@material-ui/icons/Send';
 
-class SendMessageForm extends React.Component {
+const useStyles = makeStyles((theme) => ({
+    root: {
+      margin: 16,
+      padding: '2px 4px',
+      display: 'flex',
+      alignItems: 'center',
+      borderRadius: 8
+    },
+    input: {
+      marginLeft: theme.spacing(1),
+      flex: 1,
+    },
+    iconButton: {
+      padding: 10,
+    },
+    divider: {
+      height: 28,
+      margin: 4,
+    },
+  }));
 
-    constructor() {
-        super()
-        this.state = {
-            message: ''
-        }
-        this.handleChange = this.handleChange.bind(this)
-        this.handleSubmit = this.handleSubmit.bind(this)
+  export default function SendMessageForm(props) {
+    const classes = useStyles();
+
+    const handleSubmit = e => {
+        e.preventDefault()
     }
 
-    handleChange(e) {
-        this.setState({
-            message: e
-        })
-    }
-
-    handleSubmit(e) {
-        //e.preventDefault()
-        this.props.sendMessage(this.state.message)
-        //this.props.sendMessage(this.state.message)
-        this.setState({
-            message: ''
-        })
-    }
-
-    render() {
-        return (
-            <div
-                //onSubmit={this.handleSubmit}
-                className="send-message-form">
-                <TextField
-                    disabled={this.props.disabled}
-                    onChange={this.handleChange}
-                    value={this.state.message}
-                    //cleanOnEnter
-                    //onEnter={this.handleSubmit}
-                    placeholder="Écris ton message et cliques sur Entrer"
-                    height="35"
-                />
-
-            </div>
-        )
-    }
+    return (
+        <div className="send-message-form">
+        <Paper component="form"
+            onSubmit={handleSubmit}
+            className="send-message-card"
+            className={classes.root}>
+            <InputBase
+                className={classes.input}
+                placeholder="Write something nice"
+                height="35"
+            />
+            <IconButton type="submit" className={classes.iconButton} aria-label="search">
+                <SendIcon />
+            </IconButton>
+        </Paper>
+        </div>
+    )
 }
-
-export default SendMessageForm

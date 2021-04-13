@@ -13,10 +13,10 @@ class AccountSettings extends React.Component {
     this.accountId = props.accountId || props.match.params.accountId
     this.state = { loaded: false, account: props.account }
     this.req = undefined
-    this.controller = new AbortController()
   }
 
   componentDidMount() {
+    this.controller = new AbortController()
     if (this.req === undefined) {
       this.req = authManager.fetch(`/api/accounts/${this.accountId}`, {signal: this.controller.signal})
         .then(res => res.json())

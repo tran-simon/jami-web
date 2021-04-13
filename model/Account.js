@@ -8,6 +8,7 @@ class Account {
         this.contactCache = {}
         this.contacts = {}
         this.conversations = {}
+        this.lookups = []
     }
 
     static from(object) {
@@ -53,6 +54,9 @@ class Account {
 
     getConversationIds() {
         return Object.keys(this.conversations)
+    }
+    getConversations() {
+        return this.conversations
     }
 
     getConversation(conversationId) {

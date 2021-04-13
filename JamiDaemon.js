@@ -29,7 +29,7 @@ class JamiDaemon {
             "AccountsChanged": () => {
                 console.log("AccountsChanged")
                 const newAccounts = []
-                this.stringVectToArr(this.dring.getAccountList()).forEach(accountId => {
+                JamiDaemon.vectToJs(this.dring.getAccountList()).forEach(accountId => {
                     for (const account in this.accounts) {
                         if (account.id === accountId) {
                             newAccounts.push(account)
@@ -37,8 +37,8 @@ class JamiDaemon {
                         }
                     }
                     newAccounts.push(new Account(accountId,
-                        this.mapToJs(this.dring.getAccountDetails(accountId)),
-                        this.mapToJs(this.dring.getVolatileAccountDetails(accountId))
+                        JamiDaemon.mapToJs(this.dring.getAccountDetails(accountId)),
+                        JamiDaemon.mapToJs(this.dring.getVolatileAccountDetails(accountId))
                     ))
                 })
                 this.accounts = newAccounts
@@ -99,8 +99,26 @@ class JamiDaemon {
             },
             "RegisteredNameFound": (accountId, state, address, name) => {
                 console.log(`RegisteredNameFound: ${accountId} ${state} ${address} ${name}`)
+                const account = this.getAccount(accountId)
+                if (!account) {
+                    console.log(`Unknown account ${accountId}`)
+                    return
+                }
+                if (state == 0) {
+                    const contact = account.getContactFromCache(address)
+                    contact.setRegisteredName(name)
+                }
+                let index = account.lookups.length - 1;
+                while (index >= 0) {
+                    const lookup = account.lookups[index]
+                    if ((lookup.address && lookup.address === address) || (lookup.name && lookup.name === name)) {
+                        lookup.resolve({address, name, state})
+                        account.lookups.splice(index, 1);
+                    }
+                    index -= 1;
+                }
             },
-            "conversationReady": (accountId, conversationId) => {
+            "ConversationReady": (accountId, conversationId) => {
                 console.log(`conversationReady: ${accountId} ${conversationId}`)
                 const account = this.getAccount(accountId)
                 if (!account) {
@@ -109,13 +127,13 @@ class JamiDaemon {
                 }
                 let conversation = account.getConversation(conversationId)
                 if (!conversation) {
-                    const members = this.dring.getConversationMembers(accountId, conversationId)
-                    console.log(members)
-                    conversation = new Conversation(conversationId, members)
+                    const members = JamiDaemon.vectMapToJs(this.dring.getConversationMembers(accountId, conversationId))
+                    members.forEach(member => member.contact = account.getContactFromCache(member.uri))
+                    conversation = new Conversation(conversationId, accountId, members)
                     account.addConversation(conversation)
                 }
             },
-            "conversationRemoved": (accountId, conversationId) => {
+            "ConversationRemoved": (accountId, conversationId) => {
                 console.log(`conversationRemoved: ${accountId} ${conversationId}`)
                 const account = this.getAccount(accountId)
                 if (!account) {
@@ -124,7 +142,7 @@ class JamiDaemon {
                 }
                 account.removeConversation(conversationId)
             },
-            "conversationLoaded": (accountId, conversationId) => {
+            "ConversationLoaded": (accountId, conversationId) => {
                 console.log(`conversationLoaded: ${accountId} ${conversationId}`)
                 const account = this.getAccount(accountId)
                 if (!account) {
@@ -132,7 +150,7 @@ class JamiDaemon {
                     return
                 }
             },
-            "messageReceived": (accountId, conversationId, message) => {
+            "MessageReceived": (accountId, conversationId, message) => {
                 console.log(`messageReceived: ${accountId} ${conversationId}`)
                 const account = this.getAccount(accountId)
                 if (!account) {
@@ -144,7 +162,7 @@ class JamiDaemon {
                     conversation.addMessage(message)
                 }
             },
-            "conversationRequestReceived": (accountId, conversationId, request) => {
+            "ConversationRequestReceived": (accountId, conversationId, request) => {
                 console.log(`conversationRequestReceived: ${accountId} ${conversationId}`)
                 const account = this.getAccount(accountId)
                 if (!account) {
@@ -152,7 +170,7 @@ class JamiDaemon {
                     return
                 }
             },
-            "conversationMemberEvent": (accountId, conversationId, member, event) => {
+            "ConversationMemberEvent": (accountId, conversationId, member, event) => {
                 console.log(`conversationMemberEvent: ${accountId} ${conversationId}`)
                 const account = this.getAccount(accountId)
                 if (!account) {
@@ -160,7 +178,7 @@ class JamiDaemon {
                     return
                 }
             },
-            "onConversationError": (accountId, conversationId, code, what) => {
+            "OnConversationError": (accountId, conversationId, code, what) => {
                 console.log(`onConversationError: ${accountId} ${conversationId}`)
                 const account = this.getAccount(accountId)
                 if (!account) {
@@ -169,11 +187,19 @@ class JamiDaemon {
                 }
             }
         })
-        this.stringVectToArr(this.dring.getAccountList()).forEach(accountId => {
-            this.accounts.push(new Account(accountId,
-                this.mapToJs(this.dring.getAccountDetails(accountId)),
-                this.mapToJs(this.dring.getVolatileAccountDetails(accountId))
-            ))
+
+        JamiDaemon.vectToJs(this.dring.getAccountList()).forEach(accountId => {
+            const account = new Account(accountId,
+                JamiDaemon.mapToJs(this.dring.getAccountDetails(accountId)),
+                JamiDaemon.mapToJs(this.dring.getVolatileAccountDetails(accountId))
+            )
+            JamiDaemon.vectToJs(this.dring.getConversations(accountId)).forEach(conversationId => {
+                const members = JamiDaemon.vectMapToJs(this.dring.getConversationMembers(accountId, conversationId))
+                members.forEach(member => member.contact = account.getContactFromCache(member.uri))
+                const conversation = new Conversation(conversationId, accountId, members)
+                account.addConversation(conversation)
+            })
+            this.accounts.push(account)
         })
     }
 
@@ -194,103 +220,158 @@ class JamiDaemon {
         return this.accounts
     }
     /*getAccountDetails(accountId) {
-        return this.mapToJs(this.dring.getAccountDetails(accountId));
+        return this.mapToJs(this.dring.getAccountDetails(accountId))
     }*/
     setAccountDetails(accountId, details) {
-        this.dring.setAccountDetails(accountId, mapToNative(details));
+        this.dring.setAccountDetails(accountId, mapToNative(details))
     }
     getAudioOutputDeviceList() {
-        return this.stringVectToArr(this.dring.getAudioOutputDeviceList());
+        return JamiDaemon.vectToJs(this.dring.getAudioOutputDeviceList())
     }
     getVolume(deviceName) {
-        return this.dring.getVolume(deviceName);
+        return this.dring.getVolume(deviceName)
     }
     setVolume(deviceName, volume) {
-        return this.dring.setVolume(deviceName, volume);
+        return this.dring.setVolume(deviceName, volume)
+    }
+
+    lookupName(accountId, name) {
+        const p = new Promise((resolve, reject) => {
+            const account = this.getAccount(accountId)
+            if (!account) {
+                reject(new Error("Can't find account"))
+            } else {
+                account.lookups.push({name, resolve, reject})
+            }
+        })
+        this.dring.lookupName(accountId, "", name)
+        return p
+    }
+
+    lookupAddress(accountId, address) {
+        console.log(`lookupAddress ${accountId} ${address}`)
+        const p = new Promise((resolve, reject) => {
+            const account = this.getAccount(accountId)
+            if (!account) {
+                reject(new Error("Can't find account"))
+            } else {
+                account.lookups.push({address, resolve, reject})
+            }
+        })
+        this.dring.lookupAddress(accountId, "", address)
+        return p
     }
 
     stop() {
-        this.dring.fini();
+        this.dring.fini()
     }
+
+    addContact(accountId, contactId) {
+        this.dring.addContact(accountId, contactId)
+        const details = JamiDaemon.mapToJs(this.dring.getContactDetails(accountId, contactId))
+        if (details.conversationId) {
+            const account = this.getAccount(accountId)
+            if (account) {
+                let conversation = account.getConversation(details.conversationId)
+                if (!conversation) {
+                    const members = JamiDaemon.vectMapToJs(this.dring.getConversationMembers(accountId, details.conversationId))
+                    members.forEach(member => member.contact = account.getContactFromCache(member.uri))
+                    conversation = new Conversation(details.conversationId, accountId, members)
+                    account.addConversation(conversation)
+                }
+            }
+        }
+        return details
+    }
+
+    //getContactDetails
 
 // private
 
     boolToStr(bool) {
-        return bool ? "true" : "false";
+        return bool ? "true" : "false"
     }
 
     accountDetailsToNative(account) {
-        const params = new this.dring.StringMap();
+        const params = new this.dring.StringMap()
         if (account.managerUri)
-            params.set("Account.managerUri", account.managerUri);
+            params.set("Account.managerUri", account.managerUri)
         if (account.managerUsername)
-            params.set("Account.managerUsername", account.managerUsername);
+            params.set("Account.managerUsername", account.managerUsername)
         if (account.archivePassword) {
-            params.set("Account.archivePassword", account.archivePassword);
+            params.set("Account.archivePassword", account.archivePassword)
         } else {
-            console.log("archivePassword required");
+            console.log("archivePassword required")
             return;
         }
         if (account.alias)
-            params.set("Account.alias", account.alias);
+            params.set("Account.alias", account.alias)
         if (account.displayName)
-            params.set("Account.displayName", account.displayName);
+            params.set("Account.displayName", account.displayName)
         if (account.enable)
-            params.set("Account.enable", this.boolToStr(account.enable));
+            params.set("Account.enable", this.boolToStr(account.enable))
         if (account.autoAnswer)
-            params.set("Account.autoAnswer", this.boolToStr(account.autoAnswer));
+            params.set("Account.autoAnswer", this.boolToStr(account.autoAnswer))
         if (account.ringtonePath)
-            params.set("Account.ringtonePath", account.ringtonePath);
+            params.set("Account.ringtonePath", account.ringtonePath)
         if (account.ringtoneEnabled)
-            params.set("Account.ringtoneEnabled", this.boolToStr(account.ringtoneEnabled));
+            params.set("Account.ringtoneEnabled", this.boolToStr(account.ringtoneEnabled))
         if (account.videoEnabled)
-            params.set("Account.videoEnabled", this.boolToStr(account.videoEnabled));
+            params.set("Account.videoEnabled", this.boolToStr(account.videoEnabled))
         if (account.useragent) {
-            params.set("Account.useragent", account.useragent);
-            params.set("Account.hasCustomUserAgent", "TRUE");
+            params.set("Account.useragent", account.useragent)
+            params.set("Account.hasCustomUserAgent", "TRUE")
         } else {
-            params.set("Account.hasCustomUserAgent", "FALSE");
+            params.set("Account.hasCustomUserAgent", "FALSE")
         }
         if (account.audioPortMin)
-            params.set("Account.audioPortMin", account.audioPortMin);
+            params.set("Account.audioPortMin", account.audioPortMin)
         if (account.audioPortMax)
-            params.set("Account.audioPortMax", account.audioPortMax);
+            params.set("Account.audioPortMax", account.audioPortMax)
         if (account.videoPortMin)
-            params.set("Account.videoPortMin", account.videoPortMin);
+            params.set("Account.videoPortMin", account.videoPortMin)
         if (account.videoPortMax)
-            params.set("Account.videoPortMax", account.videoPortMax);
+            params.set("Account.videoPortMax", account.videoPortMax)
         if (account.localInterface)
-            params.set("Account.localInterface", account.localInterface);
+            params.set("Account.localInterface", account.localInterface)
         if (account.publishedSameAsLocal)
-            params.set("Account.publishedSameAsLocal", this.boolToStr(account.publishedSameAsLocal));
+            params.set("Account.publishedSameAsLocal", this.boolToStr(account.publishedSameAsLocal))
         if (account.localPort)
-            params.set("Account.localPort", account.localPort);
+            params.set("Account.localPort", account.localPort)
         if (account.publishedPort)
-            params.set("Account.publishedPort", account.publishedPort);
+            params.set("Account.publishedPort", account.publishedPort)
         if (account.publishedAddress)
-            params.set("Account.publishedAddress", account.publishedAddress);
+            params.set("Account.publishedAddress", account.publishedAddress)
         if (account.upnpEnabled)
-            params.set("Account.upnpEnabled", this.boolToStr(account.upnpEnabled));
-        return params;
+            params.set("Account.upnpEnabled", this.boolToStr(account.upnpEnabled))
+        return params
     }
-    stringVectToArr(stringvect) {
-        const outputArr = [];
-        for (let i = 0; i < stringvect.size(); i++)
-            outputArr.push(stringvect.get(i));
-        return outputArr;
+    static vectToJs(vect) {
+        const len = vect.size()
+        const outputArr = new Array(len)
+        for (let i = 0; i < len; i++)
+            outputArr[i] = vect.get(i)
+        return outputArr
     }
-    mapToJs(m) {
-        const outputObj = {};
-        this.stringVectToArr(m.keys())
-            .forEach(k => outputObj[k] = m.get(k));
-        return outputObj;
+    static mapToJs(m) {
+        const outputObj = {}
+        JamiDaemon.vectToJs(m.keys())
+            .forEach(k => outputObj[k] = m.get(k))
+        return outputObj
     }
-    mapToNative(map){
-        const ret = new this.dring.StringMap();
-        map.forEach((value, key) => ret.set(key, value));
-        return ret;
+    static vectMapToJs(vectMap) {
+        const len = vectMap.size()
+        const outputArr = new Array(len)
+        for (let i = 0; i < len; i++)
+            outputArr[i] = JamiDaemon.mapToJs(vectMap.get(i))
+        return outputArr
     }
 
+    mapToNative(map){
+        const ret = new this.dring.StringMap()
+        map.forEach((value, key) => ret.set(key, value))
+        return ret;
+    }
 }
 
 module.exports = JamiDaemon;

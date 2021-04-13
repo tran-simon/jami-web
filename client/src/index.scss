@@ -13,7 +13,7 @@ html, body {
   padding: 0;
   font-family: 'Open Sans', sans-serif;
   font-weight: 200;
-  color: #3e5869; 
+  color: #3e5869;
 }
 
 #root {
@@ -24,15 +24,15 @@ html, body {
   display: grid;
   height: 100%;
   grid-template-columns: repeat(6, 1fr);
-  grid-template-rows: 40px 1fr 1fr 1fr 1fr 1fr 60px;
-  grid-template-areas: 
+  grid-template-rows: 40px 40px 1fr 1fr 1fr 1fr 92px;
+  grid-template-areas:
       "h h h h h h"
+      "n m m m m m"
       "r m m m m m"
       "r m m m m m"
       "r m m m m m"
       "r m m m m m"
-      "r m m m m m"
-      "n s s s s s";
+      "r s s s s s";
 }
 
 .login {
@@ -43,7 +43,7 @@ html, body {
   grid-area: h;
 }
 
-.new-room-form {
+.main-search {
   grid-area: n;
 }
 
@@ -70,6 +70,23 @@ html, body {
   color: var(--send-message-form);
 }
 
+.main-search-input {
+  padding: 8px;
+  background-color: var(--secondary-color);
+  width: 100%;
+}
+
+.rooms-list {
+  overflow-y: scroll;
+}
+.rooms-list .MuiListItemText-primary,
+.rooms-list .MuiListItemText-secondary
+{
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/*
 .rooms-list {
   box-sizing: border-box;
   padding: 10px;
@@ -79,7 +96,7 @@ html, body {
 }
 
 .rooms-list ul {
-  list-style-type: none;    
+  list-style-type: none;
   padding: 0;
   overflow: scoll;
 }
@@ -97,13 +114,14 @@ html, body {
   color: var(--secondary-text-color);
   font-weight: 600;
   text-decoration: none;
-  
+
 }
 
 .rooms-list .room.active a {
   color: var(--secondary-color);
 }
-
+*/
+/*
 .new-room-form {
   padding: 0 5px;
   background: var(--secondary-color);
@@ -126,7 +144,7 @@ html, body {
   background: var(--secondary-color);
   color: var(--main-text-color);
   border: 0;
-} 
+}
 
 .new-room-form input::placeholder {
   color: var(--main-text-color);
@@ -143,6 +161,16 @@ html, body {
 
 .new-room-form button {
   border: 0;
+}*/
+
+.list-placeholder {
+  margin: 32px auto;
+  width: 256px;
+  text-align: center;
+}
+
+.list-placeholder .subtitle {
+  color:#a0a0a0;
 }
 
 .message {
@@ -164,6 +192,12 @@ html, body {
   border-radius: 8px;
 }
 
+.send-message-card {
+  border-radius: 8px;
+  margin: 16px;
+  /*padding: 8px;*/
+}
+/*
 .message-list {
   box-sizing: border-box;
   padding-left: 6px;
@@ -180,8 +214,8 @@ html, body {
   height: 100%;
   font-size: 34px;
   font-weight: 300;
-}
-
+}*/
+/*
 .send-message-form {
   background: var(--send-message-form);
   display: flex;
@@ -204,7 +238,7 @@ html, body {
 .send-message-form input::placeholder {
   color: var(--main-text-color);
 }
-
+*/
 .help-text {
   position: absolute;
   top: 10px;

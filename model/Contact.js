@@ -6,12 +6,17 @@ class Contact {
     }
 
     static from(object) {
-        return new Contact(object.uri)
+        const contact = new Contact(object.uri)
+        if (object.registeredName)
+            contact.setRegisteredName(object.registeredName)
+        return contact
     }
 
     getUri() { return this.uri }
 
-    getRegisteredName() { this.registeredName }
+    getRegisteredName() { return this.registeredName }
+
+    setRegisteredName(name) { this.registeredName = name }
 
     getDisplayName() {
         return this.displayName || this.getRegisteredName() || this.getUri()
@@ -19,7 +24,8 @@ class Contact {
 
     getObject() {
         return {
-            uri: this.uri
+            uri: this.uri,
+            registeredName: this.registeredName
         }
     }
 }
