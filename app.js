@@ -9,15 +9,13 @@ const path = require('path')
 const passport = require('passport')
     , LocalStrategy = require('passport-local').Strategy
 
-const redis = require('redis-url').connect()
-const RedisStore = require('connect-redis')(session)
+//const redis = require('redis-url').connect()
+//const RedisStore = require('connect-redis')(session)
 /*const passportSocketIo = require('passport.socketio')*/
 
 const indexRouter = require('./routes/index')
 
 //const cors = require('cors')
-
-const parser = require('fast-xml-parser')
 
 const JamiRestApi = require('./routes/jami')
 const JamiDaemon = require('./JamiDaemon')
@@ -30,20 +28,17 @@ const compiler = webpack(webpackConfig)
 const sessionStore = new session.MemoryStore()
 
 const app = express()
-app.use(
-    require('webpack-dev-middleware')(compiler, {
-      publicPath: webpackConfig.output.publicPath
-    })
-  );
-  app.use(require('webpack-hot-middleware')(compiler));
+app.use(require('webpack-dev-middleware')(compiler, {
+    publicPath: webpackConfig.output.publicPath
+}));
+app.use(require('webpack-hot-middleware')(compiler));
 /*
     Configuation for Passeport Js
 */
-//app.use(cookieParser(process.env.SECRET_KEY_BASE));
 app.disable('x-powered-by');
 
 app.use(session({
-    //store: sessionStore,
+    store: sessionStore,
     resave: false,
     saveUninitialized: true,
     cookie: {

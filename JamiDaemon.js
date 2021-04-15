@@ -17,10 +17,11 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
+"use strict";
+
 const Account = require('./model/Account')
 const Conversation = require('./model/Conversation')
 
-"use strict";
 class JamiDaemon {
     constructor() {
         this.accounts = []
