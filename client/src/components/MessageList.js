@@ -1,32 +1,26 @@
 import { Avatar, Box, Divider, Typography } from '@material-ui/core'
-import Paper from '@material-ui/core/Paper'
 import React from 'react'
 import Message from './Message'
+import PersonIcon from '@material-ui/icons/PersonRounded'
 
-class MessageList extends React.Component {
-    render() {
-        return (
-            <div className="message-list">
-                <Box>
-                <Box style={{display:'inline-block', margin: 16, verticalAlign:'middle'}}>
-                    <Avatar>{this.props.conversation.getDisplayName()[0].toUpperCase()}</Avatar>
+export default function MessageList(props) {
+    const displayName = props.conversation.getDisplayName()
+
+    return (
+        <div className="message-list">
+            <Box>
+                <Box style={{ display: 'inline-block', margin: 16, verticalAlign: 'middle' }}>
+                    <Avatar>{displayName ? displayName[0].toUpperCase() : <PersonIcon />}</Avatar>
                 </Box>
-                <Box style={{display:'inline-block', verticalAlign:'middle'}}>
-                    <Typography variant="h5">{this.props.conversation.getDisplayName()}</Typography>
-                    <Typography variant="subtitle1">{this.props.conversation.getId()}</Typography>
-                    </Box>
-                    </Box>
-                <Divider orientation="horizontal" />
-                {
-                    this.props.messages.map((message, index) => {
-                        /*DUMMY_DATA.map((message, index) => {*/
-                        return (
-                            <Message key={index} username={message.senderId} text={message.text} />
-                        )
-                    })}
-            </div>
-        )
-    }
+                <Box style={{ display: 'inline-block', verticalAlign: 'middle' }}>
+                    <Typography variant="h5">{displayName}</Typography>
+                    <Typography variant="subtitle1">{props.conversation.getId()}</Typography>
+                </Box>
+            </Box>
+            <Divider orientation="horizontal" />
+            {props.messages.map((message, index) =>
+                <Message key={index} username={message.senderId} text={message.text} />
+            )}
+        </div>
+    )
 }
-
-export default MessageList
