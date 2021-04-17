@@ -23,42 +23,16 @@ const JamiDaemon = require('./JamiDaemon')
 //const sessionStore = new RedisStore({ client: redis })
 const sessionStore = new session.MemoryStore()
 
-const app = express()
-console.log(`Loading server for ${app.get('env')}`)
-const development = app.get('env') === 'development'
-
-if (development) {
-    const webpack = require('webpack')
-    const webpackConfig = require('./client/webpack.config.js')
-    const compiler = webpack(webpackConfig)
-    app.use(require('webpack-dev-middleware')(compiler, {
-        publicPath: webpackConfig.output.publicPath
-    }));
-    app.use(require('webpack-hot-middleware')(compiler));
+const loadConfig = async (filePath) => {
+    try {
+        return JSON.parse(await fs.readFile(filePath))
+    } catch {
+        return {}
+    }
 }
 
 /*
-    Configuation for Passeport Js
-*/
-app.disable('x-powered-by');
-
-app.use(session({
-    store: sessionStore,
-    resave: false,
-    saveUninitialized: true,
-    cookie: {
-        secure: false,//process.env.ENVIRONMENT !== 'development' && process.env.ENVIRONMENT !== 'test',
-        maxAge: 2419200000
-    },
-    secret: process.env.SECRET_KEY_BASE
-}));
-app.use(passport.initialize());
-app.use(passport.session());
-// app.use(app.router);
-//app.use(cors())
-
-/*
-    Share sessions between Passport.js and Socket.io
+Share sessions between Passport.js and Socket.io
 */
 
 function logSuccess() {
@@ -70,136 +44,178 @@ function logFail() {
 }
 
 /*
-io.use(passportSocketIo.authorize({
-    key: 'connect.sid',
-    secret: process.env.SECRET_KEY_BASE,
-    store: sessionStore,
-    passport: passport,
-    cookieParser: cookieParser,
-    //success: logSuccess(),
-    // fail: logFail(),
-}));
-*/
 
-/*
+tempAccounts holds users accounts while tempting to authenticate them on Jams.
+connectedUsers  holds users accounts after they got authenticated by Jams.
 
-    tempAccounts holds users accounts while tempting to authenticate them on Jams.
-    connectedUsers  holds users accounts after they got authenticated by Jams.
-
-    Users should be removed from connectedUsers when receiving a disconnect
-    web socket call
+Users should be removed from connectedUsers when receiving a disconnect
+web socket call
 
 */
 const tempAccounts = {};
 const connectedUsers = {};
 
-const jami = new JamiDaemon();
-const apiRouter = new JamiRestApi(jami).getRouter()
+const createServer = async (appConfig) => {
+    const app = express()
+    console.log(`Loading server for ${app.get('env')} with config:`)
+    console.log(appConfig)
+    const development = app.get('env') === 'development'
 
-passport.serializeUser((user, done) => {
-    console.log(user)
-    connectedUsers[user.accountId] = user;
-    console.log("=============================SerializeUser called " + user.accountId)
-    done(null, user.accountId);
-});
-
-const deserializeUser = (id, done) => {
-    console.log("=============================DeserializeUser called on: " + id + " " + connectedUsers[id])
-    done(null, connectedUsers[id]);
-};
-passport.deserializeUser(deserializeUser);
-
-//var tempAccountId = '';
-
-const jamsStrategy = new LocalStrategy(
-    (username, password, done) => {
-
-        const newUser = {};
-        newUser.username = username;
-        //newUser.socketid =
-
-        const accountId = jami.addAccount({
-            'managerUri': 'https://jams.savoirfairelinux.com',
-            'managerUsername': username,
-            'archivePassword': password
-        });
-
-        const newProps = jami.getAccount(accountId).details;
-        console.log(newProps);
-        //Object.entries(newProps).forEach(v => console.log(v[0], v[1]))
-        //tempAccountId = accountId;
-        newUser.accountId = accountId;
-        console.log("AccountId: " + accountId);
-        connectedUsers[accountId] = newUser;
-        tempAccounts[accountId] = { done, newUser };
-
-        //return done(null, newUser);
-
-        /*User.findOne({ username: username }, function (err, user) {
-            if (err) { return done(err); }
-            if (!user) {
-                return done(null, false, { message: 'Incorrect username.' });
-            }
-            if (!user.validPassword(password)) {
-                return done(null, false, { message: 'Incorrect password.' });
-            }
-            return done(null, user);
-        });*/
+    if (development) {
+        const webpack = require('webpack')
+        const webpackConfig = require('./client/webpack.config.js')
+        const compiler = webpack(webpackConfig)
+        app.use(require('webpack-dev-middleware')(compiler, {
+            publicPath: webpackConfig.output.publicPath
+        }));
+        app.use(require('webpack-hot-middleware')(compiler));
     }
-);
-jamsStrategy.name = "jams";
 
-const localStrategy = new LocalStrategy(
-    (username, password, done) => {
-        console.log("localStrategy: " + username + " " + password);
+    /*
+        Configuation for Passeport Js
+    */
+    app.disable('x-powered-by');
 
-        const newUser = {};
-        newUser.accountId = jami.getAccountList()[0].getId();
-        console.log("Local AccountId: " + newUser.accountId);
-        connectedUsers[newUser.accountId] = newUser;
-        done(null, newUser);
-    }
-);
+    app.use(session({
+        store: sessionStore,
+        resave: false,
+        saveUninitialized: true,
+        cookie: {
+            secure: false,//!development,
+            maxAge: 2419200000
+        },
+        secret: process.env.SECRET_KEY_BASE
+    }));
+    app.use(passport.initialize());
+    app.use(passport.session());
+    // app.use(app.router);
+    //app.use(cors())
 
-passport.use(jamsStrategy);
-passport.use(localStrategy);
+    const jami = new JamiDaemon();
+    const apiRouter = new JamiRestApi(jami).getRouter()
 
-const secured = (req, res, next) => {
-    console.log(`isSecured ${req.user}`);
-    if (req.user && req.user.accountId) {
-        return next();
-    }
-    res.status(401).end()
-};
-const securedRedirect = (req, res, next) => {
-    if (req.user && req.user.accountId) {
-        return next();
-    }
-    req.session.returnTo = req.originalUrl;
-    res.redirect('/login');
-};
+    /*
+    io.use(passportSocketIo.authorize({
+        key: 'connect.sid',
+        secret: process.env.SECRET_KEY_BASE,
+        store: sessionStore,
+        passport: passport,
+        cookieParser: cookieParser,
+        //success: logSuccess(),
+        // fail: logFail(),
+    }));
+    */
 
-app.post('/auth', passport.authenticate('jams'), (req, res) => {
-    res.json({ loggedin: true })
-});
-app.post('/api/localLogin', passport.authenticate('local'), (req, res) => {
-    res.json({ loggedin: true })
-});
+    passport.serializeUser((user, done) => {
+        console.log(user)
+        connectedUsers[user.accountId] = user;
+        console.log("=============================SerializeUser called " + user.accountId)
+        done(null, user.accountId);
+    });
 
-app.use('/api', secured, apiRouter);
+    const deserializeUser = (id, done) => {
+        console.log("=============================DeserializeUser called on: " + id + " " + connectedUsers[id])
+        done(null, connectedUsers[id]);
+    };
+    passport.deserializeUser(deserializeUser);
 
-app.use('/', indexRouter);
+    //var tempAccountId = '';
 
-/* GET React App */
+    const jamsStrategy = new LocalStrategy(
+        (username, password, done) => {
 
-app.use(express.static(path.join(__dirname, 'client', 'dist')))
+            const newUser = {};
+            newUser.username = username;
+            //newUser.socketid =
 
-app.use((req, res, next) => {
-    res.sendFile(path.join(__dirname, 'client', 'dist', 'index.html'));
-});
+            const accountId = jami.addAccount({
+                'managerUri': 'https://jams.savoirfairelinux.com',
+                'managerUsername': username,
+                'archivePassword': password
+            });
 
-const server = http.Server(app);
-server.listen(3000);
+            const newProps = jami.getAccount(accountId).details;
+            console.log(newProps);
+            //Object.entries(newProps).forEach(v => console.log(v[0], v[1]))
+            //tempAccountId = accountId;
+            newUser.accountId = accountId;
+            console.log("AccountId: " + accountId);
+            connectedUsers[accountId] = newUser;
+            tempAccounts[accountId] = { done, newUser };
+
+            //return done(null, newUser);
+
+            /*User.findOne({ username: username }, function (err, user) {
+                if (err) { return done(err); }
+                if (!user) {
+                    return done(null, false, { message: 'Incorrect username.' });
+                }
+                if (!user.validPassword(password)) {
+                    return done(null, false, { message: 'Incorrect password.' });
+                }
+                return done(null, user);
+            });*/
+        }
+    );
+    jamsStrategy.name = "jams";
+
+    const localStrategy = new LocalStrategy(
+        (username, password, done) => {
+            console.log("localStrategy: " + username + " " + password);
+
+            const newUser = {};
+            newUser.accountId = jami.getAccountList()[0].getId();
+            console.log("Local AccountId: " + newUser.accountId);
+            connectedUsers[newUser.accountId] = newUser;
+            done(null, newUser);
+        }
+    );
+
+    passport.use(jamsStrategy);
+    passport.use(localStrategy);
+
+    const secured = (req, res, next) => {
+        console.log(`isSecured ${req.user}`);
+        if (req.user && req.user.accountId) {
+            return next();
+        }
+        res.status(401).end()
+    };
+    const securedRedirect = (req, res, next) => {
+        if (req.user && req.user.accountId) {
+            return next();
+        }
+        req.session.returnTo = req.originalUrl;
+        res.redirect('/login');
+    };
+
+    app.post('/auth', passport.authenticate('jams'), (req, res) => {
+        res.json({ loggedin: true })
+    });
+    app.post('auth/localLogin', passport.authenticate('local'), (req, res) => {
+        res.json({ loggedin: true })
+    });
+
+    app.use('/api', secured, apiRouter);
+
+    app.use('/', indexRouter);
+
+    /* GET React App */
+
+    app.use(express.static(path.join(__dirname, 'client', 'dist')))
+
+    app.use((req, res, next) => {
+        res.sendFile(path.join(__dirname, 'client', 'dist', 'index.html'));
+    });
+
+    return http.Server(app);
+}
+
+loadConfig()
+    .then(createServer)
+    .then(server => {
+        server.listen(3000);
+    })
 
 /*
 io.on('connection', (socket) => {
