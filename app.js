@@ -1,4 +1,4 @@
-const env = require('dotenv/config')
+require('dotenv').config()
 
 const express = require('express')
 const http = require('http')
@@ -20,18 +20,23 @@ const indexRouter = require('./routes/index')
 const JamiRestApi = require('./routes/jami')
 const JamiDaemon = require('./JamiDaemon')
 
-const webpack = require('webpack')
-const webpackConfig = require('./client/webpack.config.js')
-const compiler = webpack(webpackConfig)
-
 //const sessionStore = new RedisStore({ client: redis })
 const sessionStore = new session.MemoryStore()
 
 const app = express()
-app.use(require('webpack-dev-middleware')(compiler, {
-    publicPath: webpackConfig.output.publicPath
-}));
-app.use(require('webpack-hot-middleware')(compiler));
+console.log(`Loading server for ${app.get('env')}`)
+const development = app.get('env') === 'development'
+
+if (development) {
+    const webpack = require('webpack')
+    const webpackConfig = require('./client/webpack.config.js')
+    const compiler = webpack(webpackConfig)
+    app.use(require('webpack-dev-middleware')(compiler, {
+        publicPath: webpackConfig.output.publicPath
+    }));
+    app.use(require('webpack-hot-middleware')(compiler));
+}
+
 /*
     Configuation for Passeport Js
 */
