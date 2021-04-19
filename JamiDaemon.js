@@ -17,10 +17,12 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
-"use strict";
+"use strict"
 
-const Account = require('./model/Account')
-const Conversation = require('./model/Conversation')
+import Account from './model/Account.js'
+import Conversation from './model/Conversation.js'
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
 
 class JamiDaemon {
     constructor() {
@@ -66,13 +68,13 @@ class JamiDaemon {
                 console.log(`Received message: ${accountId} ${from} ${message["text/plain"]}`)
 /*
                 if (parser.validate(message["text/plain"]) === true) {
-                    console.log(message["text/plain"]);
+                    console.log(message["text/plain"])
                 } else {
 
-                    user = connectedUsers[accountId];
+                    user = connectedUsers[accountId]
                     console.log(user.socketId)
-                    io.to(user.socketId).emit('receivedMessage', message["text/plain"]);
-                    //io.emit('receivedMessage', message["text/plain"]);
+                    io.to(user.socketId).emit('receivedMessage', message["text/plain"])
+                    //io.emit('receivedMessage', message["text/plain"])
                 }*/
             },
             "RegistrationStateChanged": (accountId, state, /*int*/ code, detail) => {
@@ -109,14 +111,14 @@ class JamiDaemon {
                     const contact = account.getContactFromCache(address)
                     contact.setRegisteredName(name)
                 }
-                let index = account.lookups.length - 1;
+                let index = account.lookups.length - 1
                 while (index >= 0) {
                     const lookup = account.lookups[index]
                     if ((lookup.address && lookup.address === address) || (lookup.name && lookup.name === name)) {
                         lookup.resolve({address, name, state})
-                        account.lookups.splice(index, 1);
+                        account.lookups.splice(index, 1)
                     }
-                    index -= 1;
+                    index -= 1
                 }
             },
             "ConversationReady": (accountId, conversationId) => {
@@ -303,7 +305,7 @@ class JamiDaemon {
             params.set("Account.archivePassword", account.archivePassword)
         } else {
             console.log("archivePassword required")
-            return;
+            return
         }
         if (account.alias)
             params.set("Account.alias", account.alias)
@@ -371,8 +373,8 @@ class JamiDaemon {
     mapToNative(map){
         const ret = new this.dring.StringMap()
         map.forEach((value, key) => ret.set(key, value))
-        return ret;
+        return ret
     }
 }
 
-module.exports = JamiDaemon;
+export default JamiDaemon

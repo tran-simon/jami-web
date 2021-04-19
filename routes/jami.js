@@ -1,4 +1,4 @@
-const express = require('express')
+import { Router } from 'express'
 
 class JamiRestApi {
     constructor(jami) {
@@ -6,17 +6,28 @@ class JamiRestApi {
     }
 
     getRouter() {
-        const router = express.Router({mergeParams: true})
-        router.use(express.json());
+        const router = Router({mergeParams: true})
+        //router.use(express.json());
 
         // Accounts
         router.get(['/accounts'], (req, res, next) => {
             console.log("Get account list")
-            res.json(this.jami.getAccountList().map(account => account.getSummary()))
+            let accounts = this.jami.getAccountList()
+            if (req.user.accountFilter)
+                accounts = accounts.filter(account => req.user.accountFilter(account.getId()))
+            res.json(accounts.map(account => account.getSummary()))
         })
 
-        const accountRouter = express.Router({mergeParams: true})
-        router.use('/accounts/:accountId', accountRouter)
+        const checkAccount = (req, res, next) => {
+            console.log(`checkAccount ${req.params.accountId} for ${req.user.id}`)
+            if (req.user && (!req.user.accountFilter || req.user.accountFilter(req.params.accountId))) {
+                return next();
+            }
+            res.status(403).end()
+        }
+
+        const accountRouter = Router({mergeParams: true})
+        router.use('/accounts/:accountId', checkAccount, accountRouter)
 
         accountRouter.get(['/'], (req, res, next) => {
             console.log(`Get account ${req.params.accountId}`)
@@ -24,7 +35,7 @@ class JamiRestApi {
             if (account)
                 res.json(account.getObject())
             else
-                res.sendStatus(404)
+                res.status(404).end()
         })
 
         // Contacts
@@ -34,7 +45,7 @@ class JamiRestApi {
             if (account)
                 res.json(account.getContacts())
             else
-                res.sendStatus(404)
+                res.status(404).end()
         })
 
         // Conversations
@@ -42,7 +53,7 @@ class JamiRestApi {
             console.log(`Get conversations for account ${req.params.accountId}`)
             const account = this.jami.getAccount(req.params.accountId)
             if (!account)
-                res.sendStatus(404)
+                return res.sendStatus(404)
             const conversations = account.getConversations()
             res.json(Object.keys(conversations).map(conversationId => conversations[conversationId].getObject({
                 memberFilter: member => member.contact.getUri() !== account.getUri()
@@ -55,22 +66,22 @@ class JamiRestApi {
             console.log(req.body)
             const account = this.jami.getAccount(req.params.accountId)
             if (!account)
-                res.sendStatus(404)
+                return res.sendStatus(404)
             if (req.body.members.length === 1) {
                 const details = this.jami.addContact(req.params.accountId, req.body.members[0])
                 res.json(details)
             } else
-                res.sendStatus(400)
+                res.status(400).end()
         })
 
         accountRouter.get('/conversations/:conversationId', (req, res, next) => {
             console.log(`Get conversation ${req.params.conversationId} for account ${req.params.accountId}`)
             const account = this.jami.getAccount(req.params.accountId)
             if (!account)
-                res.sendStatus(404)
+                return res.sendStatus(404)
             const conversation = account.getConversation(req.params.conversationId)
             if (!conversation)
-                res.sendStatus(404)
+                res.status(404).end()
             else {
                 res.json(conversation.getObject({
                     memberFilter: member => member.contact.getUri() !== account.getUri()
@@ -79,7 +90,7 @@ class JamiRestApi {
         })
 
         // Nameserver
-        const nsRouter = express.Router({mergeParams: true})
+        const nsRouter = Router({mergeParams: true})
         accountRouter.use('/ns', nsRouter)
 
         nsRouter.get(['/name/:nameQuery'], (req, res, next) => {
@@ -115,4 +126,4 @@ class JamiRestApi {
     }
 }
 
-module.exports = JamiRestApi
+export default JamiRestApi

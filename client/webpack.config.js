@@ -1,27 +1,38 @@
 'use strict'
-const path = require('path')
-require('dotenv').config({ path: path.resolve(__dirname, '..', '.env') })
-const HtmlWebpackPlugin = require('html-webpack-plugin')
+
+import dotenv from 'dotenv'
+dotenv.config({ path: resolve(import.meta.url, '..', '.env') })
+
+import { resolve } from 'path'
+import HtmlWebpackPlugin from 'html-webpack-plugin'
+
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 const mode = process.env.NODE_ENV || 'development'
 
-let entry = [path.resolve(__dirname, 'src', 'index.js')]
+let entry = [resolve(__dirname, 'src', 'index.js')]
 let plugins = [new HtmlWebpackPlugin({
-    template: path.resolve(__dirname, 'src', 'index.ejs')
+    template: resolve(__dirname, 'src', 'index.ejs')
 })]
 let devtool = undefined
+let babelLoaderPlugins = ["@babel/plugin-transform-runtime"]
 
 if (mode === 'development') {
-    const webpack = require('webpack')
-    entry = ['react-hot-loader/patch', 'webpack-hot-middleware/client', ...entry]
-    plugins = [new webpack.HotModuleReplacementPlugin(), ...plugins]
+    const webpack = (await import('webpack')).default
+    const ReactRefreshWebpackPlugin = (await import('@pmmmwh/react-refresh-webpack-plugin')).default
+    entry = ['webpack-hot-middleware/client', ...entry]
+    plugins = [new webpack.HotModuleReplacementPlugin(), new ReactRefreshWebpackPlugin(), ...plugins]
+    babelLoaderPlugins = [...babelLoaderPlugins, "react-refresh/babel"]
     devtool = 'inline-source-map'
 }
 console.log(`Webpack configured for ${mode}`)
 
-module.exports = {
+export default {
     entry,
     output: {
-        path: path.resolve(__dirname, 'dist'),
+        path: resolve(__dirname, 'dist'),
         filename: 'bundle.js',
         publicPath: '/'
     },
@@ -31,14 +42,20 @@ module.exports = {
         rules: [
             {
                 test: /\.jsx?/,
+                resolve: {
+                    fullySpecified: false
+                },
                 exclude: /node_modules/,
                 use: {
                     loader: 'babel-loader',
                     options: {
-                        presets: [['@babel/preset-env', {
-                            useBuiltIns: 'entry',
-                            corejs:{ version: "3.10", proposals: true },
-                        }], '@babel/preset-react']
+                        plugins: babelLoaderPlugins,
+                        presets: [
+                            ['@babel/preset-env', {
+                                useBuiltIns: 'entry',
+                                corejs:{ version: "3.10", proposals: true },
+                            }],
+                            '@babel/preset-react']
                     }
                 }
             },

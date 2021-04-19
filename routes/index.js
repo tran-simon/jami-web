@@ -1,10 +1,14 @@
-const express = require('express');
-const router = express.Router();
-const path = require('path');
+import { Router } from 'express'
+const router = Router()
+import { join } from 'path'
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 /* GET React App */
 router.get(['/app', '/app/*'], (req, res, next) => {
-    res.sendFile(path.join(__dirname, '../public', 'index.html'));
-});
+    res.sendFile(join(__dirname, '../public', 'index.html'))
+})
 
-module.exports = router;
+export default router

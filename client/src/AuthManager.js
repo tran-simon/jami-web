@@ -17,39 +17,114 @@
  *  along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-//import cookie from 'cookie';
-
 class AuthManager {
     constructor() {
         console.log("AuthManager()")
-        this.authenticated = true//'connect.sid' in cookie.parse(document.cookie)
         this.authenticating = false
+
+        this.state = {
+            initialized: false,
+            authenticated: true,
+            setupComplete: true,
+            error: false
+        }
+
         this.tasks = []
         this.onAuthChanged = undefined
     }
-    setOnAuthChanged(onAuthChanged) {
-        this.onAuthChanged = onAuthChanged
-    }
 
     isAuthenticated() {
-        return this.authenticated
+        return this.state.authenticated
     }
 
-    authenticate() {
+    getState() {
+        return this.state
+    }
+
+    init(cb) {
+        this.onAuthChanged = cb
+        if (this.state.initialized || this.authenticating)
+            return
+        console.log("Init")
+        this.authenticating = true
+        fetch('/auth')
+            .then(async (response) => {
+                this.authenticating = false
+                this.state.initialized = true
+                console.log("Init ended")
+                console.log(response)
+                if (response.status === 200) {
+                    const jsonData = await response.json()
+                    Object.assign(this.state, {
+                        authenticated: true,
+                        setupComplete: true,
+                        error: false,
+                        user: { username: jsonData.username, type: jsonData.type }
+                    })
+                } else if (response.status === 401) {
+                    const jsonData = await response.json()
+                    Object.assign(this.state, {
+                        authenticated: false,
+                        setupComplete: 'setupComplete' in jsonData ? jsonData.setupComplete : true,
+                        error: false
+                    })
+                } else {
+                    this.state.error = true
+                }
+                console.log("New auth state")
+                console.log(this.state)
+
+                if (this.onAuthChanged)
+                    this.onAuthChanged(this.state)
+            })
+    }
+
+    deinit() {
+        console.log("Deinit")
+        this.onAuthChanged = undefined
+    }
+
+    async setup(password) {
+        if (this.authenticating || this.state.setupComplete)
+            return
+        console.log("Starting setup")
+        this.authenticating = true
+        const response = await fetch(`/setup`, {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ password })
+        })
+        console.log(response)
+        if (response.ok) {
+            console.log("Success, going home")
+            //history.replace('/')
+        } else {
+        }
+        this.authenticating = false
+        this.state.setupComplete = true
+        if (this.onAuthChanged)
+            this.onAuthChanged(this.state)
+        return response.ok
+    }
+
+    authenticate(username, password) {
         if (this.authenticating)
             return
         console.log("Starting authentication")
         this.authenticating = true
-        fetch('/api/localLogin?username=local&password=local', { method:"POST" })
+        fetch(`/auth/local?username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`, { method:"POST" })
             .then(response => {
                 console.log(response)
                 this.authenticating = false
-                this.authenticated = response.ok && response.status === 200
+                this.state.authenticated = response.ok && response.status === 200
                 if (this.onAuthChanged)
-                    this.onAuthChanged(this.authenticated)
+                    this.onAuthChanged(this.state)
                 while (this.tasks.length !== 0) {
                     const task = this.tasks.shift()
-                    if (this.authenticated)
+                    if (this.state.authenticated)
                         fetch(task.url, task.init).then(res => task.resolve(res))
                     else
                         task.reject(new Error("Authentication failed"))
@@ -59,14 +134,14 @@ class AuthManager {
 
     disconnect() {
         console.log("Disconnect")
-        this.authenticated = false
+        this.state.authenticated = false
         if (this.onAuthChanged)
-            this.onAuthChanged(this.authenticated)
+            this.onAuthChanged(this.state)
     }
 
     fetch(url, init) {
         console.log(`get ${url}`)
-        if (!this.authenticated) {
+        if (!this.state.authenticated) {
             return new Promise((resolve, reject) => this.tasks.push({url, init, resolve, reject}))
         }
         return fetch(url, init)

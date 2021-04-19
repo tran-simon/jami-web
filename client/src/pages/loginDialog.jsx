@@ -105,7 +105,7 @@ class SignInPage extends React.Component {
             submitted: true,
             loading: true
         })
-        authManager.authenticate()
+        authManager.authenticate('admin', 'admin')
         /*fetch('/api/localLogin?username=none&password=none', {
             header: { "Content-Type": "application/json" },
             method: "POST",

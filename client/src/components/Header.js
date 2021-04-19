@@ -32,7 +32,7 @@ export default function Header() {
             <Menu
                 id="simple-menu"
                 anchorEl={anchorEl}
-                keepMounted
+
                 open={Boolean(anchorEl)}
                 onClose={handleClose}
             >

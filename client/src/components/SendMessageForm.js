@@ -1,8 +1,7 @@
 import React from 'react'
 import { makeStyles } from '@material-ui/core/styles'
 import { IconButton, InputBase, Paper, Popper } from '@material-ui/core'
-import SendIcon from '@material-ui/icons/Send'
-import EmojiIcon from '@material-ui/icons/EmojiEmotionsRounded'
+import { Send, EmojiEmotionsRounded } from '@material-ui/icons'
 import EmojiPicker from 'emoji-picker-react'
 
 const useStyles = makeStyles((theme) => ({
@@ -58,7 +57,7 @@ export default function SendMessageForm(props) {
         className="send-message-card"
         className={classes.root}>
         <IconButton aria-describedby={id} variant="contained" color="primary" onClick={handleOpenEmojiPicker}>
-          <EmojiIcon />
+          <EmojiEmotionsRounded />
         </IconButton>
         <Popper
           id={id}
@@ -66,7 +65,7 @@ export default function SendMessageForm(props) {
           anchorEl={anchorEl}
           onClose={handleClose}
         >
-          <EmojiPicker
+          <EmojiPicker.default
             onEmojiClick={onEmojiClick}
             disableAutoFocus={true}
             disableSkinTonePicker={true}
@@ -82,7 +81,7 @@ export default function SendMessageForm(props) {
           onChange={handleInputChange}
         />
         <IconButton type="submit" className={classes.iconButton} aria-label="search">
-          <SendIcon />
+          <Send />
         </IconButton>
       </Paper>
     </div>

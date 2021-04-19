@@ -1,4 +1,4 @@
-const Contact = require('./Contact')
+import Contact from './Contact.js'
 
 class Conversation {
     constructor(id, accountId, members) {
@@ -62,4 +62,4 @@ class Conversation {
     }
 }
 
-module.exports = Conversation;
+export default Conversation;

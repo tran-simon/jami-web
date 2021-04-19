@@ -1,4 +1,4 @@
-const Contact = require('./Contact')
+import Contact from './Contact.js'
 
 class Account {
     constructor(id, details, volatileDetails) {
@@ -52,6 +52,10 @@ class Account {
         return this.getRegisteredName() || this.getUri()
     }
 
+    getDisplayNameNoFallback() {
+        return this.details["Account.displayName"] || this.getRegisteredName()
+    }
+
     getConversationIds() {
         return Object.keys(this.conversations)
     }
@@ -91,4 +95,4 @@ Account.TYPE_SIP = "SIP"
 Account.BOOL_TRUE = "true"
 Account.BOOL_FALSE = "false"
 
-module.exports = Account
+export default Account

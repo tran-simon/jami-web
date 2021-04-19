@@ -1,7 +1,6 @@
 import React from 'react'
-import SearchIcon from '@material-ui/icons/Search';
-import InputBase from '@material-ui/core/InputBase';
-import InputAdornment from '@material-ui/core/InputAdornment';
+import { InputBase, InputAdornment } from '@material-ui/core';
+import { SearchRounded } from '@material-ui/icons';
 
 class NewContactForm extends React.Component {
     constructor(props) {
@@ -40,11 +39,8 @@ class NewContactForm extends React.Component {
                     type="search"
                     placeholder="Ajouter un contact"
                     onChange={this.handleChange}
-                    startAdornment={
-                        <InputAdornment position="start">
-                            <SearchIcon />
-                        </InputAdornment>
-                        } />
+                    startAdornment={<InputAdornment position="start"><SearchRounded /></InputAdornment>}
+                />
             </form>
         )
     }

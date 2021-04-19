@@ -2,7 +2,7 @@ import { Avatar, ListItem, ListItemAvatar, ListItemText } from '@material-ui/cor
 import React from 'react'
 import Conversation from '../../../model/Conversation'
 import { useHistory, useParams } from "react-router-dom"
-import PersonIcon from '@material-ui/icons/PersonRounded'
+import { PersonRounded } from '@material-ui/icons'
 
 export default function ConversationListItem(props) {
     const { conversationId, contactId } = useParams()
@@ -22,7 +22,7 @@ export default function ConversationListItem(props) {
                 style={{overflow:'hidden'}}
                 onClick={() => history.push(`/account/${conversation.getAccountId()}/${uri}`)}>
                 <ListItemAvatar>
-                    <Avatar>{displayName ? displayName[0].toUpperCase() : <PersonIcon />}</Avatar>
+                    <Avatar>{displayName ? displayName[0].toUpperCase() : <PersonRounded />}</Avatar>
                 </ListItemAvatar>
                 <ListItemText
                     style={{overflow:'hidden', textOverflow:'ellipsis'}}
