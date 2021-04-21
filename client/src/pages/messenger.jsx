@@ -15,6 +15,7 @@ import Conversation from '../../../model/Conversation'
 import Contact from '../../../model/Contact'
 import ConversationView from '../components/ConversationView';
 import AddContactPage from './addContactPage.jsx';
+import LoadingPage from '../components/loading';
 
 class JamiMessenger extends React.Component {
 
@@ -120,7 +121,7 @@ class JamiMessenger extends React.Component {
         <Header />
         {this.state.conversations ?
           <ConversationList search={this.state.searchResult} conversations={this.state.conversations} accountId={accountId} /> :
-          <CircularProgress />}
+          <div className="rooms-list"><LoadingPage /></div>}
         <NewContactForm onChange={query => this.handleSearch(query)} />
         {conversationId && <ConversationView accountId={accountId} conversationId={conversationId} />}
         {contactId && <AddContactPage accountId={accountId} contactId={contactId} />}
@@ -137,4 +138,4 @@ class JamiMessenger extends React.Component {
   }
 }
 
-export default JamiMessenger;
+export default JamiMessenger

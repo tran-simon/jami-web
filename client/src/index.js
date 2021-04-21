@@ -4,6 +4,7 @@ import ReactDOM from 'react-dom'
 import { BrowserRouter as Router } from 'react-router-dom'
 import App from './App.js'
 import './index.scss'
+import { CssBaseline } from '@material-ui/core'
 
 //import * as serviceWorker from './serviceWorker'
 const rootEl = document.getElementById('root')
@@ -11,6 +12,7 @@ const rootEl = document.getElementById('root')
 const render = Component =>
 ReactDOM.render(
   <React.StrictMode>
+    <CssBaseline />
     <Router>
     <Component />
     </Router>

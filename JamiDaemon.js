@@ -109,7 +109,8 @@ class JamiDaemon {
                 }
                 if (state == 0) {
                     const contact = account.getContactFromCache(address)
-                    contact.setRegisteredName(name)
+                    if (!contact.isRegisteredNameResolved())
+                        contact.setRegisteredName(name)
                 }
                 let index = account.lookups.length - 1
                 while (index >= 0) {
@@ -198,7 +199,24 @@ class JamiDaemon {
             )
             JamiDaemon.vectToJs(this.dring.getConversations(accountId)).forEach(conversationId => {
                 const members = JamiDaemon.vectMapToJs(this.dring.getConversationMembers(accountId, conversationId))
-                members.forEach(member => member.contact = account.getContactFromCache(member.uri))
+                members.forEach(member => {
+                    member.contact = account.getContactFromCache(member.uri)
+                    if (!member.contact.isRegisteredNameResolved()) {
+                        if (!member.uri) return
+                        console.log(`lookupAddress ${accountId} ${member.uri}`)
+                        member.contact.setRegisteredName(new Promise((resolve, reject) =>
+                            account.lookups.push({address: member.uri, resolve, reject})
+                        ).then(result => {
+                            if (result.state == 0)
+                                return result.name
+                            else if (result.state == 1)
+                                return undefined
+                            else
+                                return null
+                        }))
+                        this.dring.lookupAddress(accountId, "", member.uri)
+                    }
+                })
                 const conversation = new Conversation(conversationId, accountId, members)
                 account.addConversation(conversation)
             })
@@ -287,9 +305,19 @@ class JamiDaemon {
         return details
     }
 
-    //getContactDetails
+    getDefaultModerators(accountId) {
+        const account = this.getAccount(accountId)
+        if (!account) {
+            console.log(`Unknown account ${accountId}`)
+            return {}
+        }
+        return JamiDaemon.vectToJs(this.dring.getDefaultModerators(accountId))
+            .map(contactId => account.getContactFromCache(contctId))
+    }
 
-// private
+    setDefaultModerators(accountId, moderators) {
+
+    }
 
     boolToStr(bool) {
         return bool ? "true" : "false"

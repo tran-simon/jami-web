@@ -1,25 +1,35 @@
 import React from 'react';
+import { Box, Card, CardContent, Typography } from '@material-ui/core';
+import { makeStyles } from '@material-ui/core/styles';
 
-import Card from '@material-ui/core/Card';
-import CardContent from '@material-ui/core/CardContent';
-import Typography from '@material-ui/core/Typography';
+const useStyles = makeStyles({
+  title: {
+    fontSize: 14,
+  }, pos: {
+    fontSize: 14,
 
-class JamiIdCard extends React.Component {
-  render() {
-    const account = this.props.account
-    const registeredName = account.getRegisteredName()
-    return (
-        <Card style={{marginBottom:16}}>
-          <CardContent>
-            <Typography variant="h6">Jami key ID</Typography>
-            <Typography variant="body1">{account.getUri()}</Typography>
-            {registeredName && <div>
-                <Typography variant="h6">Jami username</Typography>
-                <Typography variant="body1">{registeredName}</Typography></div>
-            }
-          </CardContent>
-        </Card>)
   }
-}
+});
 
-export default JamiIdCard;
+export default function JamiIdCard(props) {
+  const classes = useStyles()
+  const account = props.account
+  const registeredName = account.getRegisteredName()
+  return <Card style={{marginBottom:16}}>
+      <CardContent>
+        <Box>
+        <Typography className={classes.title} color="textSecondary">
+          Jami ID
+        </Typography>
+          <Typography variant="h5" component="h2" gutterBottom noWrap>{account.getUri()}</Typography>
+        </Box>
+        {registeredName && <Box>
+          <Typography className={classes.title} color="textSecondary" >
+          Jami username
+        </Typography>
+            <Typography variant="h5" component="h2" noWrap>{registeredName}</Typography>
+          </Box>
+        }
+      </CardContent>
+    </Card>
+}

@@ -16,6 +16,7 @@ import AccountSettings from "./pages/accountSettings.jsx"
 import AccountSelection from "./pages/accountSelection.jsx"
 import ServerSetup from "./pages/serverSetup.jsx"
 import NotFoundPage from "./pages/404.jsx"
+import LoadingPage from './components/loading'
 
 const App = (props) => {
     const history = useHistory()
@@ -36,7 +37,7 @@ const App = (props) => {
     console.log(location)
 
     if (!state.loaded) {
-      return <Container><CircularProgress /></Container>
+      return <LoadingPage />
     } else if (!state.auth.setupComplete) {
       return <Switch>
           <Route path="/setup" component={ServerSetup} />
@@ -44,7 +45,6 @@ const App = (props) => {
         </Switch>
     }
     return <React.Fragment>
-      <CssBaseline />
         <Switch>
           <Route exact path="/"><Redirect to="/account" /></Route>
           <Route path="/account/:accountId/settings" component={AccountSettings} />

@@ -32,6 +32,7 @@ class JamiRestApi {
         accountRouter.get(['/'], (req, res, next) => {
             console.log(`Get account ${req.params.accountId}`)
             const account = this.jami.getAccount(req.params.accountId)
+            account.defaultModerators = this.jami.getDefaultModerators(account.getId())
             if (account)
                 res.json(account.getObject())
             else
@@ -49,15 +50,15 @@ class JamiRestApi {
         })
 
         // Conversations
-        accountRouter.get('/conversations', (req, res, next) => {
+        accountRouter.get('/conversations', async (req, res, next) => {
             console.log(`Get conversations for account ${req.params.accountId}`)
             const account = this.jami.getAccount(req.params.accountId)
             if (!account)
                 return res.sendStatus(404)
             const conversations = account.getConversations()
-            res.json(Object.keys(conversations).map(conversationId => conversations[conversationId].getObject({
+            res.json(await Promise.all(Object.keys(conversations).map(async conversationId => await conversations[conversationId].getObject({
                 memberFilter: member => member.contact.getUri() !== account.getUri()
-            })))
+            }))))
             //res.json(account.getConversations())
         })
 
@@ -74,7 +75,7 @@ class JamiRestApi {
                 res.status(400).end()
         })
 
-        accountRouter.get('/conversations/:conversationId', (req, res, next) => {
+        accountRouter.get('/conversations/:conversationId', async (req, res, next) => {
             console.log(`Get conversation ${req.params.conversationId} for account ${req.params.accountId}`)
             const account = this.jami.getAccount(req.params.accountId)
             if (!account)
@@ -83,7 +84,7 @@ class JamiRestApi {
             if (!conversation)
                 res.status(404).end()
             else {
-                res.json(conversation.getObject({
+                res.json(await conversation.getObject({
                     memberFilter: member => member.contact.getUri() !== account.getUri()
                 }))
             }

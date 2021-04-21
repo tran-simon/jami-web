@@ -23,16 +23,18 @@ html, body {
 .app {
   display: grid;
   height: 100%;
-  grid-template-columns: repeat(6, 1fr);
-  grid-template-rows: 40px 40px 1fr 1fr 1fr 1fr 92px;
+  grid-template-columns: 320px 1fr;
+  grid-template-rows: 40px 50px 1fr 1fr 92px;
   grid-template-areas:
-      "h h h h h h"
-      "n m m m m m"
-      "r m m m m m"
-      "r m m m m m"
-      "r m m m m m"
-      "r m m m m m"
-      "r s s s s s";
+      "h m"
+      "n m"
+      "r m"
+      "r m"
+      "r s";
+}
+
+.MuiContainer-root {
+  padding-bottom: 32px;
 }
 
 .login {

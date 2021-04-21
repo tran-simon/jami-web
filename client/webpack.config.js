@@ -5,6 +5,7 @@ dotenv.config({ path: resolve(import.meta.url, '..', '.env') })
 
 import { resolve } from 'path'
 import HtmlWebpackPlugin from 'html-webpack-plugin'
+import CopyWebpackPlugin from 'copy-webpack-plugin'
 
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
@@ -13,9 +14,12 @@ const __dirname = dirname(__filename);
 const mode = process.env.NODE_ENV || 'development'
 
 let entry = [resolve(__dirname, 'src', 'index.js')]
-let plugins = [new HtmlWebpackPlugin({
-    template: resolve(__dirname, 'src', 'index.ejs')
-})]
+let plugins = [
+    new HtmlWebpackPlugin({template: resolve(__dirname, 'src', 'index.ejs')}),
+    new CopyWebpackPlugin({
+        patterns: [{ from: resolve(__dirname, 'public'), to: resolve(__dirname, 'dist') }]
+    })
+]
 let devtool = undefined
 let babelLoaderPlugins = ["@babel/plugin-transform-runtime"]
 

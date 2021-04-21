@@ -3,7 +3,7 @@ import React from 'react'
 import ConversationListItem from './ConversationListItem'
 import ListSubheader from '@material-ui/core/ListSubheader';
 import Conversation from '../../../model/Conversation';
-import GroupRoundedIcon from '@material-ui/icons/GroupRounded';
+import { GroupRounded as GroupIcon } from '@material-ui/icons';
 import Typography from '@material-ui/core/Typography';
 
 export default function ConversationList(props) {
@@ -21,7 +21,7 @@ export default function ConversationList(props) {
                 )}
                 {props.conversations.length === 0 && (
                     <div className="list-placeholder">
-                        <GroupRoundedIcon color="disabled" fontSize="large"  />
+                        <GroupIcon color="disabled" fontSize="large"  />
                         <Typography className="subtitle" variant="subtitle2">No conversation yet</Typography>
                     </div>
                 )}

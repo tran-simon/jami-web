@@ -29,11 +29,13 @@ export default function ServerSetup(props) {
   const history = useHistory();
   const [password, setPassword] = useState('');
   const [passwordRepeat, setPasswordRepeat] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const isValid = () => password && password === passwordRepeat
 
   const handleSubmit = async e => {
     e.preventDefault()
+    setLoading(true)
     if (!isValid())
       return
     if (await authManager.setup(password)) {
@@ -43,7 +45,7 @@ export default function ServerSetup(props) {
 
   return (
     <Container className='message-list'>
-      <Card  className={classes.wizardCard}>
+      <Card className={classes.wizardCard} disabled={loading}>
         <CardContent component="form" onSubmit={handleSubmit}>
           <Typography gutterBottom variant="h5" component="h2">
           Jami Web Node setup
@@ -53,7 +55,7 @@ export default function ServerSetup(props) {
             Let's start by creating a new administrator account to control access to the server configuration.
           </Typography>
 
-          <Typography variant='body1'></Typography>
+          <Box style={{ textAlign: 'center', marginTop: 8, marginBottom: 16 }}>
           <div><Input className={classes.textField} value="admin" name="username" autoComplete="username" disabled /></div>
           <div><Input
             className={classes.textField}
@@ -73,7 +75,8 @@ export default function ServerSetup(props) {
             type='password'
             placeholder="Repeat password"
             autoComplete="new-password" /></div>
-          <Box style={{ textAlign: 'center', marginTop: 16 }}>
+          </Box>
+          <Box style={{ textAlign: 'center', marginTop: 24 }}>
             <Fab variant='extended' color='primary' type='submit' disabled={!isValid()}>
               <GroupAddRounded className={classes.extendedIcon} />
               Create admin account

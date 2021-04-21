@@ -18,14 +18,22 @@ class Contact {
 
     setRegisteredName(name) { this.registeredName = name }
 
-    getDisplayName() {
-        return this.displayName || this.getRegisteredName() || this.getUri()
+    isRegisteredNameResolved() {
+        return this.registeredName !== undefined
     }
 
-    getObject() {
+    getDisplayName() {
+        return this.getDisplayNameNoFallback() || this.getUri()
+    }
+
+    getDisplayNameNoFallback() {
+        return this.displayName || this.getRegisteredName()
+    }
+
+    async getObject() {
         return {
             uri: this.uri,
-            registeredName: this.registeredName
+            registeredName: await this.registeredName
         }
     }
 }

@@ -4,6 +4,7 @@ import MessageList from './MessageList';
 import SendMessageForm from './SendMessageForm';
 import authManager from '../AuthManager'
 import Conversation from '../../../model/Conversation';
+import LoadingPage from './loading';
 
 class ConversationView extends React.Component {
     constructor(props) {
@@ -69,7 +70,7 @@ class ConversationView extends React.Component {
 
     render() {
         if (this.state.loaded === false) {
-            return <CircularProgress />
+            return <LoadingPage />
         } else if (this.state.error === true) {
             return <div>Error loding {this.props.conversationId}</div>
         } else {

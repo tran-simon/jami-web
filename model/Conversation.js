@@ -29,15 +29,21 @@ class Conversation {
         return this.getDisplayUri()
     }
 
-    getObject(params) {
+    getDisplayNameNoFallback() {
+        if (this.members.length !== 0) {
+            return this.members[0].contact.getDisplayNameNoFallback()
+        }
+    }
+
+    async getObject(params) {
         const members = params.memberFilter ? this.members.filter(params.memberFilter) : this.members
         return {
             id: this.id,
-            members: members.map(member => {
+            members: await Promise.all(members.map(async member => {
                 const copiedMember = { role: member.role }//Object.assign({}, member);
-                copiedMember.contact = member.contact.getObject()
+                copiedMember.contact = await member.contact.getObject()
                 return copiedMember
-            })
+            }))
         }
     }
 

@@ -1,15 +1,14 @@
-import { Avatar, ListItem, ListItemAvatar, ListItemText } from '@material-ui/core'
+import { ListItem, ListItemAvatar, ListItemText } from '@material-ui/core'
 import React from 'react'
 import Conversation from '../../../model/Conversation'
 import { useHistory, useParams } from "react-router-dom"
-import { PersonRounded } from '@material-ui/icons'
+import ConversationAvatar from './ConversationAvatar'
 
 export default function ConversationListItem(props) {
     const { conversationId, contactId } = useParams()
     const conversation = props.conversation
     const pathId = conversationId || contactId
     const isSelected = conversation.getDisplayUri() === pathId
-    const displayName = conversation.getDisplayName()
     const history = useHistory()
 
     const uri = conversation.getId() ? `conversation/${conversation.getId()}` : `addContact/${conversation.getFirstMember().contact.getUri()}`
@@ -20,10 +19,8 @@ export default function ConversationListItem(props) {
                 alignItems="flex-start"
                 selected={isSelected}
                 style={{overflow:'hidden'}}
-                onClick={() => history.push(`/account/${conversation.getAccountId()}/${uri}`)}>
-                <ListItemAvatar>
-                    <Avatar>{displayName ? displayName[0].toUpperCase() : <PersonRounded />}</Avatar>
-                </ListItemAvatar>
+                onClick={() => history.replace(`/account/${conversation.getAccountId()}/${uri}`)}>
+                <ListItemAvatar><ConversationAvatar displayName={conversation.getDisplayNameNoFallback()} /></ListItemAvatar>
                 <ListItemText
                     style={{overflow:'hidden', textOverflow:'ellipsis'}}
                     primary={conversation.getDisplayName()} secondary={conversation.getDisplayUri()} />

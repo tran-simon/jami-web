@@ -1,49 +1,32 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { InputBase, InputAdornment } from '@material-ui/core';
 import { SearchRounded } from '@material-ui/icons';
 
-class NewContactForm extends React.Component {
-    constructor(props) {
-        super(props)
-        this.state = {value: ''}
-        this.controller = new AbortController()
-        this.handleChange = this.handleChange.bind(this)
-        this.handleSubmit = this.handleSubmit.bind(this)
+export default function NewContactForm(props) {
+    const [value, setValue] = useState('')
+
+    const handleChange = event => {
+        setValue(event.target.value)
+        if (props.onChange)
+            props.onChange(event.target.value)
     }
 
-    componentDidMount() {
-        this.controller = new AbortController()
-    }
-
-    componentWillUnmount() {
-        this.controller.abort()
-        this.req = undefined
-    }
-
-    handleChange(event) {
-        this.setState({value: event.target.value})
-        this.props.onChange(event.target.value)
-    }
-
-    handleSubmit(event) {
+    const handleSubmit = event => {
         event.preventDefault()
-        if (this.props.onSubmit)
-            this.props.onSubmit(this.state.value)
+        if (value && props.onSubmit)
+            props.onSubmit(value)
     }
 
-    render() {
-        return (
-            <form className="main-search" onSubmit={this.handleSubmit} noValidate autoComplete="off">
-                <InputBase
-                    className="main-search-input"
-                    type="search"
-                    placeholder="Ajouter un contact"
-                    onChange={this.handleChange}
-                    startAdornment={<InputAdornment position="start"><SearchRounded /></InputAdornment>}
-                />
-            </form>
-        )
-    }
+    return (
+        <form className="main-search" onSubmit={handleSubmit} noValidate autoComplete="off">
+            <InputBase
+                className="main-search-input"
+                type="search"
+                placeholder="Ajouter un contact"
+                value={value}
+                onChange={handleChange}
+                startAdornment={<InputAdornment position="start"><SearchRounded /></InputAdornment>}
+            />
+        </form>
+    )
 }
-
-export default NewContactForm
