@@ -12,7 +12,10 @@ class Account {
     }
 
     static from(object) {
-        return new Account(object.id, object.details, object.volatileDetails)
+        const account = new Account(object.id, object.details, object.volatileDetails)
+        if (object.defaultModerators)
+            account.defaultModerators = object.defaultModerators.map(m => Contact.from(m))
+        return account
     }
 
     update(data) {
@@ -24,6 +27,7 @@ class Account {
         return {
             id: this.id,
             details: this.details,
+            defaultModerators: this.defaultModerators ? this.defaultModerators.map(c => c.getObject()) : undefined,
             volatileDetails: this.volatileDetails
         }
     }
@@ -86,6 +90,10 @@ class Account {
 
     getContacts() {
         return this.contacts
+    }
+
+    getDefaultModerators() {
+        return this.defaultModerators
     }
 }
 
