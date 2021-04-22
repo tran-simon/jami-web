@@ -28,7 +28,7 @@ export default function ConversationsOverviewCard(props) {
         setState({ loaded: true, conversations: Object.values(result).map(c => Conversation.from(accountId, c)) })
       })
     return () => controller.abort()
-  }, [])
+  }, [accountId])
 
   return (
     <Card onClick={() => history.push(`/account/${accountId}`)} >

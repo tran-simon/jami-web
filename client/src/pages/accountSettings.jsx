@@ -19,7 +19,7 @@ const AccountSettings = (props) => {
         setState({loaded: true, account: Account.from(result)})
       })
       return () => controller.abort()
-  }, [])
+  }, [accountId])
 
   return (
     <Container maxWidth="sm">

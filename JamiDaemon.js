@@ -146,23 +146,29 @@ class JamiDaemon {
                 }
                 account.removeConversation(conversationId)
             },
-            "ConversationLoaded": (accountId, conversationId) => {
+            "ConversationLoaded": (accountId, conversationId, messages) => {
                 console.log(`conversationLoaded: ${accountId} ${conversationId}`)
-                const account = this.getAccount(accountId)
-                if (!account) {
-                    console.log(`Unknown account ${accountId}`)
-                    return
-                }
-            },
-            "MessageReceived": (accountId, conversationId, message) => {
-                console.log(`messageReceived: ${accountId} ${conversationId}`)
+                console.log(messages)
                 const account = this.getAccount(accountId)
                 if (!account) {
                     console.log(`Unknown account ${accountId}`)
                     return
                 }
                 const conversation = account.getConversation(conversationId)
-                if (!conversation) {
+                if (conversation) {
+                    conversation.addLoadedMessages(message)
+                }
+            },
+            "MessageReceived": (accountId, conversationId, message) => {
+                console.log(`messageReceived: ${accountId} ${conversationId}`)
+                console.log(message)
+                const account = this.getAccount(accountId)
+                if (!account) {
+                    console.log(`Unknown account ${accountId}`)
+                    return
+                }
+                const conversation = account.getConversation(conversationId)
+                if (conversation) {
                     conversation.addMessage(message)
                 }
             },
@@ -317,6 +323,10 @@ class JamiDaemon {
 
     setDefaultModerators(accountId, moderators) {
 
+    }
+
+    sendMessage(accountId, conversationId, message) {
+        this.dring.sendMessage(accountId, conversationId, message, "")
     }
 
     boolToStr(bool) {

@@ -5,7 +5,6 @@ import ConversationAvatar from './ConversationAvatar'
 
 export default function MessageList(props) {
   const displayName = props.conversation.getDisplayName()
-
   return (
     <div className="message-list">
       <Box>
@@ -19,7 +18,7 @@ export default function MessageList(props) {
       </Box>
       <Divider orientation="horizontal" />
       {props.messages.map((message, index) =>
-        <Message key={index} username={message.senderId} text={message.text} />
+        <Message key={index} username={message.senderId} text={message.body} />
       )}
     </div>
   )

@@ -3,6 +3,7 @@ import { makeStyles } from '@material-ui/core/styles'
 import { IconButton, InputBase, Paper, Popper } from '@material-ui/core'
 import { Send, EmojiEmotionsRounded } from '@material-ui/icons'
 import EmojiPicker from 'emoji-picker-react'
+import authManager from '../AuthManager'
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -23,27 +24,23 @@ const useStyles = makeStyles((theme) => ({
     height: 28,
     margin: 4,
   },
-}));
+}))
 
 export default function SendMessageForm(props) {
   const classes = useStyles()
   const [anchorEl, setAnchorEl] = React.useState(null)
   const [currentMessage, setCurrentMessage] = React.useState("")
 
-  const handleOpenEmojiPicker = e => {
-    setAnchorEl(anchorEl ? null : e.currentTarget)
-  }
-  const handleClose = () => {
-    setAnchorEl(null)
-  }
+  const handleOpenEmojiPicker = e => setAnchorEl(anchorEl ? null : e.currentTarget)
+  const handleClose = () => setAnchorEl(null)
+
   const handleSubmit = e => {
     e.preventDefault()
+    props.onSend(currentMessage)
+    setCurrentMessage('')
   }
-  const handleInputChange = (event) => {
-    setCurrentMessage(event.target.value);
-  };
+  const handleInputChange = (event) => setCurrentMessage(event.target.value)
   const onEmojiClick = (e, emojiObject) => {
-    console.log(emojiObject.emoji)
     setCurrentMessage(currentMessage + emojiObject.emoji)
     handleClose()
   }

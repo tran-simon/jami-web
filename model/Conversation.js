@@ -9,10 +9,12 @@ class Conversation {
     }
 
     static from(accountId, object) {
-        return new Conversation(object.id, accountId, object.members.map(member => {
+        const conversation = new Conversation(object.id, accountId, object.members.map(member => {
             member.contact = Contact.from(member.contact)
             return member
         }))
+        conversation.messages = object.messages
+        return conversation
     }
     static fromSingleContact(accountId, contact) {
         return new Conversation(undefined, accountId, [{contact}])
@@ -39,6 +41,7 @@ class Conversation {
         const members = params.memberFilter ? this.members.filter(params.memberFilter) : this.members
         return {
             id: this.id,
+            messages: this.messages,
             members: await Promise.all(members.map(async member => {
                 const copiedMember = { role: member.role }//Object.assign({}, member);
                 copiedMember.contact = await member.contact.getObject()
@@ -65,6 +68,10 @@ class Conversation {
 
     addMessage(message) {
         this.messages.push(message)
+    }
+
+    getMessages() {
+        return this.messages
     }
 }
 

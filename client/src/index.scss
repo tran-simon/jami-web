@@ -1,7 +1,7 @@
 :root {
   --main-color: #1F1F1F;
   --secondary-color: white;
-  --third-color: #2F2F2F;
+  --third-color: #8b8b8b;
   --main-text-color: #3e5869;
   --secondary-text-color: #b0c7d6;
   --send-message-form: #F5F5F5;
@@ -190,8 +190,8 @@ html, body {
   background: var(--third-color);
   color: var(--secondary-color);
   display: inline;
-  padding: 4px 8px;
-  border-radius: 8px;
+  padding: 8px 16px;
+  border-radius: 16px;
 }
 
 .send-message-card {

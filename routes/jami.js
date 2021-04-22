@@ -62,7 +62,7 @@ class JamiRestApi {
             //res.json(account.getConversations())
         })
 
-        accountRouter.post('/conversations', (req, res, next) => {
+        accountRouter.post('/conversations', (req, res) => {
             console.log(`Create conversations for account, contact ${req.params.accountId}`)
             console.log(req.body)
             const account = this.jami.getAccount(req.params.accountId)
@@ -75,7 +75,13 @@ class JamiRestApi {
                 res.status(400).end()
         })
 
-        accountRouter.get('/conversations/:conversationId', async (req, res, next) => {
+        accountRouter.post('/conversations/:conversationId', async (req, res) => {
+            console.log(`Sending message to ${req.params.conversationId} for account ${req.params.accountId}`)
+            this.jami.sendMessage(req.params.accountId, req.params.conversationId, req.body.message)
+            res.status(200).end()
+        })
+
+        accountRouter.get('/conversations/:conversationId', async (req, res) => {
             console.log(`Get conversation ${req.params.conversationId} for account ${req.params.accountId}`)
             const account = this.jami.getAccount(req.params.accountId)
             if (!account)
