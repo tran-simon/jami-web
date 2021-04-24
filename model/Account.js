@@ -23,11 +23,12 @@ class Account {
         this.volatileDetails = data.volatileDetails
     }
 
-    getObject() {
+    async getObject() {
+        const hasModerators = this.defaultModerators && this.defaultModerators.length
         return {
             id: this.id,
             details: this.details,
-            defaultModerators: this.defaultModerators ? this.defaultModerators.map(c => c.getObject()) : undefined,
+            defaultModerators: hasModerators ? await Promise.all(this.defaultModerators.map(async c => await c.getObject())) : undefined,
             volatileDetails: this.volatileDetails
         }
     }

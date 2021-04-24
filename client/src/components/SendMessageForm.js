@@ -7,7 +7,8 @@ import authManager from '../AuthManager'
 
 const useStyles = makeStyles((theme) => ({
   root: {
-    margin: 16,
+    marginLeft: 16,
+    marginRight: 16,
     padding: '2px 4px',
     display: 'flex',
     alignItems: 'center',

@@ -8,7 +8,7 @@ import LoadingPage from './loading';
 
 const ConversationView = props => {
   const [state, setState] = useState({
-    loaded:false,
+    loaded: false,
     error: false,
     conversation: undefined
   })
@@ -44,15 +44,26 @@ const ConversationView = props => {
     })
   }
 
+  const loadMore = () => {
+    authManager.fetch(`/api/accounts/${props.accountId}/conversations/${props.conversationId}/messages`)
+      .then(res => res.json())
+      .then(messages => {
+        console.log(messages)
+        state.conversation.addLoadedMessages(messages)
+        setState(state)
+      })
+  }
+
+  console.log("ConversationView render " + (state.conversation ? state.conversation.getMessages().length : "no conversation"))
   if (state.loaded === false) {
       return <LoadingPage />
   } else if (state.error === true) {
       return <div>Error loding {props.conversationId}</div>
   } else {
-  return <React.Fragment>
-      <MessageList conversation={state.conversation} messages={state.conversation.getMessages()} />
+  return <div className="messenger">
+      <MessageList conversation={state.conversation} loadMore={loadMore} messages={state.conversation.getMessages()} />
       <SendMessageForm onSend={sendMessage} />
-    </React.Fragment>
+    </div>
   }
 }
 

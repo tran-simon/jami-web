@@ -10,12 +10,12 @@ class JamiRestApi {
         //router.use(express.json());
 
         // Accounts
-        router.get(['/accounts'], (req, res, next) => {
+        router.get(['/accounts'], async (req, res, next) => {
             console.log("Get account list")
             let accounts = this.jami.getAccountList()
             if (req.user.accountFilter)
                 accounts = accounts.filter(account => req.user.accountFilter(account.getId()))
-            res.json(accounts.map(account => account.getSummary()))
+            res.json(await Promise.all(accounts.map(async account => await account.getSummary())))
         })
 
         const checkAccount = (req, res, next) => {
@@ -29,24 +29,38 @@ class JamiRestApi {
         const accountRouter = Router({mergeParams: true})
         router.use('/accounts/:accountId', checkAccount, accountRouter)
 
-        accountRouter.get(['/'], (req, res, next) => {
+        accountRouter.get(['/'], async (req, res) => {
             console.log(`Get account ${req.params.accountId}`)
             const account = this.jami.getAccount(req.params.accountId)
-            account.defaultModerators = this.jami.getDefaultModerators(account.getId())
-            if (account)
-                res.json(account.getObject())
-            else
+            if (account) {
+                account.defaultModerators = this.jami.getDefaultModerators(account.getId())
+                const obj = await account.getObject()
+                console.log(obj)
+                res.json(obj)
+            } else
                 res.status(404).end()
         })
 
         // Contacts
-        accountRouter.get(['/contacts'], (req, res, next) => {
+        accountRouter.get(['/contacts'], (req, res) => {
             console.log(`Get account ${req.params.accountId}`)
             const account = this.jami.getAccount(req.params.accountId)
             if (account)
                 res.json(account.getContacts())
             else
                 res.status(404).end()
+        })
+
+        // Default modertors
+        accountRouter.put('/defaultModerators/:contactId', async (req, res) => {
+            console.log(`Adding default moderator ${req.params.contactId} to account ${req.params.accountId}`)
+            this.jami.addDefaultModerator(req.params.accountId, req.params.contactId)
+            res.status(200).end()
+        })
+        accountRouter.delete('/defaultModerators/:contactId', async (req, res) => {
+            console.log(`Removing default moderator to account ${req.params.accountId}`)
+            this.jami.removeDefaultModerator(req.params.accountId, req.params.contactId)
+            res.status(200).end()
         })
 
         // Conversations
@@ -93,6 +107,16 @@ class JamiRestApi {
                 res.json(await conversation.getObject({
                     memberFilter: member => member.contact.getUri() !== account.getUri()
                 }))
+            }
+        })
+
+        accountRouter.get('/conversations/:conversationId/messages', async (req, res) => {
+            console.log(`Get messages for conversation ${req.params.conversationId} for account ${req.params.accountId}`)
+            try {
+                const messages = await this.jami.loadMessages(req.params.accountId, req.params.conversationId)
+                res.json(messages).end()
+            } catch (e) {
+                res.status(400).json({ error: e.message })
             }
         })
 

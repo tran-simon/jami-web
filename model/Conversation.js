@@ -67,7 +67,19 @@ class Conversation {
     }
 
     addMessage(message) {
-        this.messages.push(message)
+        if (this.messages.length === 0)
+            this.messages.push(message)
+        else if (message.id === this.messages[this.messages.length - 1].linearizedParent) {
+            this.messages.push(message)
+        } else if (message.linearizedParent === this.messages[0].id) {
+            this.messages.unshift(message)
+        } else {
+            console.log("Can't insert message " + message.id)
+        }
+    }
+
+    addLoadedMessages(messages) {
+        messages.forEach(message => this.addMessage(message))
     }
 
     getMessages() {

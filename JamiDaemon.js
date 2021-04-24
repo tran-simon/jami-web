@@ -25,7 +25,7 @@ import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
 
 class JamiDaemon {
-    constructor() {
+    constructor(onMessage) {
         this.accounts = []
         this.dring = require("./dring.node")
         this.dring.init({
@@ -146,7 +146,7 @@ class JamiDaemon {
                 }
                 account.removeConversation(conversationId)
             },
-            "ConversationLoaded": (accountId, conversationId, messages) => {
+            "ConversationLoaded": (id, accountId, conversationId, messages) => {
                 console.log(`conversationLoaded: ${accountId} ${conversationId}`)
                 console.log(messages)
                 const account = this.getAccount(accountId)
@@ -156,7 +156,11 @@ class JamiDaemon {
                 }
                 const conversation = account.getConversation(conversationId)
                 if (conversation) {
-                    conversation.addLoadedMessages(message)
+                    conversation.addLoadedMessages(messages)
+                    const request = conversation.requests[id]
+                    if (request) {
+                        request.resolve(messages)
+                    }
                 }
             },
             "MessageReceived": (accountId, conversationId, message) => {
@@ -170,6 +174,8 @@ class JamiDaemon {
                 const conversation = account.getConversation(conversationId)
                 if (conversation) {
                     conversation.addMessage(message)
+                    if (onMessage)
+                        onMessage(account, conversation, message)
                 }
             },
             "ConversationRequestReceived": (accountId, conversationId, request) => {
@@ -318,15 +324,35 @@ class JamiDaemon {
             return {}
         }
         return JamiDaemon.vectToJs(this.dring.getDefaultModerators(accountId))
-            .map(contactId => account.getContactFromCache(contctId))
+            .map(contactId => account.getContactFromCache(contactId))
     }
 
-    setDefaultModerators(accountId, moderators) {
+    addDefaultModerator(accountId, uri) {
+        this.dring.setDefaultModerator(accountId, uri, true)
+    }
 
+    removeDefaultModerator(accountId, uri) {
+        this.dring.setDefaultModerator(accountId, uri, false)
     }
 
     sendMessage(accountId, conversationId, message) {
         this.dring.sendMessage(accountId, conversationId, message, "")
+    }
+
+    loadMessages(accountId, conversationId, fromMessage) {
+        const account = this.getAccount(accountId)
+        if (!account)
+            throw new Error('Unknown account')
+        const conversation = account.getConversation(conversationId)
+        if (!conversation)
+            throw new Error(`Unknown conversation ${conversationId}`)
+
+        return new Promise((resolve, reject) => {
+            if (!conversation.requests)
+                conversation.requests = {}
+            const requestId = this.dring.loadConversationMessages(accountId, conversationId, fromMessage || "", 32)
+            conversation.requests[requestId] = {resolve, reject}
+        })
     }
 
     boolToStr(bool) {

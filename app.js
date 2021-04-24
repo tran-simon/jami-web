@@ -7,8 +7,8 @@ import { promises as fs } from 'fs'
 import http from 'http'
 import express from 'express'
 import session from 'express-session'
-//const cookieParser = require('cookie-parser')
-//const io = require('socket.io')(server)
+import cookieParser  from'cookie-parser'
+import { Server } from'socket.io'
 import path from 'path'
 import passport from 'passport'
 import { Strategy as LocalStrategy } from 'passport-local'
@@ -24,7 +24,7 @@ const __dirname = path.dirname(__filename);
 
 import indexRouter from './routes/index.js'
 
-//const cors = require('cors')
+import cors from 'cors'
 
 import JamiRestApi from './routes/jami.js'
 import JamiDaemon from './JamiDaemon.js'
@@ -78,6 +78,10 @@ const createServer = async (appConfig) => {
     console.log(appConfig)
     const development = app.get('env') === 'development'
 
+    var corsOptions = {
+        origin: 'http://127.0.0.1:3000'
+    }
+
     if (development) {
         const [ webpack, webpackDev, webpackHot, webpackConfig ] = await Promise.all([
             import('webpack'),
@@ -97,7 +101,7 @@ const createServer = async (appConfig) => {
     */
     app.disable('x-powered-by')
 
-    app.use(session({
+    const sessionMiddleware = session({
         store: sessionStore,
         resave: false,
         saveUninitialized: true,
@@ -106,11 +110,13 @@ const createServer = async (appConfig) => {
             maxAge: 2419200000
         },
         secret: process.env.SECRET_KEY_BASE
-    }))
+    })
+
+    app.use(sessionMiddleware)
     app.use(passport.initialize())
     app.use(passport.session())
     // app.use(app.router)
-    //app.use(cors())
+    app.use(cors(corsOptions))
 
     const jami = new JamiDaemon()
     const apiRouter = new JamiRestApi(jami).getRouter()
@@ -267,7 +273,29 @@ const createServer = async (appConfig) => {
         res.sendFile(path.join(__dirname, 'client', 'dist', 'index.html'))
     })
 
-    return http.Server(app)
+    const server = http.Server(app)
+
+    const io = new Server(server, { cors: corsOptions })
+    const wrap = middleware => (socket, next) => middleware(socket.request, {}, next)
+    io.use(wrap(sessionMiddleware))
+    io.use(wrap(passport.initialize()))
+    io.use(wrap(passport.session()))
+    io.use((socket, next) => {
+        if (socket.request.user) {
+            next()
+        } else {
+            next(new Error("unauthorized"))
+        }
+    })
+    io.on('connect', (socket) => {
+        console.log(`new connection ${socket.id}`)
+        const session = socket.request.session
+        console.log(`saving sid ${socket.id} in session ${session.id}`)
+        session.socketId = socket.id
+        session.save()
+    })
+
+    return server
 }
 
 loadConfig(configPath)
@@ -275,53 +303,3 @@ loadConfig(configPath)
     .then(server => {
         server.listen(3000)
     })
-
-/*
-io.on('connection', (socket) => {
-    console.log("Client just connected !")
-    socket.on('SendMessage', (data) => {
-        console.log("Message " + data.text + " sent to " + data.destinationId + " by " + socket.session.user.accountId)
-        const msgMap = new jami.dring.StringMap()
-        msgMap.set('text/plain', data.text)
-        jami.dring.sendAccountTextMessage(socket.session.user.accountId, data.destinationId, msgMap)
-    })
-})
-
-io.use((socket, next) => {
-    cookieParser(socket.handshake, {}, (err) => {
-        if (err) {
-            console.log("error in parsing cookie")
-            return next(err)
-        }
-        if (!socket.handshake.signedCookies) {
-            console.log("no secureCookies|signedCookies found")
-            return next(new Error("no secureCookies found"))
-        }
-        sessionStore.get(socket.handshake.signedCookies["connect.sid"], (err, session) => {
-            socket.session = session
-            if (!err && !session) err = new Error('session not found')
-            if (err) {
-                console.log('failed connection to socket.io:', err)
-            } else {
-                console.log(session)
-                console.log('successful connection to socket.io ' + session.passport.user)
-                const userKey = session.passport.user
-                deserializeUser(userKey, (err, user) => {
-                    console.log("deserializeUser: " + user)
-                    if (err)
-                        return next(err, true)
-                    if (!user)
-                        return next("User not found", false)
-
-                    console.log("User associated socket id: " + socket.id)
-                    user.socketId = socket.id
-                    socket.session.user = user
-                    console.log("User added to session --------> " + user.accountId)
-                    //auth.success(data, accept)
-                    next(err, true)
-                })
-            }
-        })
-    })
-})
-*/

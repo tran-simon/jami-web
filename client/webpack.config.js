@@ -1,16 +1,17 @@
 'use strict'
 
-import dotenv from 'dotenv'
-dotenv.config({ path: resolve(import.meta.url, '..', '.env') })
-
-import { resolve } from 'path'
-import HtmlWebpackPlugin from 'html-webpack-plugin'
-import CopyWebpackPlugin from 'copy-webpack-plugin'
-
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
+
+import dotenv from 'dotenv'
+console.log(resolve(__dirname, '..', '.env'))
+dotenv.config({ path: resolve(__dirname, '..', '.env') })
+
+import { resolve } from 'path'
+import HtmlWebpackPlugin from 'html-webpack-plugin'
+import CopyWebpackPlugin from 'copy-webpack-plugin'
 const mode = process.env.NODE_ENV || 'development'
 
 let entry = [resolve(__dirname, 'src', 'index.js')]

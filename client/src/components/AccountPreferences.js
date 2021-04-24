@@ -1,12 +1,14 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { makeStyles } from '@material-ui/core/styles'
 import { List, ListItem, ListItemIcon, ListItemSecondaryAction, ListItemText, ListSubheader, Switch, Typography, Grid, Paper, CardContent, Card, TableContainer, Table, TableHead, TableRow, TableCell, TableBody, Toolbar, IconButton, ListItemAvatar, Input, TextField } from '@material-ui/core'
-import { PhoneCallbackRounded, GroupRounded, DeleteRounded, AccountCircle, AddCircle } from '@material-ui/icons'
+import { PhoneCallbackRounded, GroupRounded, DeleteRounded, AddCircle } from '@material-ui/icons'
 
 import Account from '../../../model/Account'
 import JamiIdCard from './JamiIdCard'
 import ConversationAvatar from './ConversationAvatar'
 import ConversationsOverviewCard from './ConversationsOverviewCard'
+
+import authManager from '../AuthManager'
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -35,6 +37,18 @@ export default function AccountPreferences(props) {
   const isJamiAccount = account.getType() === Account.TYPE_JAMI
   const alias = isJamiAccount ? "Jami account" : "SIP account"
   const moderators = account.getDefaultModerators()
+  const [defaultModeratorUri, setDefaultModeratorUri] = useState('')
+
+  const addModerator = () => {
+    if (defaultModeratorUri) {
+      authManager.fetch(`/api/accounts/${account.getId()}/defaultModerators/${defaultModeratorUri}`, {method: "PUT"})
+      setDefaultModeratorUri('')
+    }
+  }
+
+  const removeModerator = (uri) =>
+    authManager.fetch(`/api/accounts/${account.getId()}/defaultModerators/${uri}`, {method: "DELETE"})
+
   return (
     <React.Fragment>
       <Typography variant="h2" component="h2" gutterBottom>{alias}</Typography>
@@ -98,22 +112,28 @@ export default function AccountPreferences(props) {
           </Toolbar>
           <List>
             <ListItem key="add">
-              <TextField variant="outlined" className={classes.textField} label="Add new default moderator" placeholder="Enter new moderator name or URI" fullWidth />
+              <TextField variant="outlined"
+                className={classes.textField}
+                value={defaultModeratorUri}
+                onChange={e => setDefaultModeratorUri(e.target.value)}
+                label="Add new default moderator"
+                placeholder="Enter new moderator name or URI"
+                fullWidth />
               <ListItemSecondaryAction>
-                <IconButton><AddCircle /></IconButton>
+                <IconButton onClick={addModerator}><AddCircle /></IconButton>
               </ListItemSecondaryAction>
             </ListItem>
-            {moderators.length === 0 ?
+            {!moderators || moderators.length === 0 ?
               <ListItem key="placeholder">
                 <ListItemText primary="No default moderator" /></ListItem> :
               moderators.map((moderator) => (
-                <ListItem key={moderator.name}>
+                <ListItem key={moderator.uri}>
                   <ListItemAvatar>
-                    <ConversationAvatar name={moderator.name} />
+                    <ConversationAvatar name={moderator.getDisplayName()} />
                   </ListItemAvatar>
-                  <ListItemText primary={moderator.name} />
+                  <ListItemText primary={moderator.getDisplayName()} />
                   <ListItemSecondaryAction>
-                    <IconButton><DeleteRounded /></IconButton>
+                    <IconButton onClick={e => removeModerator(moderator.uri)}><DeleteRounded /></IconButton>
                   </ListItemSecondaryAction>
                 </ListItem>
               ))}

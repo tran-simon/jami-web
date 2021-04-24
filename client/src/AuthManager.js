@@ -142,7 +142,11 @@ class AuthManager {
     fetch(url, init) {
         console.log(`fetch ${url}`)
         if (!this.state.authenticated) {
-            return new Promise((resolve, reject) => this.tasks.push({url, init, resolve, reject}))
+            if (!init || !init.method || init.method === 'GET') {
+                return new Promise((resolve, reject) => this.tasks.push({url, init, resolve, reject}))
+            } else {
+                return new Promise((resolve, reject) => reject("Not authenticated"))
+            }
         }
         return fetch(url, init)
             .then(response => {
