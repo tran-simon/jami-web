@@ -45,6 +45,18 @@ class Account {
 
     isPublicIn() { return this.details["DHT.PublicInCalls"] === Account.BOOL_TRUE }
 
+    setDetail(detail, value) {
+        this.details[detail] = value
+    }
+
+    updateDetails(details) {
+        return Object.assign(this.details, details)
+    }
+
+    getDetails() {
+        return this.details
+    }
+
     getSummary() {
         return this.getObject()
     }

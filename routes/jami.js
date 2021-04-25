@@ -29,7 +29,7 @@ class JamiRestApi {
         const accountRouter = Router({mergeParams: true})
         router.use('/accounts/:accountId', checkAccount, accountRouter)
 
-        accountRouter.get(['/'], async (req, res) => {
+        accountRouter.get('/', async (req, res) => {
             console.log(`Get account ${req.params.accountId}`)
             const account = this.jami.getAccount(req.params.accountId)
             if (account) {
@@ -41,8 +41,20 @@ class JamiRestApi {
                 res.status(404).end()
         })
 
+        accountRouter.post('/', async (req, res) => {
+            console.log(`Set account details ${req.params.accountId}`)
+            const account = this.jami.getAccount(req.params.accountId)
+            if (account) {
+                console.log(req.body)
+                const newDetails = account.updateDetails(req.body)
+                this.jami.setAccountDetails(account.getId(), newDetails)
+                res.status(200).end()
+            } else
+                res.status(404).end()
+        })
+
         // Contacts
-        accountRouter.get(['/contacts'], (req, res) => {
+        accountRouter.get('/contacts', (req, res) => {
             console.log(`Get account ${req.params.accountId}`)
             const account = this.jami.getAccount(req.params.accountId)
             if (account)

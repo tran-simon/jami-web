@@ -155,7 +155,7 @@ class JamiDaemon {
                 }
                 const conversation = account.getConversation(conversationId)
                 if (conversation) {
-                    conversation.addLoadedMessages(messages)
+                    //conversation.addLoadedMessages(messages)
                     const request = conversation.requests[id]
                     if (request) {
                         request.resolve(messages)
@@ -261,7 +261,7 @@ class JamiDaemon {
         return this.mapToJs(this.dring.getAccountDetails(accountId))
     }*/
     setAccountDetails(accountId, details) {
-        this.dring.setAccountDetails(accountId, mapToNative(details))
+        this.dring.setAccountDetails(accountId, this.mapToNative(details))
     }
     getAudioOutputDeviceList() {
         return JamiDaemon.vectToJs(this.dring.getAudioOutputDeviceList())
@@ -441,7 +441,8 @@ class JamiDaemon {
 
     mapToNative(map){
         const ret = new this.dring.StringMap()
-        map.forEach((value, key) => ret.set(key, value))
+        for (const [key, value] of Object.entries(map))
+            ret.set(key, value)
         return ret
     }
 }

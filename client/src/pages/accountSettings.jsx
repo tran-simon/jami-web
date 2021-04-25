@@ -17,14 +17,17 @@ const AccountSettings = (props) => {
       .then(result => {
         console.log(result)
         setState({loaded: true, account: Account.from(result)})
-      })
+      }).catch(e => console.log(e))
       return () => controller.abort()
   }, [accountId])
 
   return (
     <Container maxWidth="sm">
       <Header />
-      {state.loaded ? <AccountPreferences account={state.account} /> : <CircularProgress />}
+      {state.loaded ? <AccountPreferences account={state.account} onAccontChanged={account => setState(state => {
+        state.account =  account
+        return state
+      })} /> : <CircularProgress />}
     </Container>
   )
 }

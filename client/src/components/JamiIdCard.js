@@ -7,7 +7,6 @@ const useStyles = makeStyles({
     fontSize: 14,
   }, pos: {
     fontSize: 14,
-
   }
 });
 

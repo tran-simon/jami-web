@@ -59,7 +59,7 @@ const ConversationView = props => {
       setState(state => {
         if (state.conversation)
           state.conversation.addMessage(data)
-          return {...state}
+        return {...state}
       })
     })
   }, [state.conversation ? state.conversation.getId() : "", socket])
@@ -74,9 +74,11 @@ const ConversationView = props => {
       .then(messages => {
         console.log(messages)
         setLoadingMesages(false)
-        if (state.conversation)
+        setState(state => {
+          if (state.conversation)
             state.conversation.addLoadedMessages(messages)
-        setState(state)
+            return {...state}
+          })
       }).catch(e => console.log(e))
       return () => controller.abort()
   }, [state, loadingMesages])

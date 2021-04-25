@@ -39,6 +39,8 @@ export default function AccountPreferences(props) {
   const moderators = account.getDefaultModerators()
   const [defaultModeratorUri, setDefaultModeratorUri] = useState('')
 
+  const [details, setDetails] = useState(account.getDetails())
+
   const addModerator = () => {
     if (defaultModeratorUri) {
       authManager.fetch(`/api/accounts/${account.getId()}/defaultModerators/${defaultModeratorUri}`, {method: "PUT"})
@@ -48,6 +50,22 @@ export default function AccountPreferences(props) {
 
   const removeModerator = (uri) =>
     authManager.fetch(`/api/accounts/${account.getId()}/defaultModerators/${uri}`, {method: "DELETE"})
+
+  const handleToggle = (key, value) => {
+    console.log(`handleToggle ${key} ${value}`)
+    const newDetails = {}
+    newDetails[key] = value ? "true" : "false"
+    console.log(newDetails)
+    authManager.fetch(`/api/accounts/${account.getId()}`, {
+      method: "POST",
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(newDetails)
+    })
+    setDetails({...account.updateDetails(newDetails)})
+  }
 
   return (
     <React.Fragment>
@@ -83,8 +101,8 @@ export default function AccountPreferences(props) {
           <ListItemSecondaryAction>
             <Switch
               edge="end"
-              /*onChange={handleToggle('wifi')}*/
-              checked={account.isRendezVous()}
+              onChange={e => handleToggle('Account.rendezVous', e.target.checked)}
+              checked={details['Account.rendezVous'] === 'true'}
               inputProps={{ 'aria-labelledby': 'switch-list-label-rendezvous' }}
             />
           </ListItemSecondaryAction>
@@ -97,8 +115,8 @@ export default function AccountPreferences(props) {
           <ListItemSecondaryAction>
             <Switch
               edge="end"
-              /*onChange={handleToggle('bluetooth')}*/
-              checked={account.isPublicIn()}
+              onChange={e => handleToggle('DHT.PublicInCalls', e.target.checked)}
+              checked={details['DHT.PublicInCalls'] === 'true'}
               inputProps={{ 'aria-labelledby': 'switch-list-label-publicin' }}
             />
           </ListItemSecondaryAction>
