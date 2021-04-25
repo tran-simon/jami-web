@@ -52,7 +52,6 @@ class AuthManager {
                 this.authenticating = false
                 this.state.initialized = true
                 console.log("Init ended")
-                console.log(response)
                 if (response.status === 200) {
                     const jsonData = await response.json()
                     Object.assign(this.state, {
@@ -71,9 +70,6 @@ class AuthManager {
                 } else {
                     this.state.error = true
                 }
-                console.log("New auth state")
-                console.log(this.state)
-
                 if (this.onAuthChanged)
                     this.onAuthChanged(this.state)
             })
@@ -150,7 +146,6 @@ class AuthManager {
         }
         return fetch(url, init)
             .then(response => {
-                console.log(`Got status ${response.status}`)
                 if (response.status === 401) {
                     this.disconnect()
                     return this.fetch(url, init)

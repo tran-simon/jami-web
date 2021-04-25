@@ -2,15 +2,14 @@ import Message from './Message'
 import React, { useEffect } from 'react'
 import { Box, Divider, Typography } from '@material-ui/core'
 import ConversationAvatar from './ConversationAvatar'
-const reverseMap = (arr, f) => arr.map((_, idx, arr) => f(arr[arr.length - 1 - idx ]));
 
 export default function MessageList(props) {
   const displayName = props.conversation.getDisplayName()
   const messages = props.conversation.getMessages()
-  console.log("MessageList render " + messages.length)
 
   useEffect(() => {
-    props.loadMore()
+    if (!props.loading)
+      props.loadMore()
   }, [props.conversation.getId()])
 
   return (
@@ -26,9 +25,8 @@ export default function MessageList(props) {
         <Divider orientation="horizontal" />
       </Box>
       <div className="message-list">
-      <div className="message-list-inner">
-      {reverseMap(messages, (message) => <Message key={message.id} message={message} />)}
-      </div>
+        {messages.map((message) => <Message key={message.id} message={message} />)}
+        <div style={{ border: "1px solid transparent" }}/>
       </div>
     </React.Fragment>
   )

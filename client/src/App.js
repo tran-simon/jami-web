@@ -32,10 +32,6 @@ const App = (props) => {
       return () => authManager.deinit()
     }, []);
 
-    console.log("App render")
-    console.log(state)
-    console.log(location)
-
     if (!state.loaded) {
       return <LoadingPage />
     } else if (!state.auth.setupComplete) {

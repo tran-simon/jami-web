@@ -40,7 +40,7 @@ export default function AddContactPage(props) {
   }
 
   return (
-    <Container className='message-list'>
+    <Container className='messenger'>
       <Card variant='outlined' style={{ borderRadius: 16, maxWidth: 560, margin: "16px auto" }}>
         <CardContent>
           <Typography variant='h6'>Jami key ID</Typography>

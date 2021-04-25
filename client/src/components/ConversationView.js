@@ -1,12 +1,14 @@
-import CircularProgress from '@material-ui/core/CircularProgress';
 import React, { useEffect, useState } from 'react';
 import MessageList from './MessageList';
 import SendMessageForm from './SendMessageForm';
 import authManager from '../AuthManager'
 import Conversation from '../../../model/Conversation';
 import LoadingPage from './loading';
+import io from "socket.io-client";
 
 const ConversationView = props => {
+  const [loadingMesages, setLoadingMesages] = useState(false)
+  const [socket, setSocket] = useState(undefined)
   const [state, setState] = useState({
     loaded: false,
     error: false,
@@ -21,7 +23,7 @@ const ConversationView = props => {
       console.log(result)
       setState({
         loaded: true,
-        conversation: Conversation.from(props.accountId, result)// result.map(account => Account.from(account)),
+        conversation: Conversation.from(props.accountId, result)
       })
     }, error => {
       console.log(`get error ${error}`)
@@ -32,6 +34,52 @@ const ConversationView = props => {
     })
     return () => controller.abort()
   }, [props.accountId, props.conversationId])
+
+  useEffect(() => {
+    console.log("io.connect")
+    const socket = io()
+    setSocket(socket)
+    return () => {
+      console.log("io.disconnect")
+      socket.disconnect()
+      setSocket(undefined)
+    }
+  }, [])
+
+  useEffect(() => {
+    if (!state.conversation)
+      return
+    console.log(`io set conversation ${state.conversation.getId()} `+ socket)
+    if (socket)
+      socket.emit('conversation', { accountId: state.conversation.getAccountId(), conversationId: state.conversation.getId() })
+    socket.off('newMessage')
+    socket.on('newMessage', (data) => {
+      console.log("newMessage")
+      console.log(data)
+      setState(state => {
+        if (state.conversation)
+          state.conversation.addMessage(data)
+          return {...state}
+      })
+    })
+  }, [state.conversation ? state.conversation.getId() : "", socket])
+
+  useEffect(() => {
+    if (!loadingMesages || !state.conversation)
+      return
+    console.log(`Load more messages`)
+    const controller = new AbortController()
+    authManager.fetch(`/api/accounts/${state.conversation.getAccountId()}/conversations/${state.conversation.getId()}/messages`, {signal: controller.signal})
+      .then(res => res.json())
+      .then(messages => {
+        console.log(messages)
+        setLoadingMesages(false)
+        if (state.conversation)
+            state.conversation.addLoadedMessages(messages)
+        setState(state)
+      }).catch(e => console.log(e))
+      return () => controller.abort()
+  }, [state, loadingMesages])
 
   const sendMessage = (message) => {
     authManager.fetch(`/api/accounts/${props.accountId}/conversations/${props.conversationId}`, {
@@ -44,24 +92,13 @@ const ConversationView = props => {
     })
   }
 
-  const loadMore = () => {
-    authManager.fetch(`/api/accounts/${props.accountId}/conversations/${props.conversationId}/messages`)
-      .then(res => res.json())
-      .then(messages => {
-        console.log(messages)
-        state.conversation.addLoadedMessages(messages)
-        setState(state)
-      })
-  }
-
-  console.log("ConversationView render " + (state.conversation ? state.conversation.getMessages().length : "no conversation"))
   if (state.loaded === false) {
       return <LoadingPage />
   } else if (state.error === true) {
       return <div>Error loding {props.conversationId}</div>
   } else {
   return <div className="messenger">
-      <MessageList conversation={state.conversation} loadMore={loadMore} messages={state.conversation.getMessages()} />
+      <MessageList conversation={state.conversation} loading={loadingMesages} loadMore={() => setLoadingMesages(true)} messages={state.conversation.getMessages()} />
       <SendMessageForm onSend={sendMessage} />
     </div>
   }

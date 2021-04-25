@@ -1,17 +1,18 @@
 :root {
-  --main-color: #1F1F1F;
+  --main-color: #1f1f1f;
   --secondary-color: white;
   --third-color: #8b8b8b;
   --main-text-color: #3e5869;
   --secondary-text-color: #b0c7d6;
-  --send-message-form: #F5F5F5;
+  --send-message-form: #f5f5f5;
 }
 
-html, body {
+html,
+body {
   height: 100%;
   margin: 0;
   padding: 0;
-  font-family: 'Open Sans', sans-serif;
+  font-family: "Open Sans", sans-serif;
   font-weight: 200;
   color: #3e5869;
 }
@@ -26,21 +27,25 @@ html, body {
   grid-template-columns: 320px 1fr;
   grid-template-rows: 40px 50px 1fr 1fr 92px;
   grid-template-areas:
-      "h m"
-      "n m"
-      "r m"
-      "r m"
-      "r m";
+    "h m"
+    "n m"
+    "r m"
+    "r m"
+    "r m";
 }
 
 .messenger {
   grid-area: m;
-  display: grid;
-  grid-template-rows: 73px 1fr 72px;
-  grid-template-areas:
-      "h"
-      "m"
-      "i";
+  display: flex;
+  flex-direction: column;
+}
+
+.conversation-header {
+  grid-area: h;
+}
+
+.send-message-form {
+  margin: 0 16px 16px 8px;
 }
 
 .MuiContainer-root {
@@ -51,50 +56,11 @@ html, body {
   background-color: var(--main-color);
 }
 
-.header-section {
-  grid-area: h;
-}
-
 .main-search {
   grid-area: n;
 }
 
-.rooms-list {
-  grid-area: r;
-}
-
-.conversation-header {
-  grid-area: h;
-}
-
-.message-list {
-  grid-area: m;
-  position: relative;
-}
-
-.message-list-inner {
-  max-height: 100%;
-  position: absolute;
-  overflow-y: auto;
-  width: 100%;
-  bottom: 0;
-  padding: 24px;
-}
-
-.send-message-form {
-  grid-area: i;
-}
-
 /* REST OF CSS */
-
-.header-section {
-  background-color: var(--main-color);
-
-}
-
-.simple-menu {
-  color: var(--send-message-form);
-}
 
 .main-search-input {
   padding: 8px;
@@ -103,42 +69,67 @@ html, body {
 }
 
 .rooms-list {
+  grid-area: r;
   overflow-y: scroll;
-}
-.rooms-list .MuiListItemText-primary,
-.rooms-list .MuiListItemText-secondary
-{
-  overflow: hidden;
-  text-overflow: ellipsis;
+
+  .MuiListItemText-primary,
+  .MuiListItemText-secondary {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
 }
 
 .list-placeholder {
   margin: 32px auto;
   width: 256px;
   text-align: center;
+
+  .subtitle {
+    color: #a0a0a0;
+  }
 }
 
-.list-placeholder .subtitle {
-  color:#a0a0a0;
-}
+.message-list {
+  flex: 1;
+  height: 100%;
+  overflow: auto;
+  display: flex;
+  flex-direction: column-reverse;
+  padding: 16px 32px;
 
-.message {
-  margin: 15px 0;
-}
+  .conversation-event {
+    margin: 8px auto;
 
-.message .message-username {
-  font-size: 11px;
-  font-weight: bold;
-  color: var(--secondary-color);
-  opacity: 0.9;
-  margin-bottom: 6px;
-}
-.message .message-text {
-  background: var(--third-color);
-  color: var(--secondary-color);
-  display: inline;
-  padding: 8px 16px;
-  border-radius: 16px;
+    .inline-avatar {
+      display: inline-block;
+      vertical-align: middle;
+      margin: 16px;
+    }
+  }
+
+  .message {
+    margin: 8px 0;
+
+    .message-avatar {
+      display: inline-block;
+      vertical-align: middle;
+    }
+    .message-username {
+      font-size: 11px;
+      font-weight: bold;
+      color: var(--secondary-color);
+      opacity: 0.9;
+      margin-bottom: 6px;
+    }
+    .message-text {
+      background: var(--third-color);
+      color: var(--secondary-color);
+      display: inline;
+      padding: 8px 16px;
+      border-radius: 16px;
+      margin: 8px;
+    }
+  }
 }
 
 .send-message-card {

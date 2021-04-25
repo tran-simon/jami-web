@@ -148,7 +148,6 @@ class JamiDaemon {
             },
             "ConversationLoaded": (id, accountId, conversationId, messages) => {
                 console.log(`conversationLoaded: ${accountId} ${conversationId}`)
-                console.log(messages)
                 const account = this.getAccount(accountId)
                 if (!account) {
                     console.log(`Unknown account ${accountId}`)
@@ -251,6 +250,12 @@ class JamiDaemon {
     }
     getAccountList() {
         return this.accounts
+    }
+    getConversation(accountId, conversationId) {
+        const account = this.getAccount(accountId)
+        if (account)
+            return account.getConversation(conversationId)
+        return null
     }
     /*getAccountDetails(accountId) {
         return this.mapToJs(this.dring.getAccountDetails(accountId))

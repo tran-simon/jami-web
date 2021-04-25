@@ -118,7 +118,15 @@ const createServer = async (appConfig) => {
     // app.use(app.router)
     app.use(cors(corsOptions))
 
-    const jami = new JamiDaemon()
+    const jami = new JamiDaemon((account, conversation, message) => {
+        console.log("JamiDaemon onMessage")
+
+        if (conversation.listeners) {
+            Object.values(conversation.listeners).forEach(listener => {
+                listener.socket.emit('newMessage', message)
+            })
+        }
+    })
     const apiRouter = new JamiRestApi(jami).getRouter()
 
     /*
@@ -293,6 +301,24 @@ const createServer = async (appConfig) => {
         console.log(`saving sid ${socket.id} in session ${session.id}`)
         session.socketId = socket.id
         session.save()
+
+        socket.on("conversation", (data) => {
+            console.log(`io conversation`)
+            console.log(data);
+            if (session.conversation) {
+                console.log(`disconnect from old conversation ${session.conversation.conversationId}`)
+                const conversation = jami.getConversation(session.conversation.accountId, session.conversation.conversationId)
+                delete conversation.listeners[socket.id]
+            }
+            session.conversation = { accountId: data.accountId, conversationId: data.conversationId }
+            const conversation = jami.getConversation(data.accountId, data.conversationId)
+            if (!conversation.listeners)
+                conversation.listeners = {}
+            conversation.listeners[socket.id] = {
+                socket, session
+            }
+            session.save()
+        })
     })
 
     return server
