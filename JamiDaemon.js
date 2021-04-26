@@ -27,14 +27,16 @@ const require = createRequire(import.meta.url);
 class JamiDaemon {
     constructor(onMessage) {
         this.accounts = []
+        this.lookups = []
+        this.tempAccounts = []
         this.dring = require("./dring.node")
         this.dring.init({
             "AccountsChanged": () => {
                 console.log("AccountsChanged")
                 const newAccounts = []
                 JamiDaemon.vectToJs(this.dring.getAccountList()).forEach(accountId => {
-                    for (const account in this.accounts) {
-                        if (account.id === accountId) {
+                    for (const account of this.accounts) {
+                        if (account.getId() === accountId) {
                             newAccounts.push(account)
                             return
                         }
@@ -77,47 +79,51 @@ class JamiDaemon {
                     //io.emit('receivedMessage', message["text/plain"])
                 }*/
             },
-            "RegistrationStateChanged": (accountId, state, /*int*/ code, detail) => {
-                const account = this.getAccount(accountId)
-                if (!account) {
-                    console.log(`Unknown account ${accountId}`)
-                    return
-                }
-                account.registrationState = state
+            "RegistrationStateChanged": (accountId, state, code, detail) => {
                 console.log("RegistrationStateChanged: " + accountId + " " + state + " " + code + " " + detail)
-                if (state === "REGISTERED") {
-                    /*if (tempAccounts[accountId]) {
-
-                        const ctx = tempAccounts[accountId]
-                        ctx.newUser.accountId = accountId
-                        ctx.newUser.jamiId = jami.dring.getAccountDetails(accountId).get("Account.username")
-                        //connectedUsers[accountId] = ctx.newUser
-                        ctx.done(null, ctx.newUser)
-                        delete tempAccounts[accountId]
-                    }*/
-                } else if (state === "ERROR_AUTH") {
-                    //done(null, false)
-                    //remove account
+                const account = this.getAccount(accountId)
+                if (account) {
+                    account.registrationState = state
+                } else {
+                    console.log(`Unknown account ${accountId}`)
+                }
+                const ctx = this.tempAccounts[accountId]
+                if (ctx) {
+                    if (state === "REGISTERED") {
+                        account.details = JamiDaemon.mapToJs(this.dring.getAccountDetails(accountId))
+                        ctx.resolve(accountId)
+                        delete this.tempAccounts[accountId]
+                    } else if (state === "ERROR_AUTH") {
+                        this.dring.removeAccount(accountId)
+                        ctx.reject(state)
+                        delete this.tempAccounts[accountId]
+                    }
                 }
             },
             "RegisteredNameFound": (accountId, state, address, name) => {
                 console.log(`RegisteredNameFound: ${accountId} ${state} ${address} ${name}`)
-                const account = this.getAccount(accountId)
-                if (!account) {
-                    console.log(`Unknown account ${accountId}`)
-                    return
+                let lookups
+                if (accountId) {
+                    const account = this.getAccount(accountId)
+                    if (!account) {
+                        console.log(`Unknown account ${accountId}`)
+                        return
+                    }
+                    if (state == 0) {
+                        const contact = account.getContactFromCache(address)
+                        if (!contact.isRegisteredNameResolved())
+                            contact.setRegisteredName(name)
+                    }
+                    lookups = account.lookups
+                } else {
+                    lookups = this.lookups
                 }
-                if (state == 0) {
-                    const contact = account.getContactFromCache(address)
-                    if (!contact.isRegisteredNameResolved())
-                        contact.setRegisteredName(name)
-                }
-                let index = account.lookups.length - 1
+                let index = lookups.length - 1
                 while (index >= 0) {
-                    const lookup = account.lookups[index]
+                    const lookup = lookups[index]
                     if ((lookup.address && lookup.address === address) || (lookup.name && lookup.name === name)) {
                         lookup.resolve({address, name, state})
-                        account.lookups.splice(index, 1)
+                        lookups.splice(index, 1)
                     }
                     index -= 1
                 }
@@ -235,10 +241,13 @@ class JamiDaemon {
         })
     }
 
-    addAccount(account) {
-        const params = accountDetailsToNative(account)
+    addAccount(accountConfig) {
+        const params = this.accountDetailsToNative(accountConfig)
         params.set("Account.type", "RING")
-        return this.dring.addAccount(params)
+        return new Promise((resolve, reject) => {
+            const accountId = this.dring.addAccount(params)
+            this.tempAccounts[accountId] = { resolve, reject }
+        })
     }
     getAccount(accountId) {
         for (let i = 0; i < this.accounts.length; i++) {
@@ -275,28 +284,36 @@ class JamiDaemon {
 
     lookupName(accountId, name) {
         const p = new Promise((resolve, reject) => {
-            const account = this.getAccount(accountId)
-            if (!account) {
-                reject(new Error("Can't find account"))
+            if (accountId) {
+                const account = this.getAccount(accountId)
+                if (!account) {
+                    reject(new Error("Can't find account"))
+                } else {
+                    account.lookups.push({ name, resolve, reject })
+                }
             } else {
-                account.lookups.push({name, resolve, reject})
+                this.lookups.push({ name, resolve, reject })
             }
         })
-        this.dring.lookupName(accountId, "", name)
+        this.dring.lookupName(accountId || '', '', name)
         return p
     }
 
     lookupAddress(accountId, address) {
         console.log(`lookupAddress ${accountId} ${address}`)
         const p = new Promise((resolve, reject) => {
-            const account = this.getAccount(accountId)
-            if (!account) {
-                reject(new Error("Can't find account"))
+            if (accountId) {
+                const account = this.getAccount(accountId)
+                if (!account) {
+                    reject(new Error("Can't find account"))
+                } else {
+                    account.lookups.push({ address, resolve, reject })
+                }
             } else {
-                account.lookups.push({address, resolve, reject})
+                this.lookups.push({ address, resolve, reject })
             }
         })
-        this.dring.lookupAddress(accountId, "", address)
+        this.dring.lookupAddress(accountId || '', '', address)
         return p
     }
 
@@ -372,23 +389,25 @@ class JamiDaemon {
             params.set("Account.managerUsername", account.managerUsername)
         if (account.archivePassword) {
             params.set("Account.archivePassword", account.archivePassword)
-        } else {
+        }/* else {
             console.log("archivePassword required")
             return
-        }
+        }*/
         if (account.alias)
             params.set("Account.alias", account.alias)
         if (account.displayName)
             params.set("Account.displayName", account.displayName)
-        if (account.enable)
+        if (account.enable !== undefined)
             params.set("Account.enable", this.boolToStr(account.enable))
-        if (account.autoAnswer)
+        if (account.autoAnswer !== undefined)
+            params.set("Account.autoAnswer", this.boolToStr(account.autoAnswer))
+        if (account.autoAnswer !== undefined)
             params.set("Account.autoAnswer", this.boolToStr(account.autoAnswer))
         if (account.ringtonePath)
             params.set("Account.ringtonePath", account.ringtonePath)
-        if (account.ringtoneEnabled)
+        if (account.ringtoneEnabled !== undefined)
             params.set("Account.ringtoneEnabled", this.boolToStr(account.ringtoneEnabled))
-        if (account.videoEnabled)
+        if (account.videoEnabled !== undefined)
             params.set("Account.videoEnabled", this.boolToStr(account.videoEnabled))
         if (account.useragent) {
             params.set("Account.useragent", account.useragent)
@@ -406,15 +425,15 @@ class JamiDaemon {
             params.set("Account.videoPortMax", account.videoPortMax)
         if (account.localInterface)
             params.set("Account.localInterface", account.localInterface)
-        if (account.publishedSameAsLocal)
+        if (account.publishedSameAsLocal !== undefined)
             params.set("Account.publishedSameAsLocal", this.boolToStr(account.publishedSameAsLocal))
         if (account.localPort)
             params.set("Account.localPort", account.localPort)
         if (account.publishedPort)
             params.set("Account.publishedPort", account.publishedPort)
-        if (account.publishedAddress)
-            params.set("Account.publishedAddress", account.publishedAddress)
-        if (account.upnpEnabled)
+        if (account.rendezVous !== undefined)
+            params.set("Account.rendezVous", this.boolToStr(account.rendezVous))
+        if (account.upnpEnabled !== undefined)
             params.set("Account.upnpEnabled", this.boolToStr(account.upnpEnabled))
         return params
     }

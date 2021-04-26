@@ -8,9 +8,9 @@ function Message(props) {
     if (message.type == 'text/plain')
         return (<div className="message">
             <div className="message-avatar">
-                    <ConversationAvatar name="{message.author}" /></div>
-                    <Typography className="message-text">{message.body}</Typography>
-                </div>)
+                <ConversationAvatar name={message.author} /></div>
+            <Typography className="message-text">{message.body}</Typography>
+        </div>)
     else if (message.type == 'contact')
         return (<div className="contact-event">
             <Typography className="message-text">Contact event</Typography>

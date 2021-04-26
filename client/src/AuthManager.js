@@ -72,6 +72,9 @@ class AuthManager {
                 }
                 if (this.onAuthChanged)
                     this.onAuthChanged(this.state)
+            }).catch(e => {
+                this.authenticating = false
+                console.log(e)
             })
     }
 
@@ -125,6 +128,9 @@ class AuthManager {
                     else
                         task.reject(new Error("Authentication failed"))
                 }
+            }).catch(e => {
+                this.authenticating = false
+                console.log(e)
             })
     }
 

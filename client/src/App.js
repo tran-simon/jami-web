@@ -4,8 +4,7 @@
   License: AGPL-3
 */
 import React, { useState, useEffect } from 'react'
-import { Route, Switch, Redirect, useHistory, useLocation } from 'react-router-dom'
-import { CircularProgress, Container, CssBaseline } from '@material-ui/core'
+import { Route, Switch, Redirect } from 'react-router-dom'
 import authManager from './AuthManager'
 //import logo from './logo.svg'
 import './App.scss'
@@ -15,12 +14,12 @@ import JamiMessenger from "./pages/messenger.jsx"
 import AccountSettings from "./pages/accountSettings.jsx"
 import AccountSelection from "./pages/accountSelection.jsx"
 import ServerSetup from "./pages/serverSetup.jsx"
+import AccountCreationDialog from "./pages/accountCreation.jsx"
 import NotFoundPage from "./pages/404.jsx"
 import LoadingPage from './components/loading'
+import JamiAccountDialog from './pages/jamiAccountCreation.jsx'
 
 const App = (props) => {
-    const history = useHistory()
-    const { location } = useLocation()
     const [state, setState] = useState({
       loaded: false,
       auth: authManager.getState()
@@ -48,6 +47,8 @@ const App = (props) => {
           <Route path="/account/:accountId/conversation/:conversationId" component={JamiMessenger} />
           <Route path="/account/:accountId" component={JamiMessenger} />
           <Route path="/account" component={AccountSelection} />
+          <Route path="/newAccount/jami" component={JamiAccountDialog} />
+          <Route path="/newAccount" component={AccountCreationDialog} />
           <Route component={NotFoundPage} />
         </Switch>
       {!state.auth.authenticated && <SignInPage open={!state.auth.authenticated}/>}

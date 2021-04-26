@@ -25,12 +25,10 @@ body {
   display: grid;
   height: 100%;
   grid-template-columns: 320px 1fr;
-  grid-template-rows: 40px 50px 1fr 1fr 92px;
+  grid-template-rows: 40px 50px 1fr;
   grid-template-areas:
     "h m"
     "n m"
-    "r m"
-    "r m"
     "r m";
 }
 

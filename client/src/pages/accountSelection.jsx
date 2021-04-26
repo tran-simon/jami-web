@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { withRouter } from 'react-router-dom';
-import { Card, CardHeader, Container, CircularProgress } from '@material-ui/core';
+import { Avatar, Card, CardHeader, Container, List } from '@material-ui/core';
 import Header from '../components/Header'
-import AccountList from '../components/AccountList';
 import authManager from '../AuthManager'
 import Account from '../../../model/Account';
 import LoadingPage from '../components/loading';
+import ListItemLink from '../components/ListItemLink';
+import ConversationAvatar from '../components/ConversationAvatar';
+import { AddRounded } from '@material-ui/icons';
 
 const AccountSelection = (props) => {
   const [state, setState] = useState({
@@ -30,7 +31,7 @@ const AccountSelection = (props) => {
           loaded: true,
           error: true
         })
-      })
+      }).catch(e => console.log(e))
     return () => controller.abort()
   }, [])
 
@@ -42,11 +43,21 @@ const AccountSelection = (props) => {
       <Container maxWidth="sm" style={{paddingBottom:32}}>
         <Card style={{marginTop:32, marginBottom:32}}>
           <CardHeader title="Choose an account" />
-          <AccountList accounts={state.accounts} onClick={account => props.history.push(`/account/${account.getId()}/settings`)} />
+          <List>
+            {state.accounts.map(account => <ListItemLink key={account.getId()}
+              icon={<ConversationAvatar displayName={account.getDisplayNameNoFallback()} />}
+              to={`/account/${account.getId()}/settings`}
+              primary={account.getDisplayName()}
+              secondary={account.getDisplayUri()} />)}
+            <ListItemLink
+              icon={<Avatar><AddRounded /></Avatar>}
+              to='/newAccount'
+              primary="Create new account" />
+          </List>
         </Card>
       </Container>
     </React.Fragment>
   )
 }
 
-export default withRouter(AccountSelection);
+export default AccountSelection

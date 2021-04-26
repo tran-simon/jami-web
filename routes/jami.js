@@ -10,12 +10,30 @@ class JamiRestApi {
         //router.use(express.json());
 
         // Accounts
-        router.get(['/accounts'], async (req, res, next) => {
+        router.get('/accounts', async (req, res) => {
             console.log("Get account list")
             let accounts = this.jami.getAccountList()
             if (req.user.accountFilter)
                 accounts = accounts.filter(account => req.user.accountFilter(account.getId()))
             res.json(await Promise.all(accounts.map(async account => await account.getSummary())))
+        })
+
+        const checkCanCreateAccounts = (req, res, next) => {
+            console.log(`checkCanCreateAccounts ${req.params.accountId} for ${req.user.id}`)
+            if (req.user && !req.user.accountFilter) {
+                return next();
+            }
+            res.status(403).end()
+        }
+
+        router.post('/accounts', checkCanCreateAccounts, async (req, res) => {
+            console.log("Create new account")
+            console.log(req.body)
+            try {
+                res.json({ accountId: await this.jami.addAccount(req.body) })
+            } catch (e) {
+                res.status(400).json({ error: e })
+            }
         })
 
         const checkAccount = (req, res, next) => {
@@ -134,36 +152,38 @@ class JamiRestApi {
 
         // Nameserver
         const nsRouter = Router({mergeParams: true})
-        accountRouter.use('/ns', nsRouter)
+        accountRouter.use('/ns', nsRouter) // use account nameserver
+        router.use('/ns', nsRouter) // use default nameserver
 
         nsRouter.get(['/name/:nameQuery'], (req, res, next) => {
             console.log(`Name lookup ${req.params.nameQuery}`)
-            this.jami.lookupName(req.params.accountId, req.params.nameQuery)
+            this.jami.lookupName(req.params.accountId || '', req.params.nameQuery)
                 .then(result => {
                     if (result.state == 0)
                         res.json(result)
                     else if (result.state == 1)
-                        res.sendStatus(400)
+                        res.status(400).json({})
                     else
-                        res.sendStatus(404)
+                        res.status(404).json({})
                 }).catch(e => {
-                    res.sendStatus(404)
+                    res.status(404).json({})
                 })
         })
         nsRouter.get(['/addr/:addrQuery'], (req, res, next) => {
             console.log(`Address lookup ${req.params.addrQuery}`)
-            this.jami.lookupAddress(req.params.accountId, req.params.addrQuery)
+            this.jami.lookupAddress(req.params.accountId || '', req.params.addrQuery)
                 .then(result => {
                     if (result.state == 0)
                         res.json(result)
                     else if (result.state == 1)
-                        res.sendStatus(400)
+                        res.status(400).json({})
                     else
-                        res.sendStatus(404)
+                        res.status(404).json({})
                 }).catch(e => {
-                    res.sendStatus(404)
+                    res.status(404).json({})
                 })
         })
+
 
         return router
     }

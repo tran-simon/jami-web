@@ -37,8 +37,10 @@ export default function SendMessageForm(props) {
 
   const handleSubmit = e => {
     e.preventDefault()
-    props.onSend(currentMessage)
-    setCurrentMessage('')
+    if (currentMessage) {
+      props.onSend(currentMessage)
+      setCurrentMessage('')
+    }
   }
   const handleInputChange = (event) => setCurrentMessage(event.target.value)
   const onEmojiClick = (e, emojiObject) => {
