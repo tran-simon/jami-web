@@ -15,12 +15,12 @@ export default function MessageList(props) {
   return (
     <React.Fragment>
       <Box className="conversation-header">
-        <Box style={{ display: 'inline-block', margin: 16, verticalAlign: 'middle' }}>
+        <Box style={{ margin: 16, flexShrink: 0 }}>
           <ConversationAvatar displayName={props.conversation.getDisplayNameNoFallback()} />
         </Box>
-        <Box style={{ display: 'inline-block', verticalAlign: 'middle' }}>
-          <Typography variant="h6">{displayName}</Typography>
-          <Typography variant="subtitle1">{props.conversation.getId()}</Typography>
+        <Box style={{ flex: "1 1 auto", overflow: 'hidden' }}>
+          <Typography className="title" variant="h6">{displayName}</Typography>
+          <Typography className="subtitle" variant="subtitle1" >{props.conversation.getId()}</Typography>
         </Box>
         <Divider orientation="horizontal" />
       </Box>

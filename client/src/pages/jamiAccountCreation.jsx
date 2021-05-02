@@ -40,9 +40,7 @@ export default function JamiAccountDialog(props) {
         'Accept': 'application/json',
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({
-        'Account.registeredName': name
-      })
+      body: JSON.stringify({ registerName: name })
     })
       .then(res => res.json())
       .catch(error => {

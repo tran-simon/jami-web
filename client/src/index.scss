@@ -36,10 +36,19 @@ body {
   grid-area: m;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
 
 .conversation-header {
   grid-area: h;
+  display: flex;
+  align-items: center;
+  padding-right: 8px;
+
+  .title, .subtitle {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
 }
 
 .send-message-form {

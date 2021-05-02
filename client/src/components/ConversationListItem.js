@@ -18,11 +18,9 @@ export default function ConversationListItem(props) {
                 button
                 alignItems="flex-start"
                 selected={isSelected}
-                style={{overflow:'hidden'}}
                 onClick={() => history.replace(`/account/${conversation.getAccountId()}/${uri}`)}>
                 <ListItemAvatar><ConversationAvatar displayName={conversation.getDisplayNameNoFallback()} /></ListItemAvatar>
                 <ListItemText
-                    style={{overflow:'hidden', textOverflow:'ellipsis'}}
                     primary={conversation.getDisplayName()} secondary={conversation.getDisplayUri()} />
             </ListItem>
         )

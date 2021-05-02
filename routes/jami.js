@@ -30,7 +30,12 @@ class JamiRestApi {
             console.log("Create new account")
             console.log(req.body)
             try {
-                res.json({ accountId: await this.jami.addAccount(req.body) })
+                const accountId = await this.jami.addAccount(req.body)
+                if (req.body.registerName) {
+                    this.jami.registerName(accountId, "", req.body.registerName)
+                        .then(result => console.log("Name registrtion result: " + result))
+                }
+                res.json({ accountId })
             } catch (e) {
                 res.status(400).json({ error: e })
             }

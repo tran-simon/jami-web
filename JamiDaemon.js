@@ -128,6 +128,20 @@ class JamiDaemon {
                     index -= 1
                 }
             },
+            "NameRegistrationEnded": (accountId, state, name) => {
+                console.log(`NameRegistrationEnded: ${accountId} ${state} ${name}`)
+                const account = this.getAccount(accountId)
+                if (account) {
+                    if (state === 0)
+                        account.volatileDetails['Account.registeredName'] = name
+                    if (account.registeringName) {
+                        account.registeringName.resolve(state)
+                        delete account.registeringName
+                    }
+                } else {
+                    console.log(`Unknown account ${accountId}`)
+                }
+            },
             "ConversationReady": (accountId, conversationId) => {
                 console.log(`conversationReady: ${accountId} ${conversationId}`)
                 const account = this.getAccount(accountId)
@@ -260,6 +274,21 @@ class JamiDaemon {
     getAccountList() {
         return this.accounts
     }
+    registerName(accountId, password, name) {
+        return new Promise((resolve, reject) => {
+            if (!name)
+                return reject(new Error("Invalid name"))
+            const account = this.getAccount(accountId)
+            if (!account)
+                return reject(new Error("Can't find account"))
+            if (account.registeringName)
+                return reject(new Error("Username already being registered"))
+            if (this.dring.registerName(accountId, password, name)) {
+                account.registeringName = { name, resolve, reject }
+            }
+        })
+    }
+
     getConversation(accountId, conversationId) {
         const account = this.getAccount(accountId)
         if (account)
