@@ -155,6 +155,28 @@ class JamiRestApi {
             }
         })
 
+        // Calls
+
+        accountRouter.get('/calls', async (req, res) => {
+            console.log(`Get calls for account ${req.params.accountId}`)
+            try {
+                const calls = await this.jami.getCalls(req.params.accountId)
+                res.json(calls).end()
+            } catch (e) {
+                res.status(400).json({ error: e.message })
+            }
+        })
+
+        accountRouter.get('/calls/:callId', async (req, res) => {
+            console.log(`Get call ${callId} for account ${req.params.accountId}`)
+            try {
+                const messages = await this.jami.getCall(req.params.accountId, req.params.callId)
+                res.json(messages).end()
+            } catch (e) {
+                res.status(400).json({ error: e.message })
+            }
+        })
+
         // Nameserver
         const nsRouter = Router({mergeParams: true})
         accountRouter.use('/ns', nsRouter) // use account nameserver

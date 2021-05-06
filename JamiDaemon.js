@@ -31,7 +31,7 @@ class JamiDaemon {
         this.tempAccounts = []
         this.dring = require("./dring.node")
         this.dring.init({
-            "AccountsChanged": () => {
+            AccountsChanged: () => {
                 console.log("AccountsChanged")
                 const newAccounts = []
                 JamiDaemon.vectToJs(this.dring.getAccountList()).forEach(accountId => {
@@ -48,7 +48,7 @@ class JamiDaemon {
                 })
                 this.accounts = newAccounts
             },
-            "AccountDetailsChanged": (accountId, details) => {
+            AccountDetailsChanged: (accountId, details) => {
                 console.log(`AccountDetailsChanged ${accountId}`)
                 const account = this.getAccount(accountId)
                 if (!account) {
@@ -57,7 +57,7 @@ class JamiDaemon {
                 }
                 account.details = details
             },
-            "VolatileDetailsChanged": (accountId, details) => {
+            VolatileDetailsChanged: (accountId, details) => {
                 console.log(`VolatileDetailsChanged ${accountId}`)
                 const account = this.getAccount(accountId)
                 if (!account) {
@@ -66,7 +66,7 @@ class JamiDaemon {
                 }
                 account.volatileDetails = details
             },
-            "IncomingAccountMessage": (accountId, from, message) => {
+            IncomingAccountMessage: (accountId, from, message) => {
                 console.log(`Received message: ${accountId} ${from} ${message["text/plain"]}`)
 /*
                 if (parser.validate(message["text/plain"]) === true) {
@@ -79,7 +79,7 @@ class JamiDaemon {
                     //io.emit('receivedMessage', message["text/plain"])
                 }*/
             },
-            "RegistrationStateChanged": (accountId, state, code, detail) => {
+            RegistrationStateChanged: (accountId, state, code, detail) => {
                 console.log("RegistrationStateChanged: " + accountId + " " + state + " " + code + " " + detail)
                 const account = this.getAccount(accountId)
                 if (account) {
@@ -100,7 +100,7 @@ class JamiDaemon {
                     }
                 }
             },
-            "RegisteredNameFound": (accountId, state, address, name) => {
+            RegisteredNameFound: (accountId, state, address, name) => {
                 console.log(`RegisteredNameFound: ${accountId} ${state} ${address} ${name}`)
                 let lookups
                 if (accountId) {
@@ -128,7 +128,7 @@ class JamiDaemon {
                     index -= 1
                 }
             },
-            "NameRegistrationEnded": (accountId, state, name) => {
+            NameRegistrationEnded: (accountId, state, name) => {
                 console.log(`NameRegistrationEnded: ${accountId} ${state} ${name}`)
                 const account = this.getAccount(accountId)
                 if (account) {
@@ -142,7 +142,8 @@ class JamiDaemon {
                     console.log(`Unknown account ${accountId}`)
                 }
             },
-            "ConversationReady": (accountId, conversationId) => {
+            // Conversations
+            ConversationReady: (accountId, conversationId) => {
                 console.log(`conversationReady: ${accountId} ${conversationId}`)
                 const account = this.getAccount(accountId)
                 if (!account) {
@@ -157,7 +158,7 @@ class JamiDaemon {
                     account.addConversation(conversation)
                 }
             },
-            "ConversationRemoved": (accountId, conversationId) => {
+            ConversationRemoved: (accountId, conversationId) => {
                 console.log(`conversationRemoved: ${accountId} ${conversationId}`)
                 const account = this.getAccount(accountId)
                 if (!account) {
@@ -166,7 +167,7 @@ class JamiDaemon {
                 }
                 account.removeConversation(conversationId)
             },
-            "ConversationLoaded": (id, accountId, conversationId, messages) => {
+            ConversationLoaded: (id, accountId, conversationId, messages) => {
                 console.log(`conversationLoaded: ${accountId} ${conversationId}`)
                 const account = this.getAccount(accountId)
                 if (!account) {
@@ -182,7 +183,7 @@ class JamiDaemon {
                     }
                 }
             },
-            "MessageReceived": (accountId, conversationId, message) => {
+            MessageReceived: (accountId, conversationId, message) => {
                 console.log(`messageReceived: ${accountId} ${conversationId}`)
                 console.log(message)
                 const account = this.getAccount(accountId)
@@ -197,7 +198,7 @@ class JamiDaemon {
                         onMessage(account, conversation, message)
                 }
             },
-            "ConversationRequestReceived": (accountId, conversationId, request) => {
+            ConversationRequestReceived: (accountId, conversationId, request) => {
                 console.log(`conversationRequestReceived: ${accountId} ${conversationId}`)
                 const account = this.getAccount(accountId)
                 if (!account) {
@@ -205,7 +206,7 @@ class JamiDaemon {
                     return
                 }
             },
-            "ConversationMemberEvent": (accountId, conversationId, member, event) => {
+            ConversationMemberEvent: (accountId, conversationId, member, event) => {
                 console.log(`conversationMemberEvent: ${accountId} ${conversationId}`)
                 const account = this.getAccount(accountId)
                 if (!account) {
@@ -213,13 +214,35 @@ class JamiDaemon {
                     return
                 }
             },
-            "OnConversationError": (accountId, conversationId, code, what) => {
+            OnConversationError: (accountId, conversationId, code, what) => {
                 console.log(`onConversationError: ${accountId} ${conversationId}`)
                 const account = this.getAccount(accountId)
                 if (!account) {
                     console.log(`Unknown account ${accountId}`)
                     return
                 }
+            },
+            // Calls
+            StateChange: (callId, state, code) => {
+                console.log(`CallStateChange: ${callId} ${state} ${code}`)
+            },
+            IncomingCall: (accountId, callId, peerUri) => {
+                console.log(`IncomingCall: ${accountId} ${callId} ${peerUri}`)
+            },
+            ConferenceCreated: (confId) => {
+                console.log(`ConferenceCreated: ${confId}`)
+            },
+            ConferenceChanged: (confId, state) => {
+                console.log(`ConferenceChanged: ${confId}`)
+
+            },
+            ConferenceRemoved: (confId) => {
+                console.log(`ConferenceRemoved: ${confId}`)
+
+            },
+            onConferenceInfosUpdated: (confId, info) => {
+                console.log(`onConferenceInfosUpdated: ${confId}`)
+
             }
         })
 
