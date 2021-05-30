@@ -5,6 +5,7 @@
   --main-text-color: #3e5869;
   --secondary-text-color: #b0c7d6;
   --send-message-form: #f5f5f5;
+  --scroll-bar-bg-color: #04000000;
 }
 
 html,
@@ -15,6 +16,7 @@ body {
   font-family: "Open Sans", sans-serif;
   font-weight: 200;
   color: #3e5869;
+  --scroll-bar-bg-color: rgba(0,0,0,0.2);
 }
 
 #root {
@@ -84,6 +86,17 @@ body {
     overflow: hidden;
     text-overflow: ellipsis;
   }
+
+  scrollbar-color: var(--scroll-bar-bg-color) transparent;
+  scrollbar-width: thin;
+}
+::-webkit-scrollbar {
+  -webkit-appearance: none;
+  width: 8px;
+}
+::-webkit-scrollbar-thumb {
+    background-color: var(--scroll-bar-bg-color);
+    border-radius: 4px;
 }
 
 .list-placeholder {
