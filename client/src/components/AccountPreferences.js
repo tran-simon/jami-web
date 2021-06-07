@@ -9,6 +9,7 @@ import ConversationAvatar from './ConversationAvatar'
 import ConversationsOverviewCard from './ConversationsOverviewCard'
 
 import authManager from '../AuthManager'
+import { motion } from 'framer-motion'
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -30,6 +31,18 @@ const useStyles = makeStyles(theme => ({
     marginRight: theme.spacing(2),
   }
 }))
+
+const transition = { duration: 0.3, ease: [0.43, 0.13, 0.23, 0.96] }
+
+const thumbnailVariants = {
+  initial: { scale: 0.9, opacity: 0 },
+  enter: { scale: 1, opacity: 1, transition },
+  exit: {
+    scale: 0.5,
+    opacity: 0,
+    transition: { duration: 1.5, ...transition }
+  }
+}
 
 export default function AccountPreferences(props) {
   const classes = useStyles()
@@ -68,17 +81,28 @@ export default function AccountPreferences(props) {
   }
 
   return (
-    <React.Fragment>
-      <Typography variant="h2" component="h2" gutterBottom>{alias}</Typography>
+    <motion.div
+        initial="initial"
+        animate="enter"
+        exit="exit"
+        variants={{
+          enter: { transition: { staggerChildren: 0.05 } },
+          exit: { transition: { staggerChildren: 0.02 } }
+        }}
+      >
+      <motion.div variants={thumbnailVariants}><Typography variant="h2" component="h2" gutterBottom>{alias}</Typography></motion.div>
       <Grid container spacing={3} style={{ marginBottom: 16 }}>
         {isJamiAccount &&
-          <Grid item xs={12}><JamiIdCard account={account} /></Grid>}
+          <Grid item xs={12}><motion.div variants={thumbnailVariants}><JamiIdCard account={account} /></motion.div></Grid>}
 
         <Grid item xs={12} sm={6}>
+        <motion.div variants={thumbnailVariants}>
           <ConversationsOverviewCard accountId={account.getId()} />
+          </motion.div>
         </Grid>
 
         <Grid item xs={12} sm={6}>
+        <motion.div variants={thumbnailVariants}>
           <Card>
             <CardContent>
               <Typography className={classes.title} color="textSecondary" gutterBottom>
@@ -89,10 +113,13 @@ export default function AccountPreferences(props) {
               </Typography>
             </CardContent>
           </Card>
+          </motion.div>
         </Grid>
+
       </Grid>
 
-      <List subheader={<ListSubheader>Settings</ListSubheader>}>
+      <List subheader={<motion.div variants={thumbnailVariants}><ListSubheader>Settings</ListSubheader></motion.div>}>
+      <motion.div variants={thumbnailVariants}>
         <ListItem>
           <ListItemIcon>
             <GroupRounded />
@@ -107,6 +134,8 @@ export default function AccountPreferences(props) {
             />
           </ListItemSecondaryAction>
         </ListItem>
+        </motion.div>
+        <motion.div variants={thumbnailVariants}>
         <ListItem>
           <ListItemIcon>
             <PhoneCallbackRounded />
@@ -121,7 +150,8 @@ export default function AccountPreferences(props) {
             />
           </ListItemSecondaryAction>
         </ListItem>
-
+        </motion.div>
+        <motion.div variants={thumbnailVariants}>
         <Paper className={classes.paper}>
           <Toolbar>
             <Typography className={classes.title} variant="h6">
@@ -157,7 +187,8 @@ export default function AccountPreferences(props) {
               ))}
           </List>
         </Paper>
+        </motion.div>
       </List>
 
-    </React.Fragment>)
+    </motion.div>)
 }

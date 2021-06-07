@@ -8,6 +8,12 @@ import ListItemLink from '../components/ListItemLink';
 import ConversationAvatar from '../components/ConversationAvatar';
 import { AddRounded } from '@material-ui/icons';
 import { useHistory } from 'react-router';
+import { motion } from 'framer-motion';
+
+const variants = {
+  enter: { opacity: 1, y: 0 },
+  exit: { opacity: 0, y: "-50px" },
+}
 
 const AccountSelection = (props) => {
   const history = useHistory()
@@ -47,6 +53,7 @@ const AccountSelection = (props) => {
     <React.Fragment>
       <Header />
       <Container maxWidth="sm" style={{paddingBottom:32}}>
+        <motion.div drag="x" initial="exit" animate="enter" exit="exit" variants={variants}>
         <Card style={{marginTop:32, marginBottom:32}}>
           <CardHeader title="Choose an account" />
           <List>
@@ -61,6 +68,7 @@ const AccountSelection = (props) => {
               primary="Create new account" />
           </List>
         </Card>
+        </motion.div>
       </Container>
     </React.Fragment>
   )

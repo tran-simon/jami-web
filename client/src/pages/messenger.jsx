@@ -12,7 +12,7 @@ import AddContactPage from './addContactPage.jsx';
 import LoadingPage from '../components/loading';
 import { useParams } from 'react-router';
 
-const JamiMessenger = (props) => {
+const Messenger = (props) => {
   const [conversations, setConversations] = useState(undefined)
   const [searchQuery, setSearchQuery] = useState('')
   const [searchResult, setSearchResults] = useState(undefined)
@@ -55,6 +55,7 @@ const JamiMessenger = (props) => {
     return () => controller.abort()
   }, [accountId, searchQuery])
 
+  console.log("Messenger render")
   return (
     <div className="app" >
       <Header />
@@ -68,4 +69,4 @@ const JamiMessenger = (props) => {
   )
 }
 
-export default JamiMessenger
+export default Messenger
