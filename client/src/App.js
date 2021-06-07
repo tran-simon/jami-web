@@ -18,12 +18,15 @@ import AccountCreationDialog from "./pages/accountCreation.jsx"
 import NotFoundPage from "./pages/404.jsx"
 import LoadingPage from './components/loading'
 import JamiAccountDialog from './pages/jamiAccountCreation.jsx'
+import WelcomeAnimation from './components/welcome'
 
 const App = (props) => {
     const [state, setState] = useState({
       loaded: false,
       auth: authManager.getState()
     })
+    const [displayWelcome, setDisplayWelcome] = useState(true)
+
     useEffect(() => {
       authManager.init(auth => {
         setState({ loaded: true, auth })
@@ -31,8 +34,9 @@ const App = (props) => {
       return () => authManager.deinit()
     }, []);
 
-    if (!state.loaded) {
-      return <LoadingPage />
+    console.log("App render")
+    if (displayWelcome) {
+      return <WelcomeAnimation showSetup={!state.auth.setupComplete} onComplete={() => setDisplayWelcome(false)} />
     } else if (!state.auth.setupComplete) {
       return <Switch>
           <Route path="/setup" component={ServerSetup} />

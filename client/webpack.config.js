@@ -71,8 +71,7 @@ export default {
       },
       {
         test: /\.svg$/,
-        type: 'asset',
-        use: 'svgo-loader'
+        use: ['@svgr/webpack']
       }
     ]
   },
