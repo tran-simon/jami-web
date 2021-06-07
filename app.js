@@ -259,13 +259,23 @@ const createServer = async (appConfig) => {
     app.post('/auth/local', passport.authenticate('local'), (req, res) => {
         res.json({ loggedin: true, user: req.user.id })
     })
-    app.get('/auth', (req, res) => {
+
+    const getState = req => {
         if (req.user) {
-            res.json({ loggedin: true, username: req.user.username, type: req.user.type })
+            return { loggedin: true, username: req.user.username, type: req.user.type }
         } else if (isSetupComplete()) {
-            res.status(401).json({})
+            return {}
         } else {
-            res.status(401).json({ setupComplete: false })
+            return { setupComplete: false }
+        }
+    }
+
+    app.get('/auth', (req, res) => {
+        const state = getState(req)
+        if (req.user) {
+            res.json(state)
+        } else {
+            res.status(401).json(state)
         }
     })
 
@@ -278,7 +288,9 @@ const createServer = async (appConfig) => {
     app.use(express.static(path.join(__dirname, 'client', 'dist')))
 
     app.use((req, res, next) => {
-        res.sendFile(path.join(__dirname, 'client', 'dist', 'index.html'))
+        res.render(path.join(__dirname, 'client', 'dist', 'index.ejs'), {
+            initdata: JSON.stringify(getState(req))
+        })
     })
 
     const server = http.Server(app)

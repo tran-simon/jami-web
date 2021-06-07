@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
-import { useHistory } from "react-router-dom";
+import React, { useState } from 'react'
+import { useHistory } from "react-router-dom"
 
-import { Box, Container, Fab, Card, CardContent, Typography, Input } from '@material-ui/core';
-import GroupAddRounded from '@material-ui/icons/GroupAddRounded';
-import { makeStyles } from '@material-ui/core/styles';
+import { Box, Container, Fab, Card, CardContent, Typography, Input } from '@material-ui/core'
+import GroupAddRounded from '@material-ui/icons/GroupAddRounded'
+import { makeStyles } from '@material-ui/core/styles'
 import authManager from '../AuthManager'
 
 const useStyles = makeStyles((theme) => ({
@@ -26,21 +26,19 @@ const useStyles = makeStyles((theme) => ({
 
 export default function ServerSetup(props) {
   const classes = useStyles()
-  const history = useHistory();
-  const [password, setPassword] = useState('');
-  const [passwordRepeat, setPasswordRepeat] = useState('');
-  const [loading, setLoading] = useState(false);
+  const history = useHistory()
+  const [password, setPassword] = useState('')
+  const [passwordRepeat, setPasswordRepeat] = useState('')
+  const [loading, setLoading] = useState(false)
 
   const isValid = () => password && password === passwordRepeat
 
-  const handleSubmit = async e => {
+  const handleSubmit = e => {
     e.preventDefault()
     setLoading(true)
     if (!isValid())
       return
-    if (await authManager.setup(password)) {
-      history.replace('/')
-    }
+    authManager.setup(password)
   }
 
   return (

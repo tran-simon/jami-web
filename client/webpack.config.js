@@ -15,7 +15,7 @@ const mode = process.env.NODE_ENV || 'development'
 
 let entry = [resolve(__dirname, 'src', 'index.js')]
 let plugins = [
-  new HtmlWebpackPlugin({ template: resolve(__dirname, 'src', 'index.ejs') }),
+  new HtmlWebpackPlugin({ template: '!!raw-loader!' + resolve(__dirname, 'src', 'index.ejs'), filename: 'index.ejs' }),
   new CopyWebpackPlugin({
     patterns: [{ from: resolve(__dirname, 'public'), to: resolve(__dirname, 'dist') }]
   })

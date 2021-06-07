@@ -7,8 +7,10 @@ import LoadingPage from '../components/loading';
 import ListItemLink from '../components/ListItemLink';
 import ConversationAvatar from '../components/ConversationAvatar';
 import { AddRounded } from '@material-ui/icons';
+import { useHistory } from 'react-router';
 
 const AccountSelection = (props) => {
+  const history = useHistory()
   const [state, setState] = useState({
     loaded: false,
     error: false,
@@ -21,10 +23,14 @@ const AccountSelection = (props) => {
       .then(res => res.json())
       .then(result => {
         console.log(result)
-        setState({
-          loaded: true,
-          accounts: result.map(account => Account.from(account)),
-        })
+        if (result.length === 0) {
+          history.replace('/newAccount')
+        } else {
+          setState({
+            loaded: true,
+            accounts: result.map(account => Account.from(account)),
+          })
+        }
       }, error => {
         console.log(`get error ${error}`)
         setState({

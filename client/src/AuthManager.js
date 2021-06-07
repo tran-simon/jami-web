@@ -31,6 +31,12 @@ class AuthManager {
 
         this.tasks = []
         this.onAuthChanged = undefined
+
+        if (initData) {
+            console.log("Using static initData")
+            this.setInitData(initData)
+            return
+        }
     }
 
     isAuthenticated() {
@@ -41,37 +47,51 @@ class AuthManager {
         return this.state
     }
 
+    setInitData(data) {
+        this.authenticating = false
+        this.state.initialized = true
+        if (data.username) {
+            Object.assign(this.state, {
+                authenticated: true,
+                setupComplete: true,
+                error: false,
+                user: { username: data.username, type: data.type }
+            })
+        } else {
+            Object.assign(this.state, {
+                authenticated: false,
+                setupComplete: 'setupComplete' in data ? data.setupComplete : true,
+                error: false
+            })
+        }
+        console.log("Init ended")
+        /*if (this.onAuthChanged)
+            this.onAuthChanged(this.state)*/
+    }
+
     init(cb) {
         this.onAuthChanged = cb
         if (this.state.initialized || this.authenticating)
             return
-        console.log("Init")
+        /*if (initData) {
+            console.log("Using static initData")
+            this.setInitData(initData)
+            return
+        }*/
         this.authenticating = true
         fetch('/auth')
             .then(async (response) => {
                 this.authenticating = false
                 this.state.initialized = true
-                console.log("Init ended")
                 if (response.status === 200) {
-                    const jsonData = await response.json()
-                    Object.assign(this.state, {
-                        authenticated: true,
-                        setupComplete: true,
-                        error: false,
-                        user: { username: jsonData.username, type: jsonData.type }
-                    })
+                    this.setInitData(await response.json())
                 } else if (response.status === 401) {
-                    const jsonData = await response.json()
-                    Object.assign(this.state, {
-                        authenticated: false,
-                        setupComplete: 'setupComplete' in jsonData ? jsonData.setupComplete : true,
-                        error: false
-                    })
+                    this.setInitData(await response.json())
                 } else {
                     this.state.error = true
+                    if (this.onAuthChanged)
+                        this.onAuthChanged(this.state)
                 }
-                if (this.onAuthChanged)
-                    this.onAuthChanged(this.state)
             }).catch(e => {
                 this.authenticating = false
                 console.log(e)
@@ -124,7 +144,9 @@ class AuthManager {
                 while (this.tasks.length !== 0) {
                     const task = this.tasks.shift()
                     if (this.state.authenticated)
-                        fetch(task.url, task.init).then(res => task.resolve(res))
+                        fetch(task.url, task.init)
+                        .then(res => task.resolve(res))
+                        .catch(e => console.log("Error executing pending task: " + e))
                     else
                         task.reject(new Error("Authentication failed"))
                 }
