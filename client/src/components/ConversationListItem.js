@@ -1,7 +1,7 @@
-import { ListItem, ListItemAvatar, ListItemText } from '@material-ui/core'
+import { ListItem, ListItemAvatar, ListItemText } from '@mui/material'
 import React from 'react'
 import Conversation from '../../../model/Conversation'
-import { useHistory, useParams } from "react-router-dom"
+import { useNavigate, useParams } from "react-router-dom"
 import ConversationAvatar from './ConversationAvatar'
 
 export default function ConversationListItem(props) {
@@ -9,7 +9,7 @@ export default function ConversationListItem(props) {
     const conversation = props.conversation
     const pathId = conversationId || contactId
     const isSelected = conversation.getDisplayUri() === pathId
-    const history = useHistory()
+    const navigate = useNavigate()
 
     const uri = conversation.getId() ? `conversation/${conversation.getId()}` : `addContact/${conversation.getFirstMember().contact.getUri()}`
     if (conversation instanceof Conversation) {
@@ -18,7 +18,7 @@ export default function ConversationListItem(props) {
                 button
                 alignItems="flex-start"
                 selected={isSelected}
-                onClick={() => history.replace(`/account/${conversation.getAccountId()}/${uri}`)}>
+                onClick={() => navigate(`/account/${conversation.getAccountId()}/${uri}`)}>
                 <ListItemAvatar><ConversationAvatar displayName={conversation.getDisplayNameNoFallback()} /></ListItemAvatar>
                 <ListItemText
                     primary={conversation.getDisplayName()} secondary={conversation.getDisplayUri()} />

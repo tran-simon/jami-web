@@ -1,7 +1,7 @@
 import React from 'react';
-import { Container, Card, CardContent, Typography, List, Avatar, Divider } from '@material-ui/core';
-import { makeStyles } from '@material-ui/core/styles';
-import { DialerSipRounded, GroupOutlined, RoomRounded } from '@material-ui/icons';
+import { Container, Card, CardContent, Typography, List, Avatar, Divider } from '@mui/material';
+import makeStyles from '@mui/styles/makeStyles';
+import { DialerSipRounded, GroupOutlined, RoomRounded } from '@mui/icons-material';
 import ListItemLink from '../components/ListItemLink';
 
 const useStyles = makeStyles((theme) => ({

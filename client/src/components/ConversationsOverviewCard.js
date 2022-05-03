@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Card, CardActionArea, CardContent, CircularProgress, Typography } from '@material-ui/core';
-import { makeStyles } from '@material-ui/core/styles';
-import { useHistory, useParams } from 'react-router';
+import { Box, Card, CardActionArea, CardContent, CircularProgress, Typography } from '@mui/material';
+import makeStyles from '@mui/styles/makeStyles';
+import { useNavigate, useParams } from 'react-router';
 import authManager from '../AuthManager'
 import Conversation from '../../../model/Conversation';
 
@@ -15,7 +15,7 @@ const useStyles = makeStyles({
 
 export default function ConversationsOverviewCard(props) {
   const classes = useStyles()
-  const history = useHistory()
+  const navigate = useNavigate()
   const accountId = props.accountId || useParams().accountId
   const [state, setState] = useState({ loaded: false })
 
@@ -31,7 +31,7 @@ export default function ConversationsOverviewCard(props) {
   }, [accountId])
 
   return (
-    <Card onClick={() => history.push(`/account/${accountId}`)} >
+    <Card onClick={() => navigate(`/account/${accountId}`)} >
       <CardActionArea>
         <CardContent>
           <Typography className={classes.title} color="textSecondary" gutterBottom>

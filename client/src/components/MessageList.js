@@ -1,6 +1,6 @@
 import Message from './Message'
 import React, { useEffect } from 'react'
-import { Box, Divider, Typography } from '@material-ui/core'
+import { Box, Divider, Typography } from '@mui/material'
 import ConversationAvatar from './ConversationAvatar'
 
 export default function MessageList(props) {

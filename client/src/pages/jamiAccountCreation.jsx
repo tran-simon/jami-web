@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { Container, Card, CardContent, Typography, Fab, CardActions, Box } from '@material-ui/core';
-import { makeStyles } from '@material-ui/core/styles';
-import { AddRounded } from '@material-ui/icons';
+import { Container, Card, CardContent, Typography, Fab, CardActions, Box } from '@mui/material';
+import makeStyles from '@mui/styles/makeStyles';
+import { AddRounded } from '@mui/icons-material';
 import UsernameChooser from '../components/UsernameChooser';
 import authManager from '../AuthManager'
-import { useHistory } from 'react-router';
+import { useNavigate } from 'react-router';
 
 const useStyles = makeStyles((theme) => ({
   extendedIcon: {
@@ -29,7 +29,7 @@ export default function JamiAccountDialog(props) {
   const [name, setName] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(false)
-  const history = useHistory()
+  const navigate = useNavigate()
 
   const onSubmit = async event => {
     event.preventDefault()
@@ -49,7 +49,7 @@ export default function JamiAccountDialog(props) {
       })
     console.log(result)
     if (result && result.accountId)
-      history.replace(`/account/${result.accountId}/settings`)
+      navigate(`/account/${result.accountId}/settings`)
   }
 
   return (

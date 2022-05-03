@@ -1,9 +1,9 @@
 import React from 'react';
-import { useHistory } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
-import { Box, Container, Fab, Card, CardContent, Typography } from '@material-ui/core';
-import GroupAddRounded from '@material-ui/icons/GroupAddRounded';
-import { makeStyles } from '@material-ui/core/styles';
+import { Box, Container, Fab, Card, CardContent, Typography } from '@mui/material';
+import GroupAddRounded from '@mui/icons-material/GroupAddRounded';
+import makeStyles from '@mui/styles/makeStyles';
 import authManager from '../AuthManager'
 
 const useStyles = makeStyles((theme) => ({
@@ -19,7 +19,7 @@ const useStyles = makeStyles((theme) => ({
 
 export default function AddContactPage(props) {
   const classes = useStyles()
-  const history = useHistory();
+  const navigate = useNavigate();
   const accountId = props.accountId || props.match.params.accountId
   const contactId = props.contactId || props.match.params.contactId
 
@@ -35,7 +35,7 @@ export default function AddContactPage(props) {
 
     console.log(response)
     if (response.conversationId) {
-      history.push(`/account/${accountId}/conversation/${response.conversationId}`)
+      navigate(`/account/${accountId}/conversation/${response.conversationId}`)
     }
   }
 

@@ -8,8 +8,8 @@ Next step will be to implement a video protocol such as WebRTC to allow audio an
 
 # Main dependencies
 
-* Jami Deamon with NodeJS bindings (https://review.jami.net/admin/repos/ring-daemon),
-* NodeJS v14+
+* Jami Deamon with NodeJS bindings (https://review.jami.net/admin/repos/jami-daemon),
+* NodeJS v16+
 
 # How to start the server
 

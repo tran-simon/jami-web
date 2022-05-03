@@ -1,6 +1,6 @@
 import React from 'react'
-import { Avatar } from '@material-ui/core'
-import { PersonRounded } from '@material-ui/icons'
+import { Avatar } from '@mui/material'
+import { PersonRounded } from '@mui/icons-material'
 
 export default function ConversationAvatar(props) {
   return <Avatar>

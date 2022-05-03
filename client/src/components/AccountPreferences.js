@@ -1,7 +1,11 @@
 import React, { useState } from 'react'
-import { makeStyles } from '@material-ui/core/styles'
-import { List, ListItem, ListItemIcon, ListItemSecondaryAction, ListItemText, ListSubheader, Switch, Typography, Grid, Paper, CardContent, Card, TableContainer, Table, TableHead, TableRow, TableCell, TableBody, Toolbar, IconButton, ListItemAvatar, Input, TextField } from '@material-ui/core'
-import { PhoneCallbackRounded, GroupRounded, DeleteRounded, AddCircle } from '@material-ui/icons'
+
+
+import { makeStyles } from '@mui/styles'
+//import { createTheme, ThemeProvider } from '@mui/material/styles'
+
+import { List, ListItem, ListItemIcon, ListItemSecondaryAction, ListItemText, ListSubheader, Switch, Typography, Grid, Paper, CardContent, Card, TableContainer, Table, TableHead, TableRow, TableCell, TableBody, Toolbar, IconButton, ListItemAvatar, Input, TextField } from '@mui/material'
+import { PhoneCallbackRounded, GroupRounded, DeleteRounded, AddCircle } from '@mui/icons-material'
 
 import Account from '../../../model/Account'
 import JamiIdCard from './JamiIdCard'
@@ -28,7 +32,7 @@ const useStyles = makeStyles(theme => ({
   },
   textField: {
     //marginLeft: theme.spacing(1),
-    marginRight: theme.spacing(2),
+    //marginRight: theme.spacing(2),
   }
 }))
 
@@ -168,7 +172,7 @@ export default function AccountPreferences(props) {
                 placeholder="Enter new moderator name or URI"
                 fullWidth />
               <ListItemSecondaryAction>
-                <IconButton onClick={addModerator}><AddCircle /></IconButton>
+                <IconButton onClick={addModerator} size="large"><AddCircle /></IconButton>
               </ListItemSecondaryAction>
             </ListItem>
             {!moderators || moderators.length === 0 ?
@@ -181,7 +185,7 @@ export default function AccountPreferences(props) {
                   </ListItemAvatar>
                   <ListItemText primary={moderator.getDisplayName()} />
                   <ListItemSecondaryAction>
-                    <IconButton onClick={e => removeModerator(moderator.uri)}><DeleteRounded /></IconButton>
+                    <IconButton onClick={e => removeModerator(moderator.uri)} size="large"><DeleteRounded /></IconButton>
                   </ListItemSecondaryAction>
                 </ListItem>
               ))}
@@ -190,5 +194,6 @@ export default function AccountPreferences(props) {
         </motion.div>
       </List>
 
-    </motion.div>)
+    </motion.div>
+  );
 }

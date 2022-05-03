@@ -1,7 +1,7 @@
 'use strict'
 
 import dotenv from 'dotenv'
-dotenv.config()
+const env = dotenv.config()
 
 import { promises as fs } from 'fs'
 import http from 'http'

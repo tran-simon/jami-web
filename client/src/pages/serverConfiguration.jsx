@@ -1,18 +1,29 @@
-import React from 'react';
+import React from 'react'
 import Header from '../components/Header'
 import AccountPreferences from '../components/AccountPreferences'
-import Container from '@material-ui/core/Container';
-import CircularProgress from '@material-ui/core/CircularProgress';
+import Container from '@mui/material/Container'
+import CircularProgress from '@mui/material/CircularProgress'
 import authManager from '../AuthManager'
 import Account from '../../../model/Account'
 
 const ServerOverview = (props) => {
 
-    this.accountId = props.accountId || props.match.params.accountId
-    this.state = { loaded: false, account: props.account }
-    this.req = undefined
+  this.accountId = props.accountId || props.match.params.accountId
+  this.state = { loaded: false, account: props.account }
+  this.req = undefined
 
-  componentDidMount() {
+  useEffect(() => {
+    const controller = new AbortController()
+    authManager.fetch(`/api/serverConfig`, {signal: controller.signal})
+      .then(res => res.json())
+      .then(result => {
+        console.log(result)
+        setState({loaded: true, account: Account.from(result)})
+      }).catch(e => console.log(e))
+      return () => controller.abort()
+  }, [accountId])
+
+  /*componentDidMount() {
     this.controller = new AbortController()
     if (this.req === undefined) {
       this.req = authManager.fetch(`/api/serverConfig`, {signal: this.controller.signal})
@@ -27,7 +38,7 @@ const ServerOverview = (props) => {
   componentWillUnmount() {
     this.controller.abort()
     this.req = undefined
-  }
+  }*/
 
   return (
     <Container maxWidth="sm" className="app" >
@@ -37,4 +48,4 @@ const ServerOverview = (props) => {
   )
 }
 
-export default ServerOverview;
+export default ServerOverview

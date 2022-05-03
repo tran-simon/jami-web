@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
-import { InputBase, InputAdornment } from '@material-ui/core';
-import { SearchRounded } from '@material-ui/icons';
+import { InputBase, InputAdornment } from '@mui/material';
+import { SearchRounded } from '@mui/icons-material';
 
 export default function NewContactForm(props) {
     const [value, setValue] = useState('')

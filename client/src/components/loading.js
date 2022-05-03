@@ -1,4 +1,4 @@
-import { CircularProgress, Container } from '@material-ui/core';
+import { CircularProgress, Container } from '@mui/material';
 import React from 'react';
 
 export default function LoadingPage() {

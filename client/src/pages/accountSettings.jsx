@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import { useParams } from 'react-router';
-import { Container, CircularProgress } from '@material-ui/core';
+import { Container, CircularProgress } from '@mui/material';
 import Header from '../components/Header'
 import AccountPreferences from '../components/AccountPreferences'
 import authManager from '../AuthManager'

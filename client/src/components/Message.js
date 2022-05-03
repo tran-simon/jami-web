@@ -1,5 +1,5 @@
-import { Typography } from '@material-ui/core'
-import { GroupOutlined } from '@material-ui/icons'
+import { Typography } from '@mui/material'
+import { GroupOutlined } from '@mui/icons-material'
 import React from 'react'
 import ConversationAvatar from './ConversationAvatar'
 

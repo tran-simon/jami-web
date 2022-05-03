@@ -3,8 +3,10 @@
   Author: Larbi Gharib <larbi.gharib@savoirfairelinux.com>
   License: AGPL-3
 */
+import { ThemeProvider, StyledEngineProvider, createTheme } from '@mui/material/styles';
+import makeStyles from '@mui/styles/makeStyles';
 import React, { useState, useEffect } from 'react'
-import { Route, Switch, Redirect } from 'react-router-dom'
+import { Route, Routes, Navigate, PageLayout, useNavigate } from 'react-router-dom'
 import authManager from './AuthManager'
 //import logo from './logo.svg'
 import './App.scss'
@@ -20,6 +22,23 @@ import LoadingPage from './components/loading'
 import JamiAccountDialog from './pages/jamiAccountCreation.jsx'
 import { AnimatePresence } from 'framer-motion'
 import WelcomeAnimation from './components/welcome'
+
+const theme = createTheme();
+const useStyles = makeStyles((theme) => {
+  root: {
+    // some CSS that access to theme
+  }
+})
+
+const Home = (props) => {
+  console.log(`home ${props}`)
+  //const navigate = useNavigate()
+  const [state, setState] = useState({
+    auth: authManager.getState()
+  })
+
+  return <Navigate to="/account" />
+}
 
 const App = (props) => {
     const [state, setState] = useState({
@@ -39,31 +58,31 @@ const App = (props) => {
     if (displayWelcome) {
       return <WelcomeAnimation showSetup={!state.auth.setupComplete} onComplete={() => setDisplayWelcome(false)} />
     } else if (!state.auth.setupComplete) {
-      return <Switch>
-          <Route path="/setup" component={ServerSetup} />
-          <Route><Redirect to="/setup" /></Route>
-        </Switch>
+      return <Routes>
+          <Route path="/setup" element={<ServerSetup />} />
+          <Route path="/" element={<Navigate to="/setup" replace />} />
+          <Route index path="*" element={<Navigate to="/setup" replace />} />
+        </Routes>
     }
-    return <React.Fragment>
-          <Route
-      render={({ location }) => {
-        console.log("App render location")
 
-        return <AnimatePresence exitBeforeEnter initial={false}>
-          <Switch location={location} key={location.pathname}>
-            <Route exact path="/"><Redirect to="/account" /></Route>
-            <Route path="/account/:accountId/settings" component={AccountSettings} />
-            <Route path="/account/:accountId" component={JamiMessenger} />
-            <Route path="/account" component={AccountSelection} />
-            <Route path="/newAccount/jami" component={JamiAccountDialog} />
-            <Route path="/newAccount" component={AccountCreationDialog} />
-            <Route path="/setup"><Redirect to="/account" /></Route>
-            <Route component={NotFoundPage} />
-          </Switch>
-          {!state.auth.authenticated && <SignInPage open={!state.auth.authenticated}/>}
-        </AnimatePresence>}}
-      />
-    </React.Fragment>
+    return <ThemeProvider theme={theme}>
+    <Routes>
+      <Route path="/account">
+        <Route index element={<AccountSelection />} />
+        <Route path=":accountId">
+          <Route index path="*" element={<JamiMessenger />} />
+          <Route path="settings" element={<AccountSettings />} />
+        </Route>
+      </Route>
+      <Route path="/newAccount" element={<AccountCreationDialog />}>
+        <Route path="jami" element={<JamiAccountDialog />} />
+      </Route>
+      <Route path="/setup" element={<ServerSetup />} />
+      <Route path="/" index element={<Home />} />
+      <Route path="*" element={<NotFoundPage />} />
+    </Routes>
+    {!state.auth.authenticated && <SignInPage key="signin" open={!state.auth.authenticated}/>}
+    </ThemeProvider>
 }
 
 export default App

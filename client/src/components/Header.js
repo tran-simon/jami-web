@@ -1,17 +1,17 @@
 import React, { useState } from 'react'
-import { Box, Button, Menu, MenuItem } from '@material-ui/core'
-import { useHistory, useParams } from "react-router-dom"
+import { Box, Button, Menu, MenuItem } from '@mui/material'
+import { useNavigate, useParams } from "react-router-dom"
 import authManager from '../AuthManager'
 
 export default function Header() {
-  const history = useHistory()
+  const navigate = useNavigate()
   const [anchorEl, setAnchorEl] = useState(null)
   const handleClick = (event) => setAnchorEl(event.currentTarget)
   const handleClose = () => setAnchorEl(null)
   const params = useParams()
 
-  const goToAccountSelection = () => history.push(`/account`)
-  const goToAccountSettings = () => history.push(`/account/${params.accountId}/settings`)
+  const goToAccountSelection = () => navigate(`/account`)
+  const goToAccountSettings = () => navigate(`/account/${params.accountId}/settings`)
 
   return (
     <Box>

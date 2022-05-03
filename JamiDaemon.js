@@ -29,7 +29,7 @@ class JamiDaemon {
         this.accounts = []
         this.lookups = []
         this.tempAccounts = []
-        this.dring = require("./dring.node")
+        this.dring = require("./jamid.node")
         this.dring.init({
             AccountsChanged: () => {
                 console.log("AccountsChanged")

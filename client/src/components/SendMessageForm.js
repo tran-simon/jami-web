@@ -1,7 +1,7 @@
 import React from 'react'
-import { makeStyles } from '@material-ui/core/styles'
-import { IconButton, InputBase, Paper, Popper } from '@material-ui/core'
-import { Send, EmojiEmotionsRounded } from '@material-ui/icons'
+import makeStyles from '@mui/styles/makeStyles';
+import { IconButton, InputBase, Paper, Popper } from '@mui/material'
+import { Send, EmojiEmotionsRounded } from '@mui/icons-material'
 import EmojiPicker from 'emoji-picker-react'
 import authManager from '../AuthManager'
 
@@ -56,7 +56,12 @@ export default function SendMessageForm(props) {
         onSubmit={handleSubmit}
         className="send-message-card"
         className={classes.root}>
-        <IconButton aria-describedby={id} variant="contained" color="primary" onClick={handleOpenEmojiPicker}>
+        <IconButton
+          aria-describedby={id}
+          variant="contained"
+          color="primary"
+          onClick={handleOpenEmojiPicker}
+          size="large">
           <EmojiEmotionsRounded />
         </IconButton>
         <Popper
@@ -80,10 +85,14 @@ export default function SendMessageForm(props) {
           value={currentMessage}
           onChange={handleInputChange}
         />
-        <IconButton type="submit" className={classes.iconButton} aria-label="search">
+        <IconButton
+          type="submit"
+          className={classes.iconButton}
+          aria-label="search"
+          size="large">
           <Send />
         </IconButton>
       </Paper>
     </div>
-  )
+  );
 }

@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { Avatar, Card, CardHeader, Container, List } from '@material-ui/core';
+import { Avatar, Card, CardHeader, Container, List } from '@mui/material';
 import Header from '../components/Header'
 import authManager from '../AuthManager'
 import Account from '../../../model/Account';
 import LoadingPage from '../components/loading';
 import ListItemLink from '../components/ListItemLink';
 import ConversationAvatar from '../components/ConversationAvatar';
-import { AddRounded } from '@material-ui/icons';
-import { useHistory } from 'react-router';
+import { AddRounded } from '@mui/icons-material';
+import { useNavigate } from 'react-router';
 import { motion } from 'framer-motion';
 
 const variants = {
@@ -16,7 +16,7 @@ const variants = {
 }
 
 const AccountSelection = (props) => {
-  const history = useHistory()
+  const navigate = useNavigate()
   const [state, setState] = useState({
     loaded: false,
     error: false,
@@ -30,7 +30,7 @@ const AccountSelection = (props) => {
       .then(result => {
         console.log(result)
         if (result.length === 0) {
-          history.replace('/newAccount')
+          navigate('/newAccount')
         } else {
           setState({
             loaded: true,

@@ -119,7 +119,7 @@ class AuthManager {
         console.log(response)
         if (response.ok) {
             console.log("Success, going home")
-            //history.replace('/')
+            //navigate('/')
         } else {
         }
         this.authenticating = false

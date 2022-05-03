@@ -1,10 +1,10 @@
-import List from '@material-ui/core/List'
+import List from '@mui/material/List'
 import React from 'react'
 import ConversationListItem from './ConversationListItem'
-import ListSubheader from '@material-ui/core/ListSubheader';
+import ListSubheader from '@mui/material/ListSubheader';
 import Conversation from '../../../model/Conversation';
-import { GroupRounded as GroupIcon } from '@material-ui/icons';
-import Typography from '@material-ui/core/Typography';
+import { GroupRounded as GroupIcon } from '@mui/icons-material';
+import Typography from '@mui/material/Typography';
 
 export default function ConversationList(props) {
     return (

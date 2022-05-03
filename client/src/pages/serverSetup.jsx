@@ -1,32 +1,33 @@
 import React, { useState } from 'react'
-import { useHistory } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 
-import { Box, Container, Fab, Card, CardContent, Typography, Input } from '@material-ui/core'
-import GroupAddRounded from '@material-ui/icons/GroupAddRounded'
-import { makeStyles } from '@material-ui/core/styles'
+import { Box, Container, Fab, Card, CardContent, Typography, Input } from '@mui/material'
+import GroupAddRounded from '@mui/icons-material/GroupAddRounded'
+import { makeStyles } from '@mui/styles';
 import authManager from '../AuthManager'
 
 const useStyles = makeStyles((theme) => ({
   root: {
     '& > *': {
-      margin: theme.spacing(1),
+      //margin: theme.spacing(1),
     },
   },
   extendedIcon: {
-    marginRight: theme.spacing(1),
+    //marginRight: theme.spacing(1),
   },
   wizardCard: {
     borderRadius: 8,
     maxWidth: 360,
     margin: "16px auto"
-  }, textField: {
-    margin: theme.spacing(1),
+  },
+  textField: {
+    //margin: theme.spacing(1),
   }
 }))
 
 export default function ServerSetup(props) {
   const classes = useStyles()
-  const history = useHistory()
+  const navigate = useNavigate()
   const [password, setPassword] = useState('')
   const [passwordRepeat, setPasswordRepeat] = useState('')
   const [loading, setLoading] = useState(false)

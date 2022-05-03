@@ -1,4 +1,4 @@
-import { Button, Container } from '@material-ui/core';
+import { Button, Container } from '@mui/material';
 import { AnimatePresence, motion } from 'framer-motion';
 import React, { useState } from 'react';
 import JamiLogo from '../../public/jami-logo-icon.svg'
