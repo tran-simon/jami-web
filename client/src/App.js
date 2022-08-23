@@ -8,7 +8,6 @@ import makeStyles from '@mui/styles/makeStyles';
 import React, { useState, useEffect } from 'react'
 import { Route, Routes, Navigate, PageLayout, useNavigate } from 'react-router-dom'
 import authManager from './AuthManager'
-//import logo from './logo.svg'
 import './App.scss'
 
 import SignInPage from "./pages/loginDialog.jsx"
