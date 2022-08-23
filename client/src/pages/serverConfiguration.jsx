@@ -9,8 +9,6 @@ import Account from '../../../model/Account'
 const ServerOverview = (props) => {
 
   this.accountId = props.accountId || props.match.params.accountId
-  this.state = { loaded: false, account: props.account }
-  this.req = undefined
 
   useEffect(() => {
     const controller = new AbortController()
@@ -22,23 +20,6 @@ const ServerOverview = (props) => {
       }).catch(e => console.log(e))
       return () => controller.abort()
   }, [accountId])
-
-  /*componentDidMount() {
-    this.controller = new AbortController()
-    if (this.req === undefined) {
-      this.req = authManager.fetch(`/api/serverConfig`, {signal: this.controller.signal})
-        .then(res => res.json())
-        .then(result => {
-          console.log(result)
-          this.setState({loaded: true, account: Account.from(result)})
-        })
-    }
-  }
-
-  componentWillUnmount() {
-    this.controller.abort()
-    this.req = undefined
-  }*/
 
   return (
     <Container maxWidth="sm" className="app" >

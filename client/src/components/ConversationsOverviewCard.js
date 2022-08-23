@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Card, CardActionArea, CardContent, CircularProgress, Typography } from '@mui/material';
+import { Card, CardActionArea, CardContent, CircularProgress, Typography } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
 import { useNavigate, useParams } from 'react-router';
 import authManager from '../AuthManager'

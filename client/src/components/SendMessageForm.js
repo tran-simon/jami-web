@@ -3,7 +3,6 @@ import makeStyles from '@mui/styles/makeStyles';
 import { IconButton, InputBase, Paper, Popper } from '@mui/material'
 import { Send, EmojiEmotionsRounded } from '@mui/icons-material'
 import EmojiPicker from 'emoji-picker-react'
-import authManager from '../AuthManager'
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -54,7 +53,6 @@ export default function SendMessageForm(props) {
     <div className="send-message-form">
       <Paper component="form"
         onSubmit={handleSubmit}
-        className="send-message-card"
         className={classes.root}>
         <IconButton
           aria-describedby={id}

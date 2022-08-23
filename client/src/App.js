@@ -3,10 +3,9 @@
   Author: Larbi Gharib <larbi.gharib@savoirfairelinux.com>
   License: AGPL-3
 */
-import { ThemeProvider, StyledEngineProvider, createTheme } from '@mui/material/styles';
-import makeStyles from '@mui/styles/makeStyles';
+import { ThemeProvider, createTheme } from '@mui/material/styles';
 import React, { useState, useEffect } from 'react'
-import { Route, Routes, Navigate, PageLayout, useNavigate } from 'react-router-dom'
+import { Route, Routes, Navigate } from 'react-router-dom'
 import authManager from './AuthManager'
 import './App.scss'
 
@@ -17,24 +16,13 @@ import AccountSelection from "./pages/accountSelection.jsx"
 import ServerSetup from "./pages/serverSetup.jsx"
 import AccountCreationDialog from "./pages/accountCreation.jsx"
 import NotFoundPage from "./pages/404.jsx"
-import LoadingPage from './components/loading'
 import JamiAccountDialog from './pages/jamiAccountCreation.jsx'
-import { AnimatePresence } from 'framer-motion'
 import WelcomeAnimation from './components/welcome'
 
 const theme = createTheme();
-const useStyles = makeStyles((theme) => {
-  root: {
-    // some CSS that access to theme
-  }
-})
 
 const Home = (props) => {
   console.log(`home ${props}`)
-  //const navigate = useNavigate()
-  const [state, setState] = useState({
-    auth: authManager.getState()
-  })
 
   return <Navigate to="/account" />
 }

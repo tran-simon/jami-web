@@ -1,29 +1,15 @@
 import React from 'react';
 
-import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Checkbox from '@mui/material/Checkbox';
 import Link from '@mui/material/Link';
-import Grid from '@mui/material/Grid';
-import Box from '@mui/material/Box';
-import Card from '@mui/material/Card';
-import CardContent from '@mui/material/CardContent';
-import CardActionArea from '@mui/material/CardActionArea';
-import CardActions from '@mui/material/CardActions';
-
-import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Typography from '@mui/material/Typography';
-//import { makeStyles } from '@mui/material/styles';
-import Container from '@mui/material/Container';
-import { Redirect } from 'react-router-dom';
-import CircularProgress from '@mui/material/CircularProgress';
 import DialogTitle from '@mui/material/DialogTitle';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
-import DialogContentText from '@mui/material/DialogContentText';
 
 import authManager from '../AuthManager'
 
@@ -39,54 +25,14 @@ function Copyright() {
     );
 }
 
-/*const useStyles = makeStyles((theme) => ({
-    paper: {
-        marginTop: theme.spacing(8),
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-    },
-    avatar: {
-        margin: theme.spacing(1),
-        backgroundColor: theme.palette.secondary.main,
-    },
-    form: {
-        width: '100%', // Fix IE 11 issue.
-        marginTop: theme.spacing(1),
-    },
-    submit: {
-        margin: theme.spacing(3, 0, 2),
-    },
-}));*/
-
-/*function SignIn() {
-    const classes = useStyles();
-
-
-}*/
-
-/*
-    TODO:
-    Use useState to handle username password and redirect states to render this page to
-    comply with material-ui usage of useStyles
-    Src: https://blog.logrocket.com/a-guide-to-usestate-in-react-ecb9952e406c/
-*/
-
 class SignInPage extends React.Component {
 
     constructor(props) {
         console.log("SignInPage " + props.open)
         super(props)
         this.state = {
-            /*username: '',
-            password: '',
-            redirect: false,
-            session: null,*/
             submitted: false,
-            loading: false/*,
-            error: false,
-            open: false,
-            errorMessage: ''*/
+            loading: false,
         }
         this.handleSubmit = this.handleSubmit.bind(this);
         this.localLogin = this.localLogin.bind(this);

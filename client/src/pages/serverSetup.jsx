@@ -1,5 +1,4 @@
 import React, { useState } from 'react'
-import { useNavigate } from "react-router-dom"
 
 import { Box, Container, Fab, Card, CardContent, Typography, Input } from '@mui/material'
 import GroupAddRounded from '@mui/icons-material/GroupAddRounded'
@@ -12,22 +11,15 @@ const useStyles = makeStyles((theme) => ({
       //margin: theme.spacing(1),
     },
   },
-  extendedIcon: {
-    //marginRight: theme.spacing(1),
-  },
   wizardCard: {
     borderRadius: 8,
     maxWidth: 360,
     margin: "16px auto"
   },
-  textField: {
-    //margin: theme.spacing(1),
-  }
 }))
 
 export default function ServerSetup(props) {
   const classes = useStyles()
-  const navigate = useNavigate()
   const [password, setPassword] = useState('')
   const [passwordRepeat, setPasswordRepeat] = useState('')
   const [loading, setLoading] = useState(false)
