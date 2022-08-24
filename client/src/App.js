@@ -19,7 +19,71 @@ import NotFoundPage from "./pages/404.jsx"
 import JamiAccountDialog from './pages/jamiAccountCreation.jsx'
 import WelcomeAnimation from './components/welcome'
 
-const theme = createTheme();
+const theme = createTheme({
+  typography: {
+    fontFamily: "Ubuntu",
+  },
+  components: {
+    MuiCssBaseline: {
+      styleOverrides: `
+        @font-face {
+          font-family: "Ubuntu";
+          src: url("./fonts/Ubuntu-Th.ttf");
+          font-weight: 100;
+          font-style: normal;
+        }
+        @font-face {
+          font-family: "Ubuntu";
+          src: url("./fonts/Ubuntu-L.ttf");
+          font-weight: 300;
+          font-style: normal;
+        }
+        @font-face {
+          font-family: "Ubuntu";
+          src: url("./fonts/Ubuntu-LI.ttf");
+          font-weight: 300;
+          font-style: italic;
+        }
+        @font-face {
+          font-family: "Ubuntu";
+          src: url("./fonts/Ubuntu-R.ttf");
+          font-weight: 400;
+          font-style: normal;
+        }
+        @font-face {
+          font-family: "Ubuntu";
+          src: url("./fonts/Ubuntu-RI.ttf");
+          font-weight: 400;
+          font-style: italic;
+        }
+        @font-face {
+          font-family: "Ubuntu";
+          src: url("./fonts/Ubuntu-M.ttf");
+          font-weight: 500;
+          font-style: normal;
+        }
+        @font-face {
+          font-family: "Ubuntu";
+          src: url("./fonts/Ubuntu-MI.ttf");
+          font-weight: 500;
+          font-style: italic;
+        }
+        @font-face {
+          font-family: "Ubuntu";
+          src: url("./fonts/Ubuntu-B.ttf");
+          font-weight: 700;
+          font-style: normal;
+        }
+        @font-face {
+          font-family: "Ubuntu";
+          src: url("./fonts/Ubuntu-BI.ttf");
+          font-weight: 700;
+          font-style: italic;
+        }
+      `,
+    },
+  },
+});
 
 const Home = (props) => {
   console.log(`home ${props}`)
