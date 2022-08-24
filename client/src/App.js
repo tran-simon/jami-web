@@ -22,6 +22,46 @@ import WelcomeAnimation from './components/welcome'
 const theme = createTheme({
   typography: {
     fontFamily: "Ubuntu",
+    h1: {
+      fontWeight: 400,
+      fontSize: "26px",
+      lineHeight: "36px",
+    },
+    h2: {
+      fontWeight: 400,
+      fontSize: "22px",
+      lineHeight: "30px",
+    },
+    h3: {
+      fontWeight: 400,
+      fontSize: "18px",
+      lineHeight: "26px",
+    },
+    h4: {
+      fontWeight: 500,
+      fontSize: "15px",
+      lineHeight: "22px",
+    },
+    h5: {
+      fontWeight: 500,
+      fontSize: "13px",
+      lineHeight: "19px",
+    },
+    body1: {
+      fontWeight: 400,
+      fontSize: "15px",
+      lineHeight: "22px"
+    },
+    body2: {
+      fontWeight: 400,
+      fontSize: "13px",
+      lineHeight: "19px",
+    },
+    caption: {
+      fontWeight: 400,
+      fontSize: "12px",
+      lineHeight: "16px",
+    },
   },
   components: {
     MuiCssBaseline: {
