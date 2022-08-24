@@ -20,6 +20,7 @@ import JamiAccountDialog from './pages/jamiAccountCreation.jsx'
 import WelcomeAnimation from './components/welcome'
 
 const theme = createTheme({
+  
   typography: {
     fontFamily: "Ubuntu",
     h1: {
@@ -64,6 +65,42 @@ const theme = createTheme({
     },
   },
   components: {
+    MuiButton: {
+      styleOverrides: {
+        root: {
+          height: "46px",
+          fontWeight: 700,
+          fontSize: "15px",
+          lineHeight: "17px",
+          textTransform: "none",
+        },
+        sizeSmall: {
+          height: "36px",
+        },
+        contained: {
+          background: "#005699",
+          "&:hover": {
+            background: "#0071C9",
+          },
+        },
+        outlined: {
+          background: "#FFF",
+          borderColor: "#0056995C",
+          color: "#005699",
+          "&:hover": {
+            background: "#0056991A",
+            borderColor: "#005699",
+          },
+        },
+        text: {
+          background: "#fff",
+          color: "#005699",
+          "&:hover": {
+            background: "#0056991A",
+          },
+        },
+      },
+    },
     MuiCssBaseline: {
       styleOverrides: `
         @font-face {
