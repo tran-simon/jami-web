@@ -1,30 +1,27 @@
 import { IconButton } from "@mui/material";
+import { styled } from "@mui/styles";
 import { CameraIcon, CancelIcon, FolderIcon, PenIcon } from "./svgIcons";
 
-const CustomisePictureButton = ({Icon, ...props}) => {
-    return (
-        <IconButton
-            {...props}
-            disableRipple={true}
-            sx={{
-                border: "1px solid #005699",
-                color: "#005699",
-                height: "53px",
-                width: "53px",
-                fontSize: "15px",
-                "&:hover": {
-                    background: "#0056991A",
-                },
-                "&:active": {
-                    color: "#FFF",
-                    background: "#005699",
-                },
-            }}
-        >
+const CustomisePictureButton = styled(
+    ({Icon, ...props}) => (
+        <IconButton {...props} disableRipple={true}>
             <Icon fontSize="inherit"/>
         </IconButton>
     )
-}
+)(() => ({
+    border: "1px solid #005699",
+    color: "#005699",
+    height: "53px",
+    width: "53px",
+    fontSize: "15px",
+    "&:hover": {
+        background: "#0056991A",
+    },
+    "&:active": {
+        color: "#FFF",
+        background: "#005699",
+    },
+}));
 
 export const RemovePictureButton = (props) => {
     return (
