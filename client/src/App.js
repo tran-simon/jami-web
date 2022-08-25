@@ -101,6 +101,49 @@ const theme = createTheme({
         },
       },
     },
+    MuiSwitch: {
+      defaultProps: {
+        disableRipple: true,
+      },
+      styleOverrides: {
+        root: {
+          width: "60px",
+          height: "30px",
+          padding: 0,
+        },
+        switchBase: {
+          padding: 0,
+          "&.Mui-checked": {
+            transform: `translateX(30px)`,
+          },
+        },
+        thumb: {
+          width: "28px",
+          height: "28px",
+          border: "1px solid #005699",
+          ".Mui-checked.Mui-checked &": {
+            width: "30px",
+            height: "30px",
+            border: "none",
+          }
+        },
+        track: {
+          backgroundColor: "#0056991A",
+          borderRadius: "30px",
+          opacity: 1,
+          ".Mui-checked.Mui-checked + &": {
+            backgroundColor: "#0056991A",
+            opacity: 1,
+          }
+        },
+        colorPrimary: {
+          color: "#fff",
+          "&.Mui-checked": {
+            color: "#005699",
+          },
+        },
+      },
+    },
     MuiCssBaseline: {
       styleOverrides: `
         @font-face {
