@@ -1,8 +1,9 @@
+import { QuestionMark } from "@mui/icons-material";
 import { IconButton } from "@mui/material";
 import { styled } from "@mui/styles";
-import { CameraIcon, CancelIcon, FolderIcon, PenIcon } from "./svgIcons";
+import { CameraIcon, CancelIcon, CrossedEyeIcon, EyeIcon, FolderIcon, InfoIcon, PenIcon } from "./svgIcons";
 
-const CustomisePictureButton = styled(
+const RoundButton = styled(
     ({Icon, ...props}) => (
         <IconButton {...props} disableRipple={true}>
             <Icon fontSize="inherit"/>
@@ -11,8 +12,6 @@ const CustomisePictureButton = styled(
 )(({theme}) => ({
     border: `1px solid ${theme.palette.primary.dark}`,
     color: theme.palette.primary.dark,
-    height: "53px",
-    width: "53px",
     fontSize: "15px",
     "&:hover": {
         background: theme.palette.primary.light,
@@ -21,40 +20,95 @@ const CustomisePictureButton = styled(
         color: "#FFF",
         background: theme.palette.primary.dark,
     },
+    "&.MuiIconButton-sizeSmall": {
+        height: "15px",
+        width: "15px",
+    },
+    "&.MuiIconButton-sizeMedium": {
+        height: "30px",
+        width: "30px",
+    },
+    "&.MuiIconButton-sizeLarge": {
+        height: "53px",
+        width: "53px",
+    }
 }));
 
-export const RemovePictureButton = (props) => {
+export const CancelButton = (props) => {
     return (
-        <CustomisePictureButton {...props}
+        <RoundButton {...props}
             aria-label="remove picture"
             Icon={CancelIcon}
+            size="large"
         />
     )
 }
 
-export const EditPictureButton = (props) => {
+export const EditButton = (props) => {
     return (
-        <CustomisePictureButton {...props}
+        <RoundButton {...props}
             aria-label="edit picture"
             Icon={PenIcon}
+            size="large"
         />
     )
 }
 
-export const UploadPictureButton = (props) => {
+export const UploadButton = (props) => {
     return (
-        <CustomisePictureButton {...props}
+        <RoundButton {...props}
             aria-label="upload picture"
             Icon={FolderIcon}
+            size="large"
         />
     )
 }
 
 export const TakePictureButton = (props) => {
     return (
-        <CustomisePictureButton {...props}
+        <RoundButton {...props}
             aria-label="take picture"
             Icon={CameraIcon}
+            size="large"
         />
     )
 }
+
+export const InfoButton = (props) => {
+    return (
+        <RoundButton {...props}
+            aria-label="informations"
+            Icon={InfoIcon}
+            size="small"
+        />
+    )
+}
+
+export const TipButton = (props) => {
+    return (
+        <RoundButton {...props}
+            aria-label="informations"
+            Icon={QuestionMark}
+            size="medium"
+        />
+    )
+}
+
+export const ToggleVisibilityButton = styled(
+    ({visible, ...props}) => {
+        const Icon = visible ? CrossedEyeIcon : EyeIcon
+        return (
+            <IconButton {...props} disableRipple={true}>
+                <Icon fontSize="inherit"/>
+            </IconButton>
+        )
+    }
+)(({theme}) => ({
+    color: theme.palette.primary.dark,
+    fontSize: "15px",
+    height: "15px",
+    width: "15px",
+    "&:hover": {
+        background: theme.palette.primary.light,
+    },
+}));

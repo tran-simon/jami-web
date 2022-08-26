@@ -69,6 +69,7 @@ export default createTheme(theme, {
           fontSize: "15px",
           lineHeight: "17px",
           textTransform: "none",
+          borderRadius: "5px",
         },
         sizeSmall: {
           height: "36px",
@@ -136,6 +137,70 @@ export default createTheme(theme, {
           color: "#fff",
           "&.Mui-checked": {
             color: theme.palette.primary.dark,
+          },
+        },
+      },
+    },
+    MuiInput: {
+      styleOverrides: {
+        root: {
+          color: theme.palette.primary.dark,
+          "&.Mui-error": {
+            color: theme.palette.error.main,
+          },
+        },
+        underline: {
+          /*
+            Material UI uses "before" for the regular underline.
+            There is a second underline called "after" placed over "before"
+          */
+          "&:before": {
+            borderBottom: `2px solid ${theme.palette.primary.dark}`,
+          },
+          "&:hover:not(.Mui-disabled, .Mui-error):before": {
+            borderBottom: "2px solid #03B9E9",
+          },
+          "&:after": {
+            borderBottom: "2px solid #03B9E9",
+          },
+          "&:hover:not(.Mui-error):after": {
+            borderBottom: "2px solid #03B9E9",
+          },
+        },
+      }
+    },
+    MuiFormControl: {
+      styleOverrides: {
+        root: {
+          height: "90px",
+        },
+      },
+    },
+    MuiFormHelperText: {
+      styleOverrides: {
+        root: {
+          position: "absolute",
+          bottom: "0px",
+          fontSize: "15px",
+        },
+      },
+    },
+    MuiInputLabel: {
+      styleOverrides: {
+        root: {
+          color: "black",
+          fontSize: "15px",
+          left: "50%",
+          transform: "translate(-50%, 20px)",
+          transition: "left .2s, transform .2s",
+        },
+        shrink: {
+          color: "black",
+          left: 0,
+          transform: "translate(0, 50px) scale(0.75)",
+          transition: "left .2s, transform .2s",
+          "&.Mui-focused, &.Mui-error": {
+            color: "black",
           },
         },
       },
