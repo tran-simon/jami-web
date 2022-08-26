@@ -1,6 +1,22 @@
 import { createTheme } from "@mui/material";
 
-export default createTheme({
+const theme = createTheme({
+  palette: {
+    primary: {
+      light: "#E5EEF5", // same as "#0056991A"
+      main: "#0071C9",
+      dark: "#005699",
+    },
+    error: {
+      main: "#CC0022",
+    },
+    success: {
+      main: "#009980",
+    },
+  },
+})
+
+export default createTheme(theme, {
   typography: {
     fontFamily: "Ubuntu",
     h1: {
@@ -58,31 +74,28 @@ export default createTheme({
           height: "36px",
         },
         contained: {
-          background: "#005699",
+          background: theme.palette.primary.dark,
           "&:hover": {
-            background: "#0071C9",
+            background: theme.palette.primary.main,
           },
         },
         outlined: {
           background: "#FFF",
           borderColor: "#0056995C",
-          color: "#005699",
+          color: theme.palette.primary.dark,
           "&:hover": {
-            background: "#0056991A",
-            borderColor: "#005699",
+            background: theme.palette.primary.light,
+            borderColor: theme.palette.primary.dark,
           },
         },
         text: {
           background: "#fff",
-          color: "#005699",
+          color: theme.palette.primary.dark,
           "&:hover": {
-            background: "#0056991A",
+            background: theme.palette.primary.light,
           },
         },
       },
-    },
-    MuiTextField: {
-
     },
     MuiSwitch: {
       defaultProps: {
@@ -103,7 +116,7 @@ export default createTheme({
         thumb: {
           width: "28px",
           height: "28px",
-          border: "1px solid #005699",
+          border: `1px solid ${theme.palette.primary.dark}`,
           ".Mui-checked.Mui-checked &": {
             width: "30px",
             height: "30px",
@@ -111,18 +124,18 @@ export default createTheme({
           }
         },
         track: {
-          backgroundColor: "#0056991A",
+          backgroundColor: theme.palette.primary.light,
           borderRadius: "30px",
           opacity: 1,
           ".Mui-checked.Mui-checked + &": {
-            backgroundColor: "#0056991A",
+            backgroundColor: theme.palette.primary.light,
             opacity: 1,
           }
         },
         colorPrimary: {
           color: "#fff",
           "&.Mui-checked": {
-            color: "#005699",
+            color: theme.palette.primary.dark,
           },
         },
       },
@@ -186,4 +199,4 @@ export default createTheme({
       `,
     },
   },
-});
+})

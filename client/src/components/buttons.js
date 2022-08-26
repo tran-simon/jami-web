@@ -8,18 +8,18 @@ const CustomisePictureButton = styled(
             <Icon fontSize="inherit"/>
         </IconButton>
     )
-)(() => ({
-    border: "1px solid #005699",
-    color: "#005699",
+)(({theme}) => ({
+    border: `1px solid ${theme.palette.primary.dark}`,
+    color: theme.palette.primary.dark,
     height: "53px",
     width: "53px",
     fontSize: "15px",
     "&:hover": {
-        background: "#0056991A",
+        background: theme.palette.primary.light,
     },
     "&:active": {
         color: "#FFF",
-        background: "#005699",
+        background: theme.palette.primary.dark,
     },
 }));
 
