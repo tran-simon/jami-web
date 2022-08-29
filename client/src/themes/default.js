@@ -16,6 +16,9 @@ const theme = createTheme({
   },
   typography: {
     fontFamily: "Ubuntu",
+    allVariants: {
+      color: "black"
+    },
     h1: {
       fontWeight: 400,
       fontSize: "26px",

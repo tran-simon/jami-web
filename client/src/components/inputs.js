@@ -14,7 +14,7 @@ const StyledLockIcon = styled(LockIcon)({height: iconsHeight, color: "#03B9E9"})
 
 export const UsernameInput = ({infoButtonProps, ...props}) => {
     const [isSelected, setIsSelected] = React.useState(false);
-    const [input, setInput] = React.useState();
+    const [input, setInput] = React.useState(props.defaultValue);
     const [startAdornment, setStartAdornment] = React.useState()
 
     const onChange = React.useCallback((event) => {
@@ -58,7 +58,7 @@ export const UsernameInput = ({infoButtonProps, ...props}) => {
 export const PasswordInput = ({infoButtonProps, ...props}) => {
     const [showPassword, setShowPassword] = React.useState(false);
     const [isSelected, setIsSelected] = React.useState(false);
-    const [input, setInput] = React.useState();
+    const [input, setInput] = React.useState(props.defaultValue);
     const [startAdornment, setStartAdornment] = React.useState()
 
     const toggleShowPassword = () => {
@@ -113,7 +113,7 @@ export const PasswordInput = ({infoButtonProps, ...props}) => {
 
 export const NickNameInput = (props) => {
     const [isSelected, setIsSelected] = React.useState(false);
-    const [input, setInput] = React.useState();
+    const [input, setInput] = React.useState(props.defaultValue);
     const [startAdornmentVisibility, setStartAdornmentVisibility] = React.useState()
 
     const onChange = React.useCallback((event) => {
@@ -143,7 +143,7 @@ export const NickNameInput = (props) => {
 
 export const RegularInput = (props) => {
     const [isSelected, setIsSelected] = React.useState(false);
-    const [input, setInput] = React.useState();
+    const [input, setInput] = React.useState(props.defaultValue);
     const [startAdornmentVisibility, setStartAdornmentVisibility] = React.useState()
     const [endAdornmentVisibility, setEndAdornmentVisibility] = React.useState()
 
