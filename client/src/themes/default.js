@@ -14,9 +14,6 @@ const theme = createTheme({
       main: "#009980",
     },
   },
-})
-
-export default createTheme(theme, {
   typography: {
     fontFamily: "Ubuntu",
     h1: {
@@ -60,6 +57,69 @@ export default createTheme(theme, {
       lineHeight: "16px",
     },
   },
+  components: {
+    MuiCssBaseline: {
+      styleOverrides: `
+        @font-face {
+          font-family: "Ubuntu";
+          src: url("./fonts/Ubuntu-Th.ttf");
+          font-weight: 100;
+          font-style: normal;
+        }
+        @font-face {
+          font-family: "Ubuntu";
+          src: url("./fonts/Ubuntu-L.ttf");
+          font-weight: 300;
+          font-style: normal;
+        }
+        @font-face {
+          font-family: "Ubuntu";
+          src: url("./fonts/Ubuntu-LI.ttf");
+          font-weight: 300;
+          font-style: italic;
+        }
+        @font-face {
+          font-family: "Ubuntu";
+          src: url("./fonts/Ubuntu-R.ttf");
+          font-weight: 400;
+          font-style: normal;
+        }
+        @font-face {
+          font-family: "Ubuntu";
+          src: url("./fonts/Ubuntu-RI.ttf");
+          font-weight: 400;
+          font-style: italic;
+        }
+        @font-face {
+          font-family: "Ubuntu";
+          src: url("./fonts/Ubuntu-M.ttf");
+          font-weight: 500;
+          font-style: normal;
+        }
+        @font-face {
+          font-family: "Ubuntu";
+          src: url("./fonts/Ubuntu-MI.ttf");
+          font-weight: 500;
+          font-style: italic;
+        }
+        @font-face {
+          font-family: "Ubuntu";
+          src: url("./fonts/Ubuntu-B.ttf");
+          font-weight: 700;
+          font-style: normal;
+        }
+        @font-face {
+          font-family: "Ubuntu";
+          src: url("./fonts/Ubuntu-BI.ttf");
+          font-weight: 700;
+          font-style: italic;
+        }
+      `,
+    },
+  }
+})
+
+export default createTheme(theme, {
   components: {
     MuiButton: {
       styleOverrides: {
@@ -204,64 +264,6 @@ export default createTheme(theme, {
           },
         },
       },
-    },
-    MuiCssBaseline: {
-      styleOverrides: `
-        @font-face {
-          font-family: "Ubuntu";
-          src: url("./fonts/Ubuntu-Th.ttf");
-          font-weight: 100;
-          font-style: normal;
-        }
-        @font-face {
-          font-family: "Ubuntu";
-          src: url("./fonts/Ubuntu-L.ttf");
-          font-weight: 300;
-          font-style: normal;
-        }
-        @font-face {
-          font-family: "Ubuntu";
-          src: url("./fonts/Ubuntu-LI.ttf");
-          font-weight: 300;
-          font-style: italic;
-        }
-        @font-face {
-          font-family: "Ubuntu";
-          src: url("./fonts/Ubuntu-R.ttf");
-          font-weight: 400;
-          font-style: normal;
-        }
-        @font-face {
-          font-family: "Ubuntu";
-          src: url("./fonts/Ubuntu-RI.ttf");
-          font-weight: 400;
-          font-style: italic;
-        }
-        @font-face {
-          font-family: "Ubuntu";
-          src: url("./fonts/Ubuntu-M.ttf");
-          font-weight: 500;
-          font-style: normal;
-        }
-        @font-face {
-          font-family: "Ubuntu";
-          src: url("./fonts/Ubuntu-MI.ttf");
-          font-weight: 500;
-          font-style: italic;
-        }
-        @font-face {
-          font-family: "Ubuntu";
-          src: url("./fonts/Ubuntu-B.ttf");
-          font-weight: 700;
-          font-style: normal;
-        }
-        @font-face {
-          font-family: "Ubuntu";
-          src: url("./fonts/Ubuntu-BI.ttf");
-          font-weight: 700;
-          font-style: italic;
-        }
-      `,
     },
   },
 })
