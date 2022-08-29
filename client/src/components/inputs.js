@@ -2,11 +2,11 @@ import { Stack, TextField } from "@mui/material"
 import { styled } from "@mui/styles"
 import React from "react"
 import { InfoButton, ToggleVisibilityButton } from "./buttons"
-import { CheckedIcon, CrossIcon, LockIcon, PenIcon, PersonIcon } from "./svgIcons"
+import { CheckedIcon, RoundCrossIcon, LockIcon, PenIcon, PersonIcon } from "./svgIcons"
 
 const iconsHeight = "16px"
 const StyledCheckedIconSuccess = styled(CheckedIcon)(({theme}) => ({height: iconsHeight, color: theme.palette.success.main}))
-const StyledCrossIconError = styled(CrossIcon)(({theme}) => ({height: iconsHeight, color: theme.palette.error.main}))
+const StyledRoundCrossIconError = styled(RoundCrossIcon)(({theme}) => ({height: iconsHeight, color: theme.palette.error.main}))
 const StyledPenIconLight = styled(PenIcon)({height: iconsHeight, color: "#03B9E9"})
 const StyledPenIconDark  = styled(PenIcon)(({theme}) => ({height: iconsHeight, color: theme.palette.primary.dark}))
 const StyledPersonIconLight = styled(PersonIcon)({height: iconsHeight, color: "#03B9E9"})
@@ -27,7 +27,7 @@ export const UsernameInput = ({infoButtonProps, ...props}) => {
         let Icon = StyledPersonIconLight
         let visibility = "visible"
         if (props.error) {
-            Icon = StyledCrossIconError
+            Icon = StyledRoundCrossIconError
         }
         else if (props.success) {
             Icon = StyledCheckedIconSuccess
@@ -75,7 +75,7 @@ export const PasswordInput = ({infoButtonProps, ...props}) => {
         let Icon = StyledLockIcon
         let visibility = "visible"
         if (props.error) {
-            Icon = StyledCrossIconError
+            Icon = StyledRoundCrossIconError
         }
         else if (props.success) {
             Icon = StyledCheckedIconSuccess

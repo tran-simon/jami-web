@@ -1,7 +1,7 @@
 import { QuestionMark } from "@mui/icons-material";
 import { IconButton } from "@mui/material";
 import { styled } from "@mui/styles";
-import { CameraIcon, CancelIcon, CrossedEyeIcon, EyeIcon, FolderIcon, InfoIcon, PenIcon } from "./svgIcons";
+import { ArrowIcon, CameraIcon, CancelIcon, CrossedEyeIcon, CrossIcon, EyeIcon, FolderIcon, InfoIcon, PenIcon } from "./svgIcons";
 
 const RoundButton = styled(
     ({Icon, ...props}) => (
@@ -94,6 +94,44 @@ export const TipButton = (props) => {
     )
 }
 
+export const BackButton = styled(
+    (props) => {
+        return (
+            <IconButton {...props} disableRipple={true}>
+                <ArrowIcon fontSize="inherit"/>
+            </IconButton>
+        )
+    }
+)(({theme}) => ({
+    color: theme.palette.primary.dark,
+    fontSize: "15px",
+    height: "30px",
+    width: "51px",
+    borderRadius: "5px",
+    "&:hover": {
+        background: theme.palette.primary.light,
+    },
+}))
+
+export const CloseButton = styled(
+    (props) => {
+        return (
+            <IconButton {...props} disableRipple={true}>
+                <CrossIcon fontSize="inherit"/>
+            </IconButton>
+        )
+    }
+)(({theme}) => ({
+    color: theme.palette.primary.dark,
+    fontSize: "15px",
+    height: "30px",
+    width: "30px",
+    borderRadius: "5px",
+    "&:hover": {
+        background: theme.palette.primary.light,
+    },
+}))
+
 export const ToggleVisibilityButton = styled(
     ({visible, ...props}) => {
         const Icon = visible ? CrossedEyeIcon : EyeIcon
@@ -111,4 +149,4 @@ export const ToggleVisibilityButton = styled(
     "&:hover": {
         background: theme.palette.primary.light,
     },
-}));
+}))
