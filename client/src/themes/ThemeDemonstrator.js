@@ -1,5 +1,5 @@
 import { Button, Stack, Switch, ThemeProvider, Typography } from "@mui/material"
-import { CancelButton, EditButton, UploadButton, TakePictureButton, InfoButton, TipButton, BackButton, CloseButton } from "../components/buttons"
+import { CancelPictureButton, EditPictureButton, UploadPictureButton, TakePictureButton, InfoButton, TipButton, BackButton, CloseButton } from "../components/buttons"
 import { NickNameInput, PasswordInput, RegularInput, UsernameInput } from "../components/inputs"
 import defaultTheme from './default'
 
@@ -24,9 +24,9 @@ export const ThemeDemonstrator = () => {
                     <Button variant="contained" size="small">Bouton liste préférences</Button>
                 </Stack>
                 <Stack direction="row" spacing="5px">
-                    <CancelButton/>
-                    <EditButton/>
-                    <UploadButton/>
+                    <CancelPictureButton/>
+                    <EditPictureButton/>
+                    <UploadPictureButton/>
                     <TakePictureButton/>
                 </Stack>
                 <Stack direction="row" spacing="5px">

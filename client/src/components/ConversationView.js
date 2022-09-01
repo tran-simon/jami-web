@@ -116,7 +116,7 @@ const ConversationView = props => {
           <Typography className="subtitle" variant="subtitle1" >{state.conversation.getId()}</Typography>
         </Box>
       </Stack>
-      <Stack flexGrow={1} overflow="auto">
+      <Stack flexGrow={1} overflow="auto" direction="column-reverse">
         <MessageList
           conversationId={state.conversation.getId()}
           loading={loadingMessages} 

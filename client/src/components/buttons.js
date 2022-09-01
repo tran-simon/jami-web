@@ -1,7 +1,10 @@
 import { QuestionMark } from "@mui/icons-material";
-import { IconButton } from "@mui/material";
+import { Box, IconButton, Popper } from "@mui/material";
+import { blue } from "@mui/material/colors";
 import { styled } from "@mui/styles";
-import { ArrowIcon, CameraIcon, CancelIcon, CrossedEyeIcon, CrossIcon, EyeIcon, FolderIcon, InfoIcon, PenIcon } from "./svgIcons";
+import EmojiPicker from "emoji-picker-react";
+import React from "react";
+import { Arrow2Icon, ArrowIcon, CameraIcon, CameraInBubbleIcon, CancelIcon, CrossedEyeIcon, CrossIcon, EmojiIcon, EyeIcon, FolderIcon, InfoIcon, MicroInBubbleIcon, PaperClipIcon, PenIcon } from "./svgIcons";
 
 const RoundButton = styled(
     ({Icon, ...props}) => (
@@ -34,7 +37,7 @@ const RoundButton = styled(
     }
 }));
 
-export const CancelButton = (props) => {
+export const CancelPictureButton = (props) => {
     return (
         <RoundButton {...props}
             aria-label="remove picture"
@@ -44,7 +47,7 @@ export const CancelButton = (props) => {
     )
 }
 
-export const EditButton = (props) => {
+export const EditPictureButton = (props) => {
     return (
         <RoundButton {...props}
             aria-label="edit picture"
@@ -54,7 +57,7 @@ export const EditButton = (props) => {
     )
 }
 
-export const UploadButton = (props) => {
+export const UploadPictureButton = (props) => {
     return (
         <RoundButton {...props}
             aria-label="upload picture"
@@ -87,7 +90,7 @@ export const InfoButton = (props) => {
 export const TipButton = (props) => {
     return (
         <RoundButton {...props}
-            aria-label="informations"
+            aria-label="tip"
             Icon={QuestionMark}
             size="medium"
         />
@@ -97,7 +100,11 @@ export const TipButton = (props) => {
 export const BackButton = styled(
     (props) => {
         return (
-            <IconButton {...props} disableRipple={true}>
+            <IconButton
+                {...props}
+                disableRipple={true}
+                aria-label="back"
+            >
                 <ArrowIcon fontSize="inherit"/>
             </IconButton>
         )
@@ -116,7 +123,11 @@ export const BackButton = styled(
 export const CloseButton = styled(
     (props) => {
         return (
-            <IconButton {...props} disableRipple={true}>
+            <IconButton
+                {...props}
+                disableRipple={true}
+                aria-label="close"
+            >
                 <CrossIcon fontSize="inherit"/>
             </IconButton>
         )
@@ -150,3 +161,105 @@ export const ToggleVisibilityButton = styled(
         background: theme.palette.primary.light,
     },
 }))
+
+const SquareButton = styled(
+    ({Icon, ...props}) => (
+        <IconButton {...props} disableRipple={true}>
+            <Icon fontSize="inherit"/>
+        </IconButton>
+    )
+)(({theme}) => ({
+    color: "#7E7E7E",
+    fontSize: "25px",
+    height: "36px",
+    width: "36px",
+    borderRadius: "5px",
+    "&:hover": {
+        background: "#E5E5E5",
+    },
+}));
+
+export const RecordVideoMessageButton = (props) => {
+    return (
+        <SquareButton {...props}
+            aria-label="record video message"
+            Icon={CameraInBubbleIcon}
+        />
+    )
+}
+
+export const RecordVoiceMessageButton = (props) => {
+    return (
+        <SquareButton {...props}
+            aria-label="record voice message"
+            Icon={MicroInBubbleIcon}
+        />
+    )
+}
+
+export const UploadFileButton = (props) => {
+    return (
+        <SquareButton {...props}
+            aria-label="upload file"
+            Icon={PaperClipIcon}
+        />
+    )
+}
+
+export const SendMessageButton = (props) => {
+    return (
+        <SquareButton {...props}
+            aria-label="send message"
+            Icon={Arrow2Icon}
+        />
+    )
+}
+
+export const SelectEmojiButton = (props) => {
+    const [anchorEl, setAnchorEl] = React.useState(null)
+  
+    const handleOpenEmojiPicker = React.useCallback(
+      e => setAnchorEl(anchorEl ? null : e.currentTarget),
+      [anchorEl],
+    )
+  
+    const handleClose = React.useCallback(
+      () => setAnchorEl(null),
+      [setAnchorEl],
+    )
+  
+    const onEmojiClick = React.useCallback(
+      (e, emojiObject) => {
+        props.onEmojiSelected(emojiObject.emoji)
+        handleClose()
+      },
+      [handleClose, props.onEmojiSelected],
+    )
+  
+    const open = Boolean(anchorEl)
+    const id = open ? 'simple-popover' : undefined
+  
+    return (
+      <Box>
+        <SquareButton
+          aria-describedby={id}
+          aria-label="select emoji"
+          Icon={EmojiIcon}
+          onClick={handleOpenEmojiPicker}
+        />
+        <Popper
+          id={id}
+          open={open}
+          anchorEl={anchorEl}
+          onClose={handleClose}
+        >
+          <EmojiPicker.default
+            onEmojiClick={onEmojiClick}
+            disableAutoFocus={true}
+            disableSkinTonePicker={true}
+            native
+          />
+        </Popper>
+      </Box>
+    )
+  }

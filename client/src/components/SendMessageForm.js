@@ -1,38 +1,10 @@
 import React from 'react'
-import makeStyles from '@mui/styles/makeStyles';
-import { Box, IconButton, InputBase, Paper, Popper } from '@mui/material'
-import { Send, EmojiEmotionsRounded } from '@mui/icons-material'
-import EmojiPicker from 'emoji-picker-react'
-
-const useStyles = makeStyles((theme) => ({
-  root: {
-    marginLeft: 16,
-    marginRight: 16,
-    padding: '2px 4px',
-    display: 'flex',
-    alignItems: 'center',
-    borderRadius: 8
-  },
-  input: {
-    marginLeft: theme.spacing(1),
-    flex: 1,
-  },
-  iconButton: {
-    padding: 10,
-  },
-  divider: {
-    height: 28,
-    margin: 4,
-  },
-}))
+import { Divider, InputBase } from '@mui/material'
+import { RecordVideoMessageButton, RecordVoiceMessageButton, SelectEmojiButton, SendMessageButton, UploadFileButton } from './buttons';
+import { Stack } from '@mui/system';
 
 export default function SendMessageForm(props) {
-  const classes = useStyles()
-  const [anchorEl, setAnchorEl] = React.useState(null)
   const [currentMessage, setCurrentMessage] = React.useState("")
-
-  const handleOpenEmojiPicker = e => setAnchorEl(anchorEl ? null : e.currentTarget)
-  const handleClose = () => setAnchorEl(null)
 
   const handleSubmit = e => {
     e.preventDefault()
@@ -42,55 +14,56 @@ export default function SendMessageForm(props) {
     }
   }
   const handleInputChange = (event) => setCurrentMessage(event.target.value)
-  const onEmojiClick = (e, emojiObject) => {
-    setCurrentMessage(currentMessage + emojiObject.emoji)
-    handleClose()
-  }
-  const open = Boolean(anchorEl)
-  const id = open ? 'simple-popover' : undefined
+
+  const onEmojiSelected = React.useCallback(
+    (emoji) => setCurrentMessage((currentMessage) => currentMessage + emoji),
+    [setCurrentMessage],
+  )
 
   return (
-    <Box >
-      <Paper component="form"
+    <Stack
+      padding="30px 16px 0px 16px"
+    >
+      <Divider
+        sx={{
+          bordeTop: "1px solid #E5E5E5",
+        }}
+      />
+      <Stack
+        component="form"
         onSubmit={handleSubmit}
-        className={classes.root}>
-        <IconButton
-          aria-describedby={id}
-          variant="contained"
-          color="primary"
-          onClick={handleOpenEmojiPicker}
-          size="large">
-          <EmojiEmotionsRounded />
-        </IconButton>
-        <Popper
-          id={id}
-          open={open}
-          anchorEl={anchorEl}
-          onClose={handleClose}
-        >
-          <EmojiPicker.default
-            onEmojiClick={onEmojiClick}
-            disableAutoFocus={true}
-            disableSkinTonePicker={true}
-            native
-          />
-        </Popper>
+        direction="row"
+        alignItems="center"
+        flexGrow={1}
+        spacing="20px"
+        padding="16px 0px"
+      >
+        <UploadFileButton/>
+        <RecordVoiceMessageButton/>
+        <RecordVideoMessageButton/>
 
-        <InputBase
-          className={classes.input}
-          placeholder="Write something nice"
-          height="35"
-          value={currentMessage}
-          onChange={handleInputChange}
+        <Stack
+          flexGrow={1}
+        >
+          <InputBase
+            placeholder="Write something nice"
+            value={currentMessage}
+            onChange={handleInputChange}
+            sx={{
+              fontSize: "15px",
+              color: "black",
+              "& ::placeholder": {
+                color: "#7E7E7E",
+                opacity: 1,
+              },
+            }}
+          />
+        </Stack>
+        <SelectEmojiButton
+          onEmojiSelected={onEmojiSelected}
         />
-        <IconButton
-          type="submit"
-          className={classes.iconButton}
-          aria-label="search"
-          size="large">
-          <Send />
-        </IconButton>
-      </Paper>
-    </Box>
+        { currentMessage && <SendMessageButton type="submit"/> }
+      </Stack>
+    </Stack>
   );
 }
