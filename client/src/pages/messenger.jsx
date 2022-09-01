@@ -11,6 +11,7 @@ import ConversationView from '../components/ConversationView';
 import AddContactPage from './addContactPage.jsx';
 import LoadingPage from '../components/loading';
 import { useParams } from 'react-router';
+import { Stack } from '@mui/material';
 
 const Messenger = (props) => {
   const [conversations, setConversations] = useState(undefined)
@@ -57,15 +58,30 @@ const Messenger = (props) => {
 
   console.log("Messenger render")
   return (
-    <div className="app" >
-      <Header />
-      <NewContactForm onChange={setSearchQuery} />
-      {conversations ?
-        <ConversationList search={searchResult} conversations={conversations} accountId={accountId} /> :
-        <div className="rooms-list"><LoadingPage /></div>}
-      {conversationId && <ConversationView accountId={accountId} conversationId={conversationId} />}
-      {contactId && <AddContactPage accountId={accountId} contactId={contactId} />}
-    </div>
+    <Stack
+      direction="row"
+      height="100vh"
+      width="100vw"
+    >
+      <Stack
+        flexGrow={0}
+        flexShrink={0}
+        overflow="auto"
+      >
+        <Header />
+        <NewContactForm onChange={setSearchQuery} />
+        {contactId && <AddContactPage accountId={accountId} contactId={contactId} />}
+        {conversations ?
+          <ConversationList search={searchResult} conversations={conversations} accountId={accountId} /> :
+          <div className="rooms-list"><LoadingPage /></div>
+        }
+      </Stack>
+      <Stack
+        flexGrow={1}
+      >
+        {conversationId && <ConversationView accountId={accountId} conversationId={conversationId} />}
+      </Stack>
+    </Stack>
   )
 }
 

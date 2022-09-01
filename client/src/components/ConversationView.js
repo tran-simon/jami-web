@@ -5,9 +5,11 @@ import authManager from '../AuthManager'
 import Conversation from '../../../model/Conversation';
 import LoadingPage from './loading';
 import io from "socket.io-client";
+import { Box, Stack, Typography } from '@mui/material';
+import ConversationAvatar from './ConversationAvatar';
 
 const ConversationView = props => {
-  const [loadingMesages, setLoadingMesages] = useState(false)
+  const [loadingMessages, setLoadingMessages] = useState(false)
   const [socket, setSocket] = useState(undefined)
   const [state, setState] = useState({
     loaded: false,
@@ -65,7 +67,7 @@ const ConversationView = props => {
   }, [state.conversation ? state.conversation.getId() : "", socket])
 
   useEffect(() => {
-    if (!loadingMesages || !state.conversation)
+    if (!loadingMessages || !state.conversation)
       return
     console.log(`Load more messages`)
     const controller = new AbortController()
@@ -73,7 +75,7 @@ const ConversationView = props => {
       .then(res => res.json())
       .then(messages => {
         console.log(messages)
-        setLoadingMesages(false)
+        setLoadingMessages(false)
         setState(state => {
           if (state.conversation)
             state.conversation.addLoadedMessages(messages)
@@ -81,7 +83,7 @@ const ConversationView = props => {
           })
       }).catch(e => console.log(e))
       return () => controller.abort()
-  }, [state, loadingMesages])
+  }, [state, loadingMessages])
 
   const sendMessage = (message) => {
     authManager.fetch(`/api/accounts/${props.accountId}/conversations/${props.conversationId}`, {
@@ -98,12 +100,35 @@ const ConversationView = props => {
       return <LoadingPage />
   } else if (state.error === true) {
       return <div>Error loding {props.conversationId}</div>
-  } else {
-  return <div className="messenger">
-      <MessageList conversation={state.conversation} loading={loadingMesages} loadMore={() => setLoadingMesages(true)} messages={state.conversation.getMessages()} />
-      <SendMessageForm onSend={sendMessage} />
-    </div>
   }
+
+  return (
+    <Stack
+      flexGrow={1}
+      height="100%"
+    >
+      <Stack direction="row" flexGrow={0}>
+        <Box style={{ margin: 16, flexShrink: 0 }}>
+          <ConversationAvatar displayName={state.conversation.getDisplayNameNoFallback()} />
+        </Box>
+        <Box style={{ flex: "1 1 auto", overflow: 'hidden' }}>
+          <Typography className="title" variant="h6">{state.conversation.getDisplayName()}</Typography>
+          <Typography className="subtitle" variant="subtitle1" >{state.conversation.getId()}</Typography>
+        </Box>
+      </Stack>
+      <Stack flexGrow={1} overflow="auto">
+        <MessageList
+          conversationId={state.conversation.getId()}
+          loading={loadingMessages} 
+          loadMore={() => setLoadingMessages(true)}
+          messages={state.conversation.getMessages()}
+        />
+      </Stack>
+      <Stack flexGrow={0}>
+        <SendMessageForm onSend={sendMessage} />
+      </Stack>
+    </Stack>
+  )
 }
 
 export default ConversationView

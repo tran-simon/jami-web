@@ -1,6 +1,6 @@
 import React from 'react'
 import makeStyles from '@mui/styles/makeStyles';
-import { IconButton, InputBase, Paper, Popper } from '@mui/material'
+import { Box, IconButton, InputBase, Paper, Popper } from '@mui/material'
 import { Send, EmojiEmotionsRounded } from '@mui/icons-material'
 import EmojiPicker from 'emoji-picker-react'
 
@@ -50,7 +50,7 @@ export default function SendMessageForm(props) {
   const id = open ? 'simple-popover' : undefined
 
   return (
-    <div className="send-message-form">
+    <Box >
       <Paper component="form"
         onSubmit={handleSubmit}
         className={classes.root}>
@@ -91,6 +91,6 @@ export default function SendMessageForm(props) {
           <Send />
         </IconButton>
       </Paper>
-    </div>
+    </Box>
   );
 }

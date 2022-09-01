@@ -1,158 +1,16 @@
-:root {
-  --main-color: #1f1f1f;
-  --secondary-color: white;
-  --third-color: #8b8b8b;
-  --main-text-color: #3e5869;
-  --secondary-text-color: #b0c7d6;
-  --send-message-form: #f5f5f5;
-  --scroll-bar-bg-color: #04000000;
-}
-
 html,
 body {
   height: 100%;
   margin: 0;
   padding: 0;
-  font-family: "Open Sans", sans-serif;
-  font-weight: 200;
-  color: #3e5869;
-  --scroll-bar-bg-color: rgba(0,0,0,0.2);
-}
-
-#root {
-  height: 100%;
-}
-
-.app {
-  display: grid;
-  height: 100%;
-  grid-template-columns: 320px 1fr;
-  grid-template-rows: 40px 50px 1fr;
-  grid-template-areas:
-    "h m"
-    "n m"
-    "r m";
-}
-
-.messenger {
-  grid-area: m;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
-
-.conversation-header {
-  grid-area: h;
-  display: flex;
-  align-items: center;
-  padding-right: 8px;
-
-  .title, .subtitle {
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-}
-
-.send-message-form {
-  margin: 0 16px 16px 8px;
-}
-
-.MuiContainer-root {
-  padding-bottom: 32px;
-}
-
-.login {
-  background-color: var(--main-color);
 }
 
 .main-search {
   grid-area: n;
 }
 
-/* REST OF CSS */
-
 .main-search-input {
   padding: 8px;
   background-color: var(--secondary-color);
   width: 100%;
-}
-
-.rooms-list {
-  grid-area: r;
-  overflow-y: scroll;
-
-  .MuiListItemText-primary,
-  .MuiListItemText-secondary {
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  scrollbar-color: var(--scroll-bar-bg-color) transparent;
-  scrollbar-width: thin;
-}
-::-webkit-scrollbar {
-  -webkit-appearance: none;
-  width: 8px;
-}
-::-webkit-scrollbar-thumb {
-    background-color: var(--scroll-bar-bg-color);
-    border-radius: 4px;
-}
-
-.list-placeholder {
-  margin: 32px auto;
-  width: 256px;
-  text-align: center;
-
-  .subtitle {
-    color: #a0a0a0;
-  }
-}
-
-.message-list {
-  flex: 1;
-  height: 100%;
-  overflow: auto;
-  display: flex;
-  flex-direction: column-reverse;
-  padding: 16px 32px;
-
-  .conversation-event {
-    margin: 8px auto;
-
-    .inline-avatar {
-      display: inline-block;
-      vertical-align: middle;
-      margin: 16px;
-    }
-  }
-
-  .message {
-    margin: 8px 0;
-
-    .message-avatar {
-      display: inline-block;
-      vertical-align: middle;
-    }
-    .message-username {
-      font-size: 11px;
-      font-weight: bold;
-      color: var(--secondary-color);
-      opacity: 0.9;
-      margin-bottom: 6px;
-    }
-    .message-text {
-      background: var(--third-color);
-      color: var(--secondary-color);
-      display: inline;
-      padding: 8px 16px;
-      border-radius: 16px;
-      margin: 8px;
-    }
-  }
-}
-
-.send-message-card {
-  border-radius: 8px;
-  margin: 16px;
 }
