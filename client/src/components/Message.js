@@ -96,9 +96,30 @@ export const MessageDate = ({time}) => {
   }
 
   return (
-    <Box marginTop="30px">
-      <Divider>
-        {textDate}
+    <Box marginTop="30px" >
+      <Divider
+        sx={{
+          ".MuiDivider-wrapper": {
+            margin: 0,
+            padding: 0,
+          },
+          "&::before": {
+            borderTop: "1px solid #E5E5E5",
+          },
+          "&::after": {
+            borderTop: "1px solid #E5E5E5",
+          },
+        }}
+      >
+        <Typography
+          variant="caption"
+          fontWeight={700}
+          border="1px solid #E5E5E5"
+          borderRadius="5px"
+          padding="10px 16px"
+        >
+          {textDate}
+        </Typography>
       </Divider>
     </Box>
   )
