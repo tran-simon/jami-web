@@ -7,7 +7,6 @@ import { ThemeProvider } from '@mui/material/styles';
 import React, { useState, useEffect } from 'react'
 import { Route, Routes, Navigate } from 'react-router-dom'
 import authManager from './AuthManager'
-import './App.scss'
 
 import SignInPage from "./pages/loginDialog.jsx"
 import JamiMessenger from "./pages/JamiMessenger.jsx"
