@@ -251,6 +251,11 @@ class JamiDaemon {
                 JamiDaemon.mapToJs(this.dring.getAccountDetails(accountId)),
                 JamiDaemon.mapToJs(this.dring.getVolatileAccountDetails(accountId))
             )
+
+            account.contacts = JamiDaemon.vectMapToJs(
+              this.dring.getContacts(accountId)
+            );
+
             JamiDaemon.vectToJs(this.dring.getConversations(accountId)).forEach(conversationId => {
                 const members = JamiDaemon.vectMapToJs(this.dring.getConversationMembers(accountId, conversationId))
                 members.forEach(member => {
@@ -397,6 +402,20 @@ class JamiDaemon {
             }
         }
         return details
+    }
+
+    removeContact(accountId, contactId){
+        //bool ban false
+        this.dring.removeContact(accountId, contactId, false);
+    }
+
+    blockContact(accountId, contactId){
+        //bool ban true
+        this.dring.removeContact(accountId, contactId, true);
+    }
+
+    getContactDetails(accountId, contactId){
+        return JamiDaemon.mapToJs(this.dring.getContactDetails(accountId, contactId))
     }
 
     getDefaultModerators(accountId) {

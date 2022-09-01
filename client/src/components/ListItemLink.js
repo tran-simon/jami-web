@@ -6,10 +6,12 @@ import ListItemText from '@mui/material/ListItemText';
 import { Link as RouterLink } from 'react-router-dom';
 
 function ListItemLink(props) {
-  const { icon, primary, secondary, to } = props
+  const { icon, primary, secondary, to, account } = props
 
   const renderLink = useMemo(
-    () => forwardRef((itemProps, ref) => <RouterLink to={to} ref={ref} {...itemProps} />),
+    () => forwardRef((itemProps, ref) => {
+    console.log("LIST ITEM LINK: ", account, itemProps)
+    return <RouterLink to={to} ref={ref} {...itemProps} state={account}/>}),
     [to])
 
   return (
@@ -25,6 +27,7 @@ ListItemLink.propTypes = {
   primary: PropTypes.string.isRequired,
   secondary: PropTypes.string,
   to: PropTypes.string.isRequired,
+  account: PropTypes.object
 }
 
 export default ListItemLink

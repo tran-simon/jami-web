@@ -75,7 +75,6 @@ export default function ConversationListItem(props) {
       })
       .then((result) => {
         console.log("YYY 1", result);
-        // setState({ loaded: true, account: Account.from(result) });
       })
       .catch((e) => console.log("YYY 2", e));
     //       return () => controller.abort()

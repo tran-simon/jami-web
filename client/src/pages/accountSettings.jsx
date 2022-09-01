@@ -6,9 +6,10 @@ import AccountPreferences from '../components/AccountPreferences'
 import authManager from '../AuthManager'
 import Account from '../../../model/Account'
 import { useAppSelector, useAppDispatch } from '../../redux/hooks';
-import { setAccountId } from '../../redux/appSlice';
+import { setAccountId, setAccountObject } from '../../redux/appSlice';
 
 const AccountSettings = (props) => {
+  console.log("ACCOUNT SETTINGS", props.account)
   const accountId = props.accountId || useParams().accountId
   const dispatch = useAppDispatch();
 
@@ -23,6 +24,7 @@ const AccountSettings = (props) => {
       .then(result => {
         let account = Account.from(result)
         account.setDevices(result.devices)
+        dispatch(setAccountObject(account))
         setState({ loaded: true, account: account})
 
       }).catch(e => console.log(e))

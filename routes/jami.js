@@ -6,8 +6,8 @@ class JamiRestApi {
     }
 
     getRouter() {
-        const router = Router({mergeParams: true})
-        //router.use(express.json());
+      const router = Router({ mergeParams: true });
+      //router.use(express.json());
 
         // Accounts
         router.get('/accounts', async (req, res) => {
@@ -53,7 +53,7 @@ class JamiRestApi {
         router.use('/accounts/:accountId', checkAccount, accountRouter)
 
         accountRouter.get('/', async (req, res) => {
-            console.log(`BBBBBBB Get account ${req.params.accountId}`)
+            console.log(`Get account ${req.params.accountId}`)
             const account = this.jami.getAccount(req.params.accountId)
             if (account) {
                 account.defaultModerators = this.jami.getDefaultModerators(account.getId())
@@ -68,7 +68,6 @@ class JamiRestApi {
           console.log(`Set account details ${req.params.accountId}`);
           const account = this.jami.getAccount(req.params.accountId);
           if (account) {
-            console.log(req.body);
             const newDetails = account.updateDetails(req.body);
             this.jami.setAccountDetails(account.getId(), newDetails);
             res.status(200).end();
@@ -77,17 +76,15 @@ class JamiRestApi {
 
         // Contacts
         accountRouter.get("/contacts", (req, res) => {
-          console.log(`AAAAAAAA Get account ${req.params.accountId}`);
+          console.log(`Get account ${req.params.accountId}`);
           const account = this.jami.getAccount(req.params.accountId);
           if (account) {
             let rep = account.getContacts();
-            console.log(rep);
             res.json(rep);
           } else res.status(404).end();
         });
 
         accountRouter.get("/contacts/:contactId", (req, res) => {
-          console.log("CCCCCCC JAMI.JS: ", req.params);
           console.log(`Get account details fot ${req.params.accountId}`);
           const account = this.jami.getAccount(req.params.accountId);
           const uri = req.params.uri;
@@ -97,140 +94,179 @@ class JamiRestApi {
           } else res.status(404).end();
         });
 
-        // Default modertors
-        accountRouter.put("/defaultModerators/:contactId", async (req, res) => {
+
+
+
+
+      // Default modertors
+      accountRouter.put("/defaultModerators/:contactId", async (req, res) => {
+        console.log(
+          `Adding default moderator ${req.params.contactId} to account ${req.params.accountId}`
+        );
+        this.jami.addDefaultModerator(
+          req.params.accountId,
+          req.params.contactId
+        );
+        res.status(200).end();
+      });
+
+      accountRouter.delete(
+        "/defaultModerators/:contactId",
+        async (req, res) => {
           console.log(
-            `Adding default moderator ${req.params.contactId} to account ${req.params.accountId}`
+            `Removing default moderator to account ${req.params.accountId}`
           );
-          this.jami.addDefaultModerator(
+          this.jami.removeDefaultModerator(
             req.params.accountId,
             req.params.contactId
           );
           res.status(200).end();
-        });
+        }
+      );
 
-        accountRouter.delete('/defaultModerators/:contactId', async (req, res) => {
-            console.log(`Removing default moderator to account ${req.params.accountId}`)
-            this.jami.removeDefaultModerator(req.params.accountId, req.params.contactId)
-            res.status(200).end()
-        })
-
-        // Conversations
-        accountRouter.get('/conversations', async (req, res, next) => {
-            console.log(`Get conversations for account ${req.params.accountId}`)
-            const account = this.jami.getAccount(req.params.accountId)
-            if (!account)
-                return res.sendStatus(404)
-            const conversations = account.getConversations()
-            res.json(await Promise.all(Object.keys(conversations).map(async conversationId => await conversations[conversationId].getObject({
-                memberFilter: member => member.contact.getUri() !== account.getUri()
-            }))))
-            //res.json(account.getConversations())
-        })
-
-        accountRouter.post('/conversations', (req, res) => {
-            console.log(`Create conversations for account, contact ${req.params.accountId}`)
-            console.log(req.body)
-            const account = this.jami.getAccount(req.params.accountId)
-            if (!account)
-                return res.sendStatus(404)
-            if (req.body.members.length === 1) {
-                const details = this.jami.addContact(req.params.accountId, req.body.members[0])
-                res.json(details)
-            } else
-                res.status(400).end()
-        })
-
-        accountRouter.post('/conversations/:conversationId', async (req, res) => {
-            console.log(`Sending message to ${req.params.conversationId} for account ${req.params.accountId}`)
-            this.jami.sendMessage(req.params.accountId, req.params.conversationId, req.body.message)
-            res.status(200).end()
-        })
-
-        accountRouter.get('/conversations/:conversationId', async (req, res) => {
-            console.log(`Get conversation ${req.params.conversationId} for account ${req.params.accountId}`)
-            const account = this.jami.getAccount(req.params.accountId)
-            if (!account)
-                return res.sendStatus(404)
-            const conversation = account.getConversation(req.params.conversationId)
-            if (!conversation)
-                res.status(404).end()
-            else {
-                res.json(await conversation.getObject({
-                    memberFilter: member => member.contact.getUri() !== account.getUri()
-                }))
-            }
-        })
-
-        accountRouter.get('/conversations/:conversationId/messages', async (req, res) => {
-            console.log(`Get messages for conversation ${req.params.conversationId} for account ${req.params.accountId}`)
-            try {
-                const messages = await this.jami.loadMessages(req.params.accountId, req.params.conversationId)
-                res.json(messages).end()
-            } catch (e) {
-                res.status(400).json({ error: e.message })
-            }
-        })
-
-        // Calls
-
-        accountRouter.get('/calls', async (req, res) => {
-            console.log(`Get calls for account ${req.params.accountId}`)
-            try {
-                const calls = await this.jami.getCalls(req.params.accountId)
-                res.json(calls).end()
-            } catch (e) {
-                res.status(400).json({ error: e.message })
-            }
-        })
-
-        accountRouter.get('/calls/:callId', async (req, res) => {
-            console.log(`Get call ${callId} for account ${req.params.accountId}`)
-            try {
-                const messages = await this.jami.getCall(req.params.accountId, req.params.callId)
-                res.json(messages).end()
-            } catch (e) {
-                res.status(400).json({ error: e.message })
-            }
-        })
-
-        // Nameserver
-        const nsRouter = Router({mergeParams: true})
-        accountRouter.use('/ns', nsRouter) // use account nameserver
-        router.use('/ns', nsRouter) // use default nameserver
-
-        nsRouter.get(['/name/:nameQuery'], (req, res, next) => {
-            console.log(`Name lookup ${req.params.nameQuery}`)
-            this.jami.lookupName(req.params.accountId || '', req.params.nameQuery)
-                .then(result => {
-                    if (result.state == 0)
-                        res.json(result)
-                    else if (result.state == 1)
-                        res.status(400).json({})
-                    else
-                        res.status(404).json({})
-                }).catch(e => {
-                    res.status(404).json({})
+      // Conversations
+      accountRouter.get("/conversations", async (req, res, next) => {
+        console.log(`Get conversations for account ${req.params.accountId}`);
+        const account = this.jami.getAccount(req.params.accountId);
+        if (!account) return res.sendStatus(404);
+        const conversations = account.getConversations();
+        res.json(
+          await Promise.all(
+            Object.keys(conversations).map(
+              async (conversationId) =>
+                await conversations[conversationId].getObject({
+                  memberFilter: (member) =>
+                    member.contact.getUri() !== account.getUri(),
                 })
-        })
+            )
+          )
+        );
+        //res.json(account.getConversations())
+      });
 
-        nsRouter.get(['/addr/:addrQuery'], (req, res, next) => {
-            console.log(`Address lookup ${req.params.addrQuery}`)
-            this.jami.lookupAddress(req.params.accountId || '', req.params.addrQuery)
-                .then(result => {
-                    if (result.state == 0)
-                        res.json(result)
-                    else if (result.state == 1)
-                        res.status(400).json({})
-                    else
-                        res.status(404).json({})
-                }).catch(e => {
-                    res.status(404).json({})
-                })
-        })
+      accountRouter.post("/conversations", (req, res) => {
+        console.log(
+          `Create conversations for account, contact ${req.params.accountId}`
+        );
+        // console.log(req.body)
+        const account = this.jami.getAccount(req.params.accountId);
+        if (!account) return res.sendStatus(404);
+        if (req.body.members.length === 1) {
+          const details = this.jami.addContact(
+            req.params.accountId,
+            req.body.members[0]
+          );
+          res.json(details);
+        } else res.status(400).end();
+      });
 
+      accountRouter.post("/conversations/:conversationId", async (req, res) => {
+        console.log(
+          `Sending message to ${req.params.conversationId} for account ${req.params.accountId}`
+        );
+        this.jami.sendMessage(
+          req.params.accountId,
+          req.params.conversationId,
+          req.body.message
+        );
+        res.status(200).end();
+      });
 
-        return router
+      accountRouter.get("/conversations/:conversationId", async (req, res) => {
+        console.log(
+          `Get conversation ${req.params.conversationId} for account ${req.params.accountId}`
+        );
+        const account = this.jami.getAccount(req.params.accountId);
+        if (!account) return res.sendStatus(404);
+        const conversation = account.getConversation(req.params.conversationId);
+        if (!conversation) res.status(404).end();
+        else {
+          res.json(
+            await conversation.getObject({
+              memberFilter: (member) =>
+                member.contact.getUri() !== account.getUri(),
+            })
+          );
+        }
+      });
+
+      accountRouter.get(
+        "/conversations/:conversationId/messages",
+        async (req, res) => {
+          console.log(
+            `Get messages for conversation ${req.params.conversationId} for account ${req.params.accountId}`
+          );
+          try {
+            const messages = await this.jami.loadMessages(
+              req.params.accountId,
+              req.params.conversationId
+            );
+            res.json(messages).end();
+          } catch (e) {
+            res.status(400).json({ error: e.message });
+          }
+        }
+      );
+
+      // Calls
+
+      accountRouter.get("/calls", async (req, res) => {
+        console.log(`Get calls for account ${req.params.accountId}`);
+        try {
+          const calls = await this.jami.getCalls(req.params.accountId);
+          res.json(calls).end();
+        } catch (e) {
+          res.status(400).json({ error: e.message });
+        }
+      });
+
+      accountRouter.get("/calls/:callId", async (req, res) => {
+        console.log(`Get call ${callId} for account ${req.params.accountId}`);
+        try {
+          const messages = await this.jami.getCall(
+            req.params.accountId,
+            req.params.callId
+          );
+          res.json(messages).end();
+        } catch (e) {
+          res.status(400).json({ error: e.message });
+        }
+      });
+
+      // Nameserver
+      const nsRouter = Router({ mergeParams: true });
+      accountRouter.use("/ns", nsRouter); // use account nameserver
+      router.use("/ns", nsRouter); // use default nameserver
+
+      nsRouter.get(["/name/:nameQuery"], (req, res, next) => {
+        console.log(`Name lookup ${req.params.nameQuery}`);
+        this.jami
+          .lookupName(req.params.accountId || "", req.params.nameQuery)
+          .then((result) => {
+            if (result.state == 0) res.json(result);
+            else if (result.state == 1) res.status(400).json({});
+            else res.status(404).json({});
+          })
+          .catch((e) => {
+            res.status(404).json({});
+          });
+      });
+
+      nsRouter.get(["/addr/:addrQuery"], (req, res, next) => {
+        console.log(`Address lookup ${req.params.addrQuery}`);
+        this.jami
+          .lookupAddress(req.params.accountId || "", req.params.addrQuery)
+          .then((result) => {
+            if (result.state == 0) res.json(result);
+            else if (result.state == 1) res.status(400).json({});
+            else res.status(404).json({});
+          })
+          .catch((e) => {
+            res.status(404).json({});
+          });
+      });
+
+      return router;
     }
 }
 
