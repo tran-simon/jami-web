@@ -17,11 +17,9 @@ const variants = {
 
 const AccountSelection = (props) => {
   const navigate = useNavigate()
-  const [state, setState] = useState({
-    loaded: false,
-    error: false,
-    accounts: []
-  })
+  const [loaded, setLoaded] = useState(false)
+  const [error, setError] = useState(false)
+  const [accounts, setAccounts] = useState([])
 
   useEffect(() => {
     const controller = new AbortController()
@@ -32,22 +30,18 @@ const AccountSelection = (props) => {
         if (result.length === 0) {
           navigate('/newAccount')
         } else {
-          setState({
-            loaded: true,
-            accounts: result.map(account => Account.from(account)),
-          })
+          setLoaded(true)
+          setAccounts(result.map(account => Account.from(account)))
         }
       }, error => {
         console.log(`get error ${error}`)
-        setState({
-          loaded: true,
-          error: true
-        })
+        setLoaded(true)
+        setError(true)
       }).catch(e => console.log(e))
-    return () => controller.abort()
+   // return () => controller.abort() // crash on React18
   }, [])
 
-  if (!state.loaded)
+  if (!loaded)
     return <LoadingPage />
   return (
     <React.Fragment>
@@ -57,7 +51,7 @@ const AccountSelection = (props) => {
         <Card style={{marginTop:32, marginBottom:32}}>
           <CardHeader title="Choose an account" />
           <List>
-            {state.accounts.map(account => <ListItemLink key={account.getId()}
+            {accounts.map(account => <ListItemLink key={account.getId()}
               icon={<ConversationAvatar displayName={account.getDisplayNameNoFallback()} />}
               to={`/account/${account.getId()}/settings`}
               primary={account.getDisplayName()}

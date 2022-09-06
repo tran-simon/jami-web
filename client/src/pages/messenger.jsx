@@ -31,7 +31,7 @@ const Messenger = (props) => {
       console.log(result)
       setConversations(Object.values(result).map(c => Conversation.from(accountId, c)))
     })
-    return () => controller.abort()
+    // return () => controller.abort() // crash on React18
   }, [accountId])
 
   useEffect(() => {
@@ -53,7 +53,7 @@ const Messenger = (props) => {
     }).catch(e => {
       setSearchResults(undefined)
     })
-    return () => controller.abort()
+   // return () => controller.abort() // crash on React18
   }, [accountId, searchQuery])
 
   console.log("Messenger render")

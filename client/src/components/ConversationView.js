@@ -34,7 +34,7 @@ const ConversationView = props => {
         error: true
       })
     })
-    return () => controller.abort()
+   // return () => controller.abort() // crash on React18
   }, [props.accountId, props.conversationId])
 
   useEffect(() => {
@@ -82,7 +82,7 @@ const ConversationView = props => {
             return {...state}
           })
       }).catch(e => console.log(e))
-      return () => controller.abort()
+     // return () => controller.abort() // crash on React18
   }, [state, loadingMessages])
 
   const sendMessage = (message) => {

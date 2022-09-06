@@ -7,7 +7,8 @@ import Conversation from '../../../model/Conversation';
 export default function ConversationsOverviewCard(props) {
   const navigate = useNavigate()
   const accountId = props.accountId || useParams().accountId
-  const [state, setState] = useState({ loaded: false })
+  const [loaded, setLoaded] = useState(false)
+  const [conversations, setConversations] = useState([])
 
   useEffect(() => {
     const controller = new AbortController()
@@ -15,9 +16,10 @@ export default function ConversationsOverviewCard(props) {
       .then(res => res.json())
       .then(result => {
         console.log(result)
-        setState({ loaded: true, conversations: Object.values(result).map(c => Conversation.from(accountId, c)) })
+        setLoaded(true)
+        setConversations(Object.values(result).map(c => Conversation.from(accountId, c)))
       })
-    return () => controller.abort()
+    // return () => controller.abort() // crash on React18
   }, [accountId])
 
   return (
@@ -28,7 +30,7 @@ export default function ConversationsOverviewCard(props) {
             Conversations
           </Typography>
           <Typography gutterBottom variant="h5" component="h2">
-            {state.loaded ? state.conversations.length : <CircularProgress size={24} />}
+            {loaded ? conversations.length : <CircularProgress size={24} />}
           </Typography>
         </CardContent>
       </CardActionArea>

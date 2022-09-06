@@ -18,7 +18,7 @@ const AccountSettings = (props) => {
         console.log(result)
         setState({loaded: true, account: Account.from(result)})
       }).catch(e => console.log(e))
-      return () => controller.abort()
+     // return () => controller.abort() // crash on React18
   }, [accountId])
 
   return (
