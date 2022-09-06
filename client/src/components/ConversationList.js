@@ -7,6 +7,7 @@ import { GroupRounded as GroupIcon } from '@mui/icons-material';
 import Typography from '@mui/material/Typography';
 
 export default function ConversationList(props) {
+    console.log(props)
     return (
         <div className="rooms-list">
             <List>

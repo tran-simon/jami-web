@@ -94,8 +94,47 @@ class JamiRestApi {
           } else res.status(404).end();
         });
 
+      accountRouter.get("/contacts/details/:contactId", (req, res) => {
+        console.log(
+          `Get contact ${req.params.contactId} details for ${req.params.accountId}`
+        );
+        const account = this.jami.getAccount(req.params.accountId);
+        if (account) {
+          let rep = this.jami.getContactDetails(
+            req.params.accountId,
+            req.params.contactId
+          );
 
+          console.log(rep);
+          res.json(rep);
+        } else res.status(404).end();
+      });
 
+      accountRouter.delete("/contacts/remove/:contactId", async (req, res) => {
+        console.log("REMOVED CONTACT: ", req.params.contactId);
+        const account = this.jami.getAccount(req.params.accountId);
+        if (account) {
+          let rep = this.jami.removeContact(
+            req.params.accountId,
+            req.params.contactId
+          );
+          res.json(rep);
+        } else res.status(404).end();
+        res.status(200).end();
+      });
+
+      accountRouter.delete("/contacts/block/:contactId/", async (req, res) => {
+        console.log("REMOVED AND BLOCKED CONTACT: ", req.params.contactId);
+        const account = this.jami.getAccount(req.params.accountId);
+        if (account) {
+          let rep = this.jami.blockContact(
+            req.params.accountId,
+            req.params.contactId
+          );
+          res.json(rep);
+        } else res.status(404).end();
+        res.status(200).end();
+      });
 
 
       // Default modertors

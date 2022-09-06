@@ -331,9 +331,9 @@ class JamiDaemon {
             return account.getConversation(conversationId)
         return null
     }
-    /*getAccountDetails(accountId) {
-        return this.mapToJs(this.dring.getAccountDetails(accountId))
-    }*/
+    getAccountDetails(accountId) {
+        return JamiDaemon.mapToJs(this.dring.getAccountDetails(accountId))
+    }
     setAccountDetails(accountId, details) {
         this.dring.setAccountDetails(accountId, this.mapToNative(details))
     }

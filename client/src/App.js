@@ -19,13 +19,7 @@ import JamiAccountDialog from './pages/jamiAccountCreation.jsx'
 import WelcomeAnimation from './components/welcome'
 import defaultTheme from './themes/default'
 import ContactList from './components/ContactList';
-
-const theme = createTheme();
-const useStyles = makeStyles((theme) => {
-  root: {
-    // some CSS that access to theme
-  }
-})
+import { ThemeDemonstrator } from './themes/ThemeDemonstrator';
 
 // import { useSelector, useDispatch } from 'react-redux'
 // import { useAppSelector, useAppDispatch } from '../redux/hooks'
@@ -88,6 +82,7 @@ const App = (props) => {
           <Route path="jami" element={<JamiAccountDialog />} />
         </Route>
         <Route path="/Contacts" element={<ContactList />} />
+        <Route path="/Theme" element={<ThemeDemonstrator />} />
         <Route path="/setup" element={<ServerSetup />} />
         <Route path="/" index element={<Home />} />
         <Route path="*" element={<NotFoundPage />} />

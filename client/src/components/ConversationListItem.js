@@ -1,23 +1,53 @@
-import { ListItem, ListItemAvatar, ListItemText } from '@mui/material'
-import React, { useState } from "react";
-import Conversation from '../../../model/Conversation'
-import { useNavigate, useParams } from "react-router-dom"
-import ConversationAvatar from './ConversationAvatar'
 import React from 'react';
 import ReactDOM from 'react-dom';
 import Modal from 'react-modal';
-import { Person } from "@mui/icons-material";
 import authManager from '../AuthManager'
+import ConversationAvatar from './ConversationAvatar'
+import Conversation from '../../../model/Conversation'
+import React, { useState } from "react";
+import { useNavigate, useParams } from "react-router-dom"
+import { Person } from "@mui/icons-material";
+import { ListItem, ListItemAvatar, ListItemText } from '@mui/material'
+import { Button, Stack, Switch, ThemeProvider, Typography } from "@mui/material"
+import { CloseButton } from './buttons';
+import { AudioCallIcon, BlockContactIcon, ContactDetailsIcon, CrossIcon, MessageIcon, RemoveContactIcon, VideoCallIcon } from './svgIcons';
 
 const customStyles = {
   content: {
-    top: "50%",
-    left: "50%",
-    right: "auto",
-    bottom: "auto",
-    marginRight: "-50%",
-    transform: "translate(-50%, -50%)",
+    // top: "50%",
+    // left: "50%",
+    // right: "auto",
+    // bottom: "auto",
+    // // marginRight: "-50%",
+    // transform: "translate(-50%, -50%)",
+    // borderRadius: "5px 20px 20px 5px",
+    // boxShadow; ""
+    // fontSize: "12px",
+    // padding: "16px"
+
+    // top: "1364px",
+    left: "94px",
+    width: "164px",
+    height: "262px",
+    background: "#FFFFFF 0% 0% no-repeat padding-box",
+    boxShadow: "3px 3px 7px #00000029",
+    borderRadius: "5px 20px 20px 20px",
+    opacity: "1",
+
+    textAlign: "left",
+    font: "normal normal normal 12px/36px Ubuntu",
+    letterSpacing: "0px",
+    color: "#000000",
   },
+};
+
+const stackStyles = {
+  flexDirection: "row",
+  marginBottom: "5px",
+  // spacing: "10px",
+  flex: 1,
+  alignItems: "center",
+  // justifyContent: "space-around"
 };
 
 export default function ConversationListItem(props) {
@@ -101,50 +131,72 @@ export default function ConversationListItem(props) {
           contentLabel="Example Modal"
         >
           {/* <h2 ref={(_subtitle) => (subtitle = _subtitle)}>Hello</h2> */}
-          <button onClick={closeModal}>close</button>
-
-          <div>
-            <Person /> Démarrer appel vidéo
-          </div>
-          <br />
-
-          <div>
-            <Person /> Démarrer appel audio
-          </div>
-          <br />
-
-          <div
+          {/* <button onClick={closeModal}>close</button> */}
+          <Stack
             onClick={() => {
-              console.log("open dialog Supprimer: ");
+              navigate(`/account/${conversation.getAccountId()}/${uri}`);
               closeModal();
-              openModalDelete();
             }}
+            {...stackStyles}
           >
-            <Person /> Supprimer contact
-          </div>
-          <br />
+            <div
+              style={{
+                marginTop: "24px",
+              }}
+            >
+              <MessageIcon />
+            </div>
+            <div>Message</div>
+          </Stack>
+          <Stack {...stackStyles}>
+            <AudioCallIcon />
+            <div>
+            Démarrer appel audio
 
-          <div
-            onClick={() => {
-              console.log("open dialog BLOCK: ");
-              closeModal();
-              openModalDelete();
-            }}
-          >
-            <Person /> Bloquer le contact
-          </div>
-          <br />
+            </div>
+          </Stack>
 
-          <div
+          <Stack {...stackStyles}>
+            <VideoCallIcon /> Démarrer appel vidéo
+          </Stack>
+
+          <Stack {...stackStyles}>
+            <CrossIcon /> Fermer la conversation
+          </Stack>
+
+          <Stack
             onClick={() => {
               console.log("open details contact for: ");
               closeModal();
               openModalDetails();
               getAccountDetails(conversation.getAccountId());
             }}
+            {...stackStyles}
           >
-            <Person /> Détails de la conversation
-          </div>
+            <ContactDetailsIcon /> Détails de la conversation
+          </Stack>
+
+          <Stack
+            onClick={() => {
+              console.log("open dialog BLOCK: ");
+              closeModal();
+              openModalDelete();
+            }}
+            {...stackStyles}
+          >
+            <BlockContactIcon /> Bloquer le contact
+          </Stack>
+
+          <Stack
+            onClick={() => {
+              console.log("open dialog Supprimer: ");
+              closeModal();
+              openModalDelete();
+            }}
+            {...stackStyles}
+          >
+            <RemoveContactIcon /> Supprimer contact
+          </Stack>
         </Modal>
 
         <Modal
@@ -190,9 +242,9 @@ export default function ConversationListItem(props) {
           button
           alignItems="flex-start"
           selected={isSelected}
-          onClick={() =>
-            navigate(`/account/${conversation.getAccountId()}/${uri}`)
-          }
+          // onClick={() =>
+          //   navigate(`/account/${conversation.getAccountId()}/${uri}`)
+          // }
         >
           <ListItemAvatar>
             <ConversationAvatar

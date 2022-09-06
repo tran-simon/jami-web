@@ -28,6 +28,7 @@ export default function ContactList() {
   const [modalIsOpen, setIsOpen] = useState(false);
   const [modalDetailsIsOpen, setModalDetailsIsOpen] = useState(false);
   const [modalDeleteIsOpen, setModalDeleteIsOpen] = useState(false);
+  const [blockOrRemove, setBlockOrRemove] = useState(true);
 
   const openModal = () => setIsOpen(true);
   const openModalDetails = () => setModalDetailsIsOpen(true);
@@ -41,34 +42,47 @@ export default function ContactList() {
   const getContactDetails = () => {
     const controller = new AbortController();
     authManager
-      .fetch(`/api/accounts/${accountId}/contacts/${currentContact.id}`, {
+      .fetch(`/api/accounts/${accountId}/contacts/details/${currentContact.id}`, {
         signal: controller.signal,
       })
       .then((res) => res.json())
       .then((result) => {
-        // setContacts(result);
         console.log("CONTACT LIST - DETAILS: ", result);
       })
-      .catch((e) => console.log("ERROR 2", e));
+      .catch((e) => console.log("ERROR GET CONTACT DETAILS: ", e));
   };
 
-  const removeContact = () => {};
-
-  const blockContact = () => {};
-
+  const removeOrBlock = (typeOfRemove) => {
+    console.log("REMOVE");
+    setBlockOrRemove(false);
+    const controller = new AbortController();
+    authManager
+      .fetch(
+        `/api/accounts/${accountId}/contacts/${typeOfRemove}/${currentContact.id}`,
+        {
+          signal: controller.signal,
+          method: "DELETE",
+        }
+      )
+      .then((res) => res.json())
+      .then((result) => {})
+      .catch((e) => console.log(`ERROR ${typeOfRemove}ing CONTACT : `, e));
+    closeModalDelete();
+  };
 
   useEffect(() => {
     const controller = new AbortController();
     authManager
-      .fetch(`/api/accounts/${accountId}/conversations`, {
+      .fetch(`/api/accounts/${accountId}/contacts`, {
         signal: controller.signal,
       })
       .then((res) => res.json())
       .then((result) => {
+        console.log("CONTACTS: ", result)
         setContacts(result);
       });
     return () => controller.abort();
-  }, []);
+  }, [blockOrRemove]);
 
   return (
     <div className="rooms-list">
@@ -95,6 +109,7 @@ export default function ContactList() {
         <div
           onClick={() => {
             console.log("open dialog Supprimer: ");
+            setBlockOrRemove(false);
             closeModal();
             openModalDelete();
           }}
@@ -106,6 +121,7 @@ export default function ContactList() {
         <div
           onClick={() => {
             console.log("open dialog BLOCK: ");
+            setBlockOrRemove(true);
             closeModal();
             openModalDelete();
           }}
@@ -132,16 +148,23 @@ export default function ContactList() {
         style={customStyles}
         contentLabel="Merci de confirmer"
       >
-        Voulez vous vraiment supprimer ce contact?
-        <button onClick={closeModalDelete}>Bloquer</button>
+        Voulez vous vraiment {blockOrRemove ? "bloquer" : "supprimer"} ce
+        contact?
+        <br />
+        {blockOrRemove ? (
+          <button onClick={() => removeOrBlock("block")}>Bloquer</button>
+        ) : (
+          <button onClick={() => removeOrBlock("remove")}>Supprimer</button>
+        )}
         <button onClick={closeModalDelete}>Annuler</button>
       </Modal>
 
       <List>
-        {contacts.map((contact) => (
+        {contacts?.map((contact) => (
           <ListItem
             button
             alignItems="flex-start"
+            key={contact.id}
             // selected={isSelected}
             onClick={() => {
               setCurrentContact(contact);
