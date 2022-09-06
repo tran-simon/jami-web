@@ -4,6 +4,7 @@ import isToday from "dayjs/plugin/isToday"
 import isYesterday from "dayjs/plugin/isYesterday"
 import React from "react"
 import { useTranslation } from "react-i18next"
+import ConversationAvatar from "./ConversationAvatar"
 
 dayjs.extend(isToday)
 dayjs.extend(isYesterday)
@@ -76,7 +77,7 @@ export const MessageText = (props) => {
       isFirstOfGroup={props.isFirstOfGroup}
       isLastOfGroup={props.isLastOfGroup}
     >
-      <Typography variant="body1" color={props.textColor}>
+      <Typography variant="body1" color={props.textColor} textAlign={props.position}>
         {props.message.body}
       </Typography>
     </MessageBubble>
@@ -152,27 +153,35 @@ export const MessageTime = ({time, hasDateOnTop}) => {
 }
 
 export const MessageBubblesGroup = (props) => {
-
-  const isUser = true // should access user from the store
+  const isUser = false // should access user from the store
   const position = isUser ? "end" : "start"
   const bubbleColor = isUser ? "#005699" : "#E5E5E5"
   const textColor = isUser ? "white" : "black"
 
   return (
-    <Stack // Container for an entire row with a single group of bubbles
+    <Stack // Row for a group of message bubbles with the user's infos
       direction="row"
       justifyContent={position}
+      alignItems="end"
+      spacing="10px"
     >
-      <Stack // Container for a group of bubbles with the partipants informations
+      {
+        !isUser
+        &&
+          <ConversationAvatar
+            displayName="TempDisplayName"
+            sx={{ width: "22px", height: "22px", fontSize: "15px" }}
+          />
+      }
+      <Stack // Container to align the bubbles to the same side of a row
         width="66.66%"
-        paddingTop="30px"
         alignItems={position}
       >
         <ParticipantName
           name={props.messages[0]?.author}
           position={position}
         />
-        <Stack // Container for the bubbles alone
+        <Stack // Container for a group of message bubbles
           spacing="6px"
           alignItems={position}
           direction="column-reverse"
@@ -189,7 +198,7 @@ export const MessageBubblesGroup = (props) => {
                   break
               } 
               return (
-                <Component // Container for a single bubble
+                <Component // Single message
                   key={message.id} 
                   message={message}
                   textColor={textColor}
