@@ -6,6 +6,7 @@ class Conversation {
         this.accountId = accountId
         this.members = members || []
         this.messages = []
+        this.infos = {}
     }
 
     static from(accountId, object) {
@@ -84,6 +85,10 @@ class Conversation {
 
     getMessages() {
         return this.messages
+    }
+
+    setInfos(infos){
+        this.infos = infos
     }
 }
 

@@ -258,11 +258,12 @@ class JamiDaemon {
 
             JamiDaemon.vectToJs(this.dring.getConversations(accountId)).forEach(conversationId => {
                 const members = JamiDaemon.vectMapToJs(this.dring.getConversationMembers(accountId, conversationId))
+                console.log("\n\nXMEMBERS: ", members)
                 members.forEach(member => {
                     member.contact = account.getContactFromCache(member.uri)
                     if (!member.contact.isRegisteredNameResolved()) {
                         if (!member.uri) return
-                        console.log(`lookupAddress ${accountId} ${member.uri}`)
+                        console.log(`lookupAddress ${accountId} ${member.uri}`, member)
                         member.contact.setRegisteredName(new Promise((resolve, reject) =>
                             account.lookups.push({address: member.uri, resolve, reject})
                         ).then(result => {
@@ -277,6 +278,7 @@ class JamiDaemon {
                     }
                 })
                 const conversation = new Conversation(conversationId, accountId, members)
+                conversation.setInfos(JamiDaemon.mapToJs(this.dring.conversationInfos(accountId, conversationId)))
                 account.addConversation(conversation)
             })
             account.setDevices(

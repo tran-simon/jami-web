@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import ReactDOM from 'react-dom';
 import Modal from 'react-modal';
 import authManager from '../AuthManager'
@@ -7,27 +7,24 @@ import Conversation from '../../../model/Conversation'
 import React, { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom"
 import { Person } from "@mui/icons-material";
-import { ListItem, ListItemAvatar, ListItemText } from '@mui/material'
-import { Button, Stack, Switch, ThemeProvider, Typography } from "@mui/material"
-import { CloseButton } from './buttons';
-import { AudioCallIcon, BlockContactIcon, ContactDetailsIcon, CrossIcon, MessageIcon, RemoveContactIcon, VideoCallIcon } from './svgIcons';
+import { ListItem, ListItemAvatar, ListItemText, Box, Typography } from '@mui/material'
+import { Button, Stack, Switch, ThemeProvider, Typography, Modal as ModalUM } from "@mui/material"
+import { RemoveContactIcon, VideoCallIcon } from './svgIcons';
+import { AudioCallIcon, BlockContactIcon, ContactDetailsIcon, CrossIcon, MessageIcon } from './svgIcons';
+import { styled } from "@mui/material/styles";
+import {QRCodeSVG, QRCodeCanvas} from 'qrcode.react';
 
 const customStyles = {
   content: {
-    // top: "50%",
-    // left: "50%",
     // right: "auto",
     // bottom: "auto",
     // // marginRight: "-50%",
     // transform: "translate(-50%, -50%)",
-    // borderRadius: "5px 20px 20px 5px",
-    // boxShadow; ""
-    // fontSize: "12px",
     // padding: "16px"
 
     // top: "1364px",
     left: "94px",
-    width: "164px",
+    width: "180px",
     height: "262px",
     background: "#FFFFFF 0% 0% no-repeat padding-box",
     boxShadow: "3px 3px 7px #00000029",
@@ -35,7 +32,41 @@ const customStyles = {
     opacity: "1",
 
     textAlign: "left",
-    font: "normal normal normal 12px/36px Ubuntu",
+    font: "normal normal normal 12px/26px Ubuntu",
+    letterSpacing: "0px",
+    color: "#000000",
+  },
+};
+
+const cancelStyles = {
+  content: {
+    left: "94px",
+    width: "300px",
+    height: "220px",
+    background: "#FFFFFF 0% 0% no-repeat padding-box",
+    boxShadow: "3px 3px 7px #00000029",
+    borderRadius: "20px",
+    opacity: "1",
+
+    textAlign: "left",
+    font: "normal normal normal 12px/26px Ubuntu",
+    letterSpacing: "0px",
+    color: "#000000",
+  },
+};
+
+const contactDetailsStyles = {
+  content: {
+    left: "94px",
+    width: "450px",
+    height: "450px",
+    background: "#FFFFFF 0% 0% no-repeat padding-box",
+    boxShadow: "3px 3px 7px #00000029",
+    borderRadius: "20px",
+    opacity: "1",
+
+    textAlign: "left",
+    font: "normal normal normal 12px/26px Ubuntu",
     letterSpacing: "0px",
     color: "#000000",
   },
@@ -43,12 +74,17 @@ const customStyles = {
 
 const stackStyles = {
   flexDirection: "row",
-  marginBottom: "5px",
-  // spacing: "10px",
+  marginBottom: "4px",
+  spacing: "40px",
   flex: 1,
   alignItems: "center",
-  // justifyContent: "space-around"
 };
+
+const iconTextStyle = {
+  marginRight: "10px",
+};
+
+const iconColor = "#005699";
 
 export default function ConversationListItem(props) {
   const { conversationId, contactId } = useParams();
@@ -64,187 +100,341 @@ export default function ConversationListItem(props) {
   const isSelected = conversation.getDisplayUri() === pathId;
   const navigate = useNavigate();
 
-  let subtitle;
   const [modalIsOpen, setIsOpen] = useState(false);
   const [modalDetailsIsOpen, setModalDetailsIsOpen] = useState(false);
   const [modalDeleteIsOpen, setModalDeleteIsOpen] = useState(false);
+  const [blockOrRemove, setBlockOrRemove] = useState(true);
+  const [userId, setUserId] = useState(
+    conversation.getFirstMember().contact.getUri()
+  );
+  const [isSwarm, setIsSwarm] = useState("true");
 
-  const openModal = () => setIsOpen(true);
+  const openModal = (e) => {
+    e.preventDefault();
+    console.log(e);
+    setIsOpen(true);
+  };
   const openModalDetails = () => setModalDetailsIsOpen(true);
   const openModalDelete = () => setModalDeleteIsOpen(true);
-
   const closeModal = () => setIsOpen(false);
-
   const closeModalDetails = () => setModalDetailsIsOpen(false);
   const closeModalDelete = () => setModalDeleteIsOpen(false);
 
+  let subtitle;
   function afterOpenModal() {
     // references are now sync'd and can be accessed.
     subtitle.style.color = "#f00";
   }
 
-  const getAccountDetails = (accountId) => {
-    // useEffect(() => {
+  const getContactDetails = () => {
     const controller = new AbortController();
     authManager
-      .fetch(`/api/accounts/${conversation.getAccountId()}`, {
-        method: "GET",
-        headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json",
-        },
-        // body: JSON.stringify(newDetails)
-        //   {
-        //     uri: conversation.getFirstMember()?.contact?.getUri(),
-        //     signal: controller.signal,
-        //   },
-      })
-      .then((res) => {
-        console.log("YYY 0", res);
-        res.json();
-      })
+      .fetch(
+        `/api/accounts/${conversation.getAccountId()}/contacts/details/${userId}`,
+        {
+          signal: controller.signal,
+        }
+      )
+      .then((res) => res.json())
       .then((result) => {
-        console.log("YYY 1", result);
+        console.log("CONTACT LIST - DETAILS: ", result);
       })
-      .catch((e) => console.log("YYY 2", e));
-    //       return () => controller.abort()
-    //   }, [accountId])
+      .catch((e) => console.log("ERROR GET CONTACT DETAILS: ", e));
   };
 
-  const [userName, setUserName] = useState("User name");
-  const [userId, setUserId] = useState("User id");
-  const [codeQr, setVodeQr] = useState("QR");
-  const [isSwarm, setIsSwarm] = useState(true);
+  const removeOrBlock = (typeOfRemove) => {
+    console.log(typeOfRemove);
+    setBlockOrRemove(false);
+
+    console.log("EEEH", typeOfRemove, conversation.getAccountId(), userId);
+
+    const controller = new AbortController();
+    authManager
+      .fetch(
+        `/api/accounts/${conversation.getAccountId()}/contacts/${typeOfRemove}/${userId}`,
+        {
+          signal: controller.signal,
+          method: "DELETE",
+        }
+      )
+      .then((res) => res.json())
+      .then((result) => {})
+      .catch((e) => console.log(`ERROR ${typeOfRemove}ing CONTACT : `, e));
+    closeModalDelete();
+    setRefresh(!refresh)
+  };
+  const [refresh, setRefresh] = useState(true)
+
+  useEffect(() => {
+    console.log("refresh");
+  }, [refresh]);
+
 
   const uri = conversation.getId()
     ? `conversation/${conversation.getId()}`
-    : `addContact/${conversation.getFirstMember().contact.getUri()}`;
+    : `addContact/${userId}`;
   if (conversation instanceof Conversation) {
     return (
-      <div>
-        <button onClick={openModal}>Open Modal</button>
-        <Modal
-          isOpen={modalIsOpen}
-          //   onAfterOpen={afterOpenModal}
-          onRequestClose={closeModal}
-          style={customStyles}
-          contentLabel="Example Modal"
-        >
-          {/* <h2 ref={(_subtitle) => (subtitle = _subtitle)}>Hello</h2> */}
-          {/* <button onClick={closeModal}>close</button> */}
-          <Stack
-            onClick={() => {
-              navigate(`/account/${conversation.getAccountId()}/${uri}`);
-              closeModal();
-            }}
-            {...stackStyles}
+      <div onContextMenu={openModal}>
+        <div name="Modal conversation">
+          <Modal
+            isOpen={modalIsOpen}
+            //   onAfterOpen={afterOpenModal}
+            onRequestClose={closeModal}
+            style={customStyles}
+            contentLabel="Example Modal"
           >
-            <div
-              style={{
-                marginTop: "24px",
+            <Stack
+              onClick={() => {
+                navigate(`/account/${conversation.getAccountId()}/${uri}`);
+                closeModal();
+              }}
+              {...stackStyles}
+            >
+              <div style={{ ...iconTextStyle }}>
+                <MessageIcon style={{ color: iconColor }} />
+              </div>
+              Message
+            </Stack>
+            <Stack {...stackStyles}>
+              <div style={{ ...iconTextStyle }}>
+                <AudioCallIcon style={{ color: iconColor }} />
+              </div>
+              Démarrer appel audio
+            </Stack>
+
+            <Stack {...stackStyles}>
+              <div style={{ ...iconTextStyle }}>
+                <VideoCallIcon style={{ color: iconColor }} />
+              </div>
+              Démarrer appel vidéo
+            </Stack>
+
+            <Stack
+              {...stackStyles}
+              onClick={() => {
+                navigate(`/account/${conversation.getAccountId()}/`);
+                closeModal();
               }}
             >
-              <MessageIcon />
+              <div style={{ ...iconTextStyle }}>
+                <CrossIcon style={{ color: iconColor }} />
+              </div>
+              Fermer la conversation
+            </Stack>
+
+            <Stack
+              onClick={() => {
+                console.log("open details contact for: ");
+                closeModal();
+                openModalDetails();
+                getContactDetails();
+              }}
+              {...stackStyles}
+            >
+              <div style={{ ...iconTextStyle }}>
+                <ContactDetailsIcon style={{ color: iconColor }} />
+              </div>
+              Détails de la conversation
+            </Stack>
+
+            <Stack
+              onClick={() => {
+                setBlockOrRemove(true);
+                closeModal();
+                openModalDelete();
+              }}
+              {...stackStyles}
+            >
+              <div style={{ ...iconTextStyle }}>
+                <BlockContactIcon style={{ color: iconColor }} />
+              </div>
+              Bloquer le contact
+            </Stack>
+
+            <Stack
+              onClick={() => {
+                setBlockOrRemove(false);
+                closeModal();
+                openModalDelete();
+              }}
+              {...stackStyles}
+            >
+              <div style={{ ...iconTextStyle }}>
+                <RemoveContactIcon style={{ color: iconColor }} />
+              </div>
+              Supprimer contact
+            </Stack>
+          </Modal>
+        </div>
+
+        <div name="Contact details">
+          <Modal
+            isOpen={modalDetailsIsOpen}
+            onRequestClose={closeModalDetails}
+            style={contactDetailsStyles}
+            contentLabel="Détails contact"
+          >
+            <Stack direction={"row"} alignContent="flex-end">
+              <Stack direction={"column"}>
+                <div style={{ height: "100px" }}>
+                  <ConversationAvatar
+                    displayName={conversation.getDisplayNameNoFallback()}
+                  />
+                </div>
+
+                <div
+                  style={{
+                    fontSize: "20px",
+                    marginBottom: "20px",
+                    height: "20px",
+                  }}
+                >
+                  Informations
+                </div>
+
+                <Typography variant="caption">Nom d'utilisateur</Typography>
+                <div style={{ height: "20px" }} />
+                <Typography variant="caption">Identifiant </Typography>
+                <div style={{ height: "20px" }} />
+
+                <div
+                  style={{
+                    flex: 1,
+                    height: "150px",
+                    direction: "column",
+                    flexDirection: "column",
+                    // alignSelf: "flex-end",
+                  }}
+                >
+                  <Typography variant="caption">Code QR</Typography>
+                </div>
+
+                <Typography variant="caption">est un swarm </Typography>
+              </Stack>
+
+              <Stack direction={"column"}>
+                <div
+                  style={{
+                    fontWeight: "bold",
+                    fontSize: "20px",
+                    height: "100px",
+                  }}
+                >
+                  {conversation.getDisplayNameNoFallback() + "(resolved name)"}
+                </div>
+
+                <div
+                  style={{
+                    height: "40px",
+                  }}
+                />
+                <Typography variant="caption">
+                  <div style={{ fontWeight: "bold" }}>
+                    {conversation.getDisplayNameNoFallback()}
+                  </div>
+                </Typography>
+
+                <div style={{ height: "20px" }} />
+
+                <Typography variant="caption">
+                  <div style={{ fontWeight: "bold" }}> {userId}</div>
+                </Typography>
+
+                <div style={{ height: "20px" }} />
+
+                <div height={"40px"}>
+                  <QRCodeCanvas value={`${userId}`} />
+                </div>
+
+                <Typography variant="caption">
+                  <div style={{ fontWeight: "bold" }}> {isSwarm}</div>
+                </Typography>
+              </Stack>
+            </Stack>
+            <div
+              onClick={closeModalDetails}
+              style={{
+                width: "100px",
+                borderStyle: "solid",
+                textAlign: "center",
+                borderRadius: "5px",
+                marginLeft: "150px",
+                marginTop: "10px",
+              }}
+            >
+              <Typography variant="caption">Fermer</Typography>
             </div>
-            <div>Message</div>
-          </Stack>
-          <Stack {...stackStyles}>
-            <AudioCallIcon />
-            <div>
-            Démarrer appel audio
+          </Modal>
+        </div>
 
-            </div>
-          </Stack>
-
-          <Stack {...stackStyles}>
-            <VideoCallIcon /> Démarrer appel vidéo
-          </Stack>
-
-          <Stack {...stackStyles}>
-            <CrossIcon /> Fermer la conversation
-          </Stack>
-
-          <Stack
-            onClick={() => {
-              console.log("open details contact for: ");
-              closeModal();
-              openModalDetails();
-              getAccountDetails(conversation.getAccountId());
-            }}
-            {...stackStyles}
+        <div name="Remove or block details">
+          <Modal
+            isOpen={modalDeleteIsOpen}
+            onRequestClose={closeModalDelete}
+            style={cancelStyles}
+            contentLabel="Merci de confirmer"
           >
-            <ContactDetailsIcon /> Détails de la conversation
-          </Stack>
+            <Typography variant="h4">Merci de confirmer</Typography>
+            <Stack
+              direction={"column"}
+              justifyContent="space-around"
+              spacing={"75px"}
+            >
+              <div style={{ textAlign: "center", marginTop: "10%" }}>
+                <Typography variant="body2">
+                  Voulez vous vraiment {blockOrRemove ? "bloquer" : "supprimer"}{" "}
+                  ce contact?
+                </Typography>
+              </div>
 
-          <Stack
-            onClick={() => {
-              console.log("open dialog BLOCK: ");
-              closeModal();
-              openModalDelete();
-            }}
-            {...stackStyles}
-          >
-            <BlockContactIcon /> Bloquer le contact
-          </Stack>
-
-          <Stack
-            onClick={() => {
-              console.log("open dialog Supprimer: ");
-              closeModal();
-              openModalDelete();
-            }}
-            {...stackStyles}
-          >
-            <RemoveContactIcon /> Supprimer contact
-          </Stack>
-        </Modal>
-
-        <Modal
-          isOpen={modalDetailsIsOpen}
-          //   onAfterOpen={afterOpenModalDetails}
-          onRequestClose={closeModalDetails}
-          style={customStyles}
-          contentLabel="Détails contact"
-        >
-          <div>
-            <Person /> {userName}
-          </div>
-          <br />
-
-          <div>Nom d'utilisateur {userName}</div>
-          <br />
-
-          <div>Identifiant {userId}</div>
-          <br />
-
-          <div>Code QR {codeQr}</div>
-          <br />
-
-          <div>est un swarm {isSwarm}</div>
-          <br />
-
-          <button onClick={closeModalDetails}>Fermer</button>
-        </Modal>
-
-        <Modal
-          isOpen={modalDeleteIsOpen}
-          //   onAfterOpen={afterOpenModalDetails}
-          onRequestClose={closeModalDelete}
-          style={customStyles}
-          contentLabel="Merci de confirmer"
-        >
-          Voulez vous vraiment supprimer ce contact?
-          <button onClick={closeModalDelete}>Bloquer</button>
-          <button onClick={closeModalDelete}>Annuler</button>
-        </Modal>
+              <Stack
+                direction={"row"}
+                top={"25px"}
+                alignSelf="center"
+                spacing={1}
+              >
+                <Box
+                  onClick={() => {
+                    if (blockOrRemove) removeOrBlock("block");
+                    else removeOrBlock("remove");
+                  }}
+                  style={{
+                    width: "100px",
+                    textAlign: "center",
+                    borderStyle: "solid",
+                    borderColor: "red",
+                    borderRadius: "10px",
+                    color: "red",
+                  }}
+                >
+                  {blockOrRemove ? "Bloquer" : "Supprimer"}
+                </Box>
+                <Box
+                  onClick={closeModalDelete}
+                  style={{
+                    width: "100px",
+                    textAlign: "center",
+                    paddingLeft: "12px",
+                    paddingRight: "12px",
+                    borderStyle: "solid",
+                    borderRadius: "10px",
+                  }}
+                >
+                  Annuler
+                </Box>
+              </Stack>
+            </Stack>
+          </Modal>
+        </div>
 
         <ListItem
           button
           alignItems="flex-start"
           selected={isSelected}
-          // onClick={() =>
-          //   navigate(`/account/${conversation.getAccountId()}/${uri}`)
-          // }
+          onClick={() =>
+            navigate(`/account/${conversation.getAccountId()}/${uri}`)
+          }
         >
           <ListItemAvatar>
             <ConversationAvatar

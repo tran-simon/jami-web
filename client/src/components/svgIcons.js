@@ -184,7 +184,7 @@ export const RoundCrossIcon = (props) => {
 export const MessageIcon = (props) => {
   return (
     <SvgIcon {...props} viewBox="0 0 16 14.554">
-      <svg
+      {/* <svg
         xmlns="http://www.w3.org/2000/svg"
         width="16"
         height="14.554"
@@ -192,7 +192,7 @@ export const MessageIcon = (props) => {
       >
         <defs>
           <style>.a{"fill:#005699;"}</style>
-        </defs>
+        </defs> */}
         <g transform="translate(-3.7 -4.4)">
           <g transform="translate(3.7 4.4)">
             <g transform="translate(0 0)">
@@ -204,7 +204,7 @@ export const MessageIcon = (props) => {
             </g>
           </g>
         </g>
-      </svg>
+      {/* </svg> */}
     </SvgIcon>
   );
 };
@@ -212,7 +212,7 @@ export const MessageIcon = (props) => {
 export const AudioCallIcon = (props) => {
   return (
     <SvgIcon {...props} viewBox="0 0 15.338 16">
-      <svg
+      {/* <svg
         xmlns="http://www.w3.org/2000/svg"
         width="15.338"
         height="16"
@@ -220,7 +220,7 @@ export const AudioCallIcon = (props) => {
       >
         <defs>
           <style>.a{"fill:#005699;"}</style>
-        </defs>
+        </defs> */}
         <g transform="translate(-2.404 -1.956)">
           <g transform="translate(2.404 1.956)">
             <g transform="translate(0)">
@@ -232,7 +232,7 @@ export const AudioCallIcon = (props) => {
             </g>
           </g>
         </g>
-      </svg>
+      {/* </svg> */}
     </SvgIcon>
   );
 };
@@ -240,7 +240,7 @@ export const AudioCallIcon = (props) => {
 export const VideoCallIcon = (props) => {
   return (
     <SvgIcon {...props} viewBox="0 0 16 12">
-      <svg
+      {/* <svg
         xmlns="http://www.w3.org/2000/svg"
         width="16"
         height="12"
@@ -248,7 +248,7 @@ export const VideoCallIcon = (props) => {
       >
         <defs>
           <style>.a{"fill:#005699;"}</style>
-        </defs>
+        </defs> */}
         <g transform="translate(-4.4 -6)">
           <g transform="translate(4.4 6)">
             <path
@@ -258,7 +258,7 @@ export const VideoCallIcon = (props) => {
             />
           </g>
         </g>
-      </svg>
+      {/* </svg> */}
     </SvgIcon>
   );
 };
@@ -266,7 +266,7 @@ export const VideoCallIcon = (props) => {
 export const ContactDetailsIcon = (props) => {
   return (
     <SvgIcon {...props} viewBox="0 0 14.647 16">
-      <svg
+      {/* <svg
         xmlns="http://www.w3.org/2000/svg"
         width="14.647"
         height="16"
@@ -274,13 +274,13 @@ export const ContactDetailsIcon = (props) => {
       >
         <defs>
           <style>.a{"fill:#005699;"}</style>
-        </defs>
+        </defs> */}
         <path
           class="a"
           d="M11.258,9.562A3.774,3.774,0,0,0,13.965,5.9,3.79,3.79,0,0,0,10.144,2,3.871,3.871,0,0,0,8.95,9.562,7.806,7.806,0,0,0,2.9,17.443a.557.557,0,1,0,1.114,0c0-3.821,2.786-6.925,6.209-6.925s6.209,3.1,6.209,6.925a.557.557,0,0,0,1.114,0C17.388,13.463,14.681,10.119,11.258,9.562ZM7.278,5.9a2.866,2.866,0,1,1,5.731,0,2.787,2.787,0,0,1-2.866,2.786A2.838,2.838,0,0,1,7.278,5.9Z"
           transform="translate(-2.9 -2)"
         />
-      </svg>
+      {/* </svg> */}
     </SvgIcon>
   );
 };
@@ -288,10 +288,10 @@ export const ContactDetailsIcon = (props) => {
 export const BlockContactIcon = (props) => {
   return (
     <SvgIcon {...props} viewBox="0 0 16 15.52">
-      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="15.52">
+      {/* <svg xmlns="http://www.w3.org/2000/svg" width="16" height="15.52">
         <defs>
           <style>.a{"fill:#005699;"}</style>
-        </defs>
+        </defs> */}
         <g transform="translate(-2 -2.3)">
           <path
             class="a"
@@ -303,7 +303,7 @@ export const BlockContactIcon = (props) => {
             d="M12,10.94l.56-.32A6.445,6.445,0,0,0,9.92,9.5a3.626,3.626,0,0,0,2.56-3.52A3.555,3.555,0,0,0,8.88,2.3,3.735,3.735,0,0,0,7.76,9.58,7.327,7.327,0,0,0,2,17.02a.547.547,0,0,0,.56.56.547.547,0,0,0,.56-.56c0-3.6,2.64-6.56,5.92-6.56a5.3,5.3,0,0,1,2.88.88A.971.971,0,0,1,12,10.94ZM8.88,8.7A2.68,2.68,0,1,1,11.6,6.06,2.631,2.631,0,0,1,8.88,8.7Z"
           />
         </g>
-      </svg>
+      {/* </svg> */}
     </SvgIcon>
   );
 };
@@ -311,7 +311,7 @@ export const BlockContactIcon = (props) => {
 export const RemoveContactIcon = (props) => {
   return (
     <SvgIcon {...props} viewBox="0 0 16 16">
-      <svg
+      {/* <svg
         xmlns="http://www.w3.org/2000/svg"
         width="16"
         height="16"
@@ -319,7 +319,7 @@ export const RemoveContactIcon = (props) => {
       >
         <defs>
           <style>.a{"fill:#005699;"}</style>
-        </defs>
+        </defs> */}
         <g transform="translate(-2 -2)">
           <g transform="translate(2 2)">
             <path
@@ -328,7 +328,7 @@ export const RemoveContactIcon = (props) => {
             />
           </g>
         </g>
-      </svg>
+      {/* </svg> */}
     </SvgIcon>
   );
 };
