@@ -21,3 +21,21 @@ Where $PATH_TO_JAMI_PROJECT is the path to the shared library of your Jami daemo
 LD_LIBRARY_PATH=$PATH_TO_JAMI_PROJECT/ring-project/install/daemon/lib node
 
 To build the dring.node Javascript interface to talk to the daemon api go to the daemon repo and use ./configure --with-nodejs then execute make -j4 to build the daemon
+
+# Docker
+
+You may run the web server in a Docker container. This will automatically build the daemon and do the necessary linking.
+
+```bash
+docker build -t jami-web .
+docker run -it -p 3000:3000 jami-web
+```
+
+## Using [docker-compose](docker run -p 3000:3000 -it jami-project
+)
+This will use a [Docker Volume](https://docs.docker.com/storage/volumes/) to enable auto-refresh when you change a file.
+
+```bash
+docker-compose build
+docker-compose up
+```

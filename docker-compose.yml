@@ -1,0 +1,11 @@
+version: "3"
+
+services:
+  jami-web:
+    build: .
+    image: jami-web
+    volumes:
+      - ./client:/app/client
+    ports:
+      - "3000:3000"
+    stdin_open: true

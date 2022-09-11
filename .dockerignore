@@ -1,0 +1,15 @@
+.idea/
+.vscode/
+
+daemon/build-local/
+daemon/contrib/native*
+daemon/contrib/i386*
+daemon/contrib/x86_64-*
+daemon/contrib/arm*
+daemon/contrib/aarch64*
+daemon/contrib/i686*
+
+node_modules/
+dist/
+
+client/dist/

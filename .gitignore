@@ -8,3 +8,7 @@ jaas-client/dist/
 .env
 dring.node
 jamid.node
+
+.idea/
+.vscode/
+*.iml
