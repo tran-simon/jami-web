@@ -26,15 +26,32 @@ To build the dring.node Javascript interface to talk to the daemon api go to the
 
 You may run the web server in a Docker container. This will automatically build the daemon and do the necessary linking.
 
+## 1. Build the daemon
+
 ```bash
-docker build -t jami-web .
-docker run -it -p 3000:3000 jami-web
+cd daemon
+docker build --build-arg config_args="--with-nodejs" -t jami-daemon .
+cd ..
+```
+
+## 2. Build and run the web server and client
+
+```bash
+docker build --tag jami-web .
+docker run -it \
+  -p 3000:3000 \
+  --volume $(pwd)/client:/web-client/client \
+  jami-web
 ```
 
 ## Using [docker-compose](docker run -p 3000:3000 -it jami-project)
 This will use a [Docker Volume](https://docs.docker.com/storage/volumes/) to enable auto-refresh when you change a file.
 
 ```bash
+# First build the daemon if necessary
+docker-compose build jami-daemon
+
+# Then build the project and start the container
 docker-compose build
 docker-compose up
 ```

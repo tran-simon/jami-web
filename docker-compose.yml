@@ -1,11 +1,21 @@
-version: "3"
+version: "3.9"
 
 services:
   jami-web:
-    build: .
     image: jami-web
+    build: .
     volumes:
-      - ./client:/app/client
+      - ./client:/web-client/client # Add bind mount to hot-reload client
+      - /web-client/client/node_modules/ # Ignore node_modules from bind mount
     ports:
       - "3000:3000"
     stdin_open: true
+    depends_on:
+      - jami-daemon
+
+  jami-daemon:
+    image: jami-daemon
+    build:
+      context: ./daemon
+      args:
+        config_args: "--with-nodejs"
