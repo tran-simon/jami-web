@@ -21,6 +21,18 @@ export const useMessagesQuery = (accountId, conversationId) => {
     )
 }
 
+export const useSendMessageMutation = (accountId, conversationId) => {
+    const queryClient = useQueryClient();
+    return useMutation(
+        (message) => (
+            axios.post(`/api/accounts/${accountId}/conversations/${conversationId}`, {message})
+        ),
+        {
+            "onSuccess": () => queryClient.invalidateQueries(["messages", accountId, conversationId]),
+        }
+    )
+}
+
 const fetchConversation = (accountId, conversationId) => (
     axios
     .get(`/api/accounts/${accountId}/conversations/${conversationId}`)

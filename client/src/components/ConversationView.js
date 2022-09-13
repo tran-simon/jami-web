@@ -1,46 +1,50 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import MessageList from './MessageList';
 import SendMessageForm from './SendMessageForm';
-import authManager from '../AuthManager'
 import Conversation from '../../../model/Conversation';
 import LoadingPage from './loading';
 import io from "socket.io-client";
 import { Box, Stack, Typography } from '@mui/material';
 import ConversationAvatar from './ConversationAvatar';
-import { useConversationQuery, useMessagesQuery } from '../services/conversation';
+import { useConversationQuery, useMessagesQuery, useSendMessageMutation } from '../services/conversation';
 
 const ConversationView = props => {
-  const [loadingMessages, setLoadingMessages] = useState(false)
   const [socket, setSocket] = useState()
   const [conversation, setConversation] = useState()
   const [messages, setMessages] = useState([])
-  const [loaded, setLoaded] = useState(true)
+  const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState(false)
 
   const conversationQuery = useConversationQuery(props.accountId, props.conversationId)
   const messagesQuery = useMessagesQuery(props.accountId, props.conversationId)
+  const sendMessageMutation = useSendMessageMutation(props.accountId, props.conversationId)
 
   useEffect(() => {
-    if (conversationQuery.data) {
+    if (conversationQuery.isSuccess) {
       const conversation = Conversation.from(props.accountId, conversationQuery.data)
       setConversation(conversation)
     }
   }, [conversationQuery.data])
 
   useEffect(() => {
-    if (messagesQuery.data) {
+    if (messagesQuery.isSuccess) {
       const sortedMessages = sortMessages(messagesQuery.data)
       setMessages(sortedMessages)
     }
   }, [messagesQuery.data])
 
   useEffect(() => {
-    setLoaded(!(conversationQuery.isLoading || messagesQuery.isLoading))
+    setIsLoading(conversationQuery.isLoading || messagesQuery.isLoading)
   }, [conversationQuery.isLoading, messagesQuery.isLoading])
   
   useEffect(() => {
     setError(conversationQuery.isError || messagesQuery.isError)
   }, [conversationQuery.isError, messagesQuery.isError])
+
+  const sendMessage = useCallback(
+    (message) => sendMessageMutation.mutate(message),
+    [sendMessageMutation]
+  )
 
   useEffect(() => {
     console.log("io.connect")
@@ -67,18 +71,7 @@ const ConversationView = props => {
     })
   }, [conversation ? props.conversationId : "", socket])
 
-  const sendMessage = (message) => {
-    authManager.fetch(`/api/accounts/${props.accountId}/conversations/${props.conversationId}`, {
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
-      },
-      method:"POST",
-      body: JSON.stringify({ message })
-    })
-  }
-
-  if (!loaded) {
+  if (isLoading) {
       return <LoadingPage />
   } else if (error) {
       return <div>Error loading {props.conversationId}</div>
@@ -100,9 +93,6 @@ const ConversationView = props => {
       </Stack>
       <Stack flexGrow={1} overflow="auto" direction="column-reverse">
         <MessageList
-          conversationId={props.conversationId}
-          loading={loadingMessages} 
-          loadMore={() => setLoadingMessages(true)}
           messages={messages}
         />
       </Stack>
