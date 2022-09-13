@@ -1,5 +1,5 @@
 import dayjs from "dayjs"
-import React, { useEffect } from 'react'
+import React, { useEffect, useMemo } from 'react'
 import dayOfYear from 'dayjs/plugin/dayOfYear'
 import isBetween from 'dayjs/plugin/isBetween'
 import { Stack } from "@mui/system"
@@ -9,7 +9,10 @@ dayjs.extend(dayOfYear)
 dayjs.extend(isBetween)
 
 export default function MessageList(props) {
-  const messagesComponents = buildMessagesList(props.messages)
+  const messagesComponents = useMemo(
+    () => buildMessagesList(props.messages),
+    [props.messages]
+  )
 
   useEffect(() => {
     if (!props.loading)

@@ -11,15 +11,26 @@ import './i18n';
 // import config from "../sentry-client.config.json"
 import * as Sentry from "@sentry/react";
 import { BrowserTracing } from "@sentry/tracing";
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      cacheTime: Infinity, // websocket is responsible to tell when data needs to be updated
+    },
+  },
+})
 
 const container = document.getElementById("root");
 const root = createRoot(container);
 root.render(
   <Provider store={store}>
     <React.StrictMode>
-      <Router>
-        <App/>
-      </Router>
+      <QueryClientProvider client={queryClient}>
+        <Router>
+          <App/>
+        </Router>
+      </QueryClientProvider>
     </React.StrictMode>
   </Provider>
 );
