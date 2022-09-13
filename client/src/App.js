@@ -81,7 +81,7 @@ const App = (props) => {
         <Route path="/newAccount" element={<AccountCreationDialog />}>
           <Route path="jami" element={<JamiAccountDialog />} />
         </Route>
-        <Route path="/Contacts" element={<ContactList />} />
+        {/* <Route path="/Contacts" element={<ContactList />} /> */}
         <Route path="/Theme" element={<ThemeDemonstrator />} />
         <Route path="/setup" element={<ServerSetup />} />
         <Route path="/" index element={<Home />} />

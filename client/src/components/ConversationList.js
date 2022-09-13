@@ -1,13 +1,19 @@
 import List from '@mui/material/List'
-import React from 'react'
+import React, { useEffect } from "react";
 import ConversationListItem from './ConversationListItem'
 import ListSubheader from '@mui/material/ListSubheader';
 import Conversation from '../../../model/Conversation';
 import { GroupRounded as GroupIcon } from '@mui/icons-material';
 import Typography from '@mui/material/Typography';
+import { useAppSelector } from '../../redux/hooks';
 
 export default function ConversationList(props) {
-    console.log(props)
+     const { refresh } = useAppSelector((state) => state.app);
+
+     useEffect(() => {
+      console.log("refresh list");
+    }, [refresh]);
+
     return (
         <div className="rooms-list">
             <List>

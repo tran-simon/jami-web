@@ -6,12 +6,14 @@ import type { RootState } from "./store";
 interface appState {
   accountId: string;
   accountObject: Account;
+  refresh: boolean;
 }
 
 // Define the initial state using that type
 const initialState: appState = {
   accountId: "",
   accountObject: null,
+  refresh: true,
 };
 
 export const appSlice = createSlice({
@@ -23,12 +25,15 @@ export const appSlice = createSlice({
       state.accountId = action.payload;
     },
     setAccountObject: (state, action: PayloadAction<Account>) => {
-      state.accountObject = action.payload ;
+      state.accountObject = action.payload;
+    },
+    setRefreshFromSlice: (state) => {
+      state.refresh = !state.refresh;
     },
   },
 });
 
-export const { setAccountId, setAccountObject } = appSlice.actions;
+export const { setAccountId, setAccountObject, setRefreshFromSlice } = appSlice.actions;
 
 // Other code such as selectors can use the imported `RootState` type
 // export const selectCount = (state: RootState) => state.app.value;

@@ -1,18 +1,18 @@
 import React, { useEffect } from 'react';
-import ReactDOM from 'react-dom';
 import Modal from 'react-modal';
 import authManager from '../AuthManager'
 import ConversationAvatar from './ConversationAvatar'
 import Conversation from '../../../model/Conversation'
 import React, { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom"
-import { Person } from "@mui/icons-material";
 import { ListItem, ListItemAvatar, ListItemText, Box, Typography } from '@mui/material'
-import { Button, Stack, Switch, ThemeProvider, Typography, Modal as ModalUM } from "@mui/material"
+import { Button, Stack, Typography, Modal as ModalUM } from "@mui/material"
 import { RemoveContactIcon, VideoCallIcon } from './svgIcons';
 import { AudioCallIcon, BlockContactIcon, ContactDetailsIcon, CrossIcon, MessageIcon } from './svgIcons';
-import { styled } from "@mui/material/styles";
-import {QRCodeSVG, QRCodeCanvas} from 'qrcode.react';
+import { QRCodeCanvas} from 'qrcode.react';
+import { setRefreshFromSlice } from '../../redux/appSlice';
+import { useAppDispatch } from '../../redux/hooks';
+
 
 const customStyles = {
   content: {
@@ -88,13 +88,9 @@ const iconColor = "#005699";
 
 export default function ConversationListItem(props) {
   const { conversationId, contactId } = useParams();
+  const dispatch = useAppDispatch();
+
   const conversation = props.conversation;
-  console.log(
-    "XXX",
-    conversation,
-    conversation.id,
-    conversation.getAccountId()
-  );
 
   const pathId = conversationId || contactId;
   const isSelected = conversation.getDisplayUri() === pathId;
@@ -105,7 +101,7 @@ export default function ConversationListItem(props) {
   const [modalDeleteIsOpen, setModalDeleteIsOpen] = useState(false);
   const [blockOrRemove, setBlockOrRemove] = useState(true);
   const [userId, setUserId] = useState(
-    conversation.getFirstMember().contact.getUri()
+    conversation?.getFirstMember()?.contact.getUri()
   );
   const [isSwarm, setIsSwarm] = useState("true");
 
@@ -158,16 +154,16 @@ export default function ConversationListItem(props) {
         }
       )
       .then((res) => res.json())
-      .then((result) => {})
-      .catch((e) => console.log(`ERROR ${typeOfRemove}ing CONTACT : `, e));
+      .then((result) => {
+        console.log("propre");
+        dispatch(setRefreshFromSlice());
+      })
+      .catch((e) => {
+        console.log(`ERROR ${typeOfRemove}ing CONTACT : `, e);
+        dispatch(setRefreshFromSlice());
+      });
     closeModalDelete();
-    setRefresh(!refresh)
   };
-  const [refresh, setRefresh] = useState(true)
-
-  useEffect(() => {
-    console.log("refresh");
-  }, [refresh]);
 
 
   const uri = conversation.getId()

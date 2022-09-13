@@ -12,8 +12,12 @@ import AddContactPage from './addContactPage.jsx';
 import LoadingPage from '../components/loading';
 import { useParams } from 'react-router';
 import { Stack } from '@mui/material';
+import { useAppSelector } from '../../redux/hooks';
+
 
 const Messenger = (props) => {
+  const { refresh } = useAppSelector((state) => state.app);
+
   const [conversations, setConversations] = useState(undefined)
   const [searchQuery, setSearchQuery] = useState('')
   const [searchResult, setSearchResults] = useState(undefined)
@@ -24,6 +28,7 @@ const Messenger = (props) => {
   const contactId = props.contactId || params.contactId
 
   useEffect(() => {
+    console.log("REFRESH CONVERSATIONS FROM MESSENGER")
     const controller = new AbortController()
     authManager.fetch(`/api/accounts/${accountId}/conversations`, {signal: controller.signal})
     .then(res => res.json())
@@ -31,8 +36,8 @@ const Messenger = (props) => {
       console.log(result)
       setConversations(Object.values(result).map(c => Conversation.from(accountId, c)))
     })
-    // return () => controller.abort() // crash on React18
-  }, [accountId])
+    // return () => controller.abort()
+  }, [accountId, refresh])
 
   useEffect(() => {
     if (!searchQuery)

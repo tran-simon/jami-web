@@ -4,11 +4,15 @@ import { useNavigate } from "react-router-dom";
 import { Box, Container, Fab, Card, CardContent, Typography } from '@mui/material';
 import GroupAddRounded from '@mui/icons-material/GroupAddRounded';
 import authManager from '../AuthManager'
+import { useAppDispatch } from '../../redux/hooks';
+import { setRefreshFromSlice } from '../../redux/appSlice';
+
 
 export default function AddContactPage(props) {
   const navigate = useNavigate();
   const accountId = props.accountId || props.match.params.accountId
   const contactId = props.contactId || props.match.params.contactId
+  const dispatch = useAppDispatch();
 
   const handleClick = async e => {
     const response = await authManager.fetch(`/api/accounts/${accountId}/conversations`, {
@@ -18,7 +22,10 @@ export default function AddContactPage(props) {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({members:[contactId]})
-    }).then(res => res.json())
+    }).then(res => {
+      dispatch(setRefreshFromSlice())
+      return res.json()
+    })
 
     console.log(response)
     if (response.conversationId) {
