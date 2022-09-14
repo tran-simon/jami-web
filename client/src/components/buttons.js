@@ -1,5 +1,5 @@
 import { QuestionMark } from "@mui/icons-material";
-import { Box, IconButton, Popper } from "@mui/material";
+import { Box, ClickAwayListener, IconButton, Popper } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import EmojiPicker from "emoji-picker-react";
 import React from "react";
@@ -239,26 +239,29 @@ export const SelectEmojiButton = (props) => {
     const id = open ? 'simple-popover' : undefined
   
     return (
-      <Box>
-        <SquareButton
-          aria-describedby={id}
-          aria-label="select emoji"
-          Icon={EmojiIcon}
-          onClick={handleOpenEmojiPicker}
-        />
-        <Popper
-          id={id}
-          open={open}
-          anchorEl={anchorEl}
-          onClose={handleClose}
-        >
-          <EmojiPicker.default
-            onEmojiClick={onEmojiClick}
-            disableAutoFocus={true}
-            disableSkinTonePicker={true}
-            native
-          />
-        </Popper>
-      </Box>
+        <ClickAwayListener onClickAway={handleClose}>
+            <Box>
+                <SquareButton
+                    aria-describedby={id}
+                    aria-label="select emoji"
+                    Icon={EmojiIcon}
+                    onClick={handleOpenEmojiPicker}
+                />
+                <Popper
+                    id={id}
+                    open={open}
+                    anchorEl={anchorEl}
+                    onClose={handleClose}
+                >
+                    <EmojiPicker.default
+                        onEmojiClick={onEmojiClick}
+                        disableAutoFocus={true}
+                        disableSkinTonePicker={true}
+                        native
+                    />
+                </Popper>
+            </Box>
+        </ClickAwayListener>
     )
-  }
+}
+
