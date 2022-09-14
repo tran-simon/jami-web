@@ -1,15 +1,15 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useState } from 'react';
 import MessageList from './MessageList';
 import SendMessageForm from './SendMessageForm';
 import Conversation from '../../../model/Conversation';
 import LoadingPage from './loading';
-import io from "socket.io-client";
 import { Box, Stack, Typography } from '@mui/material';
 import ConversationAvatar from './ConversationAvatar';
 import { useConversationQuery, useMessagesQuery, useSendMessageMutation } from '../services/conversation';
+import { SocketContext } from '../contexts/socket';
 
 const ConversationView = props => {
-  const [socket, setSocket] = useState()
+  const socket = useContext(SocketContext)
   const [conversation, setConversation] = useState()
   const [messages, setMessages] = useState([])
   const [isLoading, setIsLoading] = useState(true)
@@ -47,17 +47,6 @@ const ConversationView = props => {
   )
 
   useEffect(() => {
-    console.log("io.connect")
-    const socket = io()
-    setSocket(socket)
-    return () => {
-      console.log("io.disconnect")
-      socket.disconnect()
-      setSocket(undefined)
-    }
-  }, [])
-
-  useEffect(() => {
     if (!conversation)
       return
     console.log(`io set conversation ${props.conversationId} `+ socket)
@@ -66,10 +55,11 @@ const ConversationView = props => {
     socket.off('newMessage')
     socket.on('newMessage', (data) => {
       console.log("newMessage")
-      console.log(data)
-      setMessages(addMessage(messages, data))
+      setMessages(
+        (messages) => addMessage(messages, data)
+      )
     })
-  }, [conversation ? props.conversationId : "", socket])
+  }, [socket, setMessages])
 
   if (isLoading) {
       return <LoadingPage />

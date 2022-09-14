@@ -12,6 +12,8 @@ import './i18n';
 import * as Sentry from "@sentry/react";
 import { BrowserTracing } from "@sentry/tracing";
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import socketio from 'socket.io-client';
+import { SocketProvider } from './contexts/socket.js';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -21,15 +23,19 @@ const queryClient = new QueryClient({
   },
 })
 
+const socket = socketio()
+
 const container = document.getElementById("root");
 const root = createRoot(container);
 root.render(
   <Provider store={store}>
     <React.StrictMode>
       <QueryClientProvider client={queryClient}>
-        <Router>
-          <App/>
-        </Router>
+        <SocketProvider socket={socket}>
+          <Router>
+            <App/>
+          </Router>
+        </SocketProvider>
       </QueryClientProvider>
     </React.StrictMode>
   </Provider>
