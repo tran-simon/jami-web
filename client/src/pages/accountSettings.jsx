@@ -12,11 +12,13 @@ const AccountSettings = (props) => {
 
   useEffect(() => {
     const controller = new AbortController()
-    authManager.fetch(`/api/accounts/${accountId}`, {signal: controller.signal})
+    authManager.fetch(`/api/accounts/${accountId}`, { signal: controller.signal })
       .then(res => res.json())
       .then(result => {
-        console.log(result)
-        setState({loaded: true, account: Account.from(result)})
+        let account = Account.from(result)
+        account.setDevices(result.devices)
+        setState({ loaded: true, account: account})
+
       }).catch(e => console.log(e))
      // return () => controller.abort() // crash on React18
   }, [accountId])

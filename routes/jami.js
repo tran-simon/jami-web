@@ -57,8 +57,8 @@ class JamiRestApi {
             const account = this.jami.getAccount(req.params.accountId)
             if (account) {
                 account.defaultModerators = this.jami.getDefaultModerators(account.getId())
-                const obj = await account.getObject()
-                console.log(obj)
+                const obj = await account.getObject();
+                obj.devices = this.jami.getDevices(req.params.accountId);
                 res.json(obj)
             } else
                 res.status(404).end()

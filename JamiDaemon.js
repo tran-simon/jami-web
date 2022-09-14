@@ -274,7 +274,10 @@ class JamiDaemon {
                 const conversation = new Conversation(conversationId, accountId, members)
                 account.addConversation(conversation)
             })
-            this.accounts.push(account)
+            account.setDevices(
+            );
+
+            this.accounts.push(account);
         })
     }
 
@@ -286,6 +289,11 @@ class JamiDaemon {
             this.tempAccounts[accountId] = { resolve, reject }
         })
     }
+
+    getDevices(accountId){
+        return JamiDaemon.mapToJs(this.dring.getKnownRingDevices(accountId));
+    }
+
     getAccount(accountId) {
         for (let i = 0; i < this.accounts.length; i++) {
             const account = this.accounts[i]
