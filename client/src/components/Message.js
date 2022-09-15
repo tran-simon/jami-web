@@ -1,10 +1,13 @@
-import { Box, Chip, Divider, Stack, Typography } from "@mui/material"
+import { Box, Chip, Divider, List, ListItemButton, ListItemText, Stack, Tooltip, Typography } from "@mui/material"
+import { styled } from "@mui/material/styles";
 import dayjs from "dayjs"
 import isToday from "dayjs/plugin/isToday"
 import isYesterday from "dayjs/plugin/isYesterday"
-import { useMemo } from "react";
+import React, { useCallback, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
+import { EmojiButton, MoreButton, ReplyMessageButton } from "./buttons";
 import ConversationAvatar from "./ConversationAvatar"
+import { OppositeArrowsIcon, TrashBinIcon, TwoSheetsIcon } from "./svgIcons"
 
 dayjs.extend(isToday)
 dayjs.extend(isYesterday)
@@ -216,6 +219,131 @@ export const MessageBubblesGroup = (props) => {
   )
 }
 
+const MessageTooltip = styled(({ className, ...props }) => {
+  const [open, setOpen] = useState(false)
+  const emojis = ["😎", "😄", "😍"] // Should be last three used emojis
+  const additionalOptions = [
+    {
+      Icon: TwoSheetsIcon,
+      text: "Copy",
+      action: () => {},
+    },
+    {
+      Icon: OppositeArrowsIcon,
+      text: "Transfer",
+      action: () => {},
+    },
+    {
+      Icon: TrashBinIcon,
+      text: "Delete message",
+      action: () => {},
+    },
+  ]
+
+  const toggleMoreMenu = useCallback(
+    () => setOpen(open => !open),
+    [setOpen]
+  )
+
+  const onClose = useCallback(
+    () => {
+      setOpen(false)
+    },
+    [setOpen]
+  )
+
+  return (
+    <Tooltip
+      {...props}
+      classes={{ tooltip: className }} // Required for styles. Don't know why
+      placement={props.position == "start" ? "right-start" : "left-start"}
+      PopperProps={{
+        modifiers: [
+          {
+            name: "offset",
+            options: {
+                offset: [-2, -30],
+            },
+          },
+        ],
+      }}
+      onClose={onClose}
+      title={
+        <Stack> {/* Whole tooltip's content */}
+          <Stack // Main options
+            direction="row"
+            spacing="16px"
+          >
+            {
+              emojis.map(
+                emoji => <EmojiButton key={emoji} emoji={emoji}/>
+              )
+            }
+            <ReplyMessageButton/>
+            <MoreButton
+              onClick={toggleMoreMenu}
+            />
+          </Stack>
+          {open && // Additional menu options
+            <>
+            <Divider sx={{paddingTop:"16px"}}/>
+            <List sx={{padding: 0, paddingTop: "8px", marginBottom: "-8px"}}>
+              {
+                additionalOptions.map(
+                  (option) => (
+                    <ListItemButton
+                      key={option.text}
+                      sx={{
+                        padding: "8px",
+                      }}
+                    >
+                      <Stack // Could not find proper way to set spacing between ListItemIcon and ListItemText
+                        direction="row"
+                        spacing="16px"
+                      >
+                        <option.Icon
+                          sx={{
+                            height: "16px",
+                            margin: 0,
+                            color: theme => theme.palette.primary.dark,
+                          }}
+                        />
+                        <ListItemText
+                          primary={option.text}
+                          primaryTypographyProps={{
+                            fontSize: "12px",
+                            lineHeight: "16px",
+                          }}
+                          sx={{
+                            height: "16px",
+                            margin: 0,
+                          }}
+                        />
+                      </Stack>
+                    </ListItemButton>
+                  )
+                )
+              }
+            </List>
+            </>
+          }
+        </Stack>
+      }
+    />
+  )
+})(({ theme, position }) => {
+  const largeRadius = "20px"
+  const smallRadius = "5px"
+  return {
+    backgroundColor: "white",
+    padding: "16px",
+    boxShadow: "3px 3px 7px #00000029",
+    borderRadius: largeRadius,
+    borderStartStartRadius: position == "start" ? smallRadius : largeRadius,
+    borderStartEndRadius: position == "end" ? smallRadius : largeRadius,
+  }
+});
+
 const MessageBubble = (props) => {
   const largeRadius = "20px"
   const smallRadius = "5px"
@@ -237,16 +365,20 @@ const MessageBubble = (props) => {
   }, [props.isFirstOfGroup, props.isLastOfGroup, props.position])
 
   return (
-    <Box
-      sx={{
-        width: "fit-content",
-        backgroundColor: props.backgroundColor,
-        padding: "16px",
-        ...radius,
-      }}
+    <MessageTooltip
+      position={props.position}
     >
-      {props.children}
-    </Box>
+      <Box
+        sx={{
+          width: "fit-content",
+          backgroundColor: props.backgroundColor,
+          padding: "16px",
+          ...radius,
+        }}
+      >
+        {props.children}
+      </Box>
+    </MessageTooltip>
   )
 }
 

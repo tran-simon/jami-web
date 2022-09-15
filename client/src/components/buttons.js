@@ -2,8 +2,8 @@ import { QuestionMark } from "@mui/icons-material";
 import { Box, ClickAwayListener, IconButton, Popper } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import EmojiPicker from "emoji-picker-react";
-import { useState, useCallback } from "react";
-import { Arrow2Icon, ArrowIcon, CameraIcon, CameraInBubbleIcon, CancelIcon, CrossedEyeIcon, CrossIcon, EmojiIcon, EyeIcon, FolderIcon, InfoIcon, MicroInBubbleIcon, PaperClipIcon, PenIcon } from "./svgIcons";
+import React, { useState, useCallback } from "react";
+import { Arrow2Icon, Arrow3Icon, ArrowIcon, CameraIcon, CameraInBubbleIcon, CancelIcon, CrossedEyeIcon, CrossIcon, EmojiIcon, EyeIcon, FolderIcon, InfoIcon, MicroInBubbleIcon, PaperClipIcon, PenIcon, SaltireIcon } from "./svgIcons";
 
 const RoundButton = styled(
     ({Icon, ...props}) => (
@@ -96,6 +96,33 @@ export const TipButton = (props) => {
     )
 }
 
+export const MoreButton = styled(
+    (props) => {
+        return (
+            <IconButton
+                {...props}
+                disableRipple={true}
+                aria-label="more"
+            >
+                <CrossIcon fontSize="inherit"/>
+            </IconButton>
+        )
+    }
+)(({theme}) => ({
+    border: `1px solid ${theme.palette.primary.dark}`,
+    color: theme.palette.primary.dark,
+    fontSize: "10px",
+    height: "20px",
+    width: "20px",
+    "&:hover": {
+        background: theme.palette.primary.light,
+    },
+    "&:active": {
+        color: "#FFF",
+        background: theme.palette.primary.dark,
+    },
+}))
+
 export const BackButton = styled(
     (props) => {
         return (
@@ -127,7 +154,7 @@ export const CloseButton = styled(
                 disableRipple={true}
                 aria-label="close"
             >
-                <CrossIcon fontSize="inherit"/>
+                <SaltireIcon fontSize="inherit"/>
             </IconButton>
         )
     }
@@ -213,6 +240,40 @@ export const SendMessageButton = (props) => {
         />
     )
 }
+
+export const ReplyMessageButton = styled(
+    ({Icon, ...props}) => (
+        <IconButton
+            {...props}
+            disableRipple={true}
+            aria-label="send message"
+        >
+            <Arrow3Icon fontSize="inherit"/>
+        </IconButton>
+    )
+)(({theme}) => ({
+    color: theme.palette.primary.dark,
+    fontSize: "20px",
+    height: "20px",
+    width: "20px",
+    borderRadius: "5px",
+    "&:hover": {
+        background: "#E5E5E5",
+    },
+}));
+
+export const EmojiButton = styled(
+    ({emoji, ...props}) => (
+        <IconButton {...props} disableRipple={true}>
+            {emoji}
+        </IconButton>
+    )
+)(({theme}) => ({
+    color: "white",
+    fontSize: "20px",
+    height: "20px",
+    width: "20px",
+}));
 
 export const SelectEmojiButton = (props) => {
     const [anchorEl, setAnchorEl] = useState(null)
