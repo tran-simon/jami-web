@@ -3,22 +3,9 @@ import { useNavigate } from "react-router-dom";
 
 import { Box, Container, Fab, Card, CardContent, Typography } from '@mui/material';
 import GroupAddRounded from '@mui/icons-material/GroupAddRounded';
-import makeStyles from '@mui/styles/makeStyles';
 import authManager from '../AuthManager'
 
-const useStyles = makeStyles((theme) => ({
-  root: {
-    '& > *': {
-      margin: theme.spacing(1),
-    },
-  },
-  extendedIcon: {
-    marginRight: theme.spacing(1),
-  },
-}))
-
 export default function AddContactPage(props) {
-  const classes = useStyles()
   const navigate = useNavigate();
   const accountId = props.accountId || props.match.params.accountId
   const contactId = props.contactId || props.match.params.contactId
@@ -47,7 +34,7 @@ export default function AddContactPage(props) {
           <Typography variant='body1'>{contactId}</Typography>
           <Box style={{textAlign: 'center', marginTop: 16}}>
           <Fab variant='extended' color='primary' onClick={handleClick}>
-            <GroupAddRounded className={classes.extendedIcon} />
+            <GroupAddRounded/>
             Add contact
           </Fab>
           </Box>

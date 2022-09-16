@@ -1,31 +1,11 @@
 import React, { useState } from 'react';
 import { Container, Card, CardContent, Typography, Fab, CardActions, Box } from '@mui/material';
-import makeStyles from '@mui/styles/makeStyles';
 import { AddRounded } from '@mui/icons-material';
 import UsernameChooser from '../components/UsernameChooser';
 import authManager from '../AuthManager'
 import { useNavigate } from 'react-router';
 
-const useStyles = makeStyles((theme) => ({
-  extendedIcon: {
-    marginRight: theme.spacing(1),
-  },
-  wizardCard: {
-    borderRadius: 8,
-    maxWidth: 360,
-    margin: "16px auto"
-  },
-  actionArea: {
-    textAlign: 'center',
-    display: 'block'
-  },
-  chooser: {
-    marginTop: 16
-  }
-}))
-
 export default function JamiAccountDialog(props) {
-  const classes = useStyles()
   const [name, setName] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(false)
@@ -54,7 +34,7 @@ export default function JamiAccountDialog(props) {
 
   return (
     <Container>
-      <Card component="form" onSubmit={onSubmit} className={classes.wizardCard}>
+      <Card component="form" onSubmit={onSubmit}>
         <CardContent>
           <Typography gutterBottom variant="h5" component="h2">
             Create Jami account
@@ -64,14 +44,14 @@ export default function JamiAccountDialog(props) {
             Let's start by creating a new administrator account to control access to the server configuration.
           </Typography>
 
-          <Box className={classes.chooser} >
+          <Box>
             <UsernameChooser disabled={loading} setName={setName} />
           </Box>
         </CardContent>
-        <CardActions className={classes.actionArea}>
+        <CardActions>
           {error && <Typography color="error">Error: {JSON.stringify(error)}</Typography>}
           <Fab color="primary" type="submit" variant="extended" disabled={!name || loading}>
-            <AddRounded className={classes.extendedIcon} />
+            <AddRounded/>
             Register name
           </Fab>
         </CardActions>

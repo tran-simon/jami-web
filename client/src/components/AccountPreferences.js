@@ -1,9 +1,5 @@
 import React, { useState } from 'react'
 
-
-import { makeStyles } from '@mui/styles'
-//import { createTheme, ThemeProvider } from '@mui/material/styles'
-
 import { List, ListItem, ListItemIcon, ListItemSecondaryAction, ListItemText, ListSubheader, Switch, Typography, Grid, Paper, CardContent, Card, TableContainer, Table, TableHead, TableRow, TableCell, TableBody, Toolbar, IconButton, ListItemAvatar, Input, TextField } from '@mui/material'
 import { PhoneCallbackRounded, GroupRounded, DeleteRounded, AddCircle } from '@mui/icons-material'
 
@@ -14,27 +10,6 @@ import ConversationsOverviewCard from './ConversationsOverviewCard'
 
 import authManager from '../AuthManager'
 import { motion } from 'framer-motion'
-
-const useStyles = makeStyles(theme => ({
-  root: {
-    minWidth: 275,
-  },
-  title: {
-    fontSize: 14,
-    flexGrow: 1
-  },
-  pos: {
-    marginBottom: 12,
-  },
-  paper: {
-    marginTop: 24,
-    marginBottom: 24
-  },
-  textField: {
-    //marginLeft: theme.spacing(1),
-    //marginRight: theme.spacing(2),
-  }
-}))
 
 const transition = { duration: 0.3, ease: [0.43, 0.13, 0.23, 0.96] }
 
@@ -49,7 +24,6 @@ const thumbnailVariants = {
 }
 
 export default function AccountPreferences(props) {
-  const classes = useStyles()
   const account = props.account
   const isJamiAccount = account.getType() === Account.TYPE_JAMI
   const alias = isJamiAccount ? "Jami account" : "SIP account"
@@ -109,7 +83,7 @@ export default function AccountPreferences(props) {
         <motion.div variants={thumbnailVariants}>
           <Card>
             <CardContent>
-              <Typography className={classes.title} color="textSecondary" gutterBottom>
+              <Typography color="textSecondary" gutterBottom>
                 Current calls
               </Typography>
               <Typography gutterBottom variant="h5" component="h2">
@@ -156,16 +130,15 @@ export default function AccountPreferences(props) {
         </ListItem>
         </motion.div>
         <motion.div variants={thumbnailVariants}>
-        <Paper className={classes.paper}>
+        <Paper>
           <Toolbar>
-            <Typography className={classes.title} variant="h6">
+            <Typography variant="h6">
               Default moderators
           </Typography>
           </Toolbar>
           <List>
             <ListItem key="add">
               <TextField variant="outlined"
-                className={classes.textField}
                 value={defaultModeratorUri}
                 onChange={e => setDefaultModeratorUri(e.target.value)}
                 label="Add new default moderator"

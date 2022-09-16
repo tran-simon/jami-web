@@ -1,7 +1,6 @@
 import { QuestionMark } from "@mui/icons-material";
 import { Box, IconButton, Popper } from "@mui/material";
-import { blue } from "@mui/material/colors";
-import { styled } from "@mui/styles";
+import { styled } from "@mui/material/styles";
 import EmojiPicker from "emoji-picker-react";
 import React from "react";
 import { Arrow2Icon, ArrowIcon, CameraIcon, CameraInBubbleIcon, CancelIcon, CrossedEyeIcon, CrossIcon, EmojiIcon, EyeIcon, FolderIcon, InfoIcon, MicroInBubbleIcon, PaperClipIcon, PenIcon } from "./svgIcons";

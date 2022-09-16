@@ -1,23 +1,13 @@
 import React from 'react';
 import { Container, Card, CardContent, Typography, List, Avatar, Divider } from '@mui/material';
-import makeStyles from '@mui/styles/makeStyles';
 import { DialerSipRounded, GroupOutlined, RoomRounded } from '@mui/icons-material';
 import ListItemLink from '../components/ListItemLink';
 
-const useStyles = makeStyles((theme) => ({
-  wizardCard: {
-    borderRadius: 8,
-    maxWidth: 360,
-    margin: "16px auto"
-  }
-}))
-
 export default function AccountCreationDialog(props) {
-  const classes = useStyles()
 
   return (
     <Container>
-      <Card className={classes.wizardCard}>
+      <Card>
         <CardContent>
           <Typography gutterBottom variant="h5" component="h2">
             Create new account
@@ -28,7 +18,7 @@ export default function AccountCreationDialog(props) {
           </Typography>
         </CardContent>
 
-        <List className={classes.root}>
+        <List>
           <ListItemLink
             to="/newAccount/rendezVous"
             icon={<Avatar><RoomRounded /></Avatar>}

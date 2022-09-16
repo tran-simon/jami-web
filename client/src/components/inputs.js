@@ -1,5 +1,5 @@
 import { Stack, TextField } from "@mui/material"
-import { styled } from "@mui/styles"
+import { styled } from "@mui/material/styles"
 import React from "react"
 import { InfoButton, ToggleVisibilityButton } from "./buttons"
 import { CheckedIcon, RoundCrossIcon, LockIcon, PenIcon, PersonIcon } from "./svgIcons"
