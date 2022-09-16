@@ -12,3 +12,5 @@ jamid.node
 .idea/
 .vscode/
 *.iml
+
+sentry.config.json
