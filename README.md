@@ -42,8 +42,11 @@ docker-compose up
 # Sentry
 
 - uncomment the line `// import config from "./sentry-server.config.json" assert { type: "json" };` in `./sentry.js`
-- uncomment the line `// import config from "../sentry-client.config.json"` and the init config`Sentry.init(...` in `./client/index.js`
-- uncomment the lines `// import { sentrySetUp } from './sentry.js'` and `sentrySetUp(app)` in `./app.js`
+
+- uncomment the line `// import config from "../sentry-client.config.json"` and the init config`Sentry.init(...` in `./client/index.js`  
+
+- uncomment the lines `// import { sentrySetUp } from './sentry.js'` and `sentrySetUp(app)` in `./app.js`  
+
 - add `sentry-client.config.json` file in `client` and `sentry-server.config.json` (ask them to an admin) in your project root
 
 # Tests
