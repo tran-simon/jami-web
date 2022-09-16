@@ -43,6 +43,7 @@
     "copy-webpack-plugin": "^11.0.0",
     "css-loader": "^6.7.1",
     "html-webpack-plugin": "^5.5.0",
+    "i18next-parser": "^6.0.0",
     "react-refresh": "^0.14.0",
     "sass": "^1.54.5",
     "sass-loader": "^13.0.2",
@@ -53,7 +54,8 @@
     "webpack-cli": "^4.10.0"
   },
   "scripts": {
-    "build": "npx webpack"
+    "build": "npx webpack",
+    "extract-translations": "i18next"
   },
   "eslintConfig": {
     "extends": "react-app"

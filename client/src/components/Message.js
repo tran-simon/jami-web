@@ -3,6 +3,7 @@ import dayjs from "dayjs"
 import isToday from "dayjs/plugin/isToday"
 import isYesterday from "dayjs/plugin/isYesterday"
 import React from "react"
+import { useTranslation } from "react-i18next"
 
 dayjs.extend(isToday)
 dayjs.extend(isYesterday)
@@ -18,11 +19,12 @@ export const MessageCall = (props) => {
 }
 
 export const MessageInitial = (props) => {
+  const { t } = useTranslation()
   return (
     <Stack
       alignItems="center"
     >
-      "Le Swarm a été créé"
+      {t("message_swarm_created")}
     </Stack>
   )
 }
@@ -41,6 +43,7 @@ export const MessageDataTransfer = (props) => {
 }
 
 export const MessageMember = (props) => {
+  const { t } = useTranslation()
   return (
     <Stack
       alignItems="center"
@@ -49,7 +52,7 @@ export const MessageMember = (props) => {
         sx={{
           width: "fit-content",
         }}
-        label={`${props.message.author} s'est joint`}
+        label={t("message_user_joined", {user: props.message.author})}
       />
     </Stack>
   )
