@@ -14,3 +14,5 @@ jamid.node
 *.iml
 
 sentry.config.json
+sentry-client.config.json
+sentry-server.config.json

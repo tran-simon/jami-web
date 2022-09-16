@@ -142,7 +142,6 @@ class SignInPage extends React.Component {
                     >
                         Compte local
                     </Button>
-
                     <TextField
                         variant="outlined"
                         margin="normal"
