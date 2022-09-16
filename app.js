@@ -28,7 +28,7 @@ import cors from 'cors'
 
 import JamiRestApi from './routes/jami.js'
 import JamiDaemon from './JamiDaemon.js'
-import { sentrySetUp } from './sentry.js'
+// import { sentrySetUp } from './sentry.js'
 
 const configPath = 'jamiServerConfig.json'
 
@@ -271,7 +271,7 @@ const createServer = async (appConfig) => {
         }
     }
 
-    sentrySetUp(app);
+    // sentrySetUp(app);
 
     app.get('/auth', (req, res) => {
         const state = getState(req)

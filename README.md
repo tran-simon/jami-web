@@ -31,8 +31,7 @@ docker build -t jami-web .
 docker run -it -p 3000:3000 jami-web
 ```
 
-## Using [docker-compose](docker run -p 3000:3000 -it jami-project
-)
+## Using [docker-compose](docker run -p 3000:3000 -it jami-project)
 This will use a [Docker Volume](https://docs.docker.com/storage/volumes/) to enable auto-refresh when you change a file.
 
 ```bash
@@ -42,7 +41,10 @@ docker-compose up
 
 # Sentry
 
-- add `sentry-client.config.json` file in `client` and `sentry-server.config.json` in your project root
+- uncomment the line `// import config from "./sentry-server.config.json" assert { type: "json" };` in `./sentry.js`
+- uncomment the line `// import config from "../sentry-client.config.json"` and the init config`Sentry.init(...` in `./client/index.js`
+- uncomment the lines `// import { sentrySetUp } from './sentry.js'` and `sentrySetUp(app)` in `./app.js`
+- add `sentry-client.config.json` file in `client` and `sentry-server.config.json` (ask them to an admin) in your project root
 
 # Tests
 

@@ -7,7 +7,7 @@ import { store } from "../redux/store";
 import { Provider } from "react-redux";
 import { BrowserRouter as Router } from "react-router-dom";
 
-import config from "../sentry-client.config.json"
+// import config from "../sentry-client.config.json"
 import * as Sentry from "@sentry/react";
 import { BrowserTracing } from "@sentry/tracing";
 
@@ -17,10 +17,10 @@ import { BrowserTracing } from "@sentry/tracing";
 const rootEl = document.getElementById("root");
 var exports = {};
 
-Sentry.init({
-  ...config,
-  integrations: [new BrowserTracing()],
-});
+// Sentry.init({
+//   ...config,
+//   integrations: [new BrowserTracing()],
+// });
 
 const render = (Component) =>
   ReactDOM.render(
