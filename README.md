@@ -39,3 +39,11 @@ This will use a [Docker Volume](https://docs.docker.com/storage/volumes/) to ena
 docker-compose build
 docker-compose up
 ```
+
+# Sentry
+
+- add `sentry-client.config.json` file in `client` and `sentry-server.config.json` in your project root
+
+# Tests
+
+ - Cypress: run the following script `sh ./cypress-test.sh`

@@ -26,6 +26,7 @@
   },
   "devDependencies": {
     "@svgr/webpack": "^6.3.1",
+    "cypress": "^10.6.0",
     "jami-web-client": "file:client",
     "nodemon": "^2.0.19",
     "raw-loader": "^4.0.2",
