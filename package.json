@@ -25,14 +25,13 @@
   "devDependencies": {
     "@svgr/webpack": "^6.2.1",
     "jami-web-client": "file:client",
-    "llnode": "^3.2.0",
-    "nodemon": "^2.0.15",
+    "nodemon": "^2.0.19",
     "raw-loader": "^4.0.2",
     "webpack-dev-middleware": "^5.3.1",
     "webpack-hot-middleware": "^2.25.1"
   },
   "scripts": {
-    "start": "node app.js",
+    "start": "nodemon app.js",
     "build": "cd client && npx webpack"
   },
   "author": "Larbi Gharib",
