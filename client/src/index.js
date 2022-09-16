@@ -1,8 +1,8 @@
-"use strict";
-import "./index.scss";
-import React from "react";
-import ReactDOM from "react-dom";
-import App from "./App.js";
+'use strict'
+import './index.scss'
+import React from 'react'
+import { createRoot } from 'react-dom/client';
+import App from './App.js'
 import { store } from "../redux/store";
 import { Provider } from "react-redux";
 import { BrowserRouter as Router } from "react-router-dom";
@@ -12,30 +12,17 @@ import './i18n';
 import * as Sentry from "@sentry/react";
 import { BrowserTracing } from "@sentry/tracing";
 
-//import { CssBaseline } from '@mui/material'
-//import * as serviceWorker from './serviceWorker'
-
-const rootEl = document.getElementById("root");
-var exports = {};
-
-// Sentry.init({
-//   ...config,
-//   integrations: [new BrowserTracing()],
-// });
-
-const render = (Component) =>
-  ReactDOM.render(
-    <Provider store={store}>
-      <React.StrictMode>
-        <Router>
-          <Component />
-        </Router>
-      </React.StrictMode>
-    </Provider>,
-    rootEl
-  );
-
-render(App)
+const container = document.getElementById("root");
+const root = createRoot(container);
+root.render(
+  <Provider store={store}>
+    <React.StrictMode>
+      <Router>
+        <App/>
+      </Router>
+    </React.StrictMode>
+  </Provider>
+);
 
 if (import.meta.webpackHot)
   import.meta.webpackHot.accept("./App", () => {
