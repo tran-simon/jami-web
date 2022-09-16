@@ -36,44 +36,62 @@ console.log(`Webpack configured for ${mode}`)
 export default {
   entry,
   output: {
-    path: resolve(__dirname, 'dist'),
-    filename: 'bundle.js',
-    publicPath: '/'
+    path: resolve(__dirname, "dist"),
+    filename: "bundle.js",
+    publicPath: "/",
   },
   devtool,
   mode,
   module: {
     rules: [
       {
-        test: /\.jsx?/,
+        // test: /\.jsx?/,
+        test: /\.(js|jsx|ts|tsx)?$/,
         resolve: {
-          fullySpecified: false
+          fullySpecified: false,
         },
         exclude: /node_modules/,
         use: {
-          loader: 'babel-loader',
+          loader: "babel-loader",
           options: {
             plugins: babelLoaderPlugins,
             presets: [
-              ['@babel/preset-env', {
-                useBuiltIns: 'entry',
-                corejs: { version: '3.10', proposals: true },
-              }],
-              ['@babel/preset-react', {
-                runtime: 'automatic'
-              }]]
-          }
-        }
+              [
+                "@babel/preset-env",
+                {
+                  useBuiltIns: "entry",
+                  corejs: { version: "3.10", proposals: true },
+                },
+              ],
+              [
+                "@babel/preset-react",
+                {
+                  runtime: "automatic",
+                },
+              ],
+            ],
+          },
+        },
       },
       {
         test: /\.s[ac]ss$/i,
-        use: ['style-loader', 'css-loader', 'sass-loader'],
+        use: ["style-loader", "css-loader", "sass-loader"],
       },
       {
         test: /\.svg$/,
-        use: ['@svgr/webpack']
-      }
-    ]
+        use: ["@svgr/webpack"],
+      },
+      {
+        // test: /\.tsx?$/,
+        test: /\.(js|jsx|ts|tsx)?$/,
+        exclude: /node_modules/,
+        loader: "ts-loader",
+      },
+    ],
   },
-  plugins
-}
+  resolve: {
+    modules: ["node_modules", resolve(__dirname)],
+    extensions: [".ts", ".tsx", ".js", ".jsx"],
+  },
+  plugins,
+};

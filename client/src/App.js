@@ -19,6 +19,9 @@ import JamiAccountDialog from './pages/jamiAccountCreation.jsx'
 import WelcomeAnimation from './components/welcome'
 import defaultTheme from './themes/default'
 
+// import { useSelector, useDispatch } from 'react-redux'
+// import { useAppSelector, useAppDispatch } from '../redux/hooks'
+
 const Home = (props) => {
   console.log(`home ${props}`)
 
@@ -26,48 +29,65 @@ const Home = (props) => {
 }
 
 const App = (props) => {
-    const [state, setState] = useState({
-      loaded: false,
-      auth: authManager.getState()
-    })
-    const [displayWelcome, setDisplayWelcome] = useState(true)
+  // const count = useSelector(state => state.counter.value)
+  // const dispatch = useDispatch();
+  // const count = useAppSelector((state) => state.counter.value);
+  // const dispatch = useAppDispatch();
 
-    useEffect(() => {
-      authManager.init(auth => {
-        setState({ loaded: false, auth })
-      })
-      return () => authManager.deinit()
-    }, []);
+  const [state, setState] = useState({
+    loaded: false,
+    auth: authManager.getState(),
+  });
+  const [displayWelcome, setDisplayWelcome] = useState(true);
 
-    console.log("App render")
-    if (displayWelcome) {
-      return <WelcomeAnimation showSetup={!state.auth.setupComplete} onComplete={() => setDisplayWelcome(false)} />
-    } else if (!state.auth.setupComplete) {
-      return <Routes>
-          <Route path="/setup" element={<ServerSetup />} />
-          <Route path="/" element={<Navigate to="/setup" replace />} />
-          <Route index path="*" element={<Navigate to="/setup" replace />} />
-        </Routes>
-    }
+  useEffect(() => {
+    authManager.init((auth) => {
+      setState({ loaded: false, auth });
+    });
+    return () => authManager.deinit();
+  }, []);
 
-    return <ThemeProvider theme={defaultTheme}>
-    <Routes>
-      <Route path="/account">
-        <Route index element={<AccountSelection />} />
-        <Route path=":accountId">
-          <Route index path="*" element={<JamiMessenger />} />
-          <Route path="settings" element={<AccountSettings />} />
+  console.log("App render");
+
+  if (displayWelcome) {
+    return (
+      <WelcomeAnimation
+        showSetup={!state.auth.setupComplete}
+        onComplete={() => setDisplayWelcome(false)}
+      />
+    );
+  } else if (!state.auth.setupComplete) {
+    return (
+      <Routes>
+        <Route path="/setup" element={<ServerSetup />} />
+        <Route path="/" element={<Navigate to="/setup" replace />} />
+        <Route index path="*" element={<Navigate to="/setup" replace />} />
+      </Routes>
+    );
+  }
+
+  return (
+    <ThemeProvider theme={defaultTheme}>
+      <Routes>
+        <Route path="/account">
+          <Route index element={<AccountSelection />} />
+          <Route path=":accountId">
+            <Route index path="*" element={<JamiMessenger />} />
+            <Route path="settings" element={<AccountSettings />} />
+          </Route>
         </Route>
-      </Route>
-      <Route path="/newAccount" element={<AccountCreationDialog />}>
-        <Route path="jami" element={<JamiAccountDialog />} />
-      </Route>
-      <Route path="/setup" element={<ServerSetup />} />
-      <Route path="/" index element={<Home />} />
-      <Route path="*" element={<NotFoundPage />} />
-    </Routes>
-    {!state.auth.authenticated && <SignInPage key="signin" open={!state.auth.authenticated}/>}
+        <Route path="/newAccount" element={<AccountCreationDialog />}>
+          <Route path="jami" element={<JamiAccountDialog />} />
+        </Route>
+        <Route path="/setup" element={<ServerSetup />} />
+        <Route path="/" index element={<Home />} />
+        <Route path="*" element={<NotFoundPage />} />
+      </Routes>
+      {!state.auth.authenticated && (
+        <SignInPage key="signin" open={!state.auth.authenticated} />
+      )}
     </ThemeProvider>
-}
+  );
+};
 
 export default App
