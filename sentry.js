@@ -1,6 +1,6 @@
 import * as Sentry from "@sentry/node";
 import * as Tracing from "@sentry/tracing";
-import config from "./sentry-server.config.json" assert { type: "json" };
+// import config from "./sentry-server.config.json" assert { type: "json" };
 
 export function sentrySetUp(app) {
   Sentry.init({

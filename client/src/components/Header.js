@@ -11,6 +11,7 @@ export default function Header() {
   const params = useParams()
 
   const goToAccountSelection = () => navigate(`/account`)
+  const goToContacts = () => navigate(`/Contacts`)
   const goToAccountSettings = () => navigate(`/account/${params.accountId}/settings`)
 
   return (
@@ -25,6 +26,7 @@ export default function Header() {
         onClose={handleClose}
       >
         <MenuItem onClick={goToAccountSelection}>Change account</MenuItem>
+        <MenuItem onClick={goToContacts}>Contacts</MenuItem>
         {params.accountId && <MenuItem onClick={goToAccountSettings}>Account settings</MenuItem>}
         <MenuItem onClick={() => authManager.disconnect()}>Log out</MenuItem>
       </Menu>

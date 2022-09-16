@@ -53,7 +53,7 @@ class JamiRestApi {
         router.use('/accounts/:accountId', checkAccount, accountRouter)
 
         accountRouter.get('/', async (req, res) => {
-            console.log(`Get account ${req.params.accountId}`)
+            console.log(`BBBBBBB Get account ${req.params.accountId}`)
             const account = this.jami.getAccount(req.params.accountId)
             if (account) {
                 account.defaultModerators = this.jami.getDefaultModerators(account.getId())
@@ -64,34 +64,51 @@ class JamiRestApi {
                 res.status(404).end()
         })
 
-        accountRouter.post('/', async (req, res) => {
-            console.log(`Set account details ${req.params.accountId}`)
-            const account = this.jami.getAccount(req.params.accountId)
-            if (account) {
-                console.log(req.body)
-                const newDetails = account.updateDetails(req.body)
-                this.jami.setAccountDetails(account.getId(), newDetails)
-                res.status(200).end()
-            } else
-                res.status(404).end()
-        })
+        accountRouter.post("/", async (req, res) => {
+          console.log(`Set account details ${req.params.accountId}`);
+          const account = this.jami.getAccount(req.params.accountId);
+          if (account) {
+            console.log(req.body);
+            const newDetails = account.updateDetails(req.body);
+            this.jami.setAccountDetails(account.getId(), newDetails);
+            res.status(200).end();
+          } else res.status(404).end();
+        });
 
         // Contacts
-        accountRouter.get('/contacts', (req, res) => {
-            console.log(`Get account ${req.params.accountId}`)
-            const account = this.jami.getAccount(req.params.accountId)
-            if (account)
-                res.json(account.getContacts())
-            else
-                res.status(404).end()
-        })
+        accountRouter.get("/contacts", (req, res) => {
+          console.log(`AAAAAAAA Get account ${req.params.accountId}`);
+          const account = this.jami.getAccount(req.params.accountId);
+          if (account) {
+            let rep = account.getContacts();
+            console.log(rep);
+            res.json(rep);
+          } else res.status(404).end();
+        });
+
+        accountRouter.get("/contacts/:contactId", (req, res) => {
+          console.log("CCCCCCC JAMI.JS: ", req.params);
+          console.log(`Get account details fot ${req.params.accountId}`);
+          const account = this.jami.getAccount(req.params.accountId);
+          const uri = req.params.uri;
+          if (account) {
+            let rep = account.getContactDetails(uri);
+            res.json(rep);
+          } else res.status(404).end();
+        });
 
         // Default modertors
-        accountRouter.put('/defaultModerators/:contactId', async (req, res) => {
-            console.log(`Adding default moderator ${req.params.contactId} to account ${req.params.accountId}`)
-            this.jami.addDefaultModerator(req.params.accountId, req.params.contactId)
-            res.status(200).end()
-        })
+        accountRouter.put("/defaultModerators/:contactId", async (req, res) => {
+          console.log(
+            `Adding default moderator ${req.params.contactId} to account ${req.params.accountId}`
+          );
+          this.jami.addDefaultModerator(
+            req.params.accountId,
+            req.params.contactId
+          );
+          res.status(200).end();
+        });
+
         accountRouter.delete('/defaultModerators/:contactId', async (req, res) => {
             console.log(`Removing default moderator to account ${req.params.accountId}`)
             this.jami.removeDefaultModerator(req.params.accountId, req.params.contactId)
@@ -196,6 +213,7 @@ class JamiRestApi {
                     res.status(404).json({})
                 })
         })
+
         nsRouter.get(['/addr/:addrQuery'], (req, res, next) => {
             console.log(`Address lookup ${req.params.addrQuery}`)
             this.jami.lookupAddress(req.params.accountId || '', req.params.addrQuery)
