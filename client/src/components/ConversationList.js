@@ -8,11 +8,11 @@ import Typography from '@mui/material/Typography';
 import { useAppSelector } from '../../redux/hooks';
 
 export default function ConversationList(props) {
-     const { refresh } = useAppSelector((state) => state.app);
+    const { refresh } = useAppSelector((state) => state.app)
 
-     useEffect(() => {
+    useEffect(() => {
       console.log("refresh list");
-    }, [refresh]);
+    }, [refresh])
 
     return (
         <div className="rooms-list">

@@ -54,11 +54,11 @@ Share sessions between Passport.js and Socket.io
 */
 
 function logSuccess() {
-    console.log("passportSocketIo authorized user with Success 😁")
+    console.log('passportSocketIo authorized user with Success 😁')
 }
 
 function logFail() {
-    console.log("passportSocketIo failed to authorized user 👺")
+    console.log('passportSocketIo failed to authorized user 👺')
 }
 
 /*
@@ -120,7 +120,7 @@ const createServer = async (appConfig) => {
     app.use(cors(corsOptions))
 
     const jami = new JamiDaemon((account, conversation, message) => {
-        console.log("JamiDaemon onMessage")
+        console.log('JamiDaemon onMessage')
 
         if (conversation.listeners) {
             Object.values(conversation.listeners).forEach(listener => {
@@ -170,13 +170,13 @@ const createServer = async (appConfig) => {
 
     passport.serializeUser((user, done) => {
         connectedUsers[user.id] = user.config
-        console.log("=============================SerializeUser called " + user.id)
+        console.log('=============================SerializeUser called ' + user.id)
         console.log(user)
         done(null, user.id)
     })
 
     const deserializeUser = (id, done) => {
-        console.log("=============================DeserializeUser called on: " + id)
+        console.log('=============================DeserializeUser called on: ' + id)
         const userConfig = connectedUsers[id]
         console.log(userConfig)
         if (userConfig) {
@@ -196,16 +196,16 @@ const createServer = async (appConfig) => {
             const id = `jams_${username}`
             const userConfig = { username, type: 'jams', accounts: accountId }
             const newUser = user(id, userConfig)
-            console.log("AccountId: " + accountId)
+            console.log('AccountId: ' + accountId)
             tempAccounts[accountId] = { done, newUser }
 
         }
     )
-    jamsStrategy.name = "jams"
+    jamsStrategy.name = 'jams'
 
     const localStrategy = new LocalStrategy(
         (username, password, done) => {
-            console.log("localStrategy: " + username + " " + password)
+            console.log('localStrategy: ' + username + ' ' + password)
 
             const id = username
             const userConfig = appConfig.users[username]
@@ -248,7 +248,7 @@ const createServer = async (appConfig) => {
         }
         console.log(req.body)
         appConfig.users.admin = {
-            "accounts": "*",
+            'accounts': '*',
             password: req.body.password
         }
         res.status(200).end()
@@ -308,7 +308,7 @@ const createServer = async (appConfig) => {
         if (socket.request.user) {
             next()
         } else {
-            next(new Error("unauthorized"))
+            next(new Error('unauthorized'))
         }
     })
     io.on('connect', (socket) => {
@@ -318,9 +318,9 @@ const createServer = async (appConfig) => {
         session.socketId = socket.id
         session.save()
 
-        socket.on("conversation", (data) => {
-            console.log(`io conversation`)
-            console.log(data);
+        socket.on('conversation', (data) => {
+            console.log('io conversation')
+            console.log(data)
             if (session.conversation) {
                 console.log(`disconnect from old conversation ${session.conversation.conversationId}`)
                 const conversation = jami.getConversation(session.conversation.accountId, session.conversation.conversationId)
