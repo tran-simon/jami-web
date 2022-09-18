@@ -1,7 +1,7 @@
 
-import React from "react";
+import { createContext } from "react";
 
-export const SocketContext = React.createContext();
+export const SocketContext = createContext();
 export const SocketProvider = ({socket, children}) => (
     <SocketContext.Provider value={socket}>
         {children}

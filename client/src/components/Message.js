@@ -2,7 +2,7 @@ import { Box, Chip, Divider, Stack, Typography } from "@mui/material"
 import dayjs from "dayjs"
 import isToday from "dayjs/plugin/isToday"
 import isYesterday from "dayjs/plugin/isYesterday"
-import React from "react"
+import { useMemo } from "react";
 import { useTranslation } from "react-i18next"
 import ConversationAvatar from "./ConversationAvatar"
 
@@ -219,7 +219,7 @@ export const MessageBubblesGroup = (props) => {
 const MessageBubble = (props) => {
   const largeRadius = "20px"
   const smallRadius = "5px"
-  const radius = React.useMemo(() => {
+  const radius = useMemo(() => {
     if (props.position == "start") {
       return {
         borderStartStartRadius: props.isFirstOfGroup ? largeRadius : smallRadius,

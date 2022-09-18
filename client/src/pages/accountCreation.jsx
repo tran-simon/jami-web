@@ -1,4 +1,3 @@
-import React from 'react';
 import { Container, Card, CardContent, Typography, List, Avatar, Divider } from '@mui/material';
 import { DialerSipRounded, GroupOutlined, RoomRounded } from '@mui/icons-material';
 import ListItemLink from '../components/ListItemLink';

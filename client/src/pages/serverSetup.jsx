@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 
 import { Box, Container, Fab, Card, CardContent, Typography, Input } from '@mui/material'
 import GroupAddRounded from '@mui/icons-material/GroupAddRounded'

@@ -2,7 +2,7 @@ import List from "@mui/material/List";
 import authManager from "../AuthManager";
 import ConversationAvatar from "./ConversationAvatar";
 import Modal from 'react-modal';
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Person } from "@mui/icons-material";
 import { useAppDispatch, useAppSelector } from "../../redux/hooks";
 import { ListItem, ListItemAvatar, ListItemText } from "@mui/material";

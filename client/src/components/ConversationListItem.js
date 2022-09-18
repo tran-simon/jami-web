@@ -1,12 +1,10 @@
-import React, { useEffect } from 'react';
 import Modal from 'react-modal';
 import authManager from '../AuthManager'
 import ConversationAvatar from './ConversationAvatar'
 import Conversation from '../../../model/Conversation'
-import React, { useState } from "react";
+import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom"
-import { ListItem, ListItemAvatar, ListItemText, Box, Typography } from '@mui/material'
-import { Button, Stack, Typography, Modal as ModalUM } from "@mui/material"
+import { ListItem, Stack, ListItemAvatar, ListItemText, Box, Typography } from '@mui/material'
 import { RemoveContactIcon, VideoCallIcon } from './svgIcons';
 import { AudioCallIcon, BlockContactIcon, ContactDetailsIcon, CrossIcon, MessageIcon } from './svgIcons';
 import { QRCodeCanvas} from 'qrcode.react';

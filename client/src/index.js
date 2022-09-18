@@ -1,6 +1,6 @@
 'use strict'
 import './index.scss'
-import React from 'react'
+import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client';
 import App from './App.js'
 import { store } from "../redux/store";
@@ -29,7 +29,7 @@ const container = document.getElementById("root");
 const root = createRoot(container);
 root.render(
   <Provider store={store}>
-    <React.StrictMode>
+    <StrictMode>
       <QueryClientProvider client={queryClient}>
         <SocketProvider socket={socket}>
           <Router>
@@ -37,7 +37,7 @@ root.render(
           </Router>
         </SocketProvider>
       </QueryClientProvider>
-    </React.StrictMode>
+    </StrictMode>
   </Provider>
 );
 

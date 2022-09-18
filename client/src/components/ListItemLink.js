@@ -1,4 +1,4 @@
-import React, { useMemo, forwardRef } from 'react';
+import { useMemo, forwardRef } from 'react'
 import PropTypes from 'prop-types';
 import ListItem from '@mui/material/ListItem';
 import ListItemIcon from '@mui/material/ListItemIcon';

@@ -4,7 +4,7 @@
   License: AGPL-3
 */
 import { ThemeProvider } from '@mui/material/styles';
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { Route, Routes, Navigate } from 'react-router-dom'
 import authManager from './AuthManager'
 

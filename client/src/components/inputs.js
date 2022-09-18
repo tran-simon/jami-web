@@ -1,6 +1,6 @@
 import { Stack, TextField } from "@mui/material"
 import { styled } from "@mui/material/styles"
-import React from "react"
+import { useState, useCallback, useEffect } from "react";
 import { InfoButton, ToggleVisibilityButton } from "./buttons"
 import { CheckedIcon, RoundCrossIcon, LockIcon, PenIcon, PersonIcon } from "./svgIcons"
 
@@ -13,16 +13,16 @@ const StyledPersonIconLight = styled(PersonIcon)({height: iconsHeight, color: "#
 const StyledLockIcon = styled(LockIcon)({height: iconsHeight, color: "#03B9E9"})
 
 export const UsernameInput = ({infoButtonProps, ...props}) => {
-    const [isSelected, setIsSelected] = React.useState(false);
-    const [input, setInput] = React.useState(props.defaultValue);
-    const [startAdornment, setStartAdornment] = React.useState()
+    const [isSelected, setIsSelected] = useState(false);
+    const [input, setInput] = useState(props.defaultValue);
+    const [startAdornment, setStartAdornment] = useState()
 
-    const onChange = React.useCallback((event) => {
+    const onChange = useCallback((event) => {
         setInput(event.target.value)
         props.onChange?.(event)
     }, [props.onChange])
 
-    React.useEffect(() => {
+    useEffect(() => {
         /* Handle startAdornment */
         let Icon = StyledPersonIconLight
         let visibility = "visible"
@@ -56,21 +56,21 @@ export const UsernameInput = ({infoButtonProps, ...props}) => {
 }
 
 export const PasswordInput = ({infoButtonProps, ...props}) => {
-    const [showPassword, setShowPassword] = React.useState(false);
-    const [isSelected, setIsSelected] = React.useState(false);
-    const [input, setInput] = React.useState(props.defaultValue);
-    const [startAdornment, setStartAdornment] = React.useState()
+    const [showPassword, setShowPassword] = useState(false);
+    const [isSelected, setIsSelected] = useState(false);
+    const [input, setInput] = useState(props.defaultValue);
+    const [startAdornment, setStartAdornment] = useState()
 
     const toggleShowPassword = () => {
         setShowPassword((showPassword) => !showPassword);
     }
 
-    const onChange = React.useCallback((event) => {
+    const onChange = useCallback((event) => {
         setInput(event.target.value)
         props.onChange?.(event)
     }, [props.onChange])
 
-    React.useEffect(() => {
+    useEffect(() => {
         /* Handle startAdornment */
         let Icon = StyledLockIcon
         let visibility = "visible"
@@ -112,16 +112,16 @@ export const PasswordInput = ({infoButtonProps, ...props}) => {
 }
 
 export const NickNameInput = (props) => {
-    const [isSelected, setIsSelected] = React.useState(false);
-    const [input, setInput] = React.useState(props.defaultValue);
-    const [startAdornmentVisibility, setStartAdornmentVisibility] = React.useState()
+    const [isSelected, setIsSelected] = useState(false);
+    const [input, setInput] = useState(props.defaultValue);
+    const [startAdornmentVisibility, setStartAdornmentVisibility] = useState()
 
-    const onChange = React.useCallback((event) => {
+    const onChange = useCallback((event) => {
         setInput(event.target.value)
         props.onChange?.(event)
     }, [props.onChange])
 
-    React.useEffect(() => {
+    useEffect(() => {
         setStartAdornmentVisibility((isSelected || input) ? "visible" : "hidden")
     }, [isSelected, input])
 
@@ -142,17 +142,17 @@ export const NickNameInput = (props) => {
 }
 
 export const RegularInput = (props) => {
-    const [isSelected, setIsSelected] = React.useState(false);
-    const [input, setInput] = React.useState(props.defaultValue);
-    const [startAdornmentVisibility, setStartAdornmentVisibility] = React.useState()
-    const [endAdornmentVisibility, setEndAdornmentVisibility] = React.useState()
+    const [isSelected, setIsSelected] = useState(false);
+    const [input, setInput] = useState(props.defaultValue);
+    const [startAdornmentVisibility, setStartAdornmentVisibility] = useState()
+    const [endAdornmentVisibility, setEndAdornmentVisibility] = useState()
 
-    const onChange = React.useCallback((event) => {
+    const onChange = useCallback((event) => {
         setInput(event.target.value)
         props.onChange?.(event)
     }, [props.onChange])
 
-    React.useEffect(() => {
+    useEffect(() => {
         setStartAdornmentVisibility((isSelected || input) ? "visible" : "hidden")
         setEndAdornmentVisibility((isSelected || input) ? "hidden" : "visible")
     }, [isSelected, input])

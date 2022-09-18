@@ -1,4 +1,4 @@
-import React, { useCallback, useContext, useEffect, useState } from 'react';
+import { useCallback, useContext, useEffect, useState } from 'react'
 import MessageList from './MessageList';
 import SendMessageForm from './SendMessageForm';
 import Conversation from '../../../model/Conversation';

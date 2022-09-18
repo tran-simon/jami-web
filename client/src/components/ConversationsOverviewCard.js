@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react'
 import { Card, CardActionArea, CardContent, CircularProgress, Typography } from '@mui/material';
 import { useNavigate, useParams } from 'react-router';
 import authManager from '../AuthManager'

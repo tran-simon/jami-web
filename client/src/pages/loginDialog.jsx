@@ -1,4 +1,4 @@
-import React from 'react';
+import { Component } from 'react'
 
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
@@ -25,7 +25,7 @@ function Copyright() {
     );
 }
 
-class SignInPage extends React.Component {
+class SignInPage extends Component {
 
     constructor(props) {
         console.log("SignInPage " + props.open)

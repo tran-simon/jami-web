@@ -2,7 +2,7 @@ import { QuestionMark } from "@mui/icons-material";
 import { Box, ClickAwayListener, IconButton, Popper } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import EmojiPicker from "emoji-picker-react";
-import React from "react";
+import { useState, useCallback } from "react";
 import { Arrow2Icon, ArrowIcon, CameraIcon, CameraInBubbleIcon, CancelIcon, CrossedEyeIcon, CrossIcon, EmojiIcon, EyeIcon, FolderIcon, InfoIcon, MicroInBubbleIcon, PaperClipIcon, PenIcon } from "./svgIcons";
 
 const RoundButton = styled(
@@ -215,19 +215,19 @@ export const SendMessageButton = (props) => {
 }
 
 export const SelectEmojiButton = (props) => {
-    const [anchorEl, setAnchorEl] = React.useState(null)
+    const [anchorEl, setAnchorEl] = useState(null)
   
-    const handleOpenEmojiPicker = React.useCallback(
+    const handleOpenEmojiPicker = useCallback(
       e => setAnchorEl(anchorEl ? null : e.currentTarget),
       [anchorEl],
     )
   
-    const handleClose = React.useCallback(
+    const handleClose = useCallback(
       () => setAnchorEl(null),
       [setAnchorEl],
     )
   
-    const onEmojiClick = React.useCallback(
+    const onEmojiClick = useCallback(
       (e, emojiObject) => {
         props.onEmojiSelected(emojiObject.emoji)
         handleClose()

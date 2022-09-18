@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { InputBase, InputAdornment } from '@mui/material';
 import { SearchRounded } from '@mui/icons-material';
 

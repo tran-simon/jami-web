@@ -1,10 +1,10 @@
-import React from 'react'
+import { useState, useCallback } from 'react'
 import { Divider, InputBase } from '@mui/material'
 import { RecordVideoMessageButton, RecordVoiceMessageButton, SelectEmojiButton, SendMessageButton, UploadFileButton } from './buttons';
 import { Stack } from '@mui/system';
 
 export default function SendMessageForm(props) {
-  const [currentMessage, setCurrentMessage] = React.useState("")
+  const [currentMessage, setCurrentMessage] = useState("")
 
   const handleSubmit = e => {
     e.preventDefault()
@@ -15,7 +15,7 @@ export default function SendMessageForm(props) {
   }
   const handleInputChange = (event) => setCurrentMessage(event.target.value)
 
-  const onEmojiSelected = React.useCallback(
+  const onEmojiSelected = useCallback(
     (emoji) => setCurrentMessage((currentMessage) => currentMessage + emoji),
     [setCurrentMessage],
   )

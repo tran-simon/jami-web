@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { Fragment, useEffect, useState } from 'react'
 import { Avatar, Card, CardHeader, Container, List } from '@mui/material';
 import Header from '../components/Header'
 import authManager from '../AuthManager'
@@ -44,7 +44,7 @@ const AccountSelection = (props) => {
   if (!loaded)
     return <LoadingPage />
   return (
-    <React.Fragment>
+    <Fragment>
       <Header />
       <Container maxWidth="sm" style={{paddingBottom:32}}>
         <motion.div drag="x" initial="exit" animate="enter" exit="exit" variants={variants}>
@@ -64,8 +64,8 @@ const AccountSelection = (props) => {
         </Card>
         </motion.div>
       </Container>
-    </React.Fragment>
-  )
+    </Fragment>
+  );
 }
 
 export default AccountSelection

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react'
 import { Container, Card, CardContent, Typography, Fab, CardActions, Box } from '@mui/material';
 import { AddRounded } from '@mui/icons-material';
 import UsernameChooser from '../components/UsernameChooser';
