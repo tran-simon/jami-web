@@ -5,14 +5,14 @@
   "description": "Jaas Web API that handles client requests to Jami daemon",
   "main": "index.js",
   "dependencies": {
-    "@sentry/node": "^7.11.1",
-    "@sentry/tracing": "^7.11.1",
+    "@sentry/node": "^7.13.0",
+    "@sentry/tracing": "^7.13.0",
     "body-parser": "^1.20.0",
     "connect-redis": "^6.1.3",
     "cookie-parser": "^1.4.6",
-    "core-js": "^3.24.1",
+    "core-js": "^3.25.1",
     "cors": "^2.8.5",
-    "dotenv": "^16.0.1",
+    "dotenv": "^16.0.2",
     "ejs": "^3.1.8",
     "env": "0.0.2",
     "express": "^4.18.1",
@@ -22,13 +22,14 @@
     "passport-session": "^1.0.2",
     "path": "^0.12.7",
     "redis-url": "^1.2.1",
-    "socket.io": "^4.5.1"
+    "socket.io": "^4.5.2"
   },
   "devDependencies": {
     "@svgr/webpack": "^6.3.1",
-    "cypress": "^10.6.0",
+    "cypress": "^10.8.0",
     "jami-web-client": "file:client",
-    "nodemon": "^2.0.19",
+    "llnode": "^4.0.0",
+    "nodemon": "^2.0.20",
     "raw-loader": "^4.0.2",
     "webpack-dev-middleware": "^5.3.3",
     "webpack-hot-middleware": "^2.25.2"
