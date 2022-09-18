@@ -223,8 +223,8 @@ class JamiDaemon {
                 }
             },
             // Calls
-            StateChange: (callId, state, code) => {
-                console.log(`CallStateChange: ${callId} ${state} ${code}`)
+            CallStateChanged: (callId, state, code) => {
+                console.log(`CallStateChanged: ${callId} ${state} ${code}`)
             },
             IncomingCall: (accountId, callId, peerUri) => {
                 console.log(`IncomingCall: ${accountId} ${callId} ${peerUri}`)
@@ -240,7 +240,7 @@ class JamiDaemon {
                 console.log(`ConferenceRemoved: ${confId}`)
 
             },
-            onConferenceInfosUpdated: (confId, info) => {
+            OnConferenceInfosUpdated: (confId, info) => {
                 console.log(`onConferenceInfosUpdated: ${confId}`)
 
             }
