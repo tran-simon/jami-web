@@ -1,7 +1,6 @@
 FROM ubuntu:22.04
 
 WORKDIR /app
-COPY . .
 
 ARG DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get install -y \
@@ -13,14 +12,35 @@ RUN apt-get update && apt-get install -y \
     cmake \
     curl \
     git \
+    libarchive-dev \
+    libasio-dev \
     libasound2-dev \
     libdbus-1-dev \
+    libdbus-c++-dev \
     libexpat1-dev \
+    libfmt-dev \
+    libgmp-dev \
+    nettle-dev \
+    libgnutls28-dev \
+    libjsoncpp-dev \
+    libmsgpack-dev \
+    libnatpmp-dev \
+    libopus-dev \
     libpulse-dev \
+    libspeex-dev \
+    libspeexdsp-dev \
+    libssl-dev \
     libtool \
     libudev-dev \
+    libupnp-dev \
     libva-dev \
     libvdpau-dev \
+    libvpx-dev \
+    libx264-dev \
+    libyaml-cpp-dev \
+    libhttp-parser-dev \
+    libwebrtc-audio-processing-dev \
+    libsecp256k1-dev \
     nasm \
     pkg-config \
     yasm
@@ -39,6 +59,8 @@ RUN git clone https://github.com/swig/swig.git && \
     make -j$(nproc) && \
     make install
 
+WORKDIR /app
+COPY . .
 WORKDIR /app/daemon
 
 # Build daemon dependencies
