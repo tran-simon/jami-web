@@ -5,10 +5,10 @@ const env = dotenv.config()
 
 import { promises as fs } from 'fs'
 import http from 'http'
-import express from 'express'
+import express, {NextFunction, Response, Request} from 'express'
 import session from 'express-session'
 import cookieParser  from'cookie-parser'
-import { Server } from'socket.io'
+import {Server, Socket} from 'socket.io'
 import path from 'path'
 import passport from 'passport'
 import { Strategy as LocalStrategy } from 'passport-local'
@@ -25,6 +25,8 @@ import cors from 'cors'
 
 import JamiRestApi from './routes/jami.js'
 import JamiDaemon from './JamiDaemon.js'
+import Account from "./model/Account";
+import {ExtendedError} from "socket.io/dist/namespace";
 // import { sentrySetUp } from './sentry.js'
 
 const configPath = 'jamiServerConfig.json'
@@ -32,7 +34,19 @@ const configPath = 'jamiServerConfig.json'
 //const sessionStore = new RedisStore({ client: redis })
 const sessionStore = new session.MemoryStore()
 
-const loadConfig = async (filePath) => {
+interface UserConfig {
+  accounts: string;
+  password?: string;
+  username?: string;
+  type?: string
+}
+
+interface AppConfig {
+  users: Record<string, UserConfig>
+  authMethods: any[]
+}
+
+const loadConfig = async (filePath: string): Promise<AppConfig> => {
     const config = {users: {}, authMethods: []}
     try {
         return Object.assign(config, JSON.parse((await fs.readFile(filePath)).toString()))
@@ -42,7 +56,7 @@ const loadConfig = async (filePath) => {
     }
 }
 
-const saveConfig = (filePath, config) => {
+const saveConfig = (filePath: string, config: AppConfig) => {
     return fs.writeFile(filePath, JSON.stringify(config))
 }
 
@@ -67,10 +81,10 @@ Users should be removed from connectedUsers when receiving a disconnect
 web socket call
 
 */
-const tempAccounts = {}
-const connectedUsers = {}
+const tempAccounts: Record<string, any> = {}
+const connectedUsers: Record<string, any> = {}
 
-const createServer = async (appConfig) => {
+const createServer = async (appConfig: AppConfig) => {
     const node_env = process.env.NODE_ENV || 'development'
     const app = express()
     console.log(`Loading server for ${node_env} with config:`)
@@ -84,11 +98,11 @@ const createServer = async (appConfig) => {
         const webpack = await import('webpack')
         const webpackDev = await import('webpack-dev-middleware')
         const webpackHot = await import ('webpack-hot-middleware')
-        const {default: webpackConfig} = await import ('jami-web-client/webpack.config.js') as any
+        const {default: webpackConfig} = await import('jami-web-client/webpack.config.js')
 
         const compiler = webpack.default(webpackConfig)
         app.use(webpackDev.default(compiler, {
-            publicPath: webpackConfig.output.publicPath
+            publicPath: webpackConfig.output?.publicPath
         }))
         app.use(webpackHot.default(compiler))
     }
@@ -98,6 +112,12 @@ const createServer = async (appConfig) => {
     */
     app.disable('x-powered-by')
 
+    const secret_key = process.env.SECRET_KEY_BASE;
+
+    if (!secret_key) {
+        throw new Error("SECRET_KEY_BASE undefined")
+    }
+
     const sessionMiddleware = session({
         store: sessionStore,
         resave: false,
@@ -106,8 +126,8 @@ const createServer = async (appConfig) => {
             secure: false,//!development,
             maxAge: 2419200000
         },
-        secret: process.env.SECRET_KEY_BASE
-    })
+        secret: secret_key
+    });
 
     app.use(sessionMiddleware)
     app.use(passport.initialize())
@@ -115,7 +135,7 @@ const createServer = async (appConfig) => {
     // app.use(app.router)
     app.use(cors(corsOptions))
 
-    const jami = new JamiDaemon((account, conversation, message) => {
+    const jami = new JamiDaemon((account: Account, conversation: any, message: any) => {
         console.log('JamiDaemon onMessage')
 
         if (conversation.listeners) {
@@ -142,20 +162,20 @@ const createServer = async (appConfig) => {
         return 'admin' in appConfig.users
     }
 
-    const accountFilter = filter => {
+    const accountFilter = (filter: string | any[]) => {
         if (typeof filter === 'string') {
             if (filter === '*')
                 return undefined
             else
-                return account => account.getId() === filter
+                return (account: Account) => account.getId() === filter
         } else if (Array.isArray(filter)) {
-            return account => filter.includes(account.getId())
+            return (account: Account) => filter.includes(account.getId())
         } else {
             throw new Error('Invalid account filter string')
         }
     }
 
-    const user = (id, config) => {
+    const user = (id: string, config: UserConfig) => {
         return {
             id,
             config,
@@ -164,14 +184,14 @@ const createServer = async (appConfig) => {
         }
     }
 
-    passport.serializeUser((user, done) => {
+    passport.serializeUser((user: any, done) => {
         connectedUsers[user.id] = user.config
         console.log('=============================SerializeUser called ' + user.id)
         console.log(user)
         done(null, user.id)
     })
 
-    const deserializeUser = (id, done) => {
+    const deserializeUser = (id: string, done: (err: any, user?: Express.User | false | null) => void) => {
         console.log('=============================DeserializeUser called on: ' + id)
         const userConfig = connectedUsers[id]
         console.log(userConfig)
@@ -220,17 +240,17 @@ const createServer = async (appConfig) => {
     passport.use(jamsStrategy)
     passport.use(localStrategy)
 
-    const secured = (req, res, next) => {
+    const secured = (req: Request, res: Response, next: NextFunction) => {
         if (req.user) {
             return next()
         }
         res.status(401).end()
     }
-    const securedRedirect = (req, res, next) => {
-        if (req.user && req.user.accountId) {
+    const securedRedirect = (req: Request, res: Response, next: NextFunction) => {
+        if (req.user && (req.user as any)?.accountId) {
             return next()
         }
-        req.session.returnTo = req.originalUrl
+        (req.session as any).returnTo = req.originalUrl
         res.redirect('/login')
     }
 
@@ -254,12 +274,13 @@ const createServer = async (appConfig) => {
         res.json({ loggedin: true })
     })
     app.post('/auth/local', passport.authenticate('local'), (req, res) => {
-        res.json({ loggedin: true, user: req.user.id })
+        res.json({ loggedin: true, user: (req.user as any)?.id })
     })
 
-    const getState = req => {
+    const getState = (req: Request) => {
         if (req.user) {
-            return { loggedin: true, username: req.user.username, type: req.user.type }
+            const user = (req.user || {}) as UserConfig
+            return { loggedin: true, username: user.username, type: user.type }
         } else if (isSetupComplete()) {
             return {}
         } else {
@@ -298,7 +319,7 @@ const createServer = async (appConfig) => {
     const server = http.Server(app)
 
     const io = new Server(server, { cors: corsOptions })
-    const wrap = middleware => (socket, next) => middleware(socket.request, {}, next)
+    const wrap = (middleware: any) => (socket: Socket, next: (err?: ExtendedError) => void ) => middleware(socket.request, {}, next)
     io.use(wrap(sessionMiddleware))
     io.use(wrap(passport.initialize()))
     io.use(wrap(passport.session()))

@@ -1,0 +1,15 @@
+{
+  "settings": {
+    "react": {
+      "version": "detect"
+    }
+  },
+  "extends": ["plugin:react/recommended", "plugin:react-hooks/recommended", "../.eslintrc.json"],
+  "rules": {
+    "react-hooks/exhaustive-deps": "error",
+    "react/display-name": "off",
+    "react/jsx-uses-react": "off",
+    "react/prop-types": "off",
+    "react/react-in-jsx-scope": "off"
+  }
+}

@@ -12,20 +12,18 @@
     "moduleResolution": "Node",
     /* Specify an output folder for all emitted files. */
     "outDir": "./dist/",
+    /* Enable importing .json files. */
+    "resolveJsonModule": true,
     /* Skip type checking all .d.ts files. */
     "skipLibCheck": true,
     /* Create source map files for emitted JavaScript files. */
     "sourceMap": true,
-    /* When type checking, take into account 'null' and 'undefined'. */
-    "strictNullChecks": true,
+    /* Enable all strict type-checking options. */
+    "strict": true,
     /* Set the JavaScript language version for emitted JavaScript and include compatible library declarations. */
-    "target": "ES2017",
+    "target": "ES2017"
   },
-  "include": [
-    "model",
-    "routes",
-    "app.ts",
-  ],
+  "include": ["model", "routes", "app.ts"],
   "ts-node": {
     "esm": "true"
   }
