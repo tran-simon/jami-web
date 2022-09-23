@@ -5,8 +5,15 @@ services:
     image: jami-web
     build: .
     volumes:
-      - ./client:/web-client/client # Add bind mount to hot-reload client
-      - /web-client/client/node_modules/ # Ignore node_modules from bind mount
+      # Add bind mounts for hot-reload
+      - ./client:/web-client/client
+      - ./routes:/web-client/routes
+      - ./model:/web-client/model
+      # Ignore folders from the bind mounts
+      - /web-client/client/node_modules/
+      - /web-client/node_modules/
+      - /web-client/dist/
+      - /web-client/client/dist
     ports:
       - "3000:3000"
     stdin_open: true

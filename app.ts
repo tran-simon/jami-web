@@ -14,9 +14,6 @@ import passport from 'passport'
 import { Strategy as LocalStrategy } from 'passport-local'
 //import { createRequire } from 'module';
 //const require = createRequire(import.meta.url);
-import { fileURLToPath } from 'url';
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 //const redis = require('redis-url').connect()
 //const RedisStore = require('connect-redis')(session)
@@ -38,7 +35,7 @@ const sessionStore = new session.MemoryStore()
 const loadConfig = async (filePath) => {
     const config = {users: {}, authMethods: []}
     try {
-        return Object.assign(config, JSON.parse(await fs.readFile(filePath)))
+        return Object.assign(config, JSON.parse((await fs.readFile(filePath)).toString()))
     } catch(e) {
         console.log(e)
         return config
@@ -74,25 +71,24 @@ const tempAccounts = {}
 const connectedUsers = {}
 
 const createServer = async (appConfig) => {
+    const node_env = process.env.NODE_ENV || 'development'
     const app = express()
-    console.log(`Loading server for ${app.get('env')} with config:`)
+    console.log(`Loading server for ${node_env} with config:`)
     console.log(appConfig)
-    const development = app.get('env') === 'development'
 
     var corsOptions = {
         origin: 'http://127.0.0.1:3000'
     }
 
-    if (development) {
-        const [ webpack, webpackDev, webpackHot, webpackConfig ] = await Promise.all([
-            import('webpack'),
-            import('webpack-dev-middleware'),
-            import('webpack-hot-middleware'),
-            import('./client/webpack.config.js')
-        ])
-        const compiler = webpack.default(webpackConfig.default)
+    if (node_env === 'development') {
+        const webpack = await import('webpack')
+        const webpackDev = await import('webpack-dev-middleware')
+        const webpackHot = await import ('webpack-hot-middleware')
+        const {default: webpackConfig} = await import ('jami-web-client/webpack.config.js') as any
+
+        const compiler = webpack.default(webpackConfig)
         app.use(webpackDev.default(compiler, {
-            publicPath: webpackConfig.default.output.publicPath
+            publicPath: webpackConfig.output.publicPath
         }))
         app.use(webpackHot.default(compiler))
     }
@@ -123,7 +119,7 @@ const createServer = async (appConfig) => {
         console.log('JamiDaemon onMessage')
 
         if (conversation.listeners) {
-            Object.values(conversation.listeners).forEach(listener => {
+            Object.values(conversation.listeners).forEach((listener: any) => {
                 listener.socket.emit('newMessage', message)
             })
         }
@@ -187,8 +183,8 @@ const createServer = async (appConfig) => {
     passport.deserializeUser(deserializeUser)
 
     const jamsStrategy = new LocalStrategy(
-        (username, password, done) => {
-            const accountId = jami.addAccount({
+        async (username, password, done) => {
+            const accountId = await jami.addAccount({
                 'managerUri': 'https://jams.savoirfairelinux.com',
                 'managerUsername': username,
                 'archivePassword': password
@@ -288,15 +284,17 @@ const createServer = async (appConfig) => {
 
     /* GET React App */
 
-    app.use(express.static(path.join(__dirname, 'client', 'dist')))
+    const cwd = process.cwd()
+    app.use(express.static(path.join(cwd,  'client/dist')));
 
-    app.use((req, res, next) => {
-        res.render(path.join(__dirname, 'client', 'dist', 'index.ejs'), {
+    app.use((req, res) => {
+        res.render(path.join(cwd, 'client/dist/index.ejs'), {
             initdata: JSON.stringify(getState(req))
         })
     })
 
 
+    // @ts-ignore TODO: Fix the typescript error
     const server = http.Server(app)
 
     const io = new Server(server, { cors: corsOptions })
@@ -305,7 +303,7 @@ const createServer = async (appConfig) => {
     io.use(wrap(passport.initialize()))
     io.use(wrap(passport.session()))
     io.use((socket, next) => {
-        if (socket.request.user) {
+        if ((socket.request as any).user) {
             next()
         } else {
             next(new Error('unauthorized'))
@@ -313,7 +311,7 @@ const createServer = async (appConfig) => {
     })
     io.on('connect', (socket) => {
         console.log(`new connection ${socket.id}`)
-        const session = socket.request.session
+        const session = (socket.request as any).session
         console.log(`saving sid ${socket.id} in session ${session.id}`)
         session.socketId = socket.id
         session.save()

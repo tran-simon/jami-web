@@ -5,7 +5,7 @@ import type { RootState } from "./store";
 // Define a type for the slice state
 interface appState {
   accountId: string;
-  accountObject: Account;
+  accountObject: Account | null;
   refresh: boolean;
 }
 

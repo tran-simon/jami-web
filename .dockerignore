@@ -5,6 +5,10 @@
 
 node_modules/
 dist/
+daemon/
+.env
+dring.node
+jamid.node
 
 client/dist/
 client/node_modules/

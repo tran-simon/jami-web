@@ -21,7 +21,9 @@
 
 import Account from './model/Account.js'
 import Conversation from './model/Conversation.js'
-import { createRequire } from 'module';
+import {createRequire} from 'module';
+import path from "path";
+
 const require = createRequire(import.meta.url);
 
 class JamiDaemon {
@@ -29,7 +31,7 @@ class JamiDaemon {
         this.accounts = []
         this.lookups = []
         this.tempAccounts = []
-        this.dring = require("./jamid.node")
+        this.dring = require(path.join(process.cwd(), "jamid.node"))
         this.dring.init({
             AccountsChanged: () => {
                 console.log("AccountsChanged")
