@@ -205,7 +205,7 @@ export const EmojiButton = styled(({ emoji, ...props }) => (
   width: '20px',
 }));
 
-export const SelectEmojiButton = (props) => {
+export const SelectEmojiButton = ({ onEmojiSelected, ...props }) => {
   const [anchorEl, setAnchorEl] = useState(null);
 
   const handleOpenEmojiPicker = useCallback((e) => setAnchorEl(anchorEl ? null : e.currentTarget), [anchorEl]);
@@ -214,10 +214,10 @@ export const SelectEmojiButton = (props) => {
 
   const onEmojiClick = useCallback(
     (e, emojiObject) => {
-      props.onEmojiSelected(emojiObject.emoji);
+      onEmojiSelected(emojiObject.emoji);
       handleClose();
     },
-    [handleClose, props.onEmojiSelected]
+    [handleClose, onEmojiSelected]
   );
 
   const open = Boolean(anchorEl);

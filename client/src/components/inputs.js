@@ -19,7 +19,7 @@ const StyledPenIconDark = styled(PenIcon)(({ theme }) => ({ height: iconsHeight,
 const StyledPersonIconLight = styled(PersonIcon)({ height: iconsHeight, color: '#03B9E9' });
 const StyledLockIcon = styled(LockIcon)({ height: iconsHeight, color: '#03B9E9' });
 
-export const UsernameInput = ({ infoButtonProps, ...props }) => {
+export const UsernameInput = ({ infoButtonProps, onChange: _onChange, ...props }) => {
   const [isSelected, setIsSelected] = useState(false);
   const [input, setInput] = useState(props.defaultValue);
   const [startAdornment, setStartAdornment] = useState();
@@ -27,9 +27,9 @@ export const UsernameInput = ({ infoButtonProps, ...props }) => {
   const onChange = useCallback(
     (event) => {
       setInput(event.target.value);
-      props.onChange?.(event);
+      _onChange?.(event);
     },
-    [props.onChange]
+    [_onChange]
   );
 
   useEffect(() => {
@@ -63,7 +63,7 @@ export const UsernameInput = ({ infoButtonProps, ...props }) => {
   );
 };
 
-export const PasswordInput = ({ infoButtonProps, ...props }) => {
+export const PasswordInput = ({ infoButtonProps, onChange: _onChange, ...props }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [isSelected, setIsSelected] = useState(false);
   const [input, setInput] = useState(props.defaultValue);
@@ -76,9 +76,9 @@ export const PasswordInput = ({ infoButtonProps, ...props }) => {
   const onChange = useCallback(
     (event) => {
       setInput(event.target.value);
-      props.onChange?.(event);
+      _onChange?.(event);
     },
-    [props.onChange]
+    [_onChange]
   );
 
   useEffect(() => {
@@ -119,7 +119,7 @@ export const PasswordInput = ({ infoButtonProps, ...props }) => {
   );
 };
 
-export const NickNameInput = (props) => {
+export const NickNameInput = ({ onChange: _onChange, ...props }) => {
   const [isSelected, setIsSelected] = useState(false);
   const [input, setInput] = useState(props.defaultValue);
   const [startAdornmentVisibility, setStartAdornmentVisibility] = useState();
@@ -127,9 +127,9 @@ export const NickNameInput = (props) => {
   const onChange = useCallback(
     (event) => {
       setInput(event.target.value);
-      props.onChange?.(event);
+      _onChange?.(event);
     },
-    [props.onChange]
+    [_onChange]
   );
 
   useEffect(() => {
@@ -152,7 +152,7 @@ export const NickNameInput = (props) => {
   );
 };
 
-export const RegularInput = (props) => {
+export const RegularInput = ({ onChange: _onChange, ...props }) => {
   const [isSelected, setIsSelected] = useState(false);
   const [input, setInput] = useState(props.defaultValue);
   const [startAdornmentVisibility, setStartAdornmentVisibility] = useState();
@@ -161,9 +161,9 @@ export const RegularInput = (props) => {
   const onChange = useCallback(
     (event) => {
       setInput(event.target.value);
-      props.onChange?.(event);
+      _onChange?.(event);
     },
-    [props.onChange]
+    [_onChange]
   );
 
   useEffect(() => {

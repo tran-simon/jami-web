@@ -63,7 +63,6 @@ export default function ContactList() {
         method: 'DELETE',
       })
       .then((res) => res.json())
-      .then((result) => {})
       .catch((e) => console.log(`ERROR ${typeOfRemove}ing CONTACT : `, e));
     closeModalDelete();
   };
@@ -80,7 +79,7 @@ export default function ContactList() {
         setContacts(result);
       });
     return () => controller.abort();
-  }, [blockOrRemove]);
+  }, [accountId, blockOrRemove]);
 
   return (
     <div className="rooms-list">

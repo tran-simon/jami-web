@@ -4,7 +4,6 @@ import * as Tracing from '@sentry/tracing';
 
 export function sentrySetUp(app) {
   Sentry.init({
-    ...config,
     integrations: [
       // enable HTTP calls tracing
       new Sentry.Integrations.Http({ tracing: true }),

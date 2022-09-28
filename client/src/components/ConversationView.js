@@ -9,30 +9,30 @@ import LoadingPage from './loading';
 import MessageList from './MessageList';
 import SendMessageForm from './SendMessageForm';
 
-const ConversationView = (props) => {
+const ConversationView = ({ accountId, conversationId, ...props }) => {
   const socket = useContext(SocketContext);
   const [conversation, setConversation] = useState();
   const [messages, setMessages] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(false);
 
-  const conversationQuery = useConversationQuery(props.accountId, props.conversationId);
-  const messagesQuery = useMessagesQuery(props.accountId, props.conversationId);
-  const sendMessageMutation = useSendMessageMutation(props.accountId, props.conversationId);
+  const conversationQuery = useConversationQuery(accountId, conversationId);
+  const messagesQuery = useMessagesQuery(accountId, conversationId);
+  const sendMessageMutation = useSendMessageMutation(accountId, conversationId);
 
   useEffect(() => {
     if (conversationQuery.isSuccess) {
-      const conversation = Conversation.from(props.accountId, conversationQuery.data);
+      const conversation = Conversation.from(accountId, conversationQuery.data);
       setConversation(conversation);
     }
-  }, [conversationQuery.data]);
+  }, [accountId, conversationQuery.isSuccess, conversationQuery.data]);
 
   useEffect(() => {
     if (messagesQuery.isSuccess) {
       const sortedMessages = sortMessages(messagesQuery.data);
       setMessages(sortedMessages);
     }
-  }, [messagesQuery.data]);
+  }, [messagesQuery.isSuccess, messagesQuery.data]);
 
   useEffect(() => {
     setIsLoading(conversationQuery.isLoading || messagesQuery.isLoading);
@@ -46,19 +46,19 @@ const ConversationView = (props) => {
 
   useEffect(() => {
     if (!conversation) return;
-    console.log(`io set conversation ${props.conversationId} ` + socket);
-    if (socket) socket.emit('conversation', { accountId: props.accountId, conversationId: props.conversationId });
+    console.log(`io set conversation ${conversationId} ` + socket);
+    if (socket) socket.emit('conversation', { accountId, conversationId });
     socket.off('newMessage');
     socket.on('newMessage', (data) => {
       console.log('newMessage');
       setMessages((messages) => addMessage(messages, data));
     });
-  }, [socket, setMessages]);
+  }, [accountId, conversation, conversationId, socket]);
 
   if (isLoading) {
     return <LoadingPage />;
   } else if (error) {
-    return <div>Error loading {props.conversationId}</div>;
+    return <div>Error loading {conversationId}</div>;
   }
 
   return (
@@ -72,7 +72,7 @@ const ConversationView = (props) => {
             {conversation?.getDisplayName()}
           </Typography>
           <Typography className="subtitle" variant="subtitle1">
-            {props.conversationId}
+            {conversationId}
           </Typography>
         </Box>
       </Stack>

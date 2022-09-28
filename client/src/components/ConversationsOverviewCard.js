@@ -7,7 +7,10 @@ import authManager from '../AuthManager';
 
 export default function ConversationsOverviewCard(props) {
   const navigate = useNavigate();
-  const accountId = props.accountId || useParams().accountId;
+  let accountId = useParams().accountId;
+  if (props.accountId) {
+    accountId = props.accountId;
+  }
   const [loaded, setLoaded] = useState(false);
   const [conversations, setConversations] = useState([]);
 

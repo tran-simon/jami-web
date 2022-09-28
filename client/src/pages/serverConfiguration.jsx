@@ -1,5 +1,6 @@
 import CircularProgress from '@mui/material/CircularProgress';
 import Container from '@mui/material/Container';
+import { useEffect, useState } from 'react';
 
 import Account from '../../../model/Account';
 import authManager from '../AuthManager';
@@ -7,7 +8,9 @@ import AccountPreferences from '../components/AccountPreferences';
 import Header from '../components/Header';
 
 const ServerOverview = (props) => {
-  this.accountId = props.accountId || props.match.params.accountId;
+  const [loaded, setLoaded] = useState(false);
+  const [account, setAccount] = useState();
+  const accountId = props.accountId || props.match.params.accountId;
 
   useEffect(() => {
     const controller = new AbortController();
@@ -16,7 +19,8 @@ const ServerOverview = (props) => {
       .then((res) => res.json())
       .then((result) => {
         console.log(result);
-        setState({ loaded: true, account: Account.from(result) });
+        setLoaded(true);
+        setAccount(Account.from(result));
       })
       .catch((e) => console.log(e));
     // return () => controller.abort() // crash on React18
@@ -25,7 +29,7 @@ const ServerOverview = (props) => {
   return (
     <Container maxWidth="sm" className="app">
       <Header />
-      {this.state.loaded ? <AccountPreferences account={this.state.account} /> : <CircularProgress />}
+      {loaded ? <AccountPreferences account={account} /> : <CircularProgress />}
     </Container>
   );
 };

@@ -1,3 +1,6 @@
+/* eslint-disable no-undef */
+// TODO: This hides eslint errors for this file. This should be removed once this file is cleaned up.
+
 /*
  *  Copyright (c) 2017-2021 Savoir-faire Linux Inc.
  *
@@ -118,8 +121,8 @@ class AuthManager {
     if (response.ok) {
       console.log('Success, going home');
       //navigate('/')
-    } else {
     }
+
     this.authenticating = false;
     this.state.setupComplete = true;
     if (this.onAuthChanged) this.onAuthChanged(this.state);

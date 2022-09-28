@@ -14,7 +14,7 @@ function ListItemLink(props) {
         console.log('LIST ITEM LINK: ', account, itemProps);
         return <RouterLink to={to} ref={ref} {...itemProps} state={account} />;
       }),
-    [to]
+    [account, to]
   );
 
   return (

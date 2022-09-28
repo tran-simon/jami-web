@@ -201,7 +201,7 @@ class JamiDaemon {
           if (onMessage) onMessage(account, conversation, message);
         }
       },
-      ConversationRequestReceived: (accountId, conversationId, request) => {
+      ConversationRequestReceived: (accountId, conversationId) => {
         console.log(`conversationRequestReceived: ${accountId} ${conversationId}`);
         const account = this.getAccount(accountId);
         if (!account) {
@@ -209,7 +209,7 @@ class JamiDaemon {
           return;
         }
       },
-      ConversationMemberEvent: (accountId, conversationId, member, event) => {
+      ConversationMemberEvent: (accountId, conversationId) => {
         console.log(`conversationMemberEvent: ${accountId} ${conversationId}`);
         const account = this.getAccount(accountId);
         if (!account) {
@@ -217,7 +217,7 @@ class JamiDaemon {
           return;
         }
       },
-      OnConversationError: (accountId, conversationId, code, what) => {
+      OnConversationError: (accountId, conversationId) => {
         console.log(`onConversationError: ${accountId} ${conversationId}`);
         const account = this.getAccount(accountId);
         if (!account) {
@@ -235,13 +235,13 @@ class JamiDaemon {
       ConferenceCreated: (confId) => {
         console.log(`ConferenceCreated: ${confId}`);
       },
-      ConferenceChanged: (confId, state) => {
+      ConferenceChanged: (confId) => {
         console.log(`ConferenceChanged: ${confId}`);
       },
       ConferenceRemoved: (confId) => {
         console.log(`ConferenceRemoved: ${confId}`);
       },
-      OnConferenceInfosUpdated: (confId, info) => {
+      OnConferenceInfosUpdated: (confId) => {
         console.log(`onConferenceInfosUpdated: ${confId}`);
       },
     });

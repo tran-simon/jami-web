@@ -14,7 +14,7 @@ dayjs.extend(isToday);
 dayjs.extend(isYesterday);
 
 export const MessageCall = (props) => {
-  return <Stack alignItems="center">"Appel"</Stack>;
+  return <Stack alignItems="center">&quot;Appel&quot;</Stack>;
 };
 
 export const MessageInitial = (props) => {
@@ -30,7 +30,7 @@ export const MessageDataTransfer = (props) => {
       isFirstOfGroup={props.isFirstOfGroup}
       isLastOfGroup={props.isLastOfGroup}
     >
-      "data-transfer"
+      &quot;data-transfer&quot;
     </MessageBubble>
   );
 };
@@ -50,7 +50,7 @@ export const MessageMember = (props) => {
 };
 
 export const MessageMerge = (props) => {
-  return <Stack alignItems="center">"merge"</Stack>;
+  return <Stack alignItems="center">&quot;merge&quot;</Stack>;
 };
 
 export const MessageText = (props) => {

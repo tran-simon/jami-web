@@ -11,7 +11,10 @@ import Header from '../components/Header';
 
 const AccountSettings = (props) => {
   console.log('ACCOUNT SETTINGS', props.account);
-  const accountId = props.accountId || useParams().accountId;
+  let accountId = useParams().accountId;
+  if (props.accountId) {
+    accountId = props.accountId;
+  }
   const dispatch = useAppDispatch();
 
   const [state, setState] = useState({ loaded: false });
@@ -31,7 +34,7 @@ const AccountSettings = (props) => {
       })
       .catch((e) => console.log(e));
     // return () => controller.abort() // crash on React18
-  }, [accountId]);
+  }, [accountId, dispatch]);
 
   return (
     <Container maxWidth="sm">

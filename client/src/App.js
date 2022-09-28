@@ -29,7 +29,7 @@ const Home = (props) => {
   return <Navigate to="/account" />;
 };
 
-const App = (props) => {
+const App = () => {
   // const count = useSelector(state => state.counter.value)
   // const dispatch = useDispatch();
   // const count = useAppSelector((state) => state.counter.value);

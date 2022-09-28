@@ -7,7 +7,7 @@ import authManager from '../AuthManager';
 
 const isInputValid = (input) => input && input.length > 2;
 
-export default function UsernameChooser(props) {
+export default function UsernameChooser({ setName, ...props }) {
   const [query, setQuery] = useState('');
 
   const { isLoading, data, error } = usePromise(
@@ -23,10 +23,10 @@ export default function UsernameChooser(props) {
 
   useEffect(() => {
     if (!isLoading) {
-      if (error === 404) props.setName(query);
-      else props.setName('');
+      if (error === 404) setName(query);
+      else setName('');
     }
-  }, [query, isLoading, data, error]);
+  }, [setName, query, isLoading, data, error]);
 
   const handleChange = (event) => setQuery(event.target.value);
 

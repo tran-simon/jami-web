@@ -43,6 +43,8 @@ root.render(
 if (import.meta.webpackHot)
   import.meta.webpackHot.accept('./App', () => {
     try {
+      // TODO: This needs be fixed
+      // eslint-disable-next-line no-undef
       render(App);
     } catch (e) {
       location.reload();

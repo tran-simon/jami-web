@@ -131,8 +131,8 @@ export default function AccountPreferences(props) {
                   Appareils associés
                 </Typography>
                 <Typography gutterBottom variant="h5" component="h2">
-                  {devices.map((device) => (
-                    <ListItem>
+                  {devices.map((device, i) => (
+                    <ListItem key={i}>
                       <GroupRounded />
                       <ListItemText id="switch-list-label-rendezvous" primary={device[1]} secondary={device[0]} />
                     </ListItem>

@@ -1,5 +1,4 @@
 #!/usr/bin/env sh
 . "$(dirname -- "$0")/_/husky.sh"
 
-# TODO: Uncomment once all files are linted
-# npm run lint
+npm run lint

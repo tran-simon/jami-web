@@ -274,7 +274,7 @@ export default function ConversationListItem(props) {
                   Informations
                 </div>
 
-                <Typography variant="caption">Nom d'utilisateur</Typography>
+                <Typography variant="caption">Nom d&apos;utilisateur</Typography>
                 <div style={{ height: '20px' }} />
                 <Typography variant="caption">Identifiant </Typography>
                 <div style={{ height: '20px' }} />

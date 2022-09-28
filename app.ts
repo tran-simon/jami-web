@@ -1,8 +1,5 @@
 'use strict';
 
-import dotenv from 'dotenv';
-const env = dotenv.config();
-
 import cors from 'cors';
 import express, { NextFunction, Request, Response } from 'express';
 import session from 'express-session';

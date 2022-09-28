@@ -45,7 +45,7 @@ const AccountSelection = (props) => {
       )
       .catch((e) => console.log(e));
     // return () => controller.abort() // crash on React18
-  }, []);
+  }, [navigate]);
 
   if (!loaded) return <LoadingPage />;
   return (

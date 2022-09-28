@@ -14,7 +14,7 @@ export default function AccountCreationDialog(props) {
           <Typography variant="body2" color="textSecondary" component="p">
             Welcome to the Jami web node setup.
             <br />
-            Let's start by creating a new administrator account to control access to the server configuration.
+            Let&apos;s start by creating a new administrator account to control access to the server configuration.
           </Typography>
         </CardContent>
 
