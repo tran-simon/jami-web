@@ -19,10 +19,11 @@
  */
 'use strict';
 
-import Account from './model/Account.js';
-import Conversation from './model/Conversation.js';
 import { createRequire } from 'module';
 import path from 'path';
+
+import Account from './model/Account.js';
+import Conversation from './model/Conversation.js';
 
 const require = createRequire(import.meta.url);
 

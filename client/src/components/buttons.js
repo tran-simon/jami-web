@@ -2,7 +2,8 @@ import { QuestionMark } from '@mui/icons-material';
 import { Box, ClickAwayListener, IconButton, Popper } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import EmojiPicker from 'emoji-picker-react';
-import React, { useState, useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
+
 import {
   Arrow2Icon,
   Arrow3Icon,

@@ -1,9 +1,10 @@
-import { useState } from 'react';
-import { Container, Card, CardContent, Typography, Fab, CardActions, Box } from '@mui/material';
 import { AddRounded } from '@mui/icons-material';
-import UsernameChooser from '../components/UsernameChooser';
-import authManager from '../AuthManager';
+import { Box, Card, CardActions, CardContent, Container, Fab, Typography } from '@mui/material';
+import { useState } from 'react';
 import { useNavigate } from 'react-router';
+
+import authManager from '../AuthManager';
+import UsernameChooser from '../components/UsernameChooser';
 
 export default function JamiAccountDialog(props) {
   const [name, setName] = useState('');

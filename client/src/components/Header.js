@@ -1,6 +1,7 @@
-import { useState } from 'react';
 import { Box, Button, Menu, MenuItem } from '@mui/material';
+import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+
 import authManager from '../AuthManager';
 
 export default function Header() {

@@ -1,4 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+
 import Account from '../../model/Account';
 
 // Define a type for the slice state

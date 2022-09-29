@@ -1,12 +1,13 @@
+import { Box, Stack, Typography } from '@mui/material';
 import { useCallback, useContext, useEffect, useState } from 'react';
+
+import Conversation from '../../../model/Conversation';
+import { SocketContext } from '../contexts/socket';
+import { useConversationQuery, useMessagesQuery, useSendMessageMutation } from '../services/conversation';
+import ConversationAvatar from './ConversationAvatar';
+import LoadingPage from './loading';
 import MessageList from './MessageList';
 import SendMessageForm from './SendMessageForm';
-import Conversation from '../../../model/Conversation';
-import LoadingPage from './loading';
-import { Box, Stack, Typography } from '@mui/material';
-import ConversationAvatar from './ConversationAvatar';
-import { useConversationQuery, useMessagesQuery, useSendMessageMutation } from '../services/conversation';
-import { SocketContext } from '../contexts/socket';
 
 const ConversationView = (props) => {
   const socket = useContext(SocketContext);

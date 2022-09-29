@@ -1,7 +1,8 @@
+import { SearchRounded } from '@mui/icons-material';
+import { InputAdornment, TextField } from '@mui/material';
 import { useEffect, useState } from 'react';
 import usePromise from 'react-fetch-hook/usePromise';
-import { InputAdornment, TextField } from '@mui/material';
-import { SearchRounded } from '@mui/icons-material';
+
 import authManager from '../AuthManager';
 
 const isInputValid = (input) => input && input.length > 2;

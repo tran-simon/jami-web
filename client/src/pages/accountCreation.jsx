@@ -1,5 +1,6 @@
-import { Container, Card, CardContent, Typography, List, Avatar, Divider } from '@mui/material';
 import { DialerSipRounded, GroupOutlined, RoomRounded } from '@mui/icons-material';
+import { Avatar, Card, CardContent, Container, Divider, List, Typography } from '@mui/material';
+
 import ListItemLink from '../components/ListItemLink';
 
 export default function AccountCreationDialog(props) {

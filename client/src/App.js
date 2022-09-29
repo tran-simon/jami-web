@@ -4,19 +4,19 @@
   License: AGPL-3
 */
 import { ThemeProvider } from '@mui/material/styles';
-import { useState, useEffect } from 'react';
-import { Route, Routes, Navigate } from 'react-router-dom';
-import authManager from './AuthManager';
+import { useEffect, useState } from 'react';
+import { Navigate, Route, Routes } from 'react-router-dom';
 
-import SignInPage from './pages/loginDialog.jsx';
-import JamiMessenger from './pages/JamiMessenger.jsx';
-import AccountSettings from './pages/accountSettings.jsx';
-import AccountSelection from './pages/accountSelection.jsx';
-import ServerSetup from './pages/serverSetup.jsx';
-import AccountCreationDialog from './pages/accountCreation.jsx';
-import NotFoundPage from './pages/404.jsx';
-import JamiAccountDialog from './pages/jamiAccountCreation.jsx';
+import authManager from './AuthManager';
 import WelcomeAnimation from './components/welcome';
+import NotFoundPage from './pages/404.jsx';
+import AccountCreationDialog from './pages/accountCreation.jsx';
+import AccountSelection from './pages/accountSelection.jsx';
+import AccountSettings from './pages/accountSettings.jsx';
+import JamiAccountDialog from './pages/jamiAccountCreation.jsx';
+import JamiMessenger from './pages/JamiMessenger.jsx';
+import SignInPage from './pages/loginDialog.jsx';
+import ServerSetup from './pages/serverSetup.jsx';
 import defaultTheme from './themes/default';
 import { ThemeDemonstrator } from './themes/ThemeDemonstrator';
 

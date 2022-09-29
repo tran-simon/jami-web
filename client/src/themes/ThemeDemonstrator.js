@@ -1,13 +1,14 @@
 import { Button, Stack, Switch, ThemeProvider, Typography } from '@mui/material';
+
 import {
-  CancelPictureButton,
-  EditPictureButton,
-  UploadPictureButton,
-  TakePictureButton,
-  InfoButton,
-  TipButton,
   BackButton,
+  CancelPictureButton,
   CloseButton,
+  EditPictureButton,
+  InfoButton,
+  TakePictureButton,
+  TipButton,
+  UploadPictureButton,
 } from '../components/buttons';
 import { NickNameInput, PasswordInput, RegularInput, UsernameInput } from '../components/inputs';
 import defaultTheme from './default';

@@ -1,6 +1,7 @@
 import { Button, Container } from '@mui/material';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useState } from 'react';
+
 import JamiLogo from '../../public/jami-logo-icon.svg';
 
 const list = {

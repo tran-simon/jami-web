@@ -1,5 +1,7 @@
-import { useState, useCallback } from 'react';
 import { Divider, InputBase } from '@mui/material';
+import { Stack } from '@mui/system';
+import { useCallback, useState } from 'react';
+
 import {
   RecordVideoMessageButton,
   RecordVoiceMessageButton,
@@ -7,7 +9,6 @@ import {
   SendMessageButton,
   UploadFileButton,
 } from './buttons';
-import { Stack } from '@mui/system';
 
 export default function SendMessageForm(props) {
   const [currentMessage, setCurrentMessage] = useState('');

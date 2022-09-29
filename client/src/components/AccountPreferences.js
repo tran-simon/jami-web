@@ -1,32 +1,30 @@
-import { useState } from 'react';
-
+import { AddCircle, DeleteRounded, GroupRounded, PhoneCallbackRounded } from '@mui/icons-material';
 import {
+  Card,
+  CardContent,
+  Grid,
+  IconButton,
   List,
   ListItem,
+  ListItemAvatar,
   ListItemIcon,
   ListItemSecondaryAction,
   ListItemText,
   ListSubheader,
-  Switch,
-  Typography,
-  Grid,
   Paper,
-  CardContent,
-  Card,
-  Toolbar,
-  IconButton,
-  ListItemAvatar,
+  Switch,
   TextField,
+  Toolbar,
+  Typography,
 } from '@mui/material';
-import { PhoneCallbackRounded, GroupRounded, DeleteRounded, AddCircle } from '@mui/icons-material';
+import { motion } from 'framer-motion';
+import { useState } from 'react';
 
 import Account from '../../../model/Account';
-import JamiIdCard from './JamiIdCard';
+import authManager from '../AuthManager';
 import ConversationAvatar from './ConversationAvatar';
 import ConversationsOverviewCard from './ConversationsOverviewCard';
-
-import authManager from '../AuthManager';
-import { motion } from 'framer-motion';
+import JamiIdCard from './JamiIdCard';
 
 const transition = { duration: 0.3, ease: [0.43, 0.13, 0.23, 0.96] };
 

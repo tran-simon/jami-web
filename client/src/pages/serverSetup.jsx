@@ -1,7 +1,7 @@
+import GroupAddRounded from '@mui/icons-material/GroupAddRounded';
+import { Box, Card, CardContent, Container, Fab, Input, Typography } from '@mui/material';
 import { useState } from 'react';
 
-import { Box, Container, Fab, Card, CardContent, Typography, Input } from '@mui/material';
-import GroupAddRounded from '@mui/icons-material/GroupAddRounded';
 import authManager from '../AuthManager';
 
 export default function ServerSetup(props) {

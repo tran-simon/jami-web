@@ -14,6 +14,7 @@
     "clean-all": "npm run clean && rm -rf node_modules client/node_modules",
     "lint": "eslint \"**/*.{ts,tsx,js,jsx}\"",
     "prepare": "husky install",
+    "prettier": "prettier -c \"**/*.{ts,tsx,js,jsx,json}\"",
     "start": "nodemon",
     "start:prod": "NODE_ENV=production node dist/app.js"
   },

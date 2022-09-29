@@ -1,11 +1,12 @@
+import { Person } from '@mui/icons-material';
+import { ListItem, ListItemAvatar, ListItemText } from '@mui/material';
 import List from '@mui/material/List';
+import { useEffect, useState } from 'react';
+import Modal from 'react-modal';
+
+import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import authManager from '../AuthManager';
 import ConversationAvatar from './ConversationAvatar';
-import Modal from 'react-modal';
-import { useState, useEffect } from 'react';
-import { Person } from '@mui/icons-material';
-import { useAppDispatch, useAppSelector } from '../../redux/hooks';
-import { ListItem, ListItemAvatar, ListItemText } from '@mui/material';
 
 const customStyles = {
   content: {

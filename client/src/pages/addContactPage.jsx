@@ -1,10 +1,10 @@
+import GroupAddRounded from '@mui/icons-material/GroupAddRounded';
+import { Box, Card, CardContent, Container, Fab, Typography } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 
-import { Box, Container, Fab, Card, CardContent, Typography } from '@mui/material';
-import GroupAddRounded from '@mui/icons-material/GroupAddRounded';
-import authManager from '../AuthManager';
-import { useAppDispatch } from '../../redux/hooks';
 import { setRefreshFromSlice } from '../../redux/appSlice';
+import { useAppDispatch } from '../../redux/hooks';
+import authManager from '../AuthManager';
 
 export default function AddContactPage(props) {
   const navigate = useNavigate();

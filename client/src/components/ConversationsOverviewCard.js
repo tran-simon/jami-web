@@ -1,8 +1,9 @@
-import { useEffect, useState } from 'react';
 import { Card, CardActionArea, CardContent, CircularProgress, Typography } from '@mui/material';
+import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router';
-import authManager from '../AuthManager';
+
 import Conversation from '../../../model/Conversation';
+import authManager from '../AuthManager';
 
 export default function ConversationsOverviewCard(props) {
   const navigate = useNavigate();

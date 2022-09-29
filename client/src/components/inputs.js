@@ -1,8 +1,9 @@
 import { Stack, TextField } from '@mui/material';
 import { styled } from '@mui/material/styles';
-import { useState, useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+
 import { InfoButton, ToggleVisibilityButton } from './buttons';
-import { CheckedIcon, RoundSaltireIcon, LockIcon, PenIcon, PersonIcon } from './svgIcons';
+import { CheckedIcon, LockIcon, PenIcon, PersonIcon, RoundSaltireIcon } from './svgIcons';
 
 const iconsHeight = '16px';
 const StyledCheckedIconSuccess = styled(CheckedIcon)(({ theme }) => ({

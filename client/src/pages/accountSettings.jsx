@@ -1,12 +1,13 @@
+import { CircularProgress, Container } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router';
-import { Container, CircularProgress } from '@mui/material';
-import Header from '../components/Header';
-import AccountPreferences from '../components/AccountPreferences';
-import authManager from '../AuthManager';
+
 import Account from '../../../model/Account';
-import { useAppDispatch } from '../../redux/hooks';
 import { setAccountId, setAccountObject } from '../../redux/appSlice';
+import { useAppDispatch } from '../../redux/hooks';
+import authManager from '../AuthManager';
+import AccountPreferences from '../components/AccountPreferences';
+import Header from '../components/Header';
 
 const AccountSettings = (props) => {
   console.log('ACCOUNT SETTINGS', props.account);

@@ -1,14 +1,15 @@
-import { Fragment, useEffect, useState } from 'react';
-import { Avatar, Card, CardHeader, Container, List } from '@mui/material';
-import Header from '../components/Header';
-import authManager from '../AuthManager';
-import Account from '../../../model/Account';
-import LoadingPage from '../components/loading';
-import ListItemLink from '../components/ListItemLink';
-import ConversationAvatar from '../components/ConversationAvatar';
 import { AddRounded } from '@mui/icons-material';
-import { useNavigate } from 'react-router';
+import { Avatar, Card, CardHeader, Container, List } from '@mui/material';
 import { motion } from 'framer-motion';
+import { Fragment, useEffect, useState } from 'react';
+import { useNavigate } from 'react-router';
+
+import Account from '../../../model/Account';
+import authManager from '../AuthManager';
+import ConversationAvatar from '../components/ConversationAvatar';
+import Header from '../components/Header';
+import ListItemLink from '../components/ListItemLink';
+import LoadingPage from '../components/loading';
 
 const variants = {
   enter: { opacity: 1, y: 0 },

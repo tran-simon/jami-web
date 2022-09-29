@@ -1,9 +1,10 @@
-import Header from '../components/Header';
-import AccountPreferences from '../components/AccountPreferences';
-import Container from '@mui/material/Container';
 import CircularProgress from '@mui/material/CircularProgress';
-import authManager from '../AuthManager';
+import Container from '@mui/material/Container';
+
 import Account from '../../../model/Account';
+import authManager from '../AuthManager';
+import AccountPreferences from '../components/AccountPreferences';
+import Header from '../components/Header';
 
 const ServerOverview = (props) => {
   this.accountId = props.accountId || props.match.params.accountId;

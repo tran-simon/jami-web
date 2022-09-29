@@ -1,18 +1,18 @@
+import { Stack } from '@mui/material';
 import { useEffect, useState } from 'react';
-import Header from '../components/Header';
-import NewContactForm from '../components/NewContactForm';
+import { useParams } from 'react-router';
 
+import Contact from '../../../model/Contact';
+import Conversation from '../../../model/Conversation';
+import { useAppSelector } from '../../redux/hooks';
+import authManager from '../AuthManager';
 //import Sound from 'react-sound';
 import ConversationList from '../components/ConversationList';
-import authManager from '../AuthManager';
-import Conversation from '../../../model/Conversation';
-import Contact from '../../../model/Contact';
 import ConversationView from '../components/ConversationView';
-import AddContactPage from './addContactPage.jsx';
+import Header from '../components/Header';
 import LoadingPage from '../components/loading';
-import { useParams } from 'react-router';
-import { Stack } from '@mui/material';
-import { useAppSelector } from '../../redux/hooks';
+import NewContactForm from '../components/NewContactForm';
+import AddContactPage from './addContactPage.jsx';
 
 const Messenger = (props) => {
   const { refresh } = useAppSelector((state) => state.app);

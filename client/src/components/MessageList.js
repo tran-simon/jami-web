@@ -1,16 +1,17 @@
+import { Stack } from '@mui/system';
 import dayjs from 'dayjs';
-import { useMemo } from 'react';
 import dayOfYear from 'dayjs/plugin/dayOfYear';
 import isBetween from 'dayjs/plugin/isBetween';
-import { Stack } from '@mui/system';
+import { useMemo } from 'react';
+
 import {
+  MessageBubblesGroup,
   MessageCall,
   MessageDate,
   MessageInitial,
   MessageMember,
-  MessageBubblesGroup,
-  MessageTime,
   MessageMerge,
+  MessageTime,
 } from './Message';
 
 dayjs.extend(dayOfYear);

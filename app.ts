@@ -3,29 +3,26 @@
 import dotenv from 'dotenv';
 const env = dotenv.config();
 
+import cors from 'cors';
+import express, { NextFunction, Request, Response } from 'express';
+import session from 'express-session';
 import { promises as fs } from 'fs';
 import http from 'http';
-import express, { NextFunction, Response, Request } from 'express';
-import session from 'express-session';
-import { Server, Socket } from 'socket.io';
-import path from 'path';
 import passport from 'passport';
 import { Strategy as LocalStrategy } from 'passport-local';
+import path from 'path';
+import { Server, Socket } from 'socket.io';
+import { ExtendedError } from 'socket.io/dist/namespace';
+
+import JamiDaemon from './JamiDaemon.js';
+import Account from './model/Account';
 //import { createRequire } from 'module';
 //const require = createRequire(import.meta.url);
-
 //const redis = require('redis-url').connect()
 //const RedisStore = require('connect-redis')(session)
 /*const passportSocketIo = require('passport.socketio')*/
-
 import indexRouter from './routes/index.js';
-
-import cors from 'cors';
-
 import JamiRestApi from './routes/jami.js';
-import JamiDaemon from './JamiDaemon.js';
-import Account from './model/Account';
-import { ExtendedError } from 'socket.io/dist/namespace';
 // import { sentrySetUp } from './sentry.js'
 
 const configPath = 'jamiServerConfig.json';

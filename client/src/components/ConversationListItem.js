@@ -1,15 +1,16 @@
-import Modal from 'react-modal';
-import authManager from '../AuthManager';
-import ConversationAvatar from './ConversationAvatar';
-import Conversation from '../../../model/Conversation';
-import { useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { ListItem, Stack, ListItemAvatar, ListItemText, Box, Typography } from '@mui/material';
-import { RemoveContactIcon, VideoCallIcon } from './svgIcons';
-import { AudioCallIcon, BlockContactIcon, ContactDetailsIcon, CrossIcon, MessageIcon } from './svgIcons';
+import { Box, ListItem, ListItemAvatar, ListItemText, Stack, Typography } from '@mui/material';
 import { QRCodeCanvas } from 'qrcode.react';
+import { useState } from 'react';
+import Modal from 'react-modal';
+import { useNavigate, useParams } from 'react-router-dom';
+
+import Conversation from '../../../model/Conversation';
 import { setRefreshFromSlice } from '../../redux/appSlice';
 import { useAppDispatch } from '../../redux/hooks';
+import authManager from '../AuthManager';
+import ConversationAvatar from './ConversationAvatar';
+import { RemoveContactIcon, VideoCallIcon } from './svgIcons';
+import { AudioCallIcon, BlockContactIcon, ContactDetailsIcon, CrossIcon, MessageIcon } from './svgIcons';
 
 const customStyles = {
   content: {
