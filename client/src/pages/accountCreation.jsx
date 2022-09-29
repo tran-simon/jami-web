@@ -3,7 +3,6 @@ import { DialerSipRounded, GroupOutlined, RoomRounded } from '@mui/icons-materia
 import ListItemLink from '../components/ListItemLink';
 
 export default function AccountCreationDialog(props) {
-
   return (
     <Container>
       <Card>
@@ -12,7 +11,8 @@ export default function AccountCreationDialog(props) {
             Create new account
           </Typography>
           <Typography variant="body2" color="textSecondary" component="p">
-            Welcome to the Jami web node setup.<br />
+            Welcome to the Jami web node setup.
+            <br />
             Let's start by creating a new administrator account to control access to the server configuration.
           </Typography>
         </CardContent>
@@ -20,22 +20,38 @@ export default function AccountCreationDialog(props) {
         <List>
           <ListItemLink
             to="/newAccount/rendezVous"
-            icon={<Avatar><RoomRounded /></Avatar>}
+            icon={
+              <Avatar>
+                <RoomRounded />
+              </Avatar>
+            }
             primary="Rendez-vous point"
-            secondary="A Rendez-vous account provides a unique space suitable to easily organize meetings" />
+            secondary="A Rendez-vous account provides a unique space suitable to easily organize meetings"
+          />
           <Divider />
           <ListItemLink
             to="/newAccount/jami"
-            icon={<Avatar><GroupOutlined /></Avatar>}
+            icon={
+              <Avatar>
+                <GroupOutlined />
+              </Avatar>
+            }
             primary="Jami account"
-            secondary="A pesonal communication account to join a Rendez-vous point or directly contact other Jami users" />
+            secondary="A pesonal communication account to join a Rendez-vous point or directly contact other Jami users"
+          />
           <Divider />
           <ListItemLink
             to="/newAccount/sip"
-            icon={<Avatar><DialerSipRounded /></Avatar>}
+            icon={
+              <Avatar>
+                <DialerSipRounded />
+              </Avatar>
+            }
             primary="SIP Account"
-            secondary="Connect with standard SIP communication providers or classic telephony services" />
+            secondary="Connect with standard SIP communication providers or classic telephony services"
+          />
         </List>
       </Card>
-    </Container>)
+    </Container>
+  );
 }

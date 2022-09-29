@@ -1,20 +1,20 @@
-import List from "@mui/material/List";
-import authManager from "../AuthManager";
-import ConversationAvatar from "./ConversationAvatar";
+import List from '@mui/material/List';
+import authManager from '../AuthManager';
+import ConversationAvatar from './ConversationAvatar';
 import Modal from 'react-modal';
-import { useState, useEffect } from "react";
-import { Person } from "@mui/icons-material";
-import { useAppDispatch, useAppSelector } from "../../redux/hooks";
-import { ListItem, ListItemAvatar, ListItemText } from "@mui/material";
+import { useState, useEffect } from 'react';
+import { Person } from '@mui/icons-material';
+import { useAppDispatch, useAppSelector } from '../../redux/hooks';
+import { ListItem, ListItemAvatar, ListItemText } from '@mui/material';
 
 const customStyles = {
   content: {
-    top: "50%",
-    left: "50%",
-    right: "auto",
-    bottom: "auto",
-    marginRight: "-50%",
-    transform: "translate(-50%, -50%)",
+    top: '50%',
+    left: '50%',
+    right: 'auto',
+    bottom: 'auto',
+    marginRight: '-50%',
+    transform: 'translate(-50%, -50%)',
   },
 };
 
@@ -47,23 +47,20 @@ export default function ContactList() {
       })
       .then((res) => res.json())
       .then((result) => {
-        console.log("CONTACT LIST - DETAILS: ", result);
+        console.log('CONTACT LIST - DETAILS: ', result);
       })
-      .catch((e) => console.log("ERROR GET CONTACT DETAILS: ", e));
+      .catch((e) => console.log('ERROR GET CONTACT DETAILS: ', e));
   };
 
   const removeOrBlock = (typeOfRemove) => {
-    console.log("REMOVE");
+    console.log('REMOVE');
     setBlockOrRemove(false);
     const controller = new AbortController();
     authManager
-      .fetch(
-        `/api/accounts/${accountId}/contacts/${typeOfRemove}/${currentContact.id}`,
-        {
-          signal: controller.signal,
-          method: "DELETE",
-        }
-      )
+      .fetch(`/api/accounts/${accountId}/contacts/${typeOfRemove}/${currentContact.id}`, {
+        signal: controller.signal,
+        method: 'DELETE',
+      })
       .then((res) => res.json())
       .then((result) => {})
       .catch((e) => console.log(`ERROR ${typeOfRemove}ing CONTACT : `, e));
@@ -78,7 +75,7 @@ export default function ContactList() {
       })
       .then((res) => res.json())
       .then((result) => {
-        console.log("CONTACTS: ", result)
+        console.log('CONTACTS: ', result);
         setContacts(result);
       });
     return () => controller.abort();
@@ -108,7 +105,7 @@ export default function ContactList() {
 
         <div
           onClick={() => {
-            console.log("open dialog Supprimer: ");
+            console.log('open dialog Supprimer: ');
             setBlockOrRemove(false);
             closeModal();
             openModalDelete();
@@ -120,7 +117,7 @@ export default function ContactList() {
 
         <div
           onClick={() => {
-            console.log("open dialog BLOCK: ");
+            console.log('open dialog BLOCK: ');
             setBlockOrRemove(true);
             closeModal();
             openModalDelete();
@@ -132,7 +129,7 @@ export default function ContactList() {
 
         <div
           onClick={() => {
-            console.log("open details contact for: ");
+            console.log('open details contact for: ');
             closeModal();
             openModalDetails();
             getContactDetails();
@@ -148,13 +145,12 @@ export default function ContactList() {
         style={customStyles}
         contentLabel="Merci de confirmer"
       >
-        Voulez vous vraiment {blockOrRemove ? "bloquer" : "supprimer"} ce
-        contact?
+        Voulez vous vraiment {blockOrRemove ? 'bloquer' : 'supprimer'} ce contact?
         <br />
         {blockOrRemove ? (
-          <button onClick={() => removeOrBlock("block")}>Bloquer</button>
+          <button onClick={() => removeOrBlock('block')}>Bloquer</button>
         ) : (
-          <button onClick={() => removeOrBlock("remove")}>Supprimer</button>
+          <button onClick={() => removeOrBlock('remove')}>Supprimer</button>
         )}
         <button onClick={closeModalDelete}>Annuler</button>
       </Modal>

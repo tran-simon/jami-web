@@ -1,13 +1,11 @@
-import i18n from "i18next"
-import { initReactI18next } from "react-i18next"
-import translationEn from "../public/locale/en/translation.json"
-import translationFr from "../public/locale/fr/translation.json"
+import i18n from 'i18next';
+import { initReactI18next } from 'react-i18next';
+import translationEn from '../public/locale/en/translation.json';
+import translationFr from '../public/locale/fr/translation.json';
 
-i18n
-.use(initReactI18next)
-.init({
-  debug: process.env.NODE_ENV == "development",
-  lng: "en",
+i18n.use(initReactI18next).init({
+  debug: process.env.NODE_ENV == 'development',
+  lng: 'en',
   interpolation: {
     escapeValue: false,
   },
@@ -19,6 +17,6 @@ i18n
       translation: translationFr,
     },
   },
-})
+});
 
-export default i18n
+export default i18n;

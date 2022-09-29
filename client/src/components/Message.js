@@ -1,76 +1,56 @@
-import { Box, Chip, Divider, List, ListItemButton, ListItemText, Stack, Tooltip, Typography } from "@mui/material"
-import { styled } from "@mui/material/styles";
-import dayjs from "dayjs"
-import isToday from "dayjs/plugin/isToday"
-import isYesterday from "dayjs/plugin/isYesterday"
-import React, { useCallback, useMemo, useState } from "react"
-import { useTranslation } from "react-i18next"
-import { EmojiButton, MoreButton, ReplyMessageButton } from "./buttons";
-import ConversationAvatar from "./ConversationAvatar"
-import { OppositeArrowsIcon, TrashBinIcon, TwoSheetsIcon } from "./svgIcons"
+import { Box, Chip, Divider, List, ListItemButton, ListItemText, Stack, Tooltip, Typography } from '@mui/material';
+import { styled } from '@mui/material/styles';
+import dayjs from 'dayjs';
+import isToday from 'dayjs/plugin/isToday';
+import isYesterday from 'dayjs/plugin/isYesterday';
+import React, { useCallback, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { EmojiButton, MoreButton, ReplyMessageButton } from './buttons';
+import ConversationAvatar from './ConversationAvatar';
+import { OppositeArrowsIcon, TrashBinIcon, TwoSheetsIcon } from './svgIcons';
 
-dayjs.extend(isToday)
-dayjs.extend(isYesterday)
+dayjs.extend(isToday);
+dayjs.extend(isYesterday);
 
 export const MessageCall = (props) => {
-  return (
-    <Stack
-      alignItems="center"
-    >
-      "Appel"
-    </Stack>
-  )
-}
+  return <Stack alignItems="center">"Appel"</Stack>;
+};
 
 export const MessageInitial = (props) => {
-  const { t } = useTranslation()
-  return (
-    <Stack
-      alignItems="center"
-    >
-      {t("message_swarm_created")}
-    </Stack>
-  )
-}
+  const { t } = useTranslation();
+  return <Stack alignItems="center">{t('message_swarm_created')}</Stack>;
+};
 
 export const MessageDataTransfer = (props) => {
   return (
     <MessageBubble
-      backgroundColor={"#E5E5E5"}
+      backgroundColor={'#E5E5E5'}
       position={props.position}
       isFirstOfGroup={props.isFirstOfGroup}
       isLastOfGroup={props.isLastOfGroup}
     >
       "data-transfer"
     </MessageBubble>
-  )
-}
+  );
+};
 
 export const MessageMember = (props) => {
-  const { t } = useTranslation()
+  const { t } = useTranslation();
   return (
-    <Stack
-      alignItems="center"
-    >
+    <Stack alignItems="center">
       <Chip
         sx={{
-          width: "fit-content",
+          width: 'fit-content',
         }}
-        label={t("message_user_joined", {user: props.message.author})}
+        label={t('message_user_joined', { user: props.message.author })}
       />
     </Stack>
-  )
-}
+  );
+};
 
 export const MessageMerge = (props) => {
-  return (
-    <Stack
-      alignItems="center"
-    >
-      "merge"
-    </Stack>
-  )
-}
+  return <Stack alignItems="center">"merge"</Stack>;
+};
 
 export const MessageText = (props) => {
   return (
@@ -84,37 +64,35 @@ export const MessageText = (props) => {
         {props.message.body}
       </Typography>
     </MessageBubble>
-  )
-}
+  );
+};
 
-export const MessageDate = ({time}) => {
-  let textDate
+export const MessageDate = ({ time }) => {
+  let textDate;
 
   if (time.isToday()) {
-    textDate = "Today"
-  }
-  else if (time.isYesterday()) {
-    textDate = "Yesterday"
-  }
-  else {
-    const date = time.date().toString().padStart(2,'0')
-    const month = (time.month()+1).toString().padStart(2,'0')
-    textDate = `${date}/${month}/${time.year()}`
+    textDate = 'Today';
+  } else if (time.isYesterday()) {
+    textDate = 'Yesterday';
+  } else {
+    const date = time.date().toString().padStart(2, '0');
+    const month = (time.month() + 1).toString().padStart(2, '0');
+    textDate = `${date}/${month}/${time.year()}`;
   }
 
   return (
-    <Box marginTop="30px" >
+    <Box marginTop="30px">
       <Divider
         sx={{
-          ".MuiDivider-wrapper": {
+          '.MuiDivider-wrapper': {
             margin: 0,
             padding: 0,
           },
-          "&::before": {
-            borderTop: "1px solid #E5E5E5",
+          '&::before': {
+            borderTop: '1px solid #E5E5E5',
           },
-          "&::after": {
-            borderTop: "1px solid #E5E5E5",
+          '&::after': {
+            borderTop: '1px solid #E5E5E5',
           },
         }}
       >
@@ -129,37 +107,28 @@ export const MessageDate = ({time}) => {
         </Typography>
       </Divider>
     </Box>
-  )
-}
+  );
+};
 
-export const MessageTime = ({time, hasDateOnTop}) => {
-  const hour = time.hour().toString().padStart(2,'0')
-  const minute = time.minute().toString().padStart(2,'0')
-  const textTime = `${hour}:${minute}`
+export const MessageTime = ({ time, hasDateOnTop }) => {
+  const hour = time.hour().toString().padStart(2, '0');
+  const minute = time.minute().toString().padStart(2, '0');
+  const textTime = `${hour}:${minute}`;
 
   return (
-    <Stack
-      direction="row"
-      justifyContent="center"
-      margin="30px"
-      marginTop={hasDateOnTop ? "20px" : "30px"}
-    >
-      <Typography
-        variant="caption"
-        color="#A7A7A7"
-        fontWeight={700}
-      >
+    <Stack direction="row" justifyContent="center" margin="30px" marginTop={hasDateOnTop ? '20px' : '30px'}>
+      <Typography variant="caption" color="#A7A7A7" fontWeight={700}>
         {textTime}
       </Typography>
     </Stack>
-  )
-}
+  );
+};
 
 export const MessageBubblesGroup = (props) => {
-  const isUser = false // should access user from the store
-  const position = isUser ? "end" : "start"
-  const bubbleColor = isUser ? "#005699" : "#E5E5E5"
-  const textColor = isUser ? "white" : "black"
+  const isUser = false; // should access user from the store
+  const position = isUser ? 'end' : 'start';
+  const bubbleColor = isUser ? '#005699' : '#E5E5E5';
+  const textColor = isUser ? 'white' : 'black';
 
   return (
     <Stack // Row for a group of message bubbles with the user's infos
@@ -168,234 +137,202 @@ export const MessageBubblesGroup = (props) => {
       alignItems="end"
       spacing="10px"
     >
-      {
-        !isUser
-        &&
-          <ConversationAvatar
-            displayName="TempDisplayName"
-            sx={{ width: "22px", height: "22px", fontSize: "15px" }}
-          />
-      }
+      {!isUser && (
+        <ConversationAvatar displayName="TempDisplayName" sx={{ width: '22px', height: '22px', fontSize: '15px' }} />
+      )}
       <Stack // Container to align the bubbles to the same side of a row
         width="66.66%"
         alignItems={position}
       >
-        <ParticipantName
-          name={props.messages[0]?.author}
-          position={position}
-        />
+        <ParticipantName name={props.messages[0]?.author} position={position} />
         <Stack // Container for a group of message bubbles
           spacing="6px"
           alignItems={position}
           direction="column-reverse"
         >
-          {props.messages.map(
-            (message, index) => {
-              let Component
-              switch (message.type) {
-                case "text/plain":
-                  Component = MessageText
-                  break
-                case "application/data-transfer+json":
-                  Component = MessageDataTransfer
-                  break
-              } 
-              return (
-                <Component // Single message
-                  key={message.id} 
-                  message={message}
-                  textColor={textColor}
-                  position={position}
-                  bubbleColor={bubbleColor}
-                  isFirstOfGroup={index == props.messages.length-1}
-                  isLastOfGroup={index == 0}
-                />
-              )
+          {props.messages.map((message, index) => {
+            let Component;
+            switch (message.type) {
+              case 'text/plain':
+                Component = MessageText;
+                break;
+              case 'application/data-transfer+json':
+                Component = MessageDataTransfer;
+                break;
             }
-          )}
+            return (
+              <Component // Single message
+                key={message.id}
+                message={message}
+                textColor={textColor}
+                position={position}
+                bubbleColor={bubbleColor}
+                isFirstOfGroup={index == props.messages.length - 1}
+                isLastOfGroup={index == 0}
+              />
+            );
+          })}
         </Stack>
       </Stack>
     </Stack>
-  )
-}
+  );
+};
 
 const MessageTooltip = styled(({ className, ...props }) => {
-  const [open, setOpen] = useState(false)
-  const emojis = ["😎", "😄", "😍"] // Should be last three used emojis
+  const [open, setOpen] = useState(false);
+  const emojis = ['😎', '😄', '😍']; // Should be last three used emojis
   const additionalOptions = [
     {
       Icon: TwoSheetsIcon,
-      text: "Copy",
+      text: 'Copy',
       action: () => {},
     },
     {
       Icon: OppositeArrowsIcon,
-      text: "Transfer",
+      text: 'Transfer',
       action: () => {},
     },
     {
       Icon: TrashBinIcon,
-      text: "Delete message",
+      text: 'Delete message',
       action: () => {},
     },
-  ]
+  ];
 
-  const toggleMoreMenu = useCallback(
-    () => setOpen(open => !open),
-    [setOpen]
-  )
+  const toggleMoreMenu = useCallback(() => setOpen((open) => !open), [setOpen]);
 
-  const onClose = useCallback(
-    () => {
-      setOpen(false)
-    },
-    [setOpen]
-  )
+  const onClose = useCallback(() => {
+    setOpen(false);
+  }, [setOpen]);
 
   return (
     <Tooltip
       {...props}
       classes={{ tooltip: className }} // Required for styles. Don't know why
-      placement={props.position == "start" ? "right-start" : "left-start"}
+      placement={props.position == 'start' ? 'right-start' : 'left-start'}
       PopperProps={{
         modifiers: [
           {
-            name: "offset",
+            name: 'offset',
             options: {
-                offset: [-2, -30],
+              offset: [-2, -30],
             },
           },
         ],
       }}
       onClose={onClose}
       title={
-        <Stack> {/* Whole tooltip's content */}
+        <Stack>
+          {' '}
+          {/* Whole tooltip's content */}
           <Stack // Main options
             direction="row"
             spacing="16px"
           >
-            {
-              emojis.map(
-                emoji => <EmojiButton key={emoji} emoji={emoji}/>
-              )
-            }
-            <ReplyMessageButton/>
-            <MoreButton
-              onClick={toggleMoreMenu}
-            />
+            {emojis.map((emoji) => (
+              <EmojiButton key={emoji} emoji={emoji} />
+            ))}
+            <ReplyMessageButton />
+            <MoreButton onClick={toggleMoreMenu} />
           </Stack>
-          {open && // Additional menu options
+          {open && ( // Additional menu options
             <>
-            <Divider sx={{paddingTop:"16px"}}/>
-            <List sx={{padding: 0, paddingTop: "8px", marginBottom: "-8px"}}>
-              {
-                additionalOptions.map(
-                  (option) => (
-                    <ListItemButton
-                      key={option.text}
-                      sx={{
-                        padding: "8px",
-                      }}
+              <Divider sx={{ paddingTop: '16px' }} />
+              <List sx={{ padding: 0, paddingTop: '8px', marginBottom: '-8px' }}>
+                {additionalOptions.map((option) => (
+                  <ListItemButton
+                    key={option.text}
+                    sx={{
+                      padding: '8px',
+                    }}
+                  >
+                    <Stack // Could not find proper way to set spacing between ListItemIcon and ListItemText
+                      direction="row"
+                      spacing="16px"
                     >
-                      <Stack // Could not find proper way to set spacing between ListItemIcon and ListItemText
-                        direction="row"
-                        spacing="16px"
-                      >
-                        <option.Icon
-                          sx={{
-                            height: "16px",
-                            margin: 0,
-                            color: theme => theme.palette.primary.dark,
-                          }}
-                        />
-                        <ListItemText
-                          primary={option.text}
-                          primaryTypographyProps={{
-                            fontSize: "12px",
-                            lineHeight: "16px",
-                          }}
-                          sx={{
-                            height: "16px",
-                            margin: 0,
-                          }}
-                        />
-                      </Stack>
-                    </ListItemButton>
-                  )
-                )
-              }
-            </List>
+                      <option.Icon
+                        sx={{
+                          height: '16px',
+                          margin: 0,
+                          color: (theme) => theme.palette.primary.dark,
+                        }}
+                      />
+                      <ListItemText
+                        primary={option.text}
+                        primaryTypographyProps={{
+                          fontSize: '12px',
+                          lineHeight: '16px',
+                        }}
+                        sx={{
+                          height: '16px',
+                          margin: 0,
+                        }}
+                      />
+                    </Stack>
+                  </ListItemButton>
+                ))}
+              </List>
             </>
-          }
+          )}
         </Stack>
       }
     />
-  )
+  );
 })(({ theme, position }) => {
-  const largeRadius = "20px"
-  const smallRadius = "5px"
+  const largeRadius = '20px';
+  const smallRadius = '5px';
   return {
-    backgroundColor: "white",
-    padding: "16px",
-    boxShadow: "3px 3px 7px #00000029",
+    backgroundColor: 'white',
+    padding: '16px',
+    boxShadow: '3px 3px 7px #00000029',
     borderRadius: largeRadius,
-    borderStartStartRadius: position == "start" ? smallRadius : largeRadius,
-    borderStartEndRadius: position == "end" ? smallRadius : largeRadius,
-  }
+    borderStartStartRadius: position == 'start' ? smallRadius : largeRadius,
+    borderStartEndRadius: position == 'end' ? smallRadius : largeRadius,
+  };
 });
 
 const MessageBubble = (props) => {
-  const largeRadius = "20px"
-  const smallRadius = "5px"
+  const largeRadius = '20px';
+  const smallRadius = '5px';
   const radius = useMemo(() => {
-    if (props.position == "start") {
+    if (props.position == 'start') {
       return {
         borderStartStartRadius: props.isFirstOfGroup ? largeRadius : smallRadius,
         borderStartEndRadius: largeRadius,
         borderEndStartRadius: props.isLastOfGroup ? largeRadius : smallRadius,
         borderEndEndRadius: largeRadius,
-      }
+      };
     }
     return {
       borderStartStartRadius: largeRadius,
       borderStartEndRadius: props.isFirstOfGroup ? largeRadius : smallRadius,
       borderEndStartRadius: largeRadius,
       borderEndEndRadius: props.isLastOfGroup ? largeRadius : smallRadius,
-    }
-  }, [props.isFirstOfGroup, props.isLastOfGroup, props.position])
+    };
+  }, [props.isFirstOfGroup, props.isLastOfGroup, props.position]);
 
   return (
-    <MessageTooltip
-      position={props.position}
-    >
+    <MessageTooltip position={props.position}>
       <Box
         sx={{
-          width: "fit-content",
+          width: 'fit-content',
           backgroundColor: props.backgroundColor,
-          padding: "16px",
+          padding: '16px',
           ...radius,
         }}
       >
         {props.children}
       </Box>
     </MessageTooltip>
-  )
-}
+  );
+};
 
 const ParticipantName = (props) => {
   return (
-    <Box
-      marginBottom="6px"
-      marginLeft="16px"
-      marginRight="16px"
-    >
-      <Typography
-        variant="caption"
-        color="#A7A7A7"
-        fontWeight={700}
-      >
+    <Box marginBottom="6px" marginLeft="16px" marginRight="16px">
+      <Typography variant="caption" color="#A7A7A7" fontWeight={700}>
         {props.name}
       </Typography>
     </Box>
-  )
-}
+  );
+};

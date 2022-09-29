@@ -1,29 +1,30 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react';
 import { Card, CardActionArea, CardContent, CircularProgress, Typography } from '@mui/material';
 import { useNavigate, useParams } from 'react-router';
-import authManager from '../AuthManager'
+import authManager from '../AuthManager';
 import Conversation from '../../../model/Conversation';
 
 export default function ConversationsOverviewCard(props) {
-  const navigate = useNavigate()
-  const accountId = props.accountId || useParams().accountId
-  const [loaded, setLoaded] = useState(false)
-  const [conversations, setConversations] = useState([])
+  const navigate = useNavigate();
+  const accountId = props.accountId || useParams().accountId;
+  const [loaded, setLoaded] = useState(false);
+  const [conversations, setConversations] = useState([]);
 
   useEffect(() => {
-    const controller = new AbortController()
-    authManager.fetch(`/api/accounts/${accountId}/conversations`, { signal: controller.signal })
-      .then(res => res.json())
-      .then(result => {
-        console.log(result)
-        setLoaded(true)
-        setConversations(Object.values(result).map(c => Conversation.from(accountId, c)))
-      })
+    const controller = new AbortController();
+    authManager
+      .fetch(`/api/accounts/${accountId}/conversations`, { signal: controller.signal })
+      .then((res) => res.json())
+      .then((result) => {
+        console.log(result);
+        setLoaded(true);
+        setConversations(Object.values(result).map((c) => Conversation.from(accountId, c)));
+      });
     // return () => controller.abort() // crash on React18
-  }, [accountId])
+  }, [accountId]);
 
   return (
-    <Card onClick={() => navigate(`/account/${accountId}`)} >
+    <Card onClick={() => navigate(`/account/${accountId}`)}>
       <CardActionArea>
         <CardContent>
           <Typography color="textSecondary" gutterBottom>
@@ -35,5 +36,5 @@ export default function ConversationsOverviewCard(props) {
         </CardContent>
       </CardActionArea>
     </Card>
-  )
+  );
 }

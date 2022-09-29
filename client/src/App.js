@@ -4,31 +4,30 @@
   License: AGPL-3
 */
 import { ThemeProvider } from '@mui/material/styles';
-import { useState, useEffect } from 'react'
-import { Route, Routes, Navigate } from 'react-router-dom'
-import authManager from './AuthManager'
+import { useState, useEffect } from 'react';
+import { Route, Routes, Navigate } from 'react-router-dom';
+import authManager from './AuthManager';
 
-import SignInPage from "./pages/loginDialog.jsx"
-import JamiMessenger from "./pages/JamiMessenger.jsx"
-import AccountSettings from "./pages/accountSettings.jsx"
-import AccountSelection from "./pages/accountSelection.jsx"
-import ServerSetup from "./pages/serverSetup.jsx"
-import AccountCreationDialog from "./pages/accountCreation.jsx"
-import NotFoundPage from "./pages/404.jsx"
-import JamiAccountDialog from './pages/jamiAccountCreation.jsx'
-import WelcomeAnimation from './components/welcome'
-import defaultTheme from './themes/default'
-import ContactList from './components/ContactList';
+import SignInPage from './pages/loginDialog.jsx';
+import JamiMessenger from './pages/JamiMessenger.jsx';
+import AccountSettings from './pages/accountSettings.jsx';
+import AccountSelection from './pages/accountSelection.jsx';
+import ServerSetup from './pages/serverSetup.jsx';
+import AccountCreationDialog from './pages/accountCreation.jsx';
+import NotFoundPage from './pages/404.jsx';
+import JamiAccountDialog from './pages/jamiAccountCreation.jsx';
+import WelcomeAnimation from './components/welcome';
+import defaultTheme from './themes/default';
 import { ThemeDemonstrator } from './themes/ThemeDemonstrator';
 
 // import { useSelector, useDispatch } from 'react-redux'
 // import { useAppSelector, useAppDispatch } from '../redux/hooks'
 
 const Home = (props) => {
-  console.log(`home ${props}`)
+  console.log(`home ${props}`);
 
-  return <Navigate to="/account" />
-}
+  return <Navigate to="/account" />;
+};
 
 const App = (props) => {
   // const count = useSelector(state => state.counter.value)
@@ -49,15 +48,10 @@ const App = (props) => {
     return () => authManager.deinit();
   }, []);
 
-  console.log("App render");
+  console.log('App render');
 
   if (displayWelcome) {
-    return (
-      <WelcomeAnimation
-        showSetup={!state.auth.setupComplete}
-        onComplete={() => setDisplayWelcome(false)}
-      />
-    );
+    return <WelcomeAnimation showSetup={!state.auth.setupComplete} onComplete={() => setDisplayWelcome(false)} />;
   } else if (!state.auth.setupComplete) {
     return (
       <Routes>
@@ -87,11 +81,9 @@ const App = (props) => {
         <Route path="/" index element={<Home />} />
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
-      {!state.auth.authenticated && (
-        <SignInPage key="signin" open={!state.auth.authenticated} />
-      )}
+      {!state.auth.authenticated && <SignInPage key="signin" open={!state.auth.authenticated} />}
     </ThemeProvider>
   );
 };
 
-export default App
+export default App;

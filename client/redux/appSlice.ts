@@ -1,6 +1,5 @@
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import Account from "../../model/Account";
-import type { RootState } from "./store";
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import Account from '../../model/Account';
 
 // Define a type for the slice state
 interface appState {
@@ -11,13 +10,13 @@ interface appState {
 
 // Define the initial state using that type
 const initialState: appState = {
-  accountId: "",
+  accountId: '',
   accountObject: null,
   refresh: true,
 };
 
 export const appSlice = createSlice({
-  name: "app",
+  name: 'app',
   // `createSlice` will infer the state type from the `initialState` argument
   initialState,
   reducers: {

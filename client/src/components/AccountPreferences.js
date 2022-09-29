@@ -1,17 +1,34 @@
-import { useState } from 'react'
+import { useState } from 'react';
 
-import { List, ListItem, ListItemIcon, ListItemSecondaryAction, ListItemText, ListSubheader, Switch, Typography, Grid, Paper, CardContent, Card, TableContainer, Table, TableHead, TableRow, TableCell, TableBody, Toolbar, IconButton, ListItemAvatar, Input, TextField } from '@mui/material'
-import { PhoneCallbackRounded, GroupRounded, DeleteRounded, AddCircle } from '@mui/icons-material'
+import {
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemSecondaryAction,
+  ListItemText,
+  ListSubheader,
+  Switch,
+  Typography,
+  Grid,
+  Paper,
+  CardContent,
+  Card,
+  Toolbar,
+  IconButton,
+  ListItemAvatar,
+  TextField,
+} from '@mui/material';
+import { PhoneCallbackRounded, GroupRounded, DeleteRounded, AddCircle } from '@mui/icons-material';
 
-import Account from '../../../model/Account'
-import JamiIdCard from './JamiIdCard'
-import ConversationAvatar from './ConversationAvatar'
-import ConversationsOverviewCard from './ConversationsOverviewCard'
+import Account from '../../../model/Account';
+import JamiIdCard from './JamiIdCard';
+import ConversationAvatar from './ConversationAvatar';
+import ConversationsOverviewCard from './ConversationsOverviewCard';
 
-import authManager from '../AuthManager'
-import { motion } from 'framer-motion'
+import authManager from '../AuthManager';
+import { motion } from 'framer-motion';
 
-const transition = { duration: 0.3, ease: [0.43, 0.13, 0.23, 0.96] }
+const transition = { duration: 0.3, ease: [0.43, 0.13, 0.23, 0.96] };
 
 const thumbnailVariants = {
   initial: { scale: 0.9, opacity: 0 },
@@ -19,50 +36,44 @@ const thumbnailVariants = {
   exit: {
     scale: 0.5,
     opacity: 0,
-    transition: { duration: 1.5, ...transition }
-  }
-}
+    transition: { duration: 1.5, ...transition },
+  },
+};
 
 export default function AccountPreferences(props) {
   const account = props.account;
   let devices = [];
   for (var i in account.devices) devices.push([i, account.devices[i]]);
 
-  console.log(devices)
+  console.log(devices);
 
   const isJamiAccount = account.getType() === Account.TYPE_JAMI;
-  const alias = isJamiAccount ? "Jami account" : "SIP account";
+  const alias = isJamiAccount ? 'Jami account' : 'SIP account';
   const moderators = account.getDefaultModerators();
-  const [defaultModeratorUri, setDefaultModeratorUri] = useState("");
+  const [defaultModeratorUri, setDefaultModeratorUri] = useState('');
 
   const [details, setDetails] = useState(account.getDetails());
 
   const addModerator = () => {
     if (defaultModeratorUri) {
-      authManager.fetch(
-        `/api/accounts/${account.getId()}/defaultModerators/${defaultModeratorUri}`,
-        { method: "PUT" }
-      );
-      setDefaultModeratorUri("");
+      authManager.fetch(`/api/accounts/${account.getId()}/defaultModerators/${defaultModeratorUri}`, { method: 'PUT' });
+      setDefaultModeratorUri('');
     }
   };
 
   const removeModerator = (uri) =>
-    authManager.fetch(
-      `/api/accounts/${account.getId()}/defaultModerators/${uri}`,
-      { method: "DELETE" }
-    );
+    authManager.fetch(`/api/accounts/${account.getId()}/defaultModerators/${uri}`, { method: 'DELETE' });
 
   const handleToggle = (key, value) => {
     console.log(`handleToggle ${key} ${value}`);
     const newDetails = {};
-    newDetails[key] = value ? "true" : "false";
+    newDetails[key] = value ? 'true' : 'false';
     console.log(newDetails);
     authManager.fetch(`/api/accounts/${account.getId()}`, {
-      method: "POST",
+      method: 'POST',
       headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify(newDetails),
     });
@@ -125,11 +136,7 @@ export default function AccountPreferences(props) {
                   {devices.map((device) => (
                     <ListItem>
                       <GroupRounded />
-                      <ListItemText
-                        id="switch-list-label-rendezvous"
-                        primary={device[1]}
-                        secondary={device[0]}
-                      />
+                      <ListItemText id="switch-list-label-rendezvous" primary={device[1]} secondary={device[0]} />
                     </ListItem>
                   ))}
                   {/* <ListItemTextsion> */}
@@ -152,19 +159,14 @@ export default function AccountPreferences(props) {
             <ListItemIcon>
               <GroupRounded />
             </ListItemIcon>
-            <ListItemText
-              id="switch-list-label-rendezvous"
-              primary="Rendez-Vous point"
-            />
+            <ListItemText id="switch-list-label-rendezvous" primary="Rendez-Vous point" />
             <ListItemSecondaryAction>
               <Switch
                 edge="end"
-                onChange={(e) =>
-                  handleToggle("Account.rendezVous", e.target.checked)
-                }
-                checked={details["Account.rendezVous"] === "true"}
+                onChange={(e) => handleToggle('Account.rendezVous', e.target.checked)}
+                checked={details['Account.rendezVous'] === 'true'}
                 inputProps={{
-                  "aria-labelledby": "switch-list-label-rendezvous",
+                  'aria-labelledby': 'switch-list-label-rendezvous',
                 }}
               />
             </ListItemSecondaryAction>
@@ -175,18 +177,13 @@ export default function AccountPreferences(props) {
             <ListItemIcon>
               <PhoneCallbackRounded />
             </ListItemIcon>
-            <ListItemText
-              id="switch-list-label-publicin"
-              primary="Allow connection from unkown peers"
-            />
+            <ListItemText id="switch-list-label-publicin" primary="Allow connection from unkown peers" />
             <ListItemSecondaryAction>
               <Switch
                 edge="end"
-                onChange={(e) =>
-                  handleToggle("DHT.PublicInCalls", e.target.checked)
-                }
-                checked={details["DHT.PublicInCalls"] === "true"}
-                inputProps={{ "aria-labelledby": "switch-list-label-publicin" }}
+                onChange={(e) => handleToggle('DHT.PublicInCalls', e.target.checked)}
+                checked={details['DHT.PublicInCalls'] === 'true'}
+                inputProps={{ 'aria-labelledby': 'switch-list-label-publicin' }}
               />
             </ListItemSecondaryAction>
           </ListItem>
@@ -224,10 +221,7 @@ export default function AccountPreferences(props) {
                     </ListItemAvatar>
                     <ListItemText primary={moderator.getDisplayName()} />
                     <ListItemSecondaryAction>
-                      <IconButton
-                        onClick={(e) => removeModerator(moderator.uri)}
-                        size="large"
-                      >
+                      <IconButton onClick={(e) => removeModerator(moderator.uri)} size="large">
                         <DeleteRounded />
                       </IconButton>
                     </ListItemSecondaryAction>
