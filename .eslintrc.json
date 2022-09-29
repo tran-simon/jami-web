@@ -4,7 +4,14 @@
     "es2021": true,
     "node": true
   },
-  "extends": ["eslint:recommended", "plugin:@typescript-eslint/recommended", "prettier"],
+  "extends": [
+    "eslint:recommended",
+    "plugin:@typescript-eslint/recommended",
+    /* TODO: Enable these configs once the project is fully converted to typescript */
+    // "plugin:@typescript-eslint/recommended-requiring-type-checking",
+    // "plugin:@typescript-eslint/strict",
+    "prettier"
+  ],
   "ignorePatterns": ["node_modules/", "dist/", "daemon/", "test/"],
   "overrides": [
     {
@@ -19,13 +26,15 @@
     "ecmaVersion": "latest",
     "sourceType": "module"
   },
-  "plugins": ["@typescript-eslint", "unused-imports"],
+  "plugins": ["@typescript-eslint", "simple-import-sort", "unused-imports"],
   "rules": {
-    "linebreak-style": ["error", "unix"],
     "@typescript-eslint/ban-ts-comment": "off",
     "@typescript-eslint/no-empty-function": "off",
     "@typescript-eslint/no-explicit-any": "off",
     "@typescript-eslint/no-unused-vars": "off",
+    "eqeqeq": ["warn", "smart"],
+    "simple-import-sort/exports": "warn",
+    "simple-import-sort/imports": "warn",
     "unused-imports/no-unused-imports": "error",
     "unused-imports/no-unused-vars": [
       "warn",
