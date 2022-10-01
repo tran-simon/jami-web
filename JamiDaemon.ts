@@ -22,21 +22,29 @@
 import { createRequire } from 'module';
 import path from 'path';
 
-import Account from './model/Account.js';
-import Conversation from './model/Conversation.js';
+import Account, { RegistrationState } from './model/Account';
+import AccountDetails, { AccountConfig, VolatileDetails } from './model/AccountDetails';
+import Contact from './model/Contact';
+import Conversation, { Message } from './model/Conversation';
+import { Lookup, LookupResolveValue, PromiseExecutor } from './model/util';
 
 const require = createRequire(import.meta.url);
 
 class JamiDaemon {
-  constructor(onMessage) {
+  private accounts: Account[];
+  private readonly lookups: Lookup[];
+  private readonly tempAccounts: Record<string, PromiseExecutor<string>>;
+  private dring: Record<string, any>;
+
+  constructor(onMessage: (account: Account, conversation: Conversation, message: Message) => void) {
     this.accounts = [];
     this.lookups = [];
-    this.tempAccounts = [];
+    this.tempAccounts = {};
     this.dring = require(path.join(process.cwd(), 'jamid.node'));
     this.dring.init({
       AccountsChanged: () => {
         console.log('AccountsChanged');
-        const newAccounts = [];
+        const newAccounts: Account[] = [];
         JamiDaemon.vectToJs(this.dring.getAccountList()).forEach((accountId) => {
           for (const account of this.accounts) {
             if (account.getId() === accountId) {
@@ -47,14 +55,14 @@ class JamiDaemon {
           newAccounts.push(
             new Account(
               accountId,
-              JamiDaemon.mapToJs(this.dring.getAccountDetails(accountId)),
-              JamiDaemon.mapToJs(this.dring.getVolatileAccountDetails(accountId))
+              JamiDaemon.mapToJs(this.dring.getAccountDetails(accountId)) as AccountDetails,
+              JamiDaemon.mapToJs(this.dring.getVolatileAccountDetails(accountId)) as VolatileDetails
             )
           );
         });
         this.accounts = newAccounts;
       },
-      AccountDetailsChanged: (accountId, details) => {
+      AccountDetailsChanged: (accountId: string, details: AccountDetails) => {
         console.log(`AccountDetailsChanged ${accountId}`);
         const account = this.getAccount(accountId);
         if (!account) {
@@ -63,7 +71,7 @@ class JamiDaemon {
         }
         account.details = details;
       },
-      VolatileDetailsChanged: (accountId, details) => {
+      VolatileDetailsChanged: (accountId: string, details: VolatileDetails) => {
         console.log(`VolatileDetailsChanged ${accountId}`);
         const account = this.getAccount(accountId);
         if (!account) {
@@ -72,7 +80,7 @@ class JamiDaemon {
         }
         account.volatileDetails = details;
       },
-      IncomingAccountMessage: (accountId, from, message) => {
+      IncomingAccountMessage: (accountId: string, from: Account, message: Message) => {
         console.log(`Received message: ${accountId} ${from} ${message['text/plain']}`);
         /*
                 if (parser.validate(message["text/plain"]) === true) {
@@ -85,18 +93,19 @@ class JamiDaemon {
                     //io.emit('receivedMessage', message["text/plain"])
                 }*/
       },
-      RegistrationStateChanged: (accountId, state, code, detail) => {
+      RegistrationStateChanged: (accountId: string, state: RegistrationState, code: number, detail: string) => {
         console.log('RegistrationStateChanged: ' + accountId + ' ' + state + ' ' + code + ' ' + detail);
-        const account = this.getAccount(accountId);
+        const account: Account | undefined = this.getAccount(accountId);
         if (account) {
           account.registrationState = state;
         } else {
           console.log(`Unknown account ${accountId}`);
+          return;
         }
         const ctx = this.tempAccounts[accountId];
         if (ctx) {
           if (state === 'REGISTERED') {
-            account.details = JamiDaemon.mapToJs(this.dring.getAccountDetails(accountId));
+            account.details = JamiDaemon.mapToJs(this.dring.getAccountDetails(accountId)) as AccountDetails;
             ctx.resolve(accountId);
             delete this.tempAccounts[accountId];
           } else if (state === 'ERROR_AUTH') {
@@ -106,7 +115,7 @@ class JamiDaemon {
           }
         }
       },
-      RegisteredNameFound: (accountId, state, address, name) => {
+      RegisteredNameFound: (accountId: string, state: number, address: string, name: string) => {
         console.log(`RegisteredNameFound: ${accountId} ${state} ${address} ${name}`);
         let lookups;
         if (accountId) {
@@ -133,7 +142,7 @@ class JamiDaemon {
           index -= 1;
         }
       },
-      NameRegistrationEnded: (accountId, state, name) => {
+      NameRegistrationEnded: (accountId: string, state: number, name: string) => {
         console.log(`NameRegistrationEnded: ${accountId} ${state} ${name}`);
         const account = this.getAccount(accountId);
         if (account) {
@@ -147,7 +156,7 @@ class JamiDaemon {
         }
       },
       // Conversations
-      ConversationReady: (accountId, conversationId) => {
+      ConversationReady: (accountId: string, conversationId: string) => {
         console.log(`conversationReady: ${accountId} ${conversationId}`);
         const account = this.getAccount(accountId);
         if (!account) {
@@ -162,7 +171,7 @@ class JamiDaemon {
           account.addConversation(conversation);
         }
       },
-      ConversationRemoved: (accountId, conversationId) => {
+      ConversationRemoved: (accountId: string, conversationId: string) => {
         console.log(`conversationRemoved: ${accountId} ${conversationId}`);
         const account = this.getAccount(accountId);
         if (!account) {
@@ -171,7 +180,7 @@ class JamiDaemon {
         }
         account.removeConversation(conversationId);
       },
-      ConversationLoaded: (id, accountId, conversationId, messages) => {
+      ConversationLoaded: (id: number, accountId: string, conversationId: string, messages: Message[]) => {
         console.log(`conversationLoaded: ${accountId} ${conversationId}`);
         const account = this.getAccount(accountId);
         if (!account) {
@@ -187,7 +196,7 @@ class JamiDaemon {
           }
         }
       },
-      MessageReceived: (accountId, conversationId, message) => {
+      MessageReceived: (accountId: string, conversationId: string, message: Message) => {
         console.log(`messageReceived: ${accountId} ${conversationId}`);
         console.log(message);
         const account = this.getAccount(accountId);
@@ -201,7 +210,7 @@ class JamiDaemon {
           if (onMessage) onMessage(account, conversation, message);
         }
       },
-      ConversationRequestReceived: (accountId, conversationId) => {
+      ConversationRequestReceived: (accountId: string, conversationId: string, message: Message) => {
         console.log(`conversationRequestReceived: ${accountId} ${conversationId}`);
         const account = this.getAccount(accountId);
         if (!account) {
@@ -209,7 +218,7 @@ class JamiDaemon {
           return;
         }
       },
-      ConversationMemberEvent: (accountId, conversationId) => {
+      ConversationMemberEvent: (accountId: string, conversationId: string, memberUri: string, event: number) => {
         console.log(`conversationMemberEvent: ${accountId} ${conversationId}`);
         const account = this.getAccount(accountId);
         if (!account) {
@@ -217,7 +226,7 @@ class JamiDaemon {
           return;
         }
       },
-      OnConversationError: (accountId, conversationId) => {
+      OnConversationError: (accountId: string, conversationId: string, code: number, what: string) => {
         console.log(`onConversationError: ${accountId} ${conversationId}`);
         const account = this.getAccount(accountId);
         if (!account) {
@@ -226,22 +235,22 @@ class JamiDaemon {
         }
       },
       // Calls
-      CallStateChanged: (callId, state, code) => {
-        console.log(`CallStateChanged: ${callId} ${state} ${code}`);
+      StateChange: (callId: string, state: string, code: number) => {
+        console.log(`CallStateChange: ${callId} ${state} ${code}`);
       },
-      IncomingCall: (accountId, callId, peerUri) => {
+      IncomingCall: (accountId: string, callId: string, peerUri: string) => {
         console.log(`IncomingCall: ${accountId} ${callId} ${peerUri}`);
       },
-      ConferenceCreated: (confId) => {
+      ConferenceCreated: (confId: string) => {
         console.log(`ConferenceCreated: ${confId}`);
       },
-      ConferenceChanged: (confId) => {
+      ConferenceChanged: (accountId: string, confId: string, state: string) => {
         console.log(`ConferenceChanged: ${confId}`);
       },
-      ConferenceRemoved: (confId) => {
+      ConferenceRemoved: (confId: string) => {
         console.log(`ConferenceRemoved: ${confId}`);
       },
-      OnConferenceInfosUpdated: (confId) => {
+      OnConferenceInfosUpdated: (confId: string) => {
         console.log(`onConferenceInfosUpdated: ${confId}`);
       },
     });
@@ -249,11 +258,11 @@ class JamiDaemon {
     JamiDaemon.vectToJs(this.dring.getAccountList()).forEach((accountId) => {
       const account = new Account(
         accountId,
-        JamiDaemon.mapToJs(this.dring.getAccountDetails(accountId)),
-        JamiDaemon.mapToJs(this.dring.getVolatileAccountDetails(accountId))
+        JamiDaemon.mapToJs(this.dring.getAccountDetails(accountId)) as AccountDetails,
+        JamiDaemon.mapToJs(this.dring.getVolatileAccountDetails(accountId)) as VolatileDetails
       );
 
-      account.contacts = JamiDaemon.vectMapToJs(this.dring.getContacts(accountId));
+      account.contacts = JamiDaemon.vectMapToJs(this.dring.getContacts(accountId)) as Contact[];
 
       JamiDaemon.vectToJs(this.dring.getConversations(accountId)).forEach((conversationId) => {
         const members = JamiDaemon.vectMapToJs(this.dring.getConversationMembers(accountId, conversationId));
@@ -264,41 +273,40 @@ class JamiDaemon {
             if (!member.uri) return;
             console.log(`lookupAddress ${accountId} ${member.uri}`, member);
             member.contact.setRegisteredName(
-              new Promise((resolve, reject) => account.lookups.push({ address: member.uri, resolve, reject })).then(
-                (result) => {
-                  if (result.state == 0) return result.name;
-                  else if (result.state == 1) return undefined;
-                  else return null;
-                }
-              )
+              new Promise((resolve: (value: LookupResolveValue) => void, reject) =>
+                account.lookups.push({ address: member.uri, resolve, reject })
+              ).then((result) => {
+                if (result.state == 0) return result.name;
+                else if (result.state == 1) return undefined;
+                else return null;
+              })
             );
             this.dring.lookupAddress(accountId, '', member.uri);
           }
         });
         const conversation = new Conversation(conversationId, accountId, members);
-        conversation.setInfos(JamiDaemon.mapToJs(this.dring.conversationInfos(accountId, conversationId)));
+        conversation.infos = JamiDaemon.mapToJs(this.dring.conversationInfos(accountId, conversationId));
         account.addConversation(conversation);
       });
-      account.setDevices();
 
       this.accounts.push(account);
     });
   }
 
-  addAccount(accountConfig) {
+  addAccount(accountConfig: AccountConfig) {
     const params = this.accountDetailsToNative(accountConfig);
     params.set('Account.type', 'RING');
-    return new Promise((resolve, reject) => {
+    return new Promise<string>((resolve, reject) => {
       const accountId = this.dring.addAccount(params);
       this.tempAccounts[accountId] = { resolve, reject };
     });
   }
 
-  getDevices(accountId) {
+  getDevices(accountId: string) {
     return JamiDaemon.mapToJs(this.dring.getKnownRingDevices(accountId));
   }
 
-  getAccount(accountId) {
+  getAccount(accountId: string) {
     for (let i = 0; i < this.accounts.length; i++) {
       const account = this.accounts[i];
       if (account.getId() === accountId) return account;
@@ -308,7 +316,7 @@ class JamiDaemon {
   getAccountList() {
     return this.accounts;
   }
-  registerName(accountId, password, name) {
+  registerName(accountId: string, password: string, name: string) {
     return new Promise((resolve, reject) => {
       if (!name) return reject(new Error('Invalid name'));
       const account = this.getAccount(accountId);
@@ -320,28 +328,28 @@ class JamiDaemon {
     });
   }
 
-  getConversation(accountId, conversationId) {
+  getConversation(accountId: string, conversationId: string) {
     const account = this.getAccount(accountId);
     if (account) return account.getConversation(conversationId);
     return null;
   }
-  getAccountDetails(accountId) {
+  getAccountDetails(accountId: string) {
     return JamiDaemon.mapToJs(this.dring.getAccountDetails(accountId));
   }
-  setAccountDetails(accountId, details) {
+  setAccountDetails(accountId: string, details: AccountDetails) {
     this.dring.setAccountDetails(accountId, this.mapToNative(details));
   }
   getAudioOutputDeviceList() {
     return JamiDaemon.vectToJs(this.dring.getAudioOutputDeviceList());
   }
-  getVolume(deviceName) {
+  getVolume(deviceName: string): number {
     return this.dring.getVolume(deviceName);
   }
-  setVolume(deviceName, volume) {
+  setVolume(deviceName: string, volume: number) {
     return this.dring.setVolume(deviceName, volume);
   }
 
-  lookupName(accountId, name) {
+  lookupName(accountId: string, name: string) {
     const p = new Promise((resolve, reject) => {
       if (accountId) {
         const account = this.getAccount(accountId);
@@ -358,7 +366,7 @@ class JamiDaemon {
     return p;
   }
 
-  lookupAddress(accountId, address) {
+  lookupAddress(accountId: string, address: string) {
     console.log(`lookupAddress ${accountId} ${address}`);
     const p = new Promise((resolve, reject) => {
       if (accountId) {
@@ -380,7 +388,7 @@ class JamiDaemon {
     this.dring.fini();
   }
 
-  addContact(accountId, contactId) {
+  addContact(accountId: string, contactId: string) {
     this.dring.addContact(accountId, contactId);
     const details = JamiDaemon.mapToJs(this.dring.getContactDetails(accountId, contactId));
     if (details.conversationId) {
@@ -398,21 +406,21 @@ class JamiDaemon {
     return details;
   }
 
-  removeContact(accountId, contactId) {
+  removeContact(accountId: string, contactId: string) {
     //bool ban false
     this.dring.removeContact(accountId, contactId, false);
   }
 
-  blockContact(accountId, contactId) {
+  blockContact(accountId: string, contactId: string) {
     //bool ban true
     this.dring.removeContact(accountId, contactId, true);
   }
 
-  getContactDetails(accountId, contactId) {
+  getContactDetails(accountId: string, contactId: string) {
     return JamiDaemon.mapToJs(this.dring.getContactDetails(accountId, contactId));
   }
 
-  getDefaultModerators(accountId) {
+  getDefaultModerators(accountId: string) {
     const account = this.getAccount(accountId);
     if (!account) {
       console.log(`Unknown account ${accountId}`);
@@ -423,19 +431,19 @@ class JamiDaemon {
     );
   }
 
-  addDefaultModerator(accountId, uri) {
+  addDefaultModerator(accountId: string, uri: string) {
     this.dring.setDefaultModerator(accountId, uri, true);
   }
 
-  removeDefaultModerator(accountId, uri) {
+  removeDefaultModerator(accountId: string, uri: string) {
     this.dring.setDefaultModerator(accountId, uri, false);
   }
 
-  sendMessage(accountId, conversationId, message) {
+  sendMessage(accountId: string, conversationId: string, message: string) {
     this.dring.sendMessage(accountId, conversationId, message, '');
   }
 
-  loadMessages(accountId, conversationId, fromMessage) {
+  loadMessages(accountId: string, conversationId: string, fromMessage?: string) {
     const account = this.getAccount(accountId);
     if (!account) throw new Error('Unknown account');
     const conversation = account.getConversation(conversationId);
@@ -448,11 +456,11 @@ class JamiDaemon {
     });
   }
 
-  boolToStr(bool) {
+  boolToStr(bool: boolean) {
     return bool ? 'true' : 'false';
   }
 
-  accountDetailsToNative(account) {
+  accountDetailsToNative(account: AccountConfig) {
     const params = new this.dring.StringMap();
     if (account.managerUri) params.set('Account.managerUri', account.managerUri);
     if (account.managerUsername) params.set('Account.managerUsername', account.managerUsername);
@@ -490,25 +498,25 @@ class JamiDaemon {
     if (account.upnpEnabled !== undefined) params.set('Account.upnpEnabled', this.boolToStr(account.upnpEnabled));
     return params;
   }
-  static vectToJs(vect) {
+  static vectToJs(vect: any) {
     const len = vect.size();
     const outputArr = new Array(len);
     for (let i = 0; i < len; i++) outputArr[i] = vect.get(i);
     return outputArr;
   }
-  static mapToJs(m) {
-    const outputObj = {};
+  static mapToJs(m: any): Record<string, any> {
+    const outputObj: Record<string, any> = {};
     JamiDaemon.vectToJs(m.keys()).forEach((k) => (outputObj[k] = m.get(k)));
     return outputObj;
   }
-  static vectMapToJs(vectMap) {
+  static vectMapToJs(vectMap: any) {
     const len = vectMap.size();
     const outputArr = new Array(len);
     for (let i = 0; i < len; i++) outputArr[i] = JamiDaemon.mapToJs(vectMap.get(i));
     return outputArr;
   }
 
-  mapToNative(map) {
+  mapToNative(map: any) {
     const ret = new this.dring.StringMap();
     for (const [key, value] of Object.entries(map)) ret.set(key, value);
     return ret;

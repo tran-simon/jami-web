@@ -1,11 +1,13 @@
 class Contact {
-  constructor(uri) {
+  private readonly uri: string;
+  private displayName: string | undefined = undefined;
+  private registeredName: string | undefined = undefined;
+
+  constructor(uri: string) {
     this.uri = uri;
-    this.displayName = undefined;
-    this.registeredName = undefined;
   }
 
-  static from(object) {
+  static from(object: Contact) {
     const contact = new Contact(object.uri);
     if (object.registeredName) contact.setRegisteredName(object.registeredName);
     return contact;
@@ -19,7 +21,7 @@ class Contact {
     return this.registeredName;
   }
 
-  setRegisteredName(name) {
+  setRegisteredName(name: string | undefined) {
     this.registeredName = name;
   }
 

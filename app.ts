@@ -10,13 +10,14 @@ import session from 'express-session';
 import { promises as fs } from 'fs';
 import http from 'http';
 import passport from 'passport';
-import { Strategy as LocalStrategy } from 'passport-local';
+import { IVerifyOptions, Strategy as LocalStrategy } from 'passport-local';
 import path from 'path';
 import { Server, Socket } from 'socket.io';
 import { ExtendedError } from 'socket.io/dist/namespace';
 
-import JamiDaemon from './JamiDaemon.js';
+import JamiDaemon from './JamiDaemon';
 import Account from './model/Account';
+import { Session } from './model/util';
 //import { createRequire } from 'module';
 //const require = createRequire(import.meta.url);
 //const redis = require('redis-url').connect()
@@ -31,7 +32,15 @@ const configPath = 'jamiServerConfig.json';
 //const sessionStore = new RedisStore({ client: redis })
 const sessionStore = new session.MemoryStore();
 
+interface User {
+  id: string;
+  config: UserConfig;
+  username: string;
+  accountFilter?: (account: any) => boolean;
+}
+
 interface UserConfig {
+  accountId?: string;
   accounts: string;
   password?: string;
   username?: string;
@@ -40,7 +49,7 @@ interface UserConfig {
 
 interface AppConfig {
   users: Record<string, UserConfig>;
-  authMethods: any[];
+  authMethods: unknown[];
 }
 
 const loadConfig = async (filePath: string): Promise<AppConfig> => {
@@ -78,8 +87,14 @@ Users should be removed from connectedUsers when receiving a disconnect
 web socket call
 
 */
-const tempAccounts: Record<string, any> = {};
-const connectedUsers: Record<string, any> = {};
+const tempAccounts: Record<
+  string,
+  {
+    newUser: Express.User;
+    done: (error: any, user?: any, options?: IVerifyOptions) => void;
+  }
+> = {};
+const connectedUsers: Record<string, UserConfig> = {};
 
 const createServer = async (appConfig: AppConfig) => {
   const app = express();
@@ -160,7 +175,7 @@ const createServer = async (appConfig: AppConfig) => {
     return 'admin' in appConfig.users;
   };
 
-  const accountFilter = (filter: string | any[]) => {
+  const accountFilter = (filter: string | string[]) => {
     if (typeof filter === 'string') {
       if (filter === '*') return undefined;
       else return (account: Account) => account.getId() === filter;
@@ -181,6 +196,7 @@ const createServer = async (appConfig: AppConfig) => {
   };
 
   passport.serializeUser((user: any, done) => {
+    user = user as User;
     connectedUsers[user.id] = user.config;
     console.log('=============================SerializeUser called ' + user.id);
     console.log(user);
@@ -237,7 +253,8 @@ const createServer = async (appConfig: AppConfig) => {
     res.status(401).end();
   };
   const securedRedirect = (req: Request, res: Response, next: NextFunction) => {
-    if (req.user && (req.user as any)?.accountId) {
+    const user = req.user as UserConfig | undefined;
+    if (user?.accountId) {
       return next();
     }
     (req.session as any).returnTo = req.originalUrl;
@@ -264,12 +281,12 @@ const createServer = async (appConfig: AppConfig) => {
     res.json({ loggedin: true });
   });
   app.post('/auth/local', passport.authenticate('local'), (req, res) => {
-    res.json({ loggedin: true, user: (req.user as any)?.id });
+    res.json({ loggedin: true, user: (req.user as User | undefined)?.id });
   });
 
   const getState = (req: Request) => {
     if (req.user) {
-      const user = (req.user || {}) as UserConfig;
+      const user = req.user as UserConfig;
       return { loggedin: true, username: user.username, type: user.type };
     } else if (isSetupComplete()) {
       return {};
@@ -322,7 +339,7 @@ const createServer = async (appConfig: AppConfig) => {
   });
   io.on('connect', (socket) => {
     console.log(`new connection ${socket.id}`);
-    const session = (socket.request as any).session;
+    const session: Session = (socket.request as any).session;
     console.log(`saving sid ${socket.id} in session ${session.id}`);
     session.socketId = socket.id;
     session.save();
@@ -333,15 +350,21 @@ const createServer = async (appConfig: AppConfig) => {
       if (session.conversation) {
         console.log(`disconnect from old conversation ${session.conversation.conversationId}`);
         const conversation = jami.getConversation(session.conversation.accountId, session.conversation.conversationId);
-        delete conversation.listeners[socket.id];
+        if (conversation) {
+          delete conversation.listeners[socket.id];
+        }
       }
       session.conversation = { accountId: data.accountId, conversationId: data.conversationId };
       const conversation = jami.getConversation(data.accountId, data.conversationId);
-      if (!conversation.listeners) conversation.listeners = {};
-      conversation.listeners[socket.id] = {
-        socket,
-        session,
-      };
+      if (conversation) {
+        if (!conversation.listeners) {
+          conversation.listeners = {};
+        }
+        conversation.listeners[socket.id] = {
+          socket,
+          session,
+        };
+      }
       session.save();
     });
   });
