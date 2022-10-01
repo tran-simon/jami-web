@@ -23,9 +23,7 @@ import { ThemeDemonstrator } from './themes/ThemeDemonstrator';
 // import { useSelector, useDispatch } from 'react-redux'
 // import { useAppSelector, useAppDispatch } from '../redux/hooks'
 
-const Home = (props) => {
-  console.log(`home ${props}`);
-
+const Home = () => {
   return <Navigate to="/account" />;
 };
 
@@ -57,7 +55,7 @@ const App = () => {
       <Routes>
         <Route path="/setup" element={<ServerSetup />} />
         <Route path="/" element={<Navigate to="/setup" replace />} />
-        <Route index path="*" element={<Navigate to="/setup" replace />} />
+        <Route path="*" element={<Navigate to="/setup" replace />} />
       </Routes>
     );
   }
@@ -68,7 +66,7 @@ const App = () => {
         <Route path="/account">
           <Route index element={<AccountSelection />} />
           <Route path=":accountId">
-            <Route index path="*" element={<JamiMessenger />} />
+            <Route path="*" element={<JamiMessenger />} />
             <Route path="settings" element={<AccountSettings />} />
           </Route>
         </Route>
@@ -78,7 +76,7 @@ const App = () => {
         {/* <Route path="/Contacts" element={<ContactList />} /> */}
         <Route path="/Theme" element={<ThemeDemonstrator />} />
         <Route path="/setup" element={<ServerSetup />} />
-        <Route path="/" index element={<Home />} />
+        <Route path="/" element={<Home />} />
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
       {!state.auth.authenticated && <SignInPage key="signin" open={!state.auth.authenticated} />}

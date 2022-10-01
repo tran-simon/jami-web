@@ -1,6 +1,8 @@
 /* eslint-disable no-undef */
 // TODO: This hides eslint errors for this file. This should be removed once this file is cleaned up.
 
+import { PromiseExecutor } from '../../model/util';
+
 /*
  *  Copyright (c) 2017-2021 Savoir-faire Linux Inc.
  *
@@ -20,12 +22,38 @@
  *  along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
+interface AuthManagerState {
+  initialized: boolean;
+  authenticated: boolean;
+  setupComplete: boolean;
+  error: boolean;
+}
+
+interface AuthManagerTask extends PromiseExecutor<Response> {
+  url: string;
+  init?: RequestInit;
+}
+
+interface InitData {
+  loggedin?: true;
+  username?: string;
+  type?: string;
+  setupComplete?: boolean;
+}
+
+type OnAuthChanged = (auth: AuthManagerState) => void;
+
 class AuthManager {
+  private authenticating: boolean;
+  private readonly _state: AuthManagerState;
+  private tasks: AuthManagerTask[];
+  private onAuthChanged: OnAuthChanged | undefined;
+
   constructor() {
     console.log('AuthManager()');
     this.authenticating = false;
 
-    this.state = {
+    this._state = {
       initialized: false,
       authenticated: true,
       setupComplete: true,
@@ -35,46 +63,48 @@ class AuthManager {
     this.tasks = [];
     this.onAuthChanged = undefined;
 
+    // @ts-ignore
     if (initData) {
       console.log('Using static initData');
+      // @ts-ignore
       this.setInitData(initData);
       return;
     }
   }
 
   isAuthenticated() {
-    return this.state.authenticated;
+    return this._state.authenticated;
   }
 
   getState() {
-    return this.state;
+    return this._state;
   }
 
-  setInitData(data) {
+  setInitData(data: InitData) {
     this.authenticating = false;
-    this.state.initialized = true;
+    this._state.initialized = true;
     if (data.username) {
-      Object.assign(this.state, {
+      Object.assign(this._state, {
         authenticated: true,
         setupComplete: true,
         error: false,
         user: { username: data.username, type: data.type },
       });
     } else {
-      Object.assign(this.state, {
+      Object.assign(this._state, {
         authenticated: false,
-        setupComplete: 'setupComplete' in data ? data.setupComplete : true,
+        setupComplete: data.setupComplete ?? true,
         error: false,
       });
     }
     console.log('Init ended');
     /*if (this.onAuthChanged)
-            this.onAuthChanged(this.state)*/
+            this.onAuthChanged(this._state)*/
   }
 
-  init(cb) {
+  init(cb: OnAuthChanged) {
     this.onAuthChanged = cb;
-    if (this.state.initialized || this.authenticating) return;
+    if (this._state.initialized || this.authenticating) return;
     /*if (initData) {
             console.log("Using static initData")
             this.setInitData(initData)
@@ -84,14 +114,14 @@ class AuthManager {
     fetch('/auth')
       .then(async (response) => {
         this.authenticating = false;
-        this.state.initialized = true;
+        this._state.initialized = true;
         if (response.status === 200) {
           this.setInitData(await response.json());
         } else if (response.status === 401) {
           this.setInitData(await response.json());
         } else {
-          this.state.error = true;
-          if (this.onAuthChanged) this.onAuthChanged(this.state);
+          this._state.error = true;
+          if (this.onAuthChanged) this.onAuthChanged(this._state);
         }
       })
       .catch((e) => {
@@ -105,8 +135,8 @@ class AuthManager {
     this.onAuthChanged = undefined;
   }
 
-  async setup(password) {
-    if (this.authenticating || this.state.setupComplete) return;
+  async setup(password: string) {
+    if (this.authenticating || this._state.setupComplete) return;
     console.log('Starting setup');
     this.authenticating = true;
     const response = await fetch(`/setup`, {
@@ -124,12 +154,12 @@ class AuthManager {
     }
 
     this.authenticating = false;
-    this.state.setupComplete = true;
-    if (this.onAuthChanged) this.onAuthChanged(this.state);
+    this._state.setupComplete = true;
+    if (this.onAuthChanged) this.onAuthChanged(this._state);
     return response.ok;
   }
 
-  authenticate(username, password) {
+  authenticate(username: string, password: string) {
     if (this.authenticating) return;
     console.log('Starting authentication');
     this.authenticating = true;
@@ -139,15 +169,20 @@ class AuthManager {
       .then((response) => {
         console.log(response);
         this.authenticating = false;
-        this.state.authenticated = response.ok && response.status === 200;
-        if (this.onAuthChanged) this.onAuthChanged(this.state);
-        while (this.tasks.length !== 0) {
+        this._state.authenticated = response.ok && response.status === 200;
+        if (this.onAuthChanged) this.onAuthChanged(this._state);
+        while (true) {
           const task = this.tasks.shift();
-          if (this.state.authenticated)
+          if (!task) {
+            break;
+          }
+          if (this._state.authenticated) {
             fetch(task.url, task.init)
               .then((res) => task.resolve(res))
               .catch((e) => console.log('Error executing pending task: ' + e));
-          else task.reject(new Error('Authentication failed'));
+          } else {
+            task.reject(new Error('Authentication failed'));
+          }
         }
       })
       .catch((e) => {
@@ -158,17 +193,17 @@ class AuthManager {
 
   disconnect() {
     console.log('Disconnect');
-    this.state.authenticated = false;
-    if (this.onAuthChanged) this.onAuthChanged(this.state);
+    this._state.authenticated = false;
+    if (this.onAuthChanged) this.onAuthChanged(this._state);
   }
 
-  fetch(url, init) {
+  fetch(url: string, init?: RequestInit): Promise<Response> {
     console.log(`fetch ${url}`);
-    if (!this.state.authenticated) {
+    if (!this._state.authenticated) {
       if (!init || !init.method || init.method === 'GET') {
-        return new Promise((resolve, reject) => this.tasks.push({ url, init, resolve, reject }));
+        return new Promise<Response>((resolve, reject) => this.tasks.push({ url, init, resolve, reject }));
       } else {
-        return new Promise((resolve, reject) => reject('Not authenticated'));
+        return new Promise<Response>((resolve, reject) => reject('Not authenticated'));
       }
     }
     return fetch(url, init).then((response) => {
