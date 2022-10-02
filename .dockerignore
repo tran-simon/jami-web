@@ -6,7 +6,7 @@
 node_modules/
 dist/
 daemon/
-.env
+.env*
 dring.node
 jamid.node
 

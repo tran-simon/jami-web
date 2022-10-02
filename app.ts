@@ -1,5 +1,9 @@
 'use strict';
 
+import dotenv from 'dotenv';
+const node_env = process.env.NODE_ENV || 'development';
+dotenv.config({ path: `.env.${node_env}` });
+
 import cors from 'cors';
 import express, { NextFunction, Request, Response } from 'express';
 import session from 'express-session';
@@ -78,7 +82,6 @@ const tempAccounts: Record<string, any> = {};
 const connectedUsers: Record<string, any> = {};
 
 const createServer = async (appConfig: AppConfig) => {
-  const node_env = process.env.NODE_ENV || 'development';
   const app = express();
   console.log(`Loading server for ${node_env} with config:`);
   console.log(appConfig);

@@ -5,7 +5,7 @@ jaas-client/package-lock.json
 jaas-client/node_modules/
 jaas-client/dist/
 
-.env
+.env*
 dring.node
 jamid.node
 
