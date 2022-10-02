@@ -3,7 +3,7 @@ import { Avatar, Card, CardContent, Container, Divider, List, Typography } from 
 
 import ListItemLink from '../components/ListItemLink';
 
-export default function AccountCreationDialog(props) {
+export default function AccountCreationDialog() {
   return (
     <Container>
       <Card>

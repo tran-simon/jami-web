@@ -21,6 +21,7 @@ import { motion } from 'framer-motion';
 import { useState } from 'react';
 
 import Account from '../../../model/Account';
+import AccountDetails from '../../../model/AccountDetails';
 import authManager from '../AuthManager';
 import ConversationAvatar from './ConversationAvatar';
 import ConversationsOverviewCard from './ConversationsOverviewCard';
@@ -34,14 +35,19 @@ const thumbnailVariants = {
   exit: {
     scale: 0.5,
     opacity: 0,
-    transition: { duration: 1.5, ...transition },
+    transition: { ...transition, duration: 1.5 },
   },
 };
 
-export default function AccountPreferences(props) {
-  const account = props.account;
-  let devices = [];
-  for (var i in account.devices) devices.push([i, account.devices[i]]);
+type AccountPreferencesProps = {
+  account: Account;
+  onAccountChanged?: (account: Account) => void;
+};
+
+export default function AccountPreferences({ account }: AccountPreferencesProps) {
+  const devices: string[][] = [];
+  const accountDevices = account.getDevices();
+  for (const i in accountDevices) devices.push([i, accountDevices[i]]);
 
   console.log(devices);
 
@@ -59,12 +65,12 @@ export default function AccountPreferences(props) {
     }
   };
 
-  const removeModerator = (uri) =>
+  const removeModerator = (uri: string) =>
     authManager.fetch(`/api/accounts/${account.getId()}/defaultModerators/${uri}`, { method: 'DELETE' });
 
-  const handleToggle = (key, value) => {
+  const handleToggle = (key: keyof AccountDetails, value: boolean) => {
     console.log(`handleToggle ${key} ${value}`);
-    const newDetails = {};
+    const newDetails: Partial<AccountDetails> = {};
     newDetails[key] = value ? 'true' : 'false';
     console.log(newDetails);
     authManager.fetch(`/api/accounts/${account.getId()}`, {
@@ -213,13 +219,13 @@ export default function AccountPreferences(props) {
                 </ListItem>
               ) : (
                 moderators.map((moderator) => (
-                  <ListItem key={moderator.uri}>
+                  <ListItem key={moderator.getUri()}>
                     <ListItemAvatar>
-                      <ConversationAvatar name={moderator.getDisplayName()} />
+                      <ConversationAvatar displayName={moderator.getDisplayName()} />
                     </ListItemAvatar>
                     <ListItemText primary={moderator.getDisplayName()} />
                     <ListItemSecondaryAction>
-                      <IconButton onClick={(e) => removeModerator(moderator.uri)} size="large">
+                      <IconButton onClick={(e) => removeModerator(moderator.getUri())} size="large">
                         <DeleteRounded />
                       </IconButton>
                     </ListItemSecondaryAction>

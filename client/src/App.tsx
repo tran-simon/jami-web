@@ -9,14 +9,14 @@ import { Navigate, Route, Routes } from 'react-router-dom';
 
 import authManager from './AuthManager';
 import WelcomeAnimation from './components/welcome';
-import NotFoundPage from './pages/404.jsx';
-import AccountCreationDialog from './pages/accountCreation.jsx';
-import AccountSelection from './pages/accountSelection.jsx';
-import AccountSettings from './pages/accountSettings.jsx';
-import JamiAccountDialog from './pages/jamiAccountCreation.jsx';
-import JamiMessenger from './pages/JamiMessenger.jsx';
-import SignInPage from './pages/loginDialog.jsx';
-import ServerSetup from './pages/serverSetup.jsx';
+import NotFoundPage from './pages/404';
+import AccountCreationDialog from './pages/AccountCreation';
+import AccountSelection from './pages/AccountSelection';
+import AccountSettings from './pages/AccountSettings';
+import JamiAccountDialog from './pages/JamiAccountCreation';
+import JamiMessenger from './pages/JamiMessenger';
+import SignInPage from './pages/LoginDialog';
+import ServerSetup from './pages/ServerSetup';
 import defaultTheme from './themes/default';
 import { ThemeDemonstrator } from './themes/ThemeDemonstrator';
 

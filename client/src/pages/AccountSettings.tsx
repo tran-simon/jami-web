@@ -9,15 +9,23 @@ import authManager from '../AuthManager';
 import AccountPreferences from '../components/AccountPreferences';
 import Header from '../components/Header';
 
-const AccountSettings = (props) => {
+type AccountSettingsProps = {
+  accountId?: string;
+  account?: Account;
+};
+
+const AccountSettings = (props: AccountSettingsProps) => {
   console.log('ACCOUNT SETTINGS', props.account);
-  let accountId = useParams().accountId;
-  if (props.accountId) {
-    accountId = props.accountId;
+  const params = useParams();
+  const accountId = props.accountId || params.accountId;
+
+  if (accountId == null) {
+    throw new Error('Missing accountId');
   }
+
   const dispatch = useAppDispatch();
 
-  const [state, setState] = useState({ loaded: false });
+  const [account, setAccount] = useState<Account | null>(null);
 
   useEffect(() => {
     dispatch(setAccountId(accountId));
@@ -27,10 +35,10 @@ const AccountSettings = (props) => {
       .fetch(`/api/accounts/${accountId}`, { signal: controller.signal })
       .then((res) => res.json())
       .then((result) => {
-        let account = Account.from(result);
+        const account = Account.from(result);
         account.setDevices(result.devices);
         dispatch(setAccountObject(account));
-        setState({ loaded: true, account: account });
+        setAccount(account);
       })
       .catch((e) => console.log(e));
     // return () => controller.abort() // crash on React18
@@ -39,16 +47,8 @@ const AccountSettings = (props) => {
   return (
     <Container maxWidth="sm">
       <Header />
-      {state.loaded ? (
-        <AccountPreferences
-          account={state.account}
-          onAccontChanged={(account) =>
-            setState((state) => {
-              state.account = account;
-              return state;
-            })
-          }
-        />
+      {account != null ? (
+        <AccountPreferences account={account} onAccountChanged={(account: Account) => setAccount(account)} />
       ) : (
         <CircularProgress />
       )}

@@ -1,18 +1,18 @@
 import { AddRounded } from '@mui/icons-material';
 import { Box, Card, CardActions, CardContent, Container, Fab, Typography } from '@mui/material';
-import { useState } from 'react';
+import { FormEvent, useState } from 'react';
 import { useNavigate } from 'react-router';
 
 import authManager from '../AuthManager';
 import UsernameChooser from '../components/UsernameChooser';
 
-export default function JamiAccountDialog(props) {
+export default function JamiAccountDialog() {
   const [name, setName] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
   const navigate = useNavigate();
 
-  const onSubmit = async (event) => {
+  const onSubmit = async (event: FormEvent) => {
     event.preventDefault();
     setLoading(true);
     const result = await authManager

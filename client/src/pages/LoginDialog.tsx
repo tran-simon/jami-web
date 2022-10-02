@@ -8,7 +8,7 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 import Link from '@mui/material/Link';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
-import { Component } from 'react';
+import { ChangeEvent, Component, MouseEvent } from 'react';
 
 import authManager from '../AuthManager';
 
@@ -26,8 +26,22 @@ function Copyright() {
   );
 }
 
-class SignInPage extends Component {
-  constructor(props) {
+type SignInPageProps = {
+  open: boolean;
+};
+type SignInPageState = {
+  username?: string;
+  password?: string;
+  submitted?: boolean;
+  loading?: boolean;
+  redirect?: boolean;
+  error?: boolean;
+  open?: boolean;
+  errorMessage?: string;
+};
+
+class SignInPage extends Component<SignInPageProps, SignInPageState> {
+  constructor(props: SignInPageProps) {
     console.log('SignInPage ' + props.open);
     super(props);
     this.state = {
@@ -38,11 +52,11 @@ class SignInPage extends Component {
     this.localLogin = this.localLogin.bind(this);
   }
 
-  handleusername(text) {
+  handleusername(text: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) {
     this.setState({ username: text.target.value });
   }
 
-  handlePassword(text) {
+  handlePassword(text: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) {
     this.setState({ password: text.target.value });
   }
 
@@ -82,11 +96,12 @@ class SignInPage extends Component {
             })*/
   }
 
-  handleSubmit(event) {
+  handleSubmit(event: MouseEvent<HTMLButtonElement>) {
     event.preventDefault();
-    let obj = {};
-    obj.username = this.state.username;
-    obj.password = this.state.password;
+    const obj = {
+      username: this.state.username,
+      password: this.state.password,
+    };
 
     this.setState({
       submitted: true,
@@ -94,7 +109,7 @@ class SignInPage extends Component {
     });
 
     fetch('/api/login?username=' + obj.username + '&password=' + obj.password, {
-      header: {
+      headers: {
         'Content-Type': 'application/json',
       },
       method: 'POST',
@@ -102,11 +117,11 @@ class SignInPage extends Component {
       //body: JSON.stringify({ obj })
     })
       .then((res) => {
-        if (res.status === '200') {
+        if (res.status === 200) {
           this.setState({
             redirect: true,
           });
-        } else if (res.status === '401') {
+        } else if (res.status === 401) {
           this.setState({
             loading: false,
             error: true,

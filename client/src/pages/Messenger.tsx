@@ -12,19 +12,29 @@ import ConversationView from '../components/ConversationView';
 import Header from '../components/Header';
 import LoadingPage from '../components/loading';
 import NewContactForm from '../components/NewContactForm';
-import AddContactPage from './addContactPage.jsx';
+import AddContactPage from './AddContactPage';
 
-const Messenger = (props) => {
+type MessengerProps = {
+  accountId?: string;
+  conversationId?: string;
+  contactId?: string;
+};
+
+const Messenger = (props: MessengerProps) => {
   const { refresh } = useAppSelector((state) => state.app);
 
-  const [conversations, setConversations] = useState(undefined);
+  const [conversations, setConversations] = useState<Conversation[] | undefined>(undefined);
   const [searchQuery, setSearchQuery] = useState('');
-  const [searchResult, setSearchResults] = useState(undefined);
+  const [searchResult, setSearchResults] = useState<Conversation | undefined>(undefined);
 
   const params = useParams();
   const accountId = props.accountId || params.accountId;
   const conversationId = props.conversationId || params.conversationId;
   const contactId = props.contactId || params.contactId;
+
+  if (accountId == null) {
+    throw new Error('Missing accountId');
+  }
 
   useEffect(() => {
     console.log('REFRESH CONVERSATIONS FROM MESSENGER');
@@ -32,7 +42,7 @@ const Messenger = (props) => {
     authManager
       .fetch(`/api/accounts/${accountId}/conversations`, { signal: controller.signal })
       .then((res) => res.json())
-      .then((result) => {
+      .then((result: Conversation[]) => {
         console.log(result);
         setConversations(Object.values(result).map((c) => Conversation.from(accountId, c)));
       });
@@ -48,7 +58,7 @@ const Messenger = (props) => {
         if (response.status === 200) {
           return response.json();
         } else {
-          throw new Error(response.status);
+          throw new Error(response.status.toString());
         }
       })
       .then((response) => {

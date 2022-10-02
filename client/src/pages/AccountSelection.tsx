@@ -16,11 +16,11 @@ const variants = {
   exit: { opacity: 0, y: '-50px' },
 };
 
-const AccountSelection = (props) => {
+const AccountSelection = () => {
   const navigate = useNavigate();
   const [loaded, setLoaded] = useState(false);
   const [error, setError] = useState(false);
-  const [accounts, setAccounts] = useState([]);
+  const [accounts, setAccounts] = useState<Account[]>([]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -28,7 +28,7 @@ const AccountSelection = (props) => {
       .fetch(`/api/accounts`, { signal: controller.signal })
       .then((res) => res.json())
       .then(
-        (result) => {
+        (result: Account[]) => {
           console.log(result);
           if (result.length === 0) {
             navigate('/newAccount');

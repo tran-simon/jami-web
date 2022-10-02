@@ -1,17 +1,17 @@
 import GroupAddRounded from '@mui/icons-material/GroupAddRounded';
 import { Box, Card, CardContent, Container, Fab, Input, Typography } from '@mui/material';
-import { useState } from 'react';
+import { FormEvent, useState } from 'react';
 
 import authManager from '../AuthManager';
 
-export default function ServerSetup(props) {
+export default function ServerSetup() {
   const [password, setPassword] = useState('');
   const [passwordRepeat, setPasswordRepeat] = useState('');
   const [loading, setLoading] = useState(false);
 
   const isValid = () => password && password === passwordRepeat;
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     setLoading(true);
     if (!isValid()) return;
@@ -20,7 +20,7 @@ export default function ServerSetup(props) {
 
   return (
     <Container className="message-list">
-      <Card disabled={loading}>
+      <Card>
         <CardContent component="form" onSubmit={handleSubmit}>
           <Typography gutterBottom variant="h5" component="h2">
             Jami Web Node setup
@@ -43,6 +43,7 @@ export default function ServerSetup(props) {
                 type="password"
                 placeholder="New password"
                 autoComplete="new-password"
+                disabled={loading}
               />
             </div>
             <div>
@@ -54,11 +55,12 @@ export default function ServerSetup(props) {
                 type="password"
                 placeholder="Repeat password"
                 autoComplete="new-password"
+                disabled={loading}
               />
             </div>
           </Box>
           <Box style={{ textAlign: 'center', marginTop: 24 }}>
-            <Fab variant="extended" color="primary" type="submit" disabled={!isValid()}>
+            <Fab variant="extended" color="primary" type="submit" disabled={!isValid() || loading}>
               <GroupAddRounded />
               Create admin account
             </Fab>

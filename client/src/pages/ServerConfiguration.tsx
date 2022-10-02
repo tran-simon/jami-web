@@ -1,16 +1,21 @@
 import CircularProgress from '@mui/material/CircularProgress';
 import Container from '@mui/material/Container';
 import { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
 
 import Account from '../../../model/Account';
 import authManager from '../AuthManager';
 import AccountPreferences from '../components/AccountPreferences';
 import Header from '../components/Header';
 
-const ServerOverview = (props) => {
-  const [loaded, setLoaded] = useState(false);
-  const [account, setAccount] = useState();
-  const accountId = props.accountId || props.match.params.accountId;
+type ServerOverviewProps = {
+  accountId?: string;
+};
+
+const ServerOverview = (props: ServerOverviewProps) => {
+  const [account, setAccount] = useState<Account | null>(null);
+  const params = useParams();
+  const accountId = props.accountId || params.accountId;
 
   useEffect(() => {
     const controller = new AbortController();
@@ -19,7 +24,6 @@ const ServerOverview = (props) => {
       .then((res) => res.json())
       .then((result) => {
         console.log(result);
-        setLoaded(true);
         setAccount(Account.from(result));
       })
       .catch((e) => console.log(e));
@@ -29,7 +33,7 @@ const ServerOverview = (props) => {
   return (
     <Container maxWidth="sm" className="app">
       <Header />
-      {loaded ? <AccountPreferences account={account} /> : <CircularProgress />}
+      {account != null ? <AccountPreferences account={account} /> : <CircularProgress />}
     </Container>
   );
 };

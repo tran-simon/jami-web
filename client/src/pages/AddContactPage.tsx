@@ -1,18 +1,25 @@
 import GroupAddRounded from '@mui/icons-material/GroupAddRounded';
 import { Box, Card, CardContent, Container, Fab, Typography } from '@mui/material';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 
 import { setRefreshFromSlice } from '../../redux/appSlice';
 import { useAppDispatch } from '../../redux/hooks';
 import authManager from '../AuthManager';
 
-export default function AddContactPage(props) {
+type AddContactPageProps = {
+  accountId: string;
+  contactId: string;
+};
+
+export default function AddContactPage(props: AddContactPageProps) {
   const navigate = useNavigate();
-  const accountId = props.accountId || props.match.params.accountId;
-  const contactId = props.contactId || props.match.params.contactId;
+
+  const params = useParams();
+  const accountId = props.accountId || params.accountId;
+  const contactId = props.contactId || params.contactId;
   const dispatch = useAppDispatch();
 
-  const handleClick = async (e) => {
+  const handleClick = async () => {
     const response = await authManager
       .fetch(`/api/accounts/${accountId}/conversations`, {
         method: 'POST',
