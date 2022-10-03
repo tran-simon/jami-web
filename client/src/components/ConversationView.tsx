@@ -1,18 +1,22 @@
 import { Box, Stack, Typography } from '@mui/material';
 import { useCallback, useContext, useEffect, useState } from 'react';
 
-import Conversation from '../../../model/Conversation';
-import { SocketContext } from '../contexts/socket';
-import { useConversationQuery, useMessagesQuery, useSendMessageMutation } from '../services/conversation';
+import Conversation, { Message } from '../../../model/Conversation';
+import { SocketContext } from '../contexts/Socket';
+import { useConversationQuery, useMessagesQuery, useSendMessageMutation } from '../services/Conversation';
 import ConversationAvatar from './ConversationAvatar';
 import LoadingPage from './loading';
 import MessageList from './MessageList';
 import SendMessageForm from './SendMessageForm';
 
-const ConversationView = ({ accountId, conversationId, ...props }) => {
+type ConversationViewProps = {
+  accountId: string;
+  conversationId: string;
+};
+const ConversationView = ({ accountId, conversationId, ...props }: ConversationViewProps) => {
   const socket = useContext(SocketContext);
-  const [conversation, setConversation] = useState();
-  const [messages, setMessages] = useState([]);
+  const [conversation, setConversation] = useState<Conversation | undefined>();
+  const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(false);
 
@@ -42,17 +46,22 @@ const ConversationView = ({ accountId, conversationId, ...props }) => {
     setError(conversationQuery.isError || messagesQuery.isError);
   }, [conversationQuery.isError, messagesQuery.isError]);
 
-  const sendMessage = useCallback((message) => sendMessageMutation.mutate(message), [sendMessageMutation]);
+  const sendMessage = useCallback((message: string) => sendMessageMutation.mutate(message), [sendMessageMutation]);
 
   useEffect(() => {
     if (!conversation) return;
     console.log(`io set conversation ${conversationId} ` + socket);
-    if (socket) socket.emit('conversation', { accountId, conversationId });
-    socket.off('newMessage');
-    socket.on('newMessage', (data) => {
-      console.log('newMessage');
-      setMessages((messages) => addMessage(messages, data));
-    });
+    if (socket) {
+      socket.emit('conversation', {
+        accountId,
+        conversationId,
+      });
+      socket.off('newMessage');
+      socket.on('newMessage', (data) => {
+        console.log('newMessage');
+        setMessages((messages) => addMessage(messages, data));
+      });
+    }
   }, [accountId, conversation, conversationId, socket]);
 
   if (isLoading) {
@@ -86,7 +95,7 @@ const ConversationView = ({ accountId, conversationId, ...props }) => {
   );
 };
 
-const addMessage = (sortedMessages, message) => {
+const addMessage = (sortedMessages: Message[], message: Message) => {
   if (sortedMessages.length === 0) {
     return [message];
   } else if (message.id === sortedMessages[sortedMessages.length - 1].linearizedParent) {
@@ -95,11 +104,12 @@ const addMessage = (sortedMessages, message) => {
     return [message, ...sortedMessages];
   } else {
     console.log("Can't insert message " + message.id);
+    return sortedMessages;
   }
 };
 
-const sortMessages = (messages) => {
-  let sortedMessages = [];
+const sortMessages = (messages: Message[]) => {
+  let sortedMessages: Message[] = [];
   messages.forEach((message) => (sortedMessages = addMessage(sortedMessages, message)));
   return sortedMessages;
 };

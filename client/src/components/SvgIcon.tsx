@@ -1,4 +1,4 @@
-import { SvgIcon } from '@mui/material';
+import { SvgIcon, SvgIconProps } from '@mui/material';
 
 /*
     We use SvgIcon so the icons can be handled more easily by Material ui components.
@@ -10,7 +10,7 @@ import { SvgIcon } from '@mui/material';
     - Play with the viewBox attribute in order to center the icon and make it uses all available space. Adding a temporary border with inline style might help.
 */
 
-export const ArrowIcon = (props) => {
+export const ArrowIcon = (props: SvgIconProps) => {
   return (
     <SvgIcon {...props} viewBox="0 -3 20 20">
       <g>
@@ -23,7 +23,7 @@ export const ArrowIcon = (props) => {
   );
 };
 
-export const Arrow2Icon = (props) => {
+export const Arrow2Icon = (props: SvgIconProps) => {
   return (
     <SvgIcon {...props} viewBox="0 0 21.776 20.23">
       <path
@@ -35,7 +35,7 @@ export const Arrow2Icon = (props) => {
   );
 };
 
-export const Arrow3Icon = (props) => {
+export const Arrow3Icon = (props: SvgIconProps) => {
   return (
     <SvgIcon {...props} viewBox="0 0 21.045 14.743">
       <path
@@ -47,7 +47,7 @@ export const Arrow3Icon = (props) => {
   );
 };
 
-export const CameraIcon = (props) => {
+export const CameraIcon = (props: SvgIconProps) => {
   return (
     <SvgIcon {...props} viewBox="2 3 20 19">
       <path d="M3.6 20.3c-.4 0-.8-.2-1.1-.5-.2-.2-.4-.6-.4-.9V7.7c-.1-.3.1-.7.4-1 .2-.3.5-.4.8-.5H7.9l1.2-2.5h5.7L16 6.2h4.3c.4 0 .8.2 1.1.5.2.2.4.6.4.9v11.2c0 .4-.2.8-.5 1.1-.2.2-.6.4-.9.4H3.6zm0-12.6-.1 11v.1h17.1V7.7h-5.3L14 5.2h-4L8.8 7.7H3.6zm8.4 9.7c-1.2 0-2.3-.5-3.2-1.3-.8-.8-1.3-2-1.3-3.2 0-1.2.5-2.3 1.3-3.2.8-.8 2-1.3 3.2-1.3 1.2 0 2.3.5 3.2 1.3.8.8 1.3 2 1.3 3.2s-.5 2.3-1.3 3.2c-.9.8-2 1.3-3.2 1.3zm0-7.5c-.8 0-1.6.3-2.1.9S9 12.1 9 12.9s.3 1.6.9 2.1c1.1 1.1 3.1 1.1 4.3 0 .6-.6.9-1.3.9-2.1s-.3-1.6-.9-2.1c-.6-.6-1.4-.9-2.2-.9z" />
@@ -55,7 +55,7 @@ export const CameraIcon = (props) => {
   );
 };
 
-export const CameraInBubbleIcon = (props) => {
+export const CameraInBubbleIcon = (props: SvgIconProps) => {
   return (
     <SvgIcon {...props} viewBox="0 0 25 25">
       <path d="M25 25H12.5A12.379 12.379 0 0 1 0 12.5 12.379 12.379 0 0 1 12.5 0 12.379 12.379 0 0 1 25 12.5ZM12.5 1.75a11 11 0 0 0-7.625 3.125 10.865 10.865 0 0 0 0 15.25A10.781 10.781 0 0 0 12.5 23.25h10.75V12.5a11 11 0 0 0-3.125-7.625A11 11 0 0 0 12.5 1.75Z" />
@@ -64,7 +64,7 @@ export const CameraInBubbleIcon = (props) => {
   );
 };
 
-export const CancelIcon = (props) => {
+export const CancelIcon = (props: SvgIconProps) => {
   return (
     <SvgIcon {...props} viewBox="2 2 20 20">
       <path d="M12 2C6.4771525 2 2 6.4771525 2 12s4.4771525 10 10 10 10-4.4771525 10-10S17.5228475 2 12 2Zm0 1.33333168c2.0746076-.00128199 4.079864.74684198 5.6466667 2.10666832L5.39333333 17.5933333c-2.17561675-2.5749862-2.66070945-6.17789412-1.2436087-9.23660098C5.56682538 5.29802546 8.62897124 3.33855529 12 3.33333168Zm0 17.33333502c-2.08385186-.000638-4.09692832-.7561338-5.66666667-2.1266667L18.5866667 6.38c2.1903962 2.57136307 2.6872505 6.1810635 1.2730136 9.2485834C18.4454435 18.6961032 15.3778286 20.6624553 12 20.6666667Z" />
@@ -72,7 +72,7 @@ export const CancelIcon = (props) => {
   );
 };
 
-export const CheckedIcon = (props) => {
+export const CheckedIcon = (props: SvgIconProps) => {
   return (
     <SvgIcon {...props} viewBox="0 0 16 16">
       <path d="M11.138 5.152 6.802 9.486l-1.936-1.94a.64205296.64205296 0 0 0-.908.908l2.39 2.394a.642.642 0 0 0 .908 0l4.79-4.785a.6431145.6431145 0 0 0-.908-.911Z" />
@@ -81,7 +81,7 @@ export const CheckedIcon = (props) => {
   );
 };
 
-export const CrossedEyeIcon = (props) => {
+export const CrossedEyeIcon = (props: SvgIconProps) => {
   return (
     <SvgIcon {...props} viewBox="0 0 15.931 12.145">
       <path d="M7.933 10.41a7.081 7.081 0 0 1-3.7-1.292 12.409 12.409 0 0 1-2.874-2.717.237.237 0 0 1 0-.366 14.122 14.122 0 0 1 2.429-2.372L3 2.873a14.6 14.6 0 0 0-2.836 2.93.629.629 0 0 0 .019.87 13.62 13.62 0 0 0 4.222 3.834 7.4 7.4 0 0 0 3.547 1 7.067 7.067 0 0 0 2.948-.711l-.848-.848a5.577 5.577 0 0 1-2.119.462ZM15.74 5.784a13.154 13.154 0 0 0-4.26-3.856A7.284 7.284 0 0 0 8.145.941a6.436 6.436 0 0 0-2.892.6l.848.848a5.691 5.691 0 0 1 1.793-.348 5.788 5.788 0 0 1 2.583.617 11.437 11.437 0 0 1 3.586 2.783c.193.212.347.424.54.636a.209.209 0 0 1 .019.289 13.993 13.993 0 0 1-2.256 2.275l.79.79a14.6 14.6 0 0 0 2.6-2.737.658.658 0 0 0-.016-.91Z" />
@@ -90,7 +90,7 @@ export const CrossedEyeIcon = (props) => {
   );
 };
 
-export const CrossIcon = (props) => {
+export const CrossIcon = (props: SvgIconProps) => {
   return (
     <SvgIcon {...props} viewBox="0 0 10 10">
       <path
@@ -101,7 +101,7 @@ export const CrossIcon = (props) => {
   );
 };
 
-export const SaltireIcon = (props) => {
+export const SaltireIcon = (props: SvgIconProps) => {
   return (
     <SvgIcon {...props} viewBox="5 5 14 14">
       <path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z" />
@@ -109,7 +109,7 @@ export const SaltireIcon = (props) => {
   );
 };
 
-export const EmojiIcon = (props) => {
+export const EmojiIcon = (props: SvgIconProps) => {
   return (
     <SvgIcon {...props} viewBox="0 0 25 25">
       <path d="M12.5 0A12.5 12.5 0 1 0 25 12.5 12.537 12.537 0 0 0 12.5 0Zm0 23.25A10.75 10.75 0 1 1 23.25 12.5 10.749 10.749 0 0 1 12.5 23.25Z" />
@@ -118,7 +118,7 @@ export const EmojiIcon = (props) => {
   );
 };
 
-export const EyeIcon = (props) => {
+export const EyeIcon = (props: SvgIconProps) => {
   return (
     <SvgIcon {...props} viewBox="0 0 15.931 10.568">
       <path d="M7.933 9.469a7.081 7.081 0 0 1-3.7-1.292A12.409 12.409 0 0 1 1.359 5.46a.237.237 0 0 1 0-.366c.733-.892 3.322-3.276 4.685-3.702l-.791-.79a18.682 18.682 0 0 0-5.089 4.26.629.629 0 0 0 .019.867 13.62 13.62 0 0 0 4.222 3.837 7.4 7.4 0 0 0 3.547 1 7.067 7.067 0 0 0 2.948-.711l-.847-.853a5.577 5.577 0 0 1-2.12.467Z" />
@@ -131,7 +131,7 @@ export const EyeIcon = (props) => {
   );
 };
 
-export const FolderIcon = (props) => {
+export const FolderIcon = (props: SvgIconProps) => {
   return (
     <SvgIcon {...props} viewBox="0 0 17.504 14.812">
       <path d="M15.484 14.812H2.02a.675.675 0 0 1-.666-.578L.007 4.809a.674.674 0 0 1 .665-.769h.673V.673A.674.674 0 0 1 2.02 0h4.039a.676.676 0 0 1 .373.113l1.85 1.233h7.2a.674.674 0 0 1 .673.673v2.02h.673a.675.675 0 0 1 .667.769l-1.346 9.426a.677.677 0 0 1-.665.578ZM1.449 5.387 2.6 13.466h12.3l1.154-8.079Zm1.244-4.04v2.692h12.118V2.693H8.078A.677.677 0 0 1 7.7 2.58L5.855 1.346Z" />
@@ -139,7 +139,7 @@ export const FolderIcon = (props) => {
   );
 };
 
-export const InfoIcon = (props) => {
+export const InfoIcon = (props: SvgIconProps) => {
   return (
     <SvgIcon {...props} viewBox="2 2 20 20">
       <path d="M11 7h2v2h-2zm0 4h2v6h-2zm1-9C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z" />
@@ -147,7 +147,7 @@ export const InfoIcon = (props) => {
   );
 };
 
-export const LockIcon = (props) => {
+export const LockIcon = (props: SvgIconProps) => {
   return (
     <SvgIcon {...props} viewBox="0 0 12.727 15.636">
       <path d="M10.727 15.636H2a2 2 0 0 1-2-2V7.454a2 2 0 0 1 2-2h8.727a2 2 0 0 1 2 2v6.182a2 2 0 0 1-2 2ZM2 6.545a.91.91 0 0 0-.909.909v6.182a.91.91 0 0 0 .909.909h8.727a.908.908 0 0 0 .909-.909V7.454a.908.908 0 0 0-.909-.909Z" />
@@ -157,7 +157,7 @@ export const LockIcon = (props) => {
   );
 };
 
-export const MicroInBubbleIcon = (props) => {
+export const MicroInBubbleIcon = (props: SvgIconProps) => {
   return (
     <SvgIcon {...props} viewBox="0 0 25 25">
       <g transform="translate(-2 -2)">
@@ -182,7 +182,7 @@ export const MicroInBubbleIcon = (props) => {
   );
 };
 
-export const OppositeArrowsIcon = (props) => {
+export const OppositeArrowsIcon = (props: SvgIconProps) => {
   return (
     <SvgIcon {...props} viewBox="0 0 16.123 17" style={{ fill: 'none', stroke: '#005699', fillRule: 'evenodd' }}>
       <path d="M15.623 11.025a.358.358 0 0 0-.358-.358h-8.1v-1.4a.358.358 0 0 0-.537-.31l-2.972 1.717-2.977 1.72a.358.358 0 0 0 0 .62l2.977 1.718 2.975 1.719a.358.358 0 0 0 .537-.31v-1.4h8.1a.358.358 0 0 0 .358-.358v-3.36ZM.5 2.615a.358.358 0 0 1 .358-.358h8.1v-1.4a.358.358 0 0 1 .537-.31l2.976 1.718 2.977 1.72a.358.358 0 0 1 0 .62l-2.977 1.718-2.978 1.719a.358.358 0 0 1-.537-.31v-1.4h-8.1a.358.358 0 0 1-.358-.358v-3.36Z" />
@@ -190,7 +190,7 @@ export const OppositeArrowsIcon = (props) => {
   );
 };
 
-export const PaperClipIcon = (props) => {
+export const PaperClipIcon = (props: SvgIconProps) => {
   return (
     <SvgIcon {...props} viewBox="0 0 12.208 25.75">
       <path
@@ -201,7 +201,7 @@ export const PaperClipIcon = (props) => {
   );
 };
 
-export const PenIcon = (props) => {
+export const PenIcon = (props: SvgIconProps) => {
   return (
     <SvgIcon {...props} viewBox="0 0 14.863 14.863">
       <path d="m0 14.863.025-5.4L9.49 0l5.373 5.388-3.941 3.941-.711-.715.918-.913-3.967-3.966-6.123 6.129v3.966H5l2.959-2.958.71.715L5.4 14.838ZM9.49 1.426l-1.6 1.6 3.946 3.946 1.6-1.6L9.49 1.427Z" />
@@ -209,7 +209,7 @@ export const PenIcon = (props) => {
   );
 };
 
-export const PersonIcon = (props) => {
+export const PersonIcon = (props: SvgIconProps) => {
   return (
     <SvgIcon {...props} viewBox="0 0 24 24">
       <g stroke="#03B9E9" strokeWidth="1.75" fill="none" fillRule="evenodd" strokeLinejoin="round">
@@ -219,7 +219,7 @@ export const PersonIcon = (props) => {
   );
 };
 
-export const RoundCrossIcon = (props) => {
+export const RoundCrossIcon = (props: SvgIconProps) => {
   return (
     <SvgIcon {...props} viewBox="0 0 16 16">
       <path d="M8 16a8 8 0 1 1 8-8 8.009 8.009 0 0 1-8 8ZM8 .888A7.112 7.112 0 1 0 15.112 8 7.12 7.12 0 0 0 8 .888Z" />
@@ -228,7 +228,7 @@ export const RoundCrossIcon = (props) => {
   );
 };
 
-export const MessageIcon = (props) => {
+export const MessageIcon = (props: SvgIconProps) => {
   return (
     <SvgIcon {...props} viewBox="0 0 16 14.554">
       {/* <svg
@@ -256,7 +256,7 @@ export const MessageIcon = (props) => {
   );
 };
 
-export const AudioCallIcon = (props) => {
+export const AudioCallIcon = (props: SvgIconProps) => {
   return (
     <SvgIcon {...props} viewBox="0 0 15.338 16">
       {/* <svg
@@ -284,7 +284,7 @@ export const AudioCallIcon = (props) => {
   );
 };
 
-export const VideoCallIcon = (props) => {
+export const VideoCallIcon = (props: SvgIconProps) => {
   return (
     <SvgIcon {...props} viewBox="0 0 16 12">
       {/* <svg
@@ -310,7 +310,7 @@ export const VideoCallIcon = (props) => {
   );
 };
 
-export const ContactDetailsIcon = (props) => {
+export const ContactDetailsIcon = (props: SvgIconProps) => {
   return (
     <SvgIcon {...props} viewBox="0 0 14.647 16">
       {/* <svg
@@ -332,7 +332,7 @@ export const ContactDetailsIcon = (props) => {
   );
 };
 
-export const BlockContactIcon = (props) => {
+export const BlockContactIcon = (props: SvgIconProps) => {
   return (
     <SvgIcon {...props} viewBox="0 0 16 15.52">
       {/* <svg xmlns="http://www.w3.org/2000/svg" width="16" height="15.52">
@@ -355,7 +355,7 @@ export const BlockContactIcon = (props) => {
   );
 };
 
-export const RemoveContactIcon = (props) => {
+export const RemoveContactIcon = (props: SvgIconProps) => {
   return (
     <SvgIcon {...props} viewBox="0 0 16 16">
       {/* <svg
@@ -379,7 +379,7 @@ export const RemoveContactIcon = (props) => {
     </SvgIcon>
   );
 };
-export const RoundSaltireIcon = (props) => {
+export const RoundSaltireIcon = (props: SvgIconProps) => {
   return (
     <SvgIcon {...props} viewBox="0 0 16 16">
       <path d="M8 16a8 8 0 1 1 8-8 8.009 8.009 0 0 1-8 8ZM8 .888A7.112 7.112 0 1 0 15.112 8 7.12 7.12 0 0 0 8 .888Z" />
@@ -388,7 +388,7 @@ export const RoundSaltireIcon = (props) => {
   );
 };
 
-export const TrashBinIcon = (props) => {
+export const TrashBinIcon = (props: SvgIconProps) => {
   return (
     <SvgIcon {...props} viewBox="0 0 15.44 16">
       <path
@@ -399,7 +399,7 @@ export const TrashBinIcon = (props) => {
   );
 };
 
-export const TwoSheetsIcon = (props) => {
+export const TwoSheetsIcon = (props: SvgIconProps) => {
   return (
     <SvgIcon {...props} viewBox="0 0 16 15.68">
       <path

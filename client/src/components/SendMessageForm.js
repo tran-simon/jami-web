@@ -8,7 +8,7 @@ import {
   SelectEmojiButton,
   SendMessageButton,
   UploadFileButton,
-} from './buttons';
+} from './Button.tsx';
 
 export default function SendMessageForm(props) {
   const [currentMessage, setCurrentMessage] = useState('');

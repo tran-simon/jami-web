@@ -14,7 +14,7 @@ import socketio from 'socket.io-client';
 
 import { store } from '../redux/store';
 import App from './App';
-import { SocketProvider } from './contexts/socket.js';
+import { SocketProvider } from './contexts/Socket';
 
 const queryClient = new QueryClient({
   defaultOptions: {

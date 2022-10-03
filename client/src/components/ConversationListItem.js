@@ -9,8 +9,8 @@ import { setRefreshFromSlice } from '../../redux/appSlice';
 import { useAppDispatch } from '../../redux/hooks';
 import authManager from '../AuthManager';
 import ConversationAvatar from './ConversationAvatar';
-import { RemoveContactIcon, VideoCallIcon } from './svgIcons';
-import { AudioCallIcon, BlockContactIcon, ContactDetailsIcon, CrossIcon, MessageIcon } from './svgIcons';
+import { RemoveContactIcon, VideoCallIcon } from './SvgIcon.tsx';
+import { AudioCallIcon, BlockContactIcon, ContactDetailsIcon, CrossIcon, MessageIcon } from './SvgIcon.tsx';
 
 const customStyles = {
   content: {

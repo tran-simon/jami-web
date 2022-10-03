@@ -6,9 +6,9 @@ import isYesterday from 'dayjs/plugin/isYesterday';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { EmojiButton, MoreButton, ReplyMessageButton } from './buttons';
+import { EmojiButton, MoreButton, ReplyMessageButton } from './Button.tsx';
 import ConversationAvatar from './ConversationAvatar';
-import { OppositeArrowsIcon, TrashBinIcon, TwoSheetsIcon } from './svgIcons';
+import { OppositeArrowsIcon, TrashBinIcon, TwoSheetsIcon } from './SvgIcon.tsx';
 
 dayjs.extend(isToday);
 dayjs.extend(isYesterday);

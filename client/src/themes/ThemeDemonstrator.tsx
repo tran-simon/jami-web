@@ -9,9 +9,9 @@ import {
   TakePictureButton,
   TipButton,
   UploadPictureButton,
-} from '../components/buttons';
-import { NickNameInput, PasswordInput, RegularInput, UsernameInput } from '../components/inputs';
-import defaultTheme from './default';
+} from '../components/Button';
+import { NickNameInput, PasswordInput, RegularInput, UsernameInput } from '../components/Input';
+import defaultTheme from './Default';
 
 export const ThemeDemonstrator = () => {
   return (

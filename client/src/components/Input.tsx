@@ -1,9 +1,9 @@
-import { Stack, TextField } from '@mui/material';
+import { IconButtonProps, Stack, TextField, TextFieldProps } from '@mui/material';
 import { styled } from '@mui/material/styles';
-import { useCallback, useEffect, useState } from 'react';
+import { ChangeEvent, ReactElement, useCallback, useEffect, useState } from 'react';
 
-import { InfoButton, ToggleVisibilityButton } from './buttons';
-import { CheckedIcon, LockIcon, PenIcon, PersonIcon, RoundSaltireIcon } from './svgIcons';
+import { InfoButton, ToggleVisibilityButton } from './Button';
+import { CheckedIcon, LockIcon, PenIcon, PersonIcon, RoundSaltireIcon } from './SvgIcon';
 
 const iconsHeight = '16px';
 const StyledCheckedIconSuccess = styled(CheckedIcon)(({ theme }) => ({
@@ -19,13 +19,18 @@ const StyledPenIconDark = styled(PenIcon)(({ theme }) => ({ height: iconsHeight,
 const StyledPersonIconLight = styled(PersonIcon)({ height: iconsHeight, color: '#03B9E9' });
 const StyledLockIcon = styled(LockIcon)({ height: iconsHeight, color: '#03B9E9' });
 
-export const UsernameInput = ({ infoButtonProps, onChange: _onChange, ...props }) => {
+type InputProps = TextFieldProps & {
+  infoButtonProps?: IconButtonProps;
+  success?: boolean;
+};
+
+export const UsernameInput = ({ infoButtonProps, onChange: _onChange, ...props }: InputProps) => {
   const [isSelected, setIsSelected] = useState(false);
   const [input, setInput] = useState(props.defaultValue);
-  const [startAdornment, setStartAdornment] = useState();
+  const [startAdornment, setStartAdornment] = useState<ReactElement | undefined>();
 
   const onChange = useCallback(
-    (event) => {
+    (event: ChangeEvent<HTMLInputElement>) => {
       setInput(event.target.value);
       _onChange?.(event);
     },
@@ -63,18 +68,18 @@ export const UsernameInput = ({ infoButtonProps, onChange: _onChange, ...props }
   );
 };
 
-export const PasswordInput = ({ infoButtonProps, onChange: _onChange, ...props }) => {
+export const PasswordInput = ({ infoButtonProps, onChange: _onChange, ...props }: InputProps) => {
   const [showPassword, setShowPassword] = useState(false);
   const [isSelected, setIsSelected] = useState(false);
   const [input, setInput] = useState(props.defaultValue);
-  const [startAdornment, setStartAdornment] = useState();
+  const [startAdornment, setStartAdornment] = useState<ReactElement | undefined>();
 
   const toggleShowPassword = () => {
     setShowPassword((showPassword) => !showPassword);
   };
 
   const onChange = useCallback(
-    (event) => {
+    (event: ChangeEvent<HTMLInputElement>) => {
       setInput(event.target.value);
       _onChange?.(event);
     },
@@ -119,13 +124,13 @@ export const PasswordInput = ({ infoButtonProps, onChange: _onChange, ...props }
   );
 };
 
-export const NickNameInput = ({ onChange: _onChange, ...props }) => {
+export const NickNameInput = ({ onChange: _onChange, ...props }: TextFieldProps) => {
   const [isSelected, setIsSelected] = useState(false);
   const [input, setInput] = useState(props.defaultValue);
-  const [startAdornmentVisibility, setStartAdornmentVisibility] = useState();
+  const [startAdornmentVisibility, setStartAdornmentVisibility] = useState<'visible' | 'hidden'>('hidden');
 
   const onChange = useCallback(
-    (event) => {
+    (event: ChangeEvent<HTMLInputElement>) => {
       setInput(event.target.value);
       _onChange?.(event);
     },
@@ -152,14 +157,14 @@ export const NickNameInput = ({ onChange: _onChange, ...props }) => {
   );
 };
 
-export const RegularInput = ({ onChange: _onChange, ...props }) => {
+export const RegularInput = ({ onChange: _onChange, ...props }: TextFieldProps) => {
   const [isSelected, setIsSelected] = useState(false);
   const [input, setInput] = useState(props.defaultValue);
-  const [startAdornmentVisibility, setStartAdornmentVisibility] = useState();
-  const [endAdornmentVisibility, setEndAdornmentVisibility] = useState();
+  const [startAdornmentVisibility, setStartAdornmentVisibility] = useState<'visible' | 'hidden'>('hidden');
+  const [endAdornmentVisibility, setEndAdornmentVisibility] = useState<'visible' | 'hidden'>('visible');
 
   const onChange = useCallback(
-    (event) => {
+    (event: ChangeEvent<HTMLInputElement>) => {
       setInput(event.target.value);
       _onChange?.(event);
     },

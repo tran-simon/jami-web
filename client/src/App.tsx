@@ -17,7 +17,7 @@ import JamiAccountDialog from './pages/JamiAccountCreation';
 import JamiMessenger from './pages/JamiMessenger';
 import SignInPage from './pages/LoginDialog';
 import ServerSetup from './pages/ServerSetup';
-import defaultTheme from './themes/default';
+import defaultTheme from './themes/Default';
 import { ThemeDemonstrator } from './themes/ThemeDemonstrator';
 
 // import { useSelector, useDispatch } from 'react-redux'
