@@ -9,7 +9,7 @@ import authManager from '../AuthManager';
 import ConversationAvatar from '../components/ConversationAvatar';
 import Header from '../components/Header';
 import ListItemLink from '../components/ListItemLink';
-import LoadingPage from '../components/loading';
+import LoadingPage from '../components/Loading';
 
 const variants = {
   enter: { opacity: 1, y: 0 },

@@ -1,6 +1,12 @@
 import { Box, Card, CardContent, Typography } from '@mui/material';
 
-export default function JamiIdCard(props) {
+import Account from '../../../model/Account';
+
+type JamiIdCardProps = {
+  account: Account;
+};
+
+export default function JamiIdCard(props: JamiIdCardProps) {
   const account = props.account;
   const registeredName = account.getRegisteredName();
   return (

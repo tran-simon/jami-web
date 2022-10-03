@@ -1,16 +1,21 @@
 import { SearchRounded } from '@mui/icons-material';
 import { InputAdornment, InputBase } from '@mui/material';
-import { useState } from 'react';
+import { ChangeEvent, FormEvent, useState } from 'react';
 
-export default function NewContactForm(props) {
+type NewContactFormProps = {
+  onChange?: (v: string) => void;
+  onSubmit?: (v: string) => void;
+};
+
+export default function NewContactForm(props: NewContactFormProps) {
   const [value, setValue] = useState('');
 
-  const handleChange = (event) => {
+  const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
     setValue(event.target.value);
     if (props.onChange) props.onChange(event.target.value);
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (value && props.onSubmit) props.onSubmit(value);
   };

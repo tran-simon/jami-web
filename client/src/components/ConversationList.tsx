@@ -8,7 +8,12 @@ import Conversation from '../../../model/Conversation';
 import { useAppSelector } from '../../redux/hooks';
 import ConversationListItem from './ConversationListItem';
 
-export default function ConversationList(props) {
+type ConversationListProps = {
+  accountId: string;
+  conversations: Conversation[];
+  search?: Conversation;
+};
+export default function ConversationList(props: ConversationListProps) {
   const { refresh } = useAppSelector((state) => state.app);
 
   useEffect(() => {

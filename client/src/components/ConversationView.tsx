@@ -5,7 +5,7 @@ import Conversation, { Message } from '../../../model/Conversation';
 import { SocketContext } from '../contexts/Socket';
 import { useConversationQuery, useMessagesQuery, useSendMessageMutation } from '../services/Conversation';
 import ConversationAvatar from './ConversationAvatar';
-import LoadingPage from './loading';
+import LoadingPage from './Loading';
 import MessageList from './MessageList';
 import SendMessageForm from './SendMessageForm';
 

@@ -1,13 +1,13 @@
 import { Box, Button, Menu, MenuItem } from '@mui/material';
-import { useState } from 'react';
+import { MouseEvent, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
 import authManager from '../AuthManager';
 
 export default function Header() {
   const navigate = useNavigate();
-  const [anchorEl, setAnchorEl] = useState(null);
-  const handleClick = (event) => setAnchorEl(event.currentTarget);
+  const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
+  const handleClick = (event: MouseEvent<HTMLButtonElement>) => setAnchorEl(event.currentTarget);
   const handleClose = () => setAnchorEl(null);
   const params = useParams();
 

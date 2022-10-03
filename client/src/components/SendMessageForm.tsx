@@ -1,6 +1,6 @@
 import { Divider, InputBase } from '@mui/material';
 import { Stack } from '@mui/system';
-import { useCallback, useState } from 'react';
+import { ChangeEvent, FormEvent, useCallback, useState } from 'react';
 
 import {
   RecordVideoMessageButton,
@@ -8,22 +8,26 @@ import {
   SelectEmojiButton,
   SendMessageButton,
   UploadFileButton,
-} from './Button.tsx';
+} from './Button';
 
-export default function SendMessageForm(props) {
+type SendMessageFormProps = {
+  onSend: (message: string) => void;
+};
+
+export default function SendMessageForm(props: SendMessageFormProps) {
   const [currentMessage, setCurrentMessage] = useState('');
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (currentMessage) {
       props.onSend(currentMessage);
       setCurrentMessage('');
     }
   };
-  const handleInputChange = (event) => setCurrentMessage(event.target.value);
+  const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => setCurrentMessage(event.target.value);
 
   const onEmojiSelected = useCallback(
-    (emoji) => setCurrentMessage((currentMessage) => currentMessage + emoji),
+    (emoji: string) => setCurrentMessage((currentMessage) => currentMessage + emoji),
     [setCurrentMessage]
   );
 
