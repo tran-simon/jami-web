@@ -1,13 +1,15 @@
 class Contact {
   private readonly uri: string;
-  private displayName: string | undefined = undefined;
-  private registeredName: string | undefined = undefined;
+  private readonly displayName: string | undefined;
+  private registeredName: string | undefined;
 
   constructor(uri: string) {
     this.uri = uri;
+    this.displayName = undefined;
+    this.registeredName = undefined;
   }
 
-  static from(object: Contact) {
+  static from(object: any) {
     const contact = new Contact(object.uri);
     if (object.registeredName) contact.setRegisteredName(object.registeredName);
     return contact;

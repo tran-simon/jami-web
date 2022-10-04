@@ -25,14 +25,14 @@ class Account {
   private readonly id: string;
   private _details: AccountDetails;
   private _volatileDetails: VolatileDetails;
-  private contactCache: Record<string, Contact> = {};
-  private _contacts: Contact[] = [];
-  private conversations: Record<string, Conversation> = {};
-  private defaultModerators: Contact[] = [];
-  private _lookups: Lookup[] = [];
-  private devices: Devices = {};
-  private _registrationState: RegistrationState | undefined = undefined;
-  private _registeringName: AccountRegisteringName | undefined = undefined;
+  private readonly contactCache: Record<string, Contact>;
+  private _contacts: Contact[];
+  private readonly conversations: Record<string, Conversation>;
+  private defaultModerators: Contact[];
+  private _lookups: Lookup[];
+  private devices: Devices;
+  private _registrationState: RegistrationState | undefined;
+  private _registeringName: AccountRegisteringName | undefined;
 
   static TYPE_JAMI: string;
   static TYPE_SIP: string;
@@ -41,13 +41,21 @@ class Account {
 
   constructor(id: string, details: AccountDetails, volatileDetails: VolatileDetails) {
     this.id = id;
-    this._details = details;
-    this._volatileDetails = volatileDetails;
+    this._details = details || {};
+    this._volatileDetails = volatileDetails || {};
+    this.contactCache = {};
+    this._contacts = [];
+    this.conversations = {};
+    this.defaultModerators = [];
+    this._lookups = [];
+    this.devices = {};
+    this.registrationState = undefined;
+    this._registeringName = undefined;
   }
 
-  static from(object: Account) {
-    const account = new Account(object.id, object._details, object._volatileDetails);
-    if (object.defaultModerators) account.defaultModerators = object.defaultModerators.map((m) => Contact.from(m));
+  static from(object: any) {
+    const account = new Account(object.id, object.details, object.volatileDetails);
+    if (object.defaultModerators) account.defaultModerators = object.defaultModerators.map((m: any) => Contact.from(m));
     return account;
   }
 

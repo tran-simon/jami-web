@@ -25,22 +25,27 @@ class Conversation {
   private readonly id: string | undefined;
   private readonly accountId: string;
   private readonly members: ConversationMember[];
-  private messages: Message[] = [];
-  private _infos: ConversationInfos = {};
-  private _requests: Record<string, ConversationRequest> = {};
-  private _listeners: ConversationListeners = {};
+  private messages: Message[];
+  private _infos: ConversationInfos;
+  private _requests: Record<string, ConversationRequest>;
+  private _listeners: ConversationListeners;
 
   constructor(id: string | undefined, accountId: string, members?: ConversationMember[]) {
     this.id = id;
     this.accountId = accountId;
     this.members = members || [];
+
+    this.messages = [];
+    this._infos = {};
+    this._requests = {};
+    this._listeners = {};
   }
 
-  static from(accountId: string, object: Conversation) {
+  static from(accountId: string, object: any) {
     const conversation = new Conversation(
       object.id,
       accountId,
-      object.members.map((member) => {
+      object.members.map((member: any) => {
         member.contact = Contact.from(member.contact);
         return member;
       })
