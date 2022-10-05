@@ -1,0 +1,35 @@
+{
+  "name": "jami-web-server",
+  "type": "module",
+  "scripts": {
+    "start": "nodemon --watch src src/index.ts",
+    "start:prod": "env NODE_ENV=production node dist/index.js",
+    "build": "tsc",
+    "clean": "rm -Rf dist",
+    "lint": "eslint src",
+    "lint:fix": "eslint --fix src",
+    "format": "prettier --write src",
+    "format:check": "prettier --check src"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.14",
+    "@types/node": "^18.7.23",
+    "@types/ws": "^8.5.3",
+    "nodemon": "^2.0.20",
+    "npm-check-updates": "^16.3.3",
+    "ts-node": "^10.9.1",
+    "typescript": "^4.8.4",
+    "wscat": "^5.2.0"
+  },
+  "dependencies": {
+    "express": "^4.18.1",
+    "express-async-handler": "^1.2.0",
+    "immutable": "^4.1.0",
+    "jose": "^4.10.0",
+    "loglevel": "^1.8.0",
+    "reflect-metadata": "^0.1.13",
+    "rxjs": "^7.5.7",
+    "typedi": "^0.10.0",
+    "ws": "^8.9.0"
+  }
+}
