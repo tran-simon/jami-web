@@ -19,7 +19,7 @@
     "start:prod": "NODE_ENV=production node dist/bundle.js"
   },
   "lint-staged": {
-    "**/*.{ts,tsx,js,jsx,json}": [
+    "**/*.{ts,tsx,js,jsx,cjs}": [
       "eslint --fix",
       "prettier --write"
     ]
@@ -60,6 +60,7 @@
     "cypress": "^10.8.0",
     "eslint": "^8.23.1",
     "eslint-config-prettier": "^8.5.0",
+    "eslint-plugin-header": "^3.1.1",
     "eslint-plugin-simple-import-sort": "^8.0.0",
     "eslint-plugin-unused-imports": "^2.0.0",
     "husky": "^8.0.0",
