@@ -66,6 +66,7 @@ const App = () => {
         <Route path="/account">
           <Route index element={<AccountSelection />} />
           <Route path=":accountId">
+            <Route index element={<JamiMessenger />} />
             <Route path="*" element={<JamiMessenger />} />
             <Route path="settings" element={<AccountSettings />} />
           </Route>
