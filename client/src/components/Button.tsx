@@ -25,19 +25,29 @@ import {
   Arrow2Icon,
   Arrow3Icon,
   ArrowIcon,
+  CallEndIcon,
   CameraIcon,
   CameraInBubbleIcon,
   CancelIcon,
+  ChatBubbleIcon,
   CrossedEyeIcon,
   CrossIcon,
   EmojiIcon,
+  ExtensionIcon,
   EyeIcon,
   FolderIcon,
+  FullscreenIcon,
+  GroupAddIcon,
   InfoIcon,
+  MicroIcon,
   MicroInBubbleIcon,
   PaperClipIcon,
   PenIcon,
+  RecordingIcon,
   SaltireIcon,
+  ScreenShareIcon,
+  VideoCameraIcon,
+  VolumeIcon,
 } from './SvgIcon';
 
 type ShapedButtonProps = IconButtonProps & {
@@ -134,6 +144,85 @@ export const BackButton = styled((props: IconButtonProps) => {
     background: theme.palette.primary.light,
   },
 }));
+
+export const CallingChatButton = (props: IconButtonProps) => {
+  return (
+    <IconButton {...props} aria-label="chat" sx={{ color: 'white' }}>
+      <ChatBubbleIcon />
+    </IconButton>
+  );
+};
+
+export const CallingEndButton = (props: IconButtonProps) => {
+  return (
+    <IconButton {...props} aria-label="end call" sx={{ color: 'white', backgroundColor: 'red' }}>
+      <CallEndIcon />
+    </IconButton>
+  );
+};
+
+export const CallingExtensionButton = (props: IconButtonProps) => {
+  return (
+    <IconButton {...props} aria-label="extensions" sx={{ color: 'white' }}>
+      <ExtensionIcon />
+    </IconButton>
+  );
+};
+
+export const CallingFullscreenButton = (props: IconButtonProps) => {
+  return (
+    <IconButton {...props} aria-label="fullscreen" sx={{ color: 'white' }}>
+      <FullscreenIcon />
+    </IconButton>
+  );
+};
+
+export const CallingGroupButton = (props: IconButtonProps) => {
+  return (
+    <IconButton {...props} aria-label="group options" sx={{ color: 'white' }}>
+      <GroupAddIcon />
+    </IconButton>
+  );
+};
+
+export const CallingMicButton = (props: IconButtonProps) => {
+  return (
+    <IconButton {...props} aria-label="microphone options" sx={{ color: 'white' }}>
+      <MicroIcon />
+    </IconButton>
+  );
+};
+
+export const CallingRecordButton = (props: IconButtonProps) => {
+  return (
+    <IconButton {...props} aria-label="recording options" sx={{ color: 'white' }}>
+      <RecordingIcon />
+    </IconButton>
+  );
+};
+
+export const CallingScreenShareButton = (props: IconButtonProps) => {
+  return (
+    <IconButton {...props} aria-label="screen share" sx={{ color: 'white' }}>
+      <ScreenShareIcon />
+    </IconButton>
+  );
+};
+
+export const CallingVideoCameraButton = (props: IconButtonProps) => {
+  return (
+    <IconButton {...props} aria-label="camera options" sx={{ color: 'white' }}>
+      <VideoCameraIcon />
+    </IconButton>
+  );
+};
+export const CallingVolumeButton = (props: IconButtonProps) => {
+  return (
+    <IconButton {...props} aria-label="volume options" sx={{ color: 'white' }}>
+      <VolumeIcon />
+    </IconButton>
+  );
+};
 
 export const CloseButton = styled((props: IconButtonProps) => {
   return (
