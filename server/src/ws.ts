@@ -18,32 +18,54 @@
 import { IncomingMessage } from 'node:http';
 import { Duplex } from 'node:stream';
 
+import { jwtVerify } from 'jose';
+import log from 'loglevel';
 import { Service } from 'typedi';
+import { URL } from 'whatwg-url';
 import { WebSocket, WebSocketServer } from 'ws';
 
-@Service()
-class Ws {
-  async build() {
-    await Promise.resolve(42);
+import { Vault } from './vault.js';
 
-    const wss = new WebSocketServer({
-      noServer: true,
-    });
-    wss.on('connection', (ws: WebSocket, _req: IncomingMessage, id: string) => {
-      ws.on('message', (data) => {
-        ws.send(
-          JSON.stringify({
-            id,
-            data,
-          })
-        );
+@Service()
+export class Ws {
+  constructor(private readonly vault: Vault) {}
+
+  async build() {
+    const wss = new WebSocketServer({ noServer: true });
+    wss.on('connection', (ws: WebSocket, _req: IncomingMessage, accountId: string) => {
+      log.info('New connection', accountId);
+
+      ws.on('message', (_data) => {
+        ws.send(JSON.stringify({ accountId }));
       });
     });
 
+    const pubKey = await this.vault.pubKey();
+
     return (request: IncomingMessage, socket: Duplex, head: Buffer) => {
-      wss.handleUpgrade(request, socket, head, (ws) => wss.emit('connection', ws, request, '42'));
+      // Do not use parseURL because it returns a URLRecord and not a URL.
+      const url = new URL(request.url ?? '/', 'http://localhost/');
+      const accessToken = url.searchParams.get('accessToken');
+      if (!accessToken) {
+        socket.write('HTTP/1.1 400 Bad Request\r\n\r\n');
+        socket.destroy();
+        return;
+      }
+
+      jwtVerify(accessToken, pubKey, {
+        issuer: 'urn:example:issuer',
+        audience: 'urn:example:audience',
+      })
+        .then(({ payload }) => {
+          const id = payload.id as string;
+          log.info('Authentication successful', id);
+          wss.handleUpgrade(request, socket, head, (ws) => wss.emit('connection', ws, request, id));
+        })
+        .catch((reason) => {
+          log.debug('Authentication failed', reason);
+          socket.write('HTTP/1.1 401 Unauthorized\r\n\r\n');
+          socket.destroy();
+        });
     };
   }
 }
-
-export { Ws };

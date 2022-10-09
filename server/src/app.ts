@@ -23,7 +23,7 @@ import { StatusCode } from './constants.js';
 import { AuthRouter } from './routers/auth-router.js';
 
 @Service()
-class App {
+export class App {
   constructor(private authRouter: AuthRouter) {}
 
   async build() {
@@ -47,5 +47,3 @@ class App {
     return app;
   }
 }
-
-export { App };

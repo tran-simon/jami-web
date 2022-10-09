@@ -13,7 +13,8 @@
   },
   "devDependencies": {
     "@types/express": "^4.17.14",
-    "@types/node": "^18.7.23",
+    "@types/node": "^18.8.3",
+    "@types/whatwg-url": "^11.0.0",
     "@types/ws": "^8.5.3",
     "nodemon": "^2.0.20",
     "npm-check-updates": "^16.3.3",
@@ -22,14 +23,15 @@
     "wscat": "^5.2.0"
   },
   "dependencies": {
-    "express": "^4.18.1",
+    "argon2": "^0.29.1",
+    "express": "^4.18.2",
     "express-async-handler": "^1.2.0",
-    "immutable": "^4.1.0",
     "jose": "^4.10.0",
     "loglevel": "^1.8.0",
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.5.7",
     "typedi": "^0.10.0",
+    "whatwg-url": "^11.0.0",
     "ws": "^8.9.0"
   }
 }

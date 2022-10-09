@@ -15,21 +15,34 @@
  * License along with this program.  If not, see
  * <https://www.gnu.org/licenses/>.
  */
+import { readFile, writeFile } from 'node:fs/promises';
 
-export enum StatusCode {
-  OK = 200,
-  CREATED = 201,
-  ACCEPTED = 202,
-  NO_CONTENT = 204,
-  BAD_REQUEST = 400,
-  UNAUTHORIZED = 401,
-  FORBIDDEN = 403,
-  NOT_FOUND = 404,
-  NOT_ACCEPTABLE = 406,
-  CONFLICT = 409,
-  GONE = 410,
-  IM_A_TEAPOT = 418,
-  TOO_MANY_REQUESTS = 429,
-  INTERNAL_SERVER_ERROR = 500,
-  NOT_IMPLEMENTED = 501,
+import { Service } from 'typedi';
+
+@Service()
+export class Creds {
+  readonly file = 'creds.json';
+  db: Record<string, string>;
+
+  constructor() {
+    this.db = {};
+  }
+
+  async build() {
+    const buffer = await readFile(this.file).catch(() => Buffer.from('{}'));
+    this.db = JSON.parse(buffer.toString());
+    return this;
+  }
+
+  get(username: string) {
+    return this.db[username];
+  }
+
+  set(username: string, password: string) {
+    this.db[username] = password;
+  }
+
+  async save() {
+    await writeFile(this.file, JSON.stringify(this.db) + '\n');
+  }
 }
