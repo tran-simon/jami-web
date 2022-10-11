@@ -18,8 +18,8 @@
 'use strict';
 
 import dotenv from 'dotenv';
-const node_env = process.env.NODE_ENV || 'development';
-dotenv.config({ path: `.env.${node_env}` });
+const nodeEnv = process.env.NODE_ENV || 'development';
+dotenv.config({ path: `.env.${nodeEnv}` });
 
 import cors from 'cors';
 import express, { NextFunction, Request, Response } from 'express';
@@ -115,14 +115,14 @@ const connectedUsers: Record<string, UserConfig> = {};
 
 const createServer = async (appConfig: AppConfig) => {
   const app = express();
-  console.log(`Loading server for ${node_env} with config:`);
+  console.log(`Loading server for ${nodeEnv} with config:`);
   console.log(appConfig);
 
   const corsOptions = {
     origin: 'http://127.0.0.1:3000',
   };
 
-  if (node_env === 'development') {
+  if (nodeEnv === 'development') {
     const webpack = await import('webpack');
     const webpackDev = await import('webpack-dev-middleware');
     const webpackHot = await import('webpack-hot-middleware');
@@ -142,9 +142,9 @@ const createServer = async (appConfig: AppConfig) => {
     */
   app.disable('x-powered-by');
 
-  const secret_key = process.env.SECRET_KEY_BASE;
+  const secretKey = process.env.SECRET_KEY_BASE;
 
-  if (!secret_key) {
+  if (!secretKey) {
     throw new Error('SECRET_KEY_BASE undefined');
   }
 
@@ -156,7 +156,7 @@ const createServer = async (appConfig: AppConfig) => {
       secure: false, //!development,
       maxAge: 2419200000,
     },
-    secret: secret_key,
+    secret: secretKey,
   });
 
   app.use(sessionMiddleware);
