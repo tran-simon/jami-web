@@ -39,6 +39,7 @@
     "emoji-picker-react": "^3.6.1",
     "framer-motion": "^7.3.5",
     "i18next": "^21.9.2",
+    "jami-web-common": "file:../common",
     "qrcode.react": "^3.1.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",

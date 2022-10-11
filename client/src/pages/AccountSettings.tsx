@@ -16,10 +16,10 @@
  * <https://www.gnu.org/licenses/>.
  */
 import { CircularProgress, Container } from '@mui/material';
+import { Account } from 'jami-web-common';
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router';
 
-import Account from '../../../model/Account';
 import { setAccountId, setAccountObject } from '../../redux/appSlice';
 import { useAppDispatch } from '../../redux/hooks';
 import authManager from '../AuthManager';

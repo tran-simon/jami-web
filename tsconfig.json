@@ -23,8 +23,5 @@
     /* Set the JavaScript language version for emitted JavaScript and include compatible library declarations. */
     "target": "ES2017"
   },
-  "include": ["model", "routes", "app.ts"],
-  "ts-node": {
-    "esm": "true"
-  }
+  "include": ["routes", "app.ts", "JamiDaemon.ts"]
 }

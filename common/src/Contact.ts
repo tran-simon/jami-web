@@ -15,7 +15,7 @@
  * License along with this program.  If not, see
  * <https://www.gnu.org/licenses/>.
  */
-class Contact {
+export class Contact {
   private readonly uri: string;
   private readonly displayName: string | undefined;
   private registeredName: string | undefined;
@@ -63,5 +63,3 @@ class Contact {
     };
   }
 }
-
-export default Contact;

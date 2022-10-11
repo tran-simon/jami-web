@@ -15,10 +15,10 @@
  * License along with this program.  If not, see
  * <https://www.gnu.org/licenses/>.
  */
-import AccountDetails, { VolatileDetails } from './AccountDetails';
-import Contact from './Contact';
-import Conversation from './Conversation';
-import { Lookup, PromiseExecutor } from './util';
+import { AccountDetails, VolatileDetails } from './AccountDetails.js';
+import { Contact } from './Contact.js';
+import { Conversation } from './Conversation.js';
+import { Lookup, PromiseExecutor } from './util.js';
 
 type Devices = Record<string, string>;
 
@@ -38,7 +38,7 @@ interface AccountRegisteringName extends PromiseExecutor<number> {
   name: string;
 }
 
-class Account {
+export class Account {
   private readonly id: string;
   private _details: AccountDetails;
   private _volatileDetails: VolatileDetails;
@@ -237,5 +237,3 @@ Account.TYPE_SIP = 'SIP';
 
 Account.BOOL_TRUE = 'true';
 Account.BOOL_FALSE = 'false';
-
-export default Account;

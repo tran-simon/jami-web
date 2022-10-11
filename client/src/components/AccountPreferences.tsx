@@ -35,10 +35,10 @@ import {
   Typography,
 } from '@mui/material';
 import { motion } from 'framer-motion';
+import { Account } from 'jami-web-common';
+import { AccountDetails } from 'jami-web-common';
 import { useState } from 'react';
 
-import Account from '../../../model/Account';
-import AccountDetails from '../../../model/AccountDetails';
 import authManager from '../AuthManager';
 import ConversationAvatar from './ConversationAvatar';
 import ConversationsOverviewCard from './ConversationsOverviewCard';

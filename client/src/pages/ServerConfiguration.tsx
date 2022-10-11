@@ -17,10 +17,10 @@
  */
 import CircularProgress from '@mui/material/CircularProgress';
 import Container from '@mui/material/Container';
+import { Account } from 'jami-web-common';
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 
-import Account from '../../../model/Account';
 import authManager from '../AuthManager';
 import AccountPreferences from '../components/AccountPreferences';
 import Header from '../components/Header';

@@ -16,9 +16,9 @@
  * <https://www.gnu.org/licenses/>.
  */
 import { Box, Stack, Typography } from '@mui/material';
+import { Conversation, Message } from 'jami-web-common';
 import { useCallback, useContext, useEffect, useState } from 'react';
 
-import Conversation, { Message } from '../../../model/Conversation';
 import { SocketContext } from '../contexts/Socket';
 import { useConversationQuery, useMessagesQuery, useSendMessageMutation } from '../services/Conversation';
 import ConversationAvatar from './ConversationAvatar';

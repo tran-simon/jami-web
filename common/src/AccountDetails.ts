@@ -21,7 +21,7 @@
  *
  * See `jami-daemon/src/account_schema.h`
  */
-export default interface AccountDetails {
+export interface AccountDetails {
   // Common account parameters
   'Account.type': string;
   'Account.alias': string;

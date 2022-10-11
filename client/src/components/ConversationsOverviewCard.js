@@ -16,10 +16,10 @@
  * <https://www.gnu.org/licenses/>.
  */
 import { Card, CardActionArea, CardContent, CircularProgress, Typography } from '@mui/material';
+import { Conversation } from 'jami-web-common';
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router';
 
-import Conversation from '../../../model/Conversation';
 import authManager from '../AuthManager';
 
 export default function ConversationsOverviewCard(props) {

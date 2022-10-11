@@ -16,8 +16,7 @@
  * <https://www.gnu.org/licenses/>.
  */
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-
-import Account from '../../model/Account';
+import { Account } from 'jami-web-common';
 
 // Define a type for the slice state
 interface appState {

@@ -26,6 +26,7 @@ import express, { NextFunction, Request, Response } from 'express';
 import session from 'express-session';
 import { promises as fs } from 'fs';
 import http from 'http';
+import { Account } from 'jami-web-common';
 import passport from 'passport';
 import { IVerifyOptions, Strategy as LocalStrategy } from 'passport-local';
 import path from 'path';
@@ -33,8 +34,6 @@ import { Server, Socket } from 'socket.io';
 import { ExtendedError } from 'socket.io/dist/namespace';
 
 import JamiDaemon from './JamiDaemon';
-import Account from './model/Account';
-import { Session } from './model/util';
 //import { createRequire } from 'module';
 //const require = createRequire(import.meta.url);
 //const redis = require('redis-url').connect()
@@ -356,7 +355,7 @@ const createServer = async (appConfig: AppConfig) => {
   });
   io.on('connect', (socket) => {
     console.log(`new connection ${socket.id}`);
-    const session: Session = (socket.request as any).session;
+    const session = (socket.request as any).session;
     console.log(`saving sid ${socket.id} in session ${session.id}`);
     session.socketId = socket.id;
     session.save();

@@ -17,14 +17,21 @@
  */
 'use strict';
 
+import {
+  Account,
+  AccountConfig,
+  AccountDetails,
+  Contact,
+  Conversation,
+  Lookup,
+  LookupResolveValue,
+  Message,
+  PromiseExecutor,
+  RegistrationState,
+  VolatileDetails,
+} from 'jami-web-common';
 import { createRequire } from 'module';
 import path from 'path';
-
-import Account, { RegistrationState } from './model/Account';
-import AccountDetails, { AccountConfig, VolatileDetails } from './model/AccountDetails';
-import Contact from './model/Contact';
-import Conversation, { Message } from './model/Conversation';
-import { Lookup, LookupResolveValue, PromiseExecutor } from './model/util';
 
 const require = createRequire(import.meta.url);
 

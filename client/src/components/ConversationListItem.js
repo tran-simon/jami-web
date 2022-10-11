@@ -16,12 +16,12 @@
  * <https://www.gnu.org/licenses/>.
  */
 import { Box, ListItem, ListItemAvatar, ListItemText, Stack, Typography } from '@mui/material';
+import { Conversation } from 'jami-web-common';
 import { QRCodeCanvas } from 'qrcode.react';
 import { useState } from 'react';
 import Modal from 'react-modal';
 import { useNavigate, useParams } from 'react-router-dom';
 
-import Conversation from '../../../model/Conversation';
 import { setRefreshFromSlice } from '../../redux/appSlice';
 import { useAppDispatch } from '../../redux/hooks';
 import authManager from '../AuthManager';

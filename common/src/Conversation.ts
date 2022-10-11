@@ -17,8 +17,8 @@
  */
 import { Socket } from 'socket.io';
 
-import Contact from './Contact';
-import { PromiseExecutor, Session } from './util';
+import { Contact } from './Contact.js';
+import { PromiseExecutor, Session } from './util.js';
 
 export interface ConversationMember {
   contact: Contact;
@@ -38,7 +38,7 @@ type ConversationListeners = Record<
   }
 >;
 
-class Conversation {
+export class Conversation {
   private readonly id: string | undefined;
   private readonly accountId: string;
   private readonly members: ConversationMember[];
@@ -169,5 +169,3 @@ class Conversation {
     this._listeners = listeners;
   }
 }
-
-export default Conversation;

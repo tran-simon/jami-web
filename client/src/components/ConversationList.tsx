@@ -19,9 +19,9 @@ import { GroupRounded as GroupIcon } from '@mui/icons-material';
 import List from '@mui/material/List';
 import ListSubheader from '@mui/material/ListSubheader';
 import Typography from '@mui/material/Typography';
+import { Conversation } from 'jami-web-common';
 import { useEffect } from 'react';
 
-import Conversation from '../../../model/Conversation';
 import { useAppSelector } from '../../redux/hooks';
 import ConversationListItem from './ConversationListItem';
 

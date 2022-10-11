@@ -18,10 +18,10 @@
 import { AddRounded } from '@mui/icons-material';
 import { Avatar, Card, CardHeader, Container, List } from '@mui/material';
 import { motion } from 'framer-motion';
+import { Account } from 'jami-web-common';
 import { Fragment, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
 
-import Account from '../../../model/Account';
 import authManager from '../AuthManager';
 import ConversationAvatar from '../components/ConversationAvatar';
 import Header from '../components/Header';

@@ -16,11 +16,10 @@
  * <https://www.gnu.org/licenses/>.
  */
 import { Stack } from '@mui/material';
+import { Contact, Conversation } from 'jami-web-common';
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router';
 
-import Contact from '../../../model/Contact';
-import Conversation from '../../../model/Conversation';
 import { useAppSelector } from '../../redux/hooks';
 import authManager from '../AuthManager';
 //import Sound from 'react-sound';

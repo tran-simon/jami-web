@@ -19,7 +19,7 @@
 /* eslint-disable no-undef */
 // TODO: This hides eslint errors for this file. This should be removed once this file is cleaned up.
 
-import { PromiseExecutor } from '../../model/util';
+import { PromiseExecutor } from 'jami-web-common';
 
 interface AuthManagerState {
   initialized: boolean;

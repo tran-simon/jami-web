@@ -1,0 +1,25 @@
+{
+  "name": "jami-web-common",
+  "version": "1.0.0",
+  "license": "ISC",
+  "type": "module",
+  "main": "dist/index.js",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist/index.js"
+  ],
+  "scripts": {
+    "build": "tsc --build",
+    "clean": "rm -rf dist tsconfig.tsbuildinfo",
+    "lint": "eslint src",
+    "lint:fix": "npm run lint -- --fix",
+    "format": "prettier --write src",
+    "format:check": "prettier --check src"
+  },
+  "dependencies": {
+    "@types/express-session": "^1.17.5",
+    "@types/socket.io": "^3.0.2",
+    "typescript": "^4.8.4"
+  }
+}
