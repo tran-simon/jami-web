@@ -14,7 +14,7 @@
     "clean": "rm -rf dist client/dist common/dist",
     "clean-all": "npm run clean && rm -rf node_modules client/node_modules common/node_modules",
     "lint": "eslint \"**/*.{ts,tsx,js,jsx}\"",
-    "prepare": "husky install",
+    "prepare": "[ -e '.git' ] && git config core.hooksPath .hooks",
     "prettier": "prettier -c \"**/*.{ts,tsx,js,jsx,json}\"",
     "start": "rollup -cw",
     "start:prod": "NODE_ENV=production node dist/bundle.js"
@@ -66,7 +66,6 @@
     "eslint-plugin-header": "^3.1.1",
     "eslint-plugin-simple-import-sort": "^8.0.0",
     "eslint-plugin-unused-imports": "^2.0.0",
-    "husky": "^8.0.0",
     "lint-staged": "^13.0.3",
     "llnode": "^4.0.0",
     "prettier": "^2.7.1",
