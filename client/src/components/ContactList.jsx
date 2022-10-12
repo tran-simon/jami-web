@@ -21,8 +21,8 @@ import List from '@mui/material/List';
 import { useEffect, useState } from 'react';
 import Modal from 'react-modal';
 
-import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import authManager from '../AuthManager';
+import { useAppDispatch, useAppSelector } from '../redux/hooks';
 import ConversationAvatar from './ConversationAvatar';
 
 const customStyles = {

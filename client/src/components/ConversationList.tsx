@@ -22,7 +22,7 @@ import Typography from '@mui/material/Typography';
 import { Conversation } from 'jami-web-common';
 import { useEffect } from 'react';
 
-import { useAppSelector } from '../../redux/hooks';
+import { useAppSelector } from '../redux/hooks';
 import ConversationListItem from './ConversationListItem';
 
 type ConversationListProps = {

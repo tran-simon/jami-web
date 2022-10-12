@@ -29,7 +29,6 @@ import http from 'http';
 import { Account } from 'jami-web-common';
 import passport from 'passport';
 import { IVerifyOptions, Strategy as LocalStrategy } from 'passport-local';
-import path from 'path';
 import { Server, Socket } from 'socket.io';
 import { ExtendedError } from 'socket.io/dist/namespace';
 
@@ -120,21 +119,6 @@ const createServer = async (appConfig: AppConfig) => {
   const corsOptions = {
     origin: 'http://127.0.0.1:3000',
   };
-
-  if (nodeEnv === 'development') {
-    const webpack = await import('webpack');
-    const webpackDev = await import('webpack-dev-middleware');
-    const webpackHot = await import('webpack-hot-middleware');
-    const { default: webpackConfig } = await import('jami-web-client/webpack.config.js');
-
-    const compiler = webpack.default(webpackConfig);
-    app.use(
-      webpackDev.default(compiler, {
-        publicPath: webpackConfig.output?.publicPath,
-      })
-    );
-    app.use(webpackHot.default(compiler));
-  }
 
   /*
         Configuation for Passeport Js
@@ -326,17 +310,6 @@ const createServer = async (appConfig: AppConfig) => {
 
   app.use('/', indexRouter);
 
-  /* GET React App */
-
-  const cwd = process.cwd();
-  app.use(express.static(path.join(cwd, 'client/dist')));
-
-  app.use((req, res) => {
-    res.render(path.join(cwd, 'client/dist/index.ejs'), {
-      initdata: JSON.stringify(getState(req)),
-    });
-  });
-
   // @ts-ignore TODO: Fix the typescript error
   const server = http.Server(app);
 
@@ -391,5 +364,5 @@ const createServer = async (appConfig: AppConfig) => {
 loadConfig(configPath)
   .then(createServer)
   .then((server) => {
-    server.listen(3000);
+    server.listen(3001);
   });

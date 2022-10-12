@@ -3,8 +3,12 @@
   "compilerOptions": {
     /* Specify what JSX code is generated. */
     "jsx": "react-jsx",
+    /* Specify a set of bundled library declaration files that describe the target runtime environment. */
+    "lib": ["DOM", "DOM.Iterable", "ESNext"],
     /* Specify an output folder for all emitted files. */
-    "outDir": "./dist/"
+    "outDir": "dist",
+    /* Specify type package names to be included without being referenced in a source file. */
+    "types": ["@testing-library/jest-dom", "@types/jest", "node", "vite/client", "vite-plugin-svgr/client"]
   },
-  "include": ["src/"]
+  "include": ["src"]
 }

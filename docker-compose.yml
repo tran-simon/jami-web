@@ -6,15 +6,10 @@ services:
     build: .
     volumes:
       # Add bind mounts for hot-reload
-      - ./client:/web-client/client
-      - ./routes:/web-client/routes
-      - ./model:/web-client/model
-      # Ignore folders from the bind mounts
-      - /web-client/client/node_modules/
-      - /web-client/node_modules/
-      - /web-client/dist/
-      - /web-client/client/dist
+      - ./client/src:/web-client/client/src
+      - ./server/src:/web-client/server/src
     ports:
+      - "3001:3001"
       - "3000:3000"
       - "5000:5000"
     stdin_open: true

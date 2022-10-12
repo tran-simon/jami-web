@@ -18,11 +18,11 @@
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 
-import translationEn from '../public/locale/en/translation.json';
-import translationFr from '../public/locale/fr/translation.json';
+import translationEn from './locale/en/translation.json';
+import translationFr from './locale/fr/translation.json';
 
 i18n.use(initReactI18next).init({
-  debug: process.env.NODE_ENV == 'development',
+  debug: import.meta.env.DEV,
   lng: 'en',
   interpolation: {
     escapeValue: false,

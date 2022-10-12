@@ -19,9 +19,9 @@ import GroupAddRounded from '@mui/icons-material/GroupAddRounded';
 import { Box, Card, CardContent, Container, Fab, Typography } from '@mui/material';
 import { useNavigate, useParams } from 'react-router-dom';
 
-import { setRefreshFromSlice } from '../../redux/appSlice';
-import { useAppDispatch } from '../../redux/hooks';
 import authManager from '../AuthManager';
+import { setRefreshFromSlice } from '../redux/appSlice';
+import { useAppDispatch } from '../redux/hooks';
 
 type AddContactPageProps = {
   accountId: string;

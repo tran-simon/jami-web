@@ -19,7 +19,7 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { Account } from 'jami-web-common';
 
 // Define a type for the slice state
-interface appState {
+export interface appState {
   accountId: string;
   accountObject: Account | null;
   refresh: boolean;

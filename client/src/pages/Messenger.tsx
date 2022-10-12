@@ -20,7 +20,6 @@ import { Contact, Conversation } from 'jami-web-common';
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router';
 
-import { useAppSelector } from '../../redux/hooks';
 import authManager from '../AuthManager';
 //import Sound from 'react-sound';
 import ConversationList from '../components/ConversationList';
@@ -28,6 +27,7 @@ import ConversationView from '../components/ConversationView';
 import Header from '../components/Header';
 import LoadingPage from '../components/Loading';
 import NewContactForm from '../components/NewContactForm';
+import { useAppSelector } from '../redux/hooks';
 import AddContactPage from './AddContactPage';
 
 type MessengerProps = {

@@ -15,8 +15,6 @@
  * License along with this program.  If not, see
  * <https://www.gnu.org/licenses/>.
  */
-import { Session as ISession } from 'express-session';
-
 export interface PromiseExecutor<T> {
   resolve: (value: T) => void;
   reject: (reason?: any) => void;
@@ -31,9 +29,4 @@ export interface LookupResolveValue {
 export interface Lookup extends PromiseExecutor<LookupResolveValue> {
   name?: string;
   address?: string;
-}
-
-export interface Session extends ISession {
-  socketId: string;
-  conversation: any;
 }

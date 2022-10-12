@@ -19,8 +19,11 @@ COPY server/package*.json server/
 
 RUN npm ci --ignore-scripts
 
-COPY . .
+# Build common library
+COPY common common
+COPY tsconfig.json ./
+RUN npm run build --workspace common
 
-RUN npm run build
+COPY . .
 
 CMD ["npm", "start"]

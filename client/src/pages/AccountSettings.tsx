@@ -20,11 +20,11 @@ import { Account } from 'jami-web-common';
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router';
 
-import { setAccountId, setAccountObject } from '../../redux/appSlice';
-import { useAppDispatch } from '../../redux/hooks';
 import authManager from '../AuthManager';
 import AccountPreferences from '../components/AccountPreferences';
 import Header from '../components/Header';
+import { setAccountId, setAccountObject } from '../redux/appSlice';
+import { useAppDispatch } from '../redux/hooks';
 
 type AccountSettingsProps = {
   accountId?: string;

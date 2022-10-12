@@ -19,8 +19,6 @@ import { Button, Container } from '@mui/material';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useState } from 'react';
 
-import JamiLogo from '../../public/jami-logo-icon.svg';
-
 const list = {
   hidden: { opacity: 0 },
   visible: {
@@ -57,7 +55,14 @@ export default function WelcomeAnimation(props) {
             }}
           >
             <motion.div variants={item}>
-              <JamiLogo size="32px" />
+              <img
+                src="/jami-logo-icon.svg"
+                style={{
+                  width: '32',
+                  height: '32',
+                }}
+                alt="jami n/logo"
+              />
             </motion.div>
             <motion.h1 variants={item}>Welcome to Jami</motion.h1>
             {props.showSetup && (

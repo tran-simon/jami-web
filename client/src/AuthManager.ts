@@ -61,14 +61,6 @@ class AuthManager {
 
     this.tasks = [];
     this.onAuthChanged = undefined;
-
-    // @ts-ignore
-    if (initData) {
-      console.log('Using static initData');
-      // @ts-ignore
-      this.setInitData(initData);
-      return;
-    }
   }
 
   isAuthenticated() {

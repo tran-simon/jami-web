@@ -15,8 +15,26 @@
  * License along with this program.  If not, see
  * <https://www.gnu.org/licenses/>.
  */
-import { Configuration } from 'webpack';
+import react from '@vitejs/plugin-react';
+import { defineConfig } from 'vite';
+import svgrPlugin from 'vite-plugin-svgr';
 
-declare const config: Configuration;
-
-export default config;
+export default defineConfig({
+  server: {
+    host: '0.0.0.0',
+    port: 3000,
+    proxy: {
+      '^/(api)|(auth)|(setup)': {
+        target: 'http://localhost:3001',
+        secure: false,
+      },
+    },
+  },
+  preview: {
+    port: 8080,
+  },
+  define: {
+    global: {},
+  },
+  plugins: [react(), svgrPlugin()],
+});

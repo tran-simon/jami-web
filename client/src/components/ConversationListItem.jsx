@@ -22,9 +22,9 @@ import { useState } from 'react';
 import Modal from 'react-modal';
 import { useNavigate, useParams } from 'react-router-dom';
 
-import { setRefreshFromSlice } from '../../redux/appSlice';
-import { useAppDispatch } from '../../redux/hooks';
 import authManager from '../AuthManager';
+import { setRefreshFromSlice } from '../redux/appSlice';
+import { useAppDispatch } from '../redux/hooks';
 import ConversationAvatar from './ConversationAvatar';
 import { RemoveContactIcon, VideoCallIcon } from './SvgIcon.tsx';
 import { AudioCallIcon, BlockContactIcon, ContactDetailsIcon, CrossIcon, MessageIcon } from './SvgIcon.tsx';

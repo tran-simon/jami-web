@@ -15,10 +15,8 @@
  * License along with this program.  If not, see
  * <https://www.gnu.org/licenses/>.
  */
-import { Socket } from 'socket.io';
-
 import { Contact } from './Contact.js';
-import { PromiseExecutor, Session } from './util.js';
+import { PromiseExecutor } from './util.js';
 
 export interface ConversationMember {
   contact: Contact;
@@ -33,8 +31,8 @@ type ConversationRequest = PromiseExecutor<Message[]>;
 type ConversationListeners = Record<
   string,
   {
-    socket: Socket;
-    session: Session;
+    socket: any; // TODO: Improve typing
+    session: any;
   }
 >;
 

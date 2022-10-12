@@ -7,8 +7,8 @@
   "type": "module",
   "main": "app.ts",
   "scripts": {
-    "start": "concurrently \"npm run start-old-server\" \"npm start --workspace server\"",
-    "start:prod": "concurrently \"npm run start-old-server:prod\" \"npm run start:prod --workspace server\"",
+    "start": "concurrently \"npm run start-old-server\" \"npm start --workspace server\" \"npm start --workspace client\"",
+    "start:prod": "concurrently \"npm run start-old-server:prod\" \"npm run start:prod --workspace server\" \"npm run start:prod --workspace client\"",
     "start-old-server": "rollup -cw",
     "start-old-server:prod": "env NODE_ENV=production node dist/bundle.js",
     "build": "npm run build --workspaces; npm run build-old-server",
@@ -26,8 +26,11 @@
     "prepare": "([ -e '.git' ] && git config core.hooksPath .hooks); npm run build --workspace common"
   },
   "lint-staged": {
-    "**/*.{ts,tsx,js,jsx,cjs}": [
+    "**/*.{ts,tsx,js,jsx,cjs,html}": [
       "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md}": [
       "prettier --write"
     ]
   },
@@ -69,6 +72,7 @@
     "eslint": "^8.23.1",
     "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-header": "^3.1.1",
+    "eslint-plugin-html": "^7.1.0",
     "eslint-plugin-simple-import-sort": "^8.0.0",
     "eslint-plugin-unused-imports": "^2.0.0",
     "lint-staged": "^13.0.3",

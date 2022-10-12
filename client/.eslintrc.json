@@ -4,11 +4,7 @@
       "version": "detect"
     }
   },
-  "extends": [
-    "plugin:react/recommended",
-    "plugin:react-hooks/recommended",
-    "../.eslintrc.cjs"
-  ],
+  "extends": ["plugin:react/recommended", "plugin:react-hooks/recommended", "../.eslintrc.cjs"],
   "rules": {
     "react-hooks/exhaustive-deps": "error",
     "react/display-name": "off",

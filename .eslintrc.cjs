@@ -71,7 +71,7 @@ module.exports = {
     ecmaVersion: 'latest',
     sourceType: 'module',
   },
-  plugins: ['@typescript-eslint', 'header', 'simple-import-sort', 'unused-imports'],
+  plugins: ['@typescript-eslint', 'header', 'html', 'simple-import-sort', 'unused-imports'],
   rules: {
     '@typescript-eslint/ban-ts-comment': 'off',
     '@typescript-eslint/no-empty-function': 'off',

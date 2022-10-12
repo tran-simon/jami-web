@@ -8,9 +8,10 @@ Next step will be to implement a video protocol such as WebRTC to allow audio an
 
 # Main dependencies
 
-* Jami Daemon with NodeJS bindings (https://review.jami.net/admin/repos/jami-daemon),
-* NodeJS v16+
-+ Swig 4.1.0
+- Jami Daemon with NodeJS bindings (https://review.jami.net/admin/repos/jami-daemon),
+- NodeJS v16+
+
+* Swig 4.1.0
 
 # How to start the server
 
@@ -21,6 +22,33 @@ Where $PATH_TO_JAMI_PROJECT is the path to the shared library of your Jami daemo
 LD_LIBRARY_PATH=$PATH_TO_JAMI_PROJECT/ring-project/install/daemon/lib node
 
 To build the dring.node Javascript interface to talk to the daemon api go to the daemon repo and use ./configure --with-nodejs then execute make -j4 to build the daemon
+
+Then, start the servers:
+
+```bash
+# Install the package dependencies
+npm install
+
+# Start the client and backend servers
+npm start
+```
+
+You may also start the servers individually:
+
+```bash
+npm start --workspace client
+npm start --workspace server
+```
+
+# How to build for production
+
+```bash
+# Build the client app and the server. The resulting files are available in `client/dist` and `server/dist` respectively
+npm run build
+
+# Preview the production build locally
+npm run start:prod
+```
 
 # Docker
 
@@ -39,13 +67,16 @@ cd ..
 ```bash
 docker build --tag jami-web .
 docker run -it \
+  -p 3001:3001 \
   -p 3000:3000 \
   -p 5000:5000 \
-  --volume $(pwd)/client:/web-client/client \
+  --volume $(pwd)/client/src:/web-client/client/src \
+  --volume $(pwd)/server/src:/web-client/server/src \
   jami-web
 ```
 
 ## Using [docker-compose](docker run -p 3000:3000 -it jami-project)
+
 This will use a [Docker Volume](https://docs.docker.com/storage/volumes/) to enable auto-refresh when you change a file.
 
 ```bash
@@ -63,10 +94,10 @@ docker-compose up
 
 - uncomment the line `// import config from "../sentry-client.config.json"` and the init config`Sentry.init(...` in `./client/index.js`
 
-- uncomment the lines `// import { sentrySetUp } from './sentry.js'` and `sentrySetUp(app)` in `./app.ts`  
+- uncomment the lines `// import { sentrySetUp } from './sentry.js'` and `sentrySetUp(app)` in `./app.ts`
 
 - add `sentry-client.config.json` file in `client` and `sentry-server.config.json` (ask them to an admin) in your project root
 
 # Tests
 
- - Cypress: run the following script `sh ./cypress-test.sh`
+- Cypress: run the following script `sh ./cypress-test.sh`
