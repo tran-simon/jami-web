@@ -66,6 +66,7 @@ export class Conversation {
       })
     );
     conversation.messages = object.messages;
+    conversation.infos = object.infos;
     return conversation;
   }
   static fromSingleContact(accountId: string, contact: Contact) {
@@ -109,6 +110,7 @@ export class Conversation {
           };
         })
       ),
+      infos: this._infos,
     };
   }
 
@@ -145,6 +147,10 @@ export class Conversation {
 
   getMessages() {
     return this.messages;
+  }
+
+  get infos() {
+    return this._infos;
   }
 
   set infos(infos: ConversationInfos) {

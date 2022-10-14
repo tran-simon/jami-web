@@ -20,7 +20,7 @@ import { styled } from '@mui/material/styles';
 import dayjs from 'dayjs';
 import isToday from 'dayjs/plugin/isToday';
 import isYesterday from 'dayjs/plugin/isYesterday';
-import React, { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { EmojiButton, MoreButton, ReplyMessageButton } from './Button.tsx';
@@ -143,10 +143,19 @@ export const MessageTime = ({ time, hasDateOnTop }) => {
 };
 
 export const MessageBubblesGroup = (props) => {
-  const isUser = false; // should access user from the store
+  const isUser = props.messages[0]?.author === props.account.getUri();
   const position = isUser ? 'end' : 'start';
   const bubbleColor = isUser ? '#005699' : '#E5E5E5';
   const textColor = isUser ? 'white' : 'black';
+
+  let authorName;
+  if (isUser) {
+    authorName = props.account.getDisplayName();
+  } else {
+    const member = props.members.find((member) => props.messages[0]?.author === member.contact.getUri());
+    const contact = member.contact;
+    authorName = contact.getDisplayName();
+  }
 
   return (
     <Stack // Row for a group of message bubbles with the user's infos
@@ -156,13 +165,13 @@ export const MessageBubblesGroup = (props) => {
       spacing="10px"
     >
       {!isUser && (
-        <ConversationAvatar displayName="TempDisplayName" sx={{ width: '22px', height: '22px', fontSize: '15px' }} />
+        <ConversationAvatar displayName={authorName} sx={{ width: '22px', height: '22px', fontSize: '15px' }} />
       )}
       <Stack // Container to align the bubbles to the same side of a row
         width="66.66%"
         alignItems={position}
       >
-        <ParticipantName name={props.messages[0]?.author} position={position} />
+        <ParticipantName name={authorName} position={position} />
         <Stack // Container for a group of message bubbles
           spacing="6px"
           alignItems={position}

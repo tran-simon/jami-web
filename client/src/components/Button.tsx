@@ -19,12 +19,13 @@ import { QuestionMark } from '@mui/icons-material';
 import { Box, ClickAwayListener, IconButton, IconButtonProps, Popper, SvgIconProps } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import EmojiPicker, { IEmojiData } from 'emoji-picker-react';
-import React, { ComponentType, MouseEvent, useCallback, useState } from 'react';
+import { ComponentType, MouseEvent, useCallback, useState } from 'react';
 
 import {
   Arrow2Icon,
   Arrow3Icon,
   ArrowIcon,
+  AudioCallIcon,
   CallEndIcon,
   CameraIcon,
   CameraInBubbleIcon,
@@ -39,13 +40,16 @@ import {
   FullscreenIcon,
   GroupAddIcon,
   InfoIcon,
+  ListIcon,
   MicroIcon,
   MicroInBubbleIcon,
   PaperClipIcon,
   PenIcon,
+  PeopleWithPlusSignIcon,
   RecordingIcon,
   SaltireIcon,
   ScreenShareIcon,
+  VideoCallIcon,
   VideoCameraIcon,
   VolumeIcon,
 } from './SvgIcon';
@@ -284,12 +288,28 @@ const SquareButton = styled(({ Icon, ...props }: ShapedButtonProps) => (
   },
 }));
 
+export const AddParticipantButton = (props: IconButtonProps) => {
+  return <SquareButton {...props} aria-label="add participant" Icon={PeopleWithPlusSignIcon} />;
+};
+
 export const RecordVideoMessageButton = (props: IconButtonProps) => {
   return <SquareButton {...props} aria-label="record video message" Icon={CameraInBubbleIcon} />;
 };
 
 export const RecordVoiceMessageButton = (props: IconButtonProps) => {
   return <SquareButton {...props} aria-label="record voice message" Icon={MicroInBubbleIcon} />;
+};
+
+export const ShowOptionsMenuButton = (props: IconButtonProps) => {
+  return <SquareButton {...props} aria-label="show options menu" Icon={ListIcon} />;
+};
+
+export const StartVideoCallButton = (props: IconButtonProps) => {
+  return <SquareButton {...props} aria-label="start audio call" Icon={AudioCallIcon} />;
+};
+
+export const StartAudioCallButton = (props: IconButtonProps) => {
+  return <SquareButton {...props} aria-label="start video call" Icon={VideoCallIcon} />;
 };
 
 export const UploadFileButton = (props: IconButtonProps) => {
@@ -356,7 +376,12 @@ export const SelectEmojiButton = ({ onEmojiSelected, ...props }: SelectEmojiButt
   return (
     <ClickAwayListener onClickAway={handleClose}>
       <Box>
-        <SquareButton aria-describedby={id} aria-label="select emoji" Icon={EmojiIcon} onClick={(e) => {}} />
+        <SquareButton
+          aria-describedby={id}
+          aria-label="select emoji"
+          Icon={EmojiIcon}
+          onClick={handleOpenEmojiPicker}
+        />
         <Popper id={id} open={open} anchorEl={anchorEl}>
           <EmojiPicker onEmojiClick={onEmojiClick} disableAutoFocus={true} disableSkinTonePicker={true} native />
         </Popper>

@@ -35,10 +35,13 @@ dayjs.extend(dayOfYear);
 dayjs.extend(isBetween);
 
 export default function MessageList(props) {
-  const messagesComponents = useMemo(() => buildMessagesList(props.messages), [props.messages]);
+  const messagesComponents = useMemo(
+    () => buildMessagesList(props.account, props.members, props.messages),
+    [props.account, props.members, props.messages]
+  );
 
   return (
-    <Stack marginLeft="16px" marginRight="16px" direction="column-reverse">
+    <Stack direction="column-reverse">
       {messagesComponents?.map(({ Component, id, props }) => (
         <Component key={id} {...props} />
       ))}
@@ -46,7 +49,7 @@ export default function MessageList(props) {
   );
 }
 
-const buildMessagesList = (messages) => {
+const buildMessagesList = (account, members, messages) => {
   if (messages.length == 0) {
     return null;
   }
@@ -63,7 +66,7 @@ const buildMessagesList = (messages) => {
     components.push({
       id: `group-${messageBubblesGroup[0].id}`,
       Component: MessageBubblesGroup,
-      props: { messages: messageBubblesGroup },
+      props: { account, members, messages: messageBubblesGroup },
     });
     messageBubblesGroup = [];
   };
