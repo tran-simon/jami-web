@@ -1,5 +1,5 @@
 {
-  "name": "jami-web-server",
+  "name": "jami-web",
   "version": "1.0.0",
   "description": "Jaas Web API that handles client requests to Jami daemon",
   "license": "ISC",
@@ -7,17 +7,23 @@
   "type": "module",
   "main": "app.ts",
   "scripts": {
-    "build": "npm run build:common && npm run build:client",
-    "build:prod": "export NODE_ENV=production && rollup -c && npm run build",
-    "build:client": "cd client && npm run build",
-    "build:common": "cd common && npm run build",
-    "clean": "rm -rf dist client/dist common/dist",
-    "clean-all": "npm run clean && rm -rf node_modules client/node_modules common/node_modules",
-    "lint": "eslint \"**/*.{ts,tsx,js,jsx}\"",
-    "prepare": "[ -e '.git' ] && git config core.hooksPath .hooks",
-    "prettier": "prettier -c \"**/*.{ts,tsx,js,jsx,json}\"",
-    "start": "rollup -cw",
-    "start:prod": "NODE_ENV=production node dist/bundle.js"
+    "start": "concurrently \"npm run start-old-server\" \"npm start --workspace server\"",
+    "start:prod": "concurrently \"npm run start-old-server:prod\" \"npm run start:prod --workspace server\"",
+    "start-old-server": "rollup -cw",
+    "start-old-server:prod": "env NODE_ENV=production node dist/bundle.js",
+    "build": "npm run build --workspaces; npm run build-old-server",
+    "build-old-server": "rollup -c",
+    "clean": "rm -rf dist && npm run clean --workspaces",
+    "clean:all": "npm run clean && find . -name 'node_modules' -type d -prune -exec rm -rf '{}' +",
+    "lint": "npm run lint-old-server; npm run lint --workspaces",
+    "lint:fix": "npm run lint-old-server:fix; npm run lint:fix --workspaces",
+    "lint-old-server": "eslint app.ts JamiDaemon.ts routes/",
+    "lint-old-server:fix": "npm run lint-old-server -- --fix",
+    "format": "npm run format-old-server; npm run format --workspaces",
+    "format:check": "npm run format-old-server:check; npm run format:check --workspaces",
+    "format-old-server": "prettier -w app.ts JamiDaemon.ts routes/",
+    "format-old-server:check": "prettier -c app.ts JamiDaemon.ts routes/",
+    "prepare": "([ -e '.git' ] && git config core.hooksPath .hooks); npm run build --workspace common"
   },
   "lint-staged": {
     "**/*.{ts,tsx,js,jsx,cjs}": [
@@ -38,8 +44,6 @@
     "env": "0.0.2",
     "express": "^4.18.1",
     "express-session": "^1.17.3",
-    "jami-web-client": "file:client",
-    "jami-web-common": "file:common",
     "passport": "^0.6.0",
     "passport-local": "^1.0.0",
     "passport-session": "^1.0.2",
@@ -60,6 +64,7 @@
     "@types/webpack-hot-middleware": "^2.25.6",
     "@typescript-eslint/eslint-plugin": "^5.37.0",
     "@typescript-eslint/parser": "^5.37.0",
+    "concurrently": "^7.4.0",
     "cypress": "^10.8.0",
     "eslint": "^8.23.1",
     "eslint-config-prettier": "^8.5.0",
@@ -75,5 +80,10 @@
     "typescript": "^4.8.3",
     "webpack-dev-middleware": "^5.3.3",
     "webpack-hot-middleware": "^2.25.2"
-  }
+  },
+  "workspaces": [
+    "common",
+    "client",
+    "server"
+  ]
 }

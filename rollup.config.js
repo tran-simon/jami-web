@@ -19,7 +19,7 @@ import commonjs from '@rollup/plugin-commonjs';
 import run from '@rollup/plugin-run';
 import typescript from '@rollup/plugin-typescript';
 
-const dev = process.env.NODE_ENV !== 'production';
+const dev = !!process.env.ROLLUP_WATCH;
 
 export default (async () => ({
   input: 'app.ts',
