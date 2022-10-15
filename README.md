@@ -40,6 +40,7 @@ cd ..
 docker build --tag jami-web .
 docker run -it \
   -p 3000:3000 \
+  -p 5000:5000 \
   --volume $(pwd)/client:/web-client/client \
   jami-web
 ```

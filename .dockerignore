@@ -1,14 +1,13 @@
-.git/
+**/.git/
 
-.idea/
-.vscode/
+**/.idea/
+**/.vscode/
 
-node_modules/
-dist/
+**/node_modules/
+**/dist/
+**/.env*
+**/tsconfig.tsbuildinfo
+
 daemon/
-.env*
 dring.node
 jamid.node
-
-client/dist/
-client/node_modules/
