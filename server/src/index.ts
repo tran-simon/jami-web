@@ -22,31 +22,48 @@ import { createServer } from 'node:http';
 import log from 'loglevel';
 import { Container } from 'typedi';
 
-import { Router } from './router.js';
+import { App } from './app.js';
 import { Ws } from './ws.js';
 
 log.setLevel(process.env.NODE_ENV === 'production' ? 'error' : 'trace');
 
-const app = await Container.get(Router).build();
+const port: string | number = 5000;
+
+const app = await Container.get(App).build();
 const wss = await Container.get(Ws).build();
 
-// Disable HTTP 1.1 Keep-Alive
-const server = createServer((_, res) => res.setHeader('Connection', 'close'));
+const server = createServer();
+
 server.on('request', app);
 server.on('upgrade', wss);
-server.listen({
-  host: '0.0.0.0',
-  port: 5000,
-  exclusive: true,
-});
 
-log.debug('Server started (HTTP + WS)');
+server.listen(port);
+server.on('error', onError);
+server.on('listening', onListening);
 
-const closeFn: NodeJS.SignalsListener = (signal) => {
-  log.info(signal);
-  server.close();
-  log.info('server closed');
-};
-process.once('SIGTERM', closeFn);
-process.once('SIGHUP', closeFn);
-process.once('SIGINT', closeFn);
+function onError(error: NodeJS.ErrnoException) {
+  if (error.syscall !== 'listen') {
+    throw error;
+  }
+
+  const bind = typeof port === 'string' ? `Pipe ${port}` : `Port ${port}`;
+
+  switch (error.code) {
+    case 'EACCESS':
+      log.error(bind + ' requires elevated privileges');
+      process.exit(1);
+      break;
+    case 'EADDRINUSE':
+      log.error(bind + ' is already in use');
+      process.exit(1);
+      break;
+    default:
+      throw error;
+  }
+}
+
+function onListening() {
+  const address = server.address();
+  const bind = typeof address === 'string' ? `pipe ${address}` : `port ${address?.port}`;
+  log.debug('Listening on ' + bind);
+}

@@ -15,20 +15,16 @@
  * License along with this program.  If not, see
  * <https://www.gnu.org/licenses/>.
  */
-import express, { json, Router as ERouter } from 'express';
+import { Router } from 'express';
 import asyncHandler from 'express-async-handler';
 import { Service } from 'typedi';
 
-import { StatusCode } from './constants.js';
+import { StatusCode } from '../constants.js';
 
 @Service()
-class Router {
+class AuthRouter {
   async build() {
-    const router = ERouter();
-
-    router.use(json());
-
-    await Promise.resolve(42);
+    const router = Router();
 
     router.post(
       '/new-account',
@@ -46,10 +42,8 @@ class Router {
       })
     );
 
-    const app = express();
-    app.use('/', router);
-    return app;
+    return router;
   }
 }
 
-export { Router };
+export { AuthRouter };
