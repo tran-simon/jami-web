@@ -15,7 +15,6 @@
  * License along with this program.  If not, see
  * <https://www.gnu.org/licenses/>.
  */
-
 export enum StatusCode {
   OK = 200,
   CREATED = 201,

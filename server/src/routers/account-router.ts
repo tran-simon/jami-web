@@ -15,24 +15,23 @@
  * License along with this program.  If not, see
  * <https://www.gnu.org/licenses/>.
  */
-import { readFile } from 'node:fs/promises';
+import { Router } from 'express';
+import log from 'loglevel';
+import { Container } from 'typedi';
 
-import { importPKCS8, importSPKI, KeyLike } from 'jose';
-import { Service } from 'typedi';
+import { Jamid } from '../jamid.js';
+import { authenticateToken } from '../middleware/auth.js';
 
-@Service()
-export class Vault {
-  privateKey!: KeyLike;
-  publicKey!: KeyLike;
+const jamid = Container.get(Jamid);
 
-  // TODO: Convert to environment variables and check if defined
-  async build() {
-    const privateKeyBuffer = await readFile('privkey.pem');
-    this.privateKey = await importPKCS8(privateKeyBuffer.toString(), 'EdDSA');
+export const accountRouter = Router();
 
-    const publicKeyBuffer = await readFile('pubkey.pem');
-    this.publicKey = await importSPKI(publicKeyBuffer.toString(), 'EdDSA');
+accountRouter.get('/', authenticateToken, (req, res) => {
+  log.debug('TODO: Implement jamid.getAccount()');
+  res.send(`TODO: ${req.method} ${req.originalUrl} for account ID ${res.locals.accountId}`);
+});
 
-    return this;
-  }
-}
+accountRouter.post('/', authenticateToken, (req, res) => {
+  log.debug('TODO: Implement jamid.getAccount().updateDetails()');
+  res.send(`TODO: ${req.method} ${req.originalUrl} for account ID ${res.locals.accountId}`);
+});

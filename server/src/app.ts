@@ -15,23 +15,24 @@
  * License along with this program.  If not, see
  * <https://www.gnu.org/licenses/>.
  */
-import express, { NextFunction, Request, Response } from 'express';
+import express, { json, NextFunction, Request, Response } from 'express';
 import log from 'loglevel';
 import { Service } from 'typedi';
 
 import { StatusCode } from './constants.js';
-import { AuthRouter } from './routers/auth-router.js';
+import { accountRouter } from './routers/account-router.js';
+import { authRouter } from './routers/auth-router.js';
 
 @Service()
 export class App {
-  constructor(private authRouter: AuthRouter) {}
-
   async build() {
     const app = express();
 
+    app.use(json());
+
     // Setup routing
-    const authRouter = await this.authRouter.build();
     app.use('/auth', authRouter);
+    app.use('/account', accountRouter);
 
     // Setup 404 error handling
     app.use((_req, res) => {

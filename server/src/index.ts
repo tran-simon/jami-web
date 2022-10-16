@@ -24,6 +24,7 @@ import { Container } from 'typedi';
 
 import { App } from './app.js';
 import { Creds } from './creds.js';
+import { Vault } from './vault.js';
 import { Ws } from './ws.js';
 
 log.setLevel(process.env.NODE_ENV === 'production' ? 'error' : 'trace');
@@ -31,6 +32,7 @@ log.setLevel(process.env.NODE_ENV === 'production' ? 'error' : 'trace');
 const port: string | number = 5000;
 
 await Container.get(Creds).build();
+await Container.get(Vault).build();
 const app = await Container.get(App).build();
 const wss = await Container.get(Ws).build();
 

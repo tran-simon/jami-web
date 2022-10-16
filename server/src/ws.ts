@@ -40,19 +40,17 @@ export class Ws {
       });
     });
 
-    const pubKey = await this.vault.pubKey();
-
     return (request: IncomingMessage, socket: Duplex, head: Buffer) => {
       // Do not use parseURL because it returns a URLRecord and not a URL.
       const url = new URL(request.url ?? '/', 'http://localhost/');
       const accessToken = url.searchParams.get('accessToken');
       if (!accessToken) {
-        socket.write('HTTP/1.1 400 Bad Request\r\n\r\n');
+        socket.write('HTTP/1.1 401 Unauthorized\r\n\r\n');
         socket.destroy();
         return;
       }
 
-      jwtVerify(accessToken, pubKey, {
+      jwtVerify(accessToken, this.vault.publicKey, {
         issuer: 'urn:example:issuer',
         audience: 'urn:example:audience',
       })

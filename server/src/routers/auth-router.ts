@@ -21,7 +21,7 @@ import asyncHandler from 'express-async-handler';
 import { ParamsDictionary, Request } from 'express-serve-static-core';
 import { SignJWT } from 'jose';
 import log from 'loglevel';
-import { Service } from 'typedi';
+import { Container } from 'typedi';
 
 import { StatusCode } from '../constants.js';
 import { Creds } from '../creds.js';
@@ -33,101 +33,93 @@ interface Credentials {
   password?: string;
 }
 
-@Service()
-export class AuthRouter {
-  constructor(private readonly jamid: Jamid, private readonly creds: Creds, private readonly vault: Vault) {}
+const jamid = Container.get(Jamid);
+const creds = Container.get(Creds);
+const vault = Container.get(Vault);
 
-  async build() {
-    const router = Router();
+export const authRouter = Router();
 
-    const privKey = await this.vault.privKey();
+authRouter.post(
+  '/new-account',
+  asyncHandler(async (req: Request<ParamsDictionary, any, Credentials>, res, _next) => {
+    const { username, password } = req.body;
+    if (!username || !password) {
+      res.status(StatusCode.BAD_REQUEST).send('Missing username or password');
+      return;
+    }
 
-    router.post(
-      '/new-account',
-      asyncHandler(async (req: Request<ParamsDictionary, any, Credentials>, res, _next) => {
-        const { username, password } = req.body;
-        if (!username || !password) {
-          res.status(StatusCode.BAD_REQUEST).send('Missing username or password');
-          return;
-        }
+    const hashedPassword = await argon2.hash(password, { type: argon2.argon2id });
 
-        const hashedPassword = await argon2.hash(password, { type: argon2.argon2id });
+    // TODO: add JAMS support
+    // managerUri: 'https://jams.savoirfairelinux.com',
+    // managerUsername: data.username,
+    // TODO: find a way to store the password directly in Jami
+    // Maybe by using the "password" field? But as I tested, it's not
+    // returned when getting user infos.
+    const { accountId } = await jamid.createAccount(new Map());
 
-        // TODO: add JAMS support
-        // managerUri: 'https://jams.savoirfairelinux.com',
-        // managerUsername: data.username,
-        // TODO: find a way to store the password directly in Jami
-        // Maybe by using the "password" field? But as I tested, it's not
-        // returned when getting user infos.
-        const { accountId } = await this.jamid.createAccount(new Map());
+    // TODO: understand why the password arg in this call must be empty
+    const { state } = await jamid.registerUsername(accountId, username, '');
+    if (state !== 0) {
+      jamid.destroyAccount(accountId);
+      if (state === 2) {
+        res.status(StatusCode.BAD_REQUEST).send('Invalid username or password');
+      } else if (state === 3) {
+        res.status(StatusCode.CONFLICT).send('Username already exists');
+      } else {
+        throw new Error(`Unhandled state ${state}`);
+      }
+      return;
+    }
 
-        // TODO: understand why the password arg in this call must be empty
-        const { state } = await this.jamid.registerUsername(accountId, username, '');
-        if (state !== 0) {
-          this.jamid.destroyAccount(accountId);
-          if (state === 2) {
-            res.status(StatusCode.BAD_REQUEST).send('Invalid username or password');
-          } else if (state === 3) {
-            res.status(StatusCode.CONFLICT).send('Username already exists');
-          } else {
-            log.error(`POST - Unhandled state ${state}`);
-            res.sendStatus(StatusCode.INTERNAL_SERVER_ERROR);
-          }
-          return;
-        }
+    creds.set(username, hashedPassword);
+    await creds.save();
 
-        this.creds.set(username, hashedPassword);
-        await this.creds.save();
+    res.sendStatus(StatusCode.CREATED);
+  })
+);
 
-        res.sendStatus(StatusCode.CREATED);
-      })
-    );
+authRouter.post(
+  '/login',
+  asyncHandler(async (req: Request<ParamsDictionary, any, Credentials>, res, _next) => {
+    const { username, password } = req.body;
+    if (!username || !password) {
+      res.status(StatusCode.BAD_REQUEST).send('Missing username or password');
+      return;
+    }
 
-    router.post(
-      '/login',
-      asyncHandler(async (req: Request<ParamsDictionary, any, Credentials>, res, _next) => {
-        const { username, password } = req.body;
-        if (!username || !password) {
-          res.status(StatusCode.BAD_REQUEST).send('Missing username or password');
-          return;
-        }
+    // The account may either be:
+    // 1. not found
+    // 2. found but not on this instance (but I'm not sure about this)
+    const accountId = jamid.usernameToAccountId(username);
+    if (accountId === undefined) {
+      res.status(StatusCode.NOT_FOUND).send('Username not found');
+      return;
+    }
 
-        // The account may either be:
-        // 1. not be found
-        // 2. found but not on this instance (but I'm not sure about this)
-        const accountId = this.jamid.usernameToAccountId(username);
-        if (accountId === undefined) {
-          res.status(StatusCode.NOT_FOUND).send('Username not found');
-          return;
-        }
+    // TODO: load the password from Jami
+    const hashedPassword = creds.get(username);
+    if (!hashedPassword) {
+      res.status(StatusCode.NOT_FOUND).send('Password not found');
+      return;
+    }
 
-        // TODO: load the password from Jami
-        const hashedPassword = this.creds.get(username);
-        if (!hashedPassword) {
-          res.status(StatusCode.NOT_FOUND).send('Password not found');
-          return;
-        }
+    log.debug(jamid.getAccountDetails(accountId));
 
-        log.debug(this.jamid.getAccountDetails(accountId));
+    const isPasswordVerified = await argon2.verify(hashedPassword, password);
+    if (!isPasswordVerified) {
+      res.sendStatus(StatusCode.UNAUTHORIZED);
+      return;
+    }
 
-        const isPasswordVerified = await argon2.verify(hashedPassword, password);
-        if (!isPasswordVerified) {
-          res.sendStatus(StatusCode.UNAUTHORIZED);
-          return;
-        }
-
-        const jwt = await new SignJWT({ id: accountId })
-          .setProtectedHeader({ alg: 'EdDSA' })
-          .setIssuedAt()
-          // TODO: use valid issuer and andiance
-          .setIssuer('urn:example:issuer')
-          .setAudience('urn:example:audience')
-          .setExpirationTime('2h')
-          .sign(privKey);
-        res.json({ accessToken: jwt });
-      })
-    );
-
-    return router;
-  }
-}
+    const jwt = await new SignJWT({ id: accountId })
+      .setProtectedHeader({ alg: 'EdDSA' })
+      .setIssuedAt()
+      // TODO: use valid issuer and audience
+      .setIssuer('urn:example:issuer')
+      .setAudience('urn:example:audience')
+      .setExpirationTime('2h')
+      .sign(vault.privateKey);
+    res.json({ accessToken: jwt });
+  })
+);
