@@ -15,8 +15,20 @@
  * License along with this program.  If not, see
  * <https://www.gnu.org/licenses/>.
  */
-import { ReactNode } from 'react';
-
-export type WithChildren = {
-  children: ReactNode;
-};
+export enum StatusCode {
+  Ok = 200,
+  Created = 201,
+  Accepted = 202,
+  NoContent = 204,
+  BadRequest = 400,
+  Unauthorized = 401,
+  Forbidden = 403,
+  NotFound = 404,
+  NotAcceptable = 406,
+  Conflict = 409,
+  Gone = 410,
+  ImATeapot = 418,
+  TooManyRequests = 429,
+  InternalServerError = 500,
+  NotImplemented = 501,
+}

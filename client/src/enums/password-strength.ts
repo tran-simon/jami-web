@@ -15,8 +15,9 @@
  * License along with this program.  If not, see
  * <https://www.gnu.org/licenses/>.
  */
-import { ReactNode } from 'react';
-
-export type WithChildren = {
-  children: ReactNode;
-};
+export enum PasswordStrength {
+  TooWeak,
+  Weak,
+  Medium,
+  Strong,
+}

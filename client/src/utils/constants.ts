@@ -15,8 +15,8 @@
  * License along with this program.  If not, see
  * <https://www.gnu.org/licenses/>.
  */
-import { ReactNode } from 'react';
+export const jamiUsernamePattern = '^[a-zA-Z0-9-_]{3,32}$';
 
-export type WithChildren = {
-  children: ReactNode;
-};
+export const inputWidth = 260;
+
+export const jamiLogoDefaultSize = '512px';
