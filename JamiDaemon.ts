@@ -86,7 +86,7 @@ class JamiDaemon {
         account.volatileDetails = details;
       },
       IncomingAccountMessage: (accountId: string, from: Account, message: Message) => {
-        console.log(`Received message: ${accountId} ${from} ${message['text/plain']}`);
+        console.log(`Received message: ${accountId} ${from} ${message}`);
         /*
                 if (parser.validate(message["text/plain"]) === true) {
                     console.log(message["text/plain"])

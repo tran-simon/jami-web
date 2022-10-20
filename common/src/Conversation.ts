@@ -25,7 +25,27 @@ export interface ConversationMember {
 
 type ConversationInfos = Record<string, unknown>;
 
-export type Message = Record<string, string>;
+export type Message = {
+  id: string;
+  author: string;
+  timestamp: string;
+  type:
+    | 'application/call-history+json'
+    | 'application/data-transfer+json'
+    | 'application/update-profile'
+    | 'initial'
+    | 'member'
+    | 'merge'
+    | 'text/plain'
+    | 'vote';
+  linearizedParent: string;
+  parents: string;
+  body?: string;
+  duration?: string;
+  to?: string;
+  invited?: string;
+};
+
 type ConversationRequest = PromiseExecutor<Message[]>;
 
 type ConversationListeners = Record<

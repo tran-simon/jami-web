@@ -16,10 +16,11 @@
  * <https://www.gnu.org/licenses/>.
  */
 import { Stack } from '@mui/system';
-import dayjs from 'dayjs';
+import dayjs, { Dayjs } from 'dayjs';
 import dayOfYear from 'dayjs/plugin/dayOfYear';
 import isBetween from 'dayjs/plugin/isBetween';
-import { useMemo } from 'react';
+import { Account, ConversationMember, Message } from 'jami-web-common';
+import { ReactNode, useMemo } from 'react';
 
 import {
   MessageBubblesGroup,
@@ -34,89 +35,64 @@ import {
 dayjs.extend(dayOfYear);
 dayjs.extend(isBetween);
 
-export default function MessageList(props) {
-  const messagesComponents = useMemo(
-    () => buildMessagesList(props.account, props.members, props.messages),
-    [props.account, props.members, props.messages]
-  );
-
-  return (
-    <Stack direction="column-reverse">
-      {messagesComponents?.map(({ Component, id, props }) => (
-        <Component key={id} {...props} />
-      ))}
-    </Stack>
-  );
+interface MessageListProps {
+  account: Account;
+  members: ConversationMember[];
+  messages: Message[];
 }
 
-const buildMessagesList = (account, members, messages) => {
-  if (messages.length == 0) {
-    return null;
+export default function MessageList({ account, members, messages }: MessageListProps) {
+  const messageComponents = useMemo(() => buildMessagesList(account, members, messages), [account, members, messages]);
+  return <Stack direction="column-reverse">{messageComponents}</Stack>;
+}
+
+const buildMessagesList = (account: Account, members: ConversationMember[], messages: Message[]) => {
+  if (messages.length === 0) {
+    return [];
   }
 
-  const components = [];
-  let lastTime = dayjs.unix(messages[0].timestamp);
+  const messageComponents: ReactNode[] = [];
+  let lastTime = dayjs.unix(Number(messages[0].timestamp));
   let lastAuthor = messages[0].author;
-  let messageBubblesGroup = [];
+  let messagesGroup: Message[] = [];
 
   const pushMessageBubblesGroup = () => {
-    if (messageBubblesGroup.length == 0) {
+    if (messagesGroup.length === 0) {
       return;
     }
-    components.push({
-      id: `group-${messageBubblesGroup[0].id}`,
-      Component: MessageBubblesGroup,
-      props: { account, members, messages: messageBubblesGroup },
-    });
-    messageBubblesGroup = [];
+    const props = { account, members, messages: messagesGroup };
+    messageComponents.push(<MessageBubblesGroup key={`group-${messagesGroup[0].id}`} {...props} />);
+    messagesGroup = [];
   };
 
-  const pushMessageCall = (message) => {
-    components.push({
-      id: `call-${message.id}`,
-      Component: MessageCall,
-      props: { message },
-    });
+  const pushMessageCall = (message: Message) => {
+    const props = { message };
+    messageComponents.push(<MessageCall key={`call-${message.id}`} {...props} />);
   };
 
-  const pushMessageMember = (message) => {
-    components.push({
-      id: `member-${message.id}`,
-      Component: MessageMember,
-      props: { message },
-    });
+  const pushMessageMember = (message: Message) => {
+    const props = { message };
+    messageComponents.push(<MessageMember key={`member-${message.id}`} {...props} />);
   };
 
-  const pushMessageMerge = (message) => {
-    components.push({
-      id: `merge-${message.id}`,
-      Component: MessageMerge,
-      props: { message },
-    });
+  const pushMessageMerge = (message: Message) => {
+    const props = { message };
+    messageComponents.push(<MessageMerge key={`merge-${message.id}`} {...props} />);
   };
 
-  const pushMessageTime = (message, time, hasDateOnTop = false) => {
-    components.push({
-      id: `time-${message.id}`,
-      Component: MessageTime,
-      props: { time, hasDateOnTop },
-    });
+  const pushMessageTime = (message: Message, time: Dayjs, hasDateOnTop = false) => {
+    const props = { time, hasDateOnTop };
+    messageComponents.push(<MessageTime key={`time-${message.id}`} {...props} />);
   };
 
-  const pushMessageDate = (message, time) => {
-    components.push({
-      id: `date-${message.id}`,
-      Component: MessageDate,
-      props: { time },
-    });
+  const pushMessageDate = (message: Message, time: Dayjs) => {
+    const props = { time };
+    messageComponents.push(<MessageDate key={`date-${message.id}`} {...props} />);
   };
 
-  const pushMessageInitial = (message) => {
-    components.push({
-      id: `initial-${message.id}`,
-      Component: MessageInitial,
-      props: { message },
-    });
+  const pushMessageInitial = (message: Message) => {
+    const props = { message };
+    messageComponents.push(<MessageInitial key={`initial-${message.id}`} {...props} />);
   };
 
   messages.forEach((message) => {
@@ -124,10 +100,10 @@ const buildMessagesList = (account, members, messages) => {
     switch (message.type) {
       case 'text/plain':
       case 'application/data-transfer+json':
-        if (lastAuthor != message.author) {
+        if (lastAuthor !== message.author) {
           pushMessageBubblesGroup();
         }
-        messageBubblesGroup.push(message);
+        messagesGroup.push(message);
         break;
       case 'application/call-history+json':
         pushMessageBubblesGroup();
@@ -146,8 +122,8 @@ const buildMessagesList = (account, members, messages) => {
         break;
     }
 
-    const time = dayjs.unix(message.timestamp);
-    if (message.type == 'initial') {
+    const time = dayjs.unix(Number(message.timestamp));
+    if (message.type === 'initial') {
       pushMessageBubblesGroup();
       pushMessageTime(message, time, true);
       pushMessageDate(message, time);
@@ -155,8 +131,8 @@ const buildMessagesList = (account, members, messages) => {
     } else {
       if (
         // If the date is different
-        lastTime?.year() != time.year() ||
-        lastTime?.dayOfYear() != time.dayOfYear()
+        lastTime?.year() !== time.year() ||
+        lastTime?.dayOfYear() !== time.dayOfYear()
       ) {
         pushMessageBubblesGroup();
         pushMessageTime(message, time, true);
@@ -174,5 +150,5 @@ const buildMessagesList = (account, members, messages) => {
     }
   });
 
-  return components;
+  return messageComponents;
 };

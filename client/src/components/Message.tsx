@@ -15,44 +15,69 @@
  * License along with this program.  If not, see
  * <https://www.gnu.org/licenses/>.
  */
-import { Box, Chip, Divider, List, ListItemButton, ListItemText, Stack, Tooltip, Typography } from '@mui/material';
+import {
+  Box,
+  Chip,
+  Divider,
+  List,
+  ListItemButton,
+  ListItemText,
+  Stack,
+  Theme,
+  Tooltip,
+  Typography,
+} from '@mui/material';
 import { styled } from '@mui/material/styles';
-import dayjs from 'dayjs';
+import dayjs, { Dayjs } from 'dayjs';
 import isToday from 'dayjs/plugin/isToday';
 import isYesterday from 'dayjs/plugin/isYesterday';
-import { useCallback, useMemo, useState } from 'react';
+import { Account, ConversationMember, Message } from 'jami-web-common';
+import { ReactElement } from 'react';
+import { ReactNode, useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { EmojiButton, MoreButton, ReplyMessageButton } from './Button.tsx';
+import { EmojiButton, MoreButton, ReplyMessageButton } from './Button';
 import ConversationAvatar from './ConversationAvatar';
-import { OppositeArrowsIcon, TrashBinIcon, TwoSheetsIcon } from './SvgIcon.tsx';
+import { OppositeArrowsIcon, TrashBinIcon, TwoSheetsIcon } from './SvgIcon';
 
 dayjs.extend(isToday);
 dayjs.extend(isYesterday);
 
-export const MessageCall = (props) => {
+type MessagePosition = 'start' | 'end';
+
+export const MessageCall = () => {
   return <Stack alignItems="center">&quot;Appel&quot;</Stack>;
 };
 
-export const MessageInitial = (props) => {
+export const MessageInitial = () => {
   const { t } = useTranslation();
   return <Stack alignItems="center">{t('message_swarm_created')}</Stack>;
 };
 
-export const MessageDataTransfer = (props) => {
+interface MessageDataTransferProps {
+  position: MessagePosition;
+  isFirstOfGroup: boolean;
+  isLastOfGroup: boolean;
+}
+
+export const MessageDataTransfer = ({ position, isFirstOfGroup, isLastOfGroup }: MessageDataTransferProps) => {
   return (
     <MessageBubble
       backgroundColor={'#E5E5E5'}
-      position={props.position}
-      isFirstOfGroup={props.isFirstOfGroup}
-      isLastOfGroup={props.isLastOfGroup}
+      position={position}
+      isFirstOfGroup={isFirstOfGroup}
+      isLastOfGroup={isLastOfGroup}
     >
       &quot;data-transfer&quot;
     </MessageBubble>
   );
 };
 
-export const MessageMember = (props) => {
+interface MessageMemberProps {
+  message: Message;
+}
+
+export const MessageMember = ({ message }: MessageMemberProps) => {
   const { t } = useTranslation();
   return (
     <Stack alignItems="center">
@@ -60,32 +85,52 @@ export const MessageMember = (props) => {
         sx={{
           width: 'fit-content',
         }}
-        label={t('message_user_joined', { user: props.message.author })}
+        label={t('message_user_joined', { user: message.author })}
       />
     </Stack>
   );
 };
 
-export const MessageMerge = (props) => {
+export const MessageMerge = () => {
   return <Stack alignItems="center">&quot;merge&quot;</Stack>;
 };
 
-export const MessageText = (props) => {
+interface MessageTextProps {
+  message: Message;
+  position: MessagePosition;
+  isFirstOfGroup: boolean;
+  isLastOfGroup: boolean;
+  textColor: string;
+  bubbleColor: string;
+}
+
+export const MessageText = ({
+  message,
+  position,
+  isFirstOfGroup,
+  isLastOfGroup,
+  textColor,
+  bubbleColor,
+}: MessageTextProps) => {
   return (
     <MessageBubble
-      backgroundColor={props.bubbleColor}
-      position={props.position}
-      isFirstOfGroup={props.isFirstOfGroup}
-      isLastOfGroup={props.isLastOfGroup}
+      backgroundColor={bubbleColor}
+      position={position}
+      isFirstOfGroup={isFirstOfGroup}
+      isLastOfGroup={isLastOfGroup}
     >
-      <Typography variant="body1" color={props.textColor} textAlign={props.position}>
-        {props.message.body}
+      <Typography variant="body1" color={textColor} textAlign={position}>
+        {message.body}
       </Typography>
     </MessageBubble>
   );
 };
 
-export const MessageDate = ({ time }) => {
+interface MessageDateProps {
+  time: Dayjs;
+}
+
+export const MessageDate = ({ time }: MessageDateProps) => {
   let textDate;
 
   if (time.isToday()) {
@@ -128,7 +173,12 @@ export const MessageDate = ({ time }) => {
   );
 };
 
-export const MessageTime = ({ time, hasDateOnTop }) => {
+interface MessageTimeProps {
+  time: Dayjs;
+  hasDateOnTop: boolean;
+}
+
+export const MessageTime = ({ time, hasDateOnTop }: MessageTimeProps) => {
   const hour = time.hour().toString().padStart(2, '0');
   const minute = time.minute().toString().padStart(2, '0');
   const textTime = `${hour}:${minute}`;
@@ -142,19 +192,24 @@ export const MessageTime = ({ time, hasDateOnTop }) => {
   );
 };
 
-export const MessageBubblesGroup = (props) => {
-  const isUser = props.messages[0]?.author === props.account.getUri();
+interface MessageBubblesGroupProps {
+  account: Account;
+  messages: Message[];
+  members: ConversationMember[];
+}
+
+export const MessageBubblesGroup = ({ account, messages, members }: MessageBubblesGroupProps) => {
+  const isUser = messages[0]?.author === account.getUri();
   const position = isUser ? 'end' : 'start';
   const bubbleColor = isUser ? '#005699' : '#E5E5E5';
   const textColor = isUser ? 'white' : 'black';
 
   let authorName;
   if (isUser) {
-    authorName = props.account.getDisplayName();
+    authorName = account.getDisplayName();
   } else {
-    const member = props.members.find((member) => props.messages[0]?.author === member.contact.getUri());
-    const contact = member.contact;
-    authorName = contact.getDisplayName();
+    const member = members.find((member) => messages[0]?.author === member.contact.getUri());
+    authorName = member?.contact?.getDisplayName() || '';
   }
 
   return (
@@ -171,14 +226,14 @@ export const MessageBubblesGroup = (props) => {
         width="66.66%"
         alignItems={position}
       >
-        <ParticipantName name={authorName} position={position} />
+        <ParticipantName name={authorName} />
         <Stack // Container for a group of message bubbles
           spacing="6px"
           alignItems={position}
           direction="column-reverse"
         >
-          {props.messages.map((message, index) => {
-            let Component;
+          {messages.map((message, index) => {
+            let Component: typeof MessageText | typeof MessageDataTransfer;
             switch (message.type) {
               case 'text/plain':
                 Component = MessageText;
@@ -186,6 +241,8 @@ export const MessageBubblesGroup = (props) => {
               case 'application/data-transfer+json':
                 Component = MessageDataTransfer;
                 break;
+              default:
+                return null;
             }
             return (
               <Component // Single message
@@ -194,8 +251,8 @@ export const MessageBubblesGroup = (props) => {
                 textColor={textColor}
                 position={position}
                 bubbleColor={bubbleColor}
-                isFirstOfGroup={index == props.messages.length - 1}
-                isLastOfGroup={index == 0}
+                isFirstOfGroup={index === messages.length - 1}
+                isLastOfGroup={index === 0}
               />
             );
           })}
@@ -205,7 +262,13 @@ export const MessageBubblesGroup = (props) => {
   );
 };
 
-const MessageTooltip = styled(({ className, ...props }) => {
+interface MessageTooltipProps {
+  className?: string;
+  position: MessagePosition;
+  children: ReactElement;
+}
+
+const MessageTooltip = styled(({ className, position, children }: MessageTooltipProps) => {
   const [open, setOpen] = useState(false);
   const emojis = ['😎', '😄', '😍']; // Should be last three used emojis
   const additionalOptions = [
@@ -234,9 +297,8 @@ const MessageTooltip = styled(({ className, ...props }) => {
 
   return (
     <Tooltip
-      {...props}
       classes={{ tooltip: className }} // Required for styles. Don't know why
-      placement={props.position == 'start' ? 'right-start' : 'left-start'}
+      placement={position === 'start' ? 'right-start' : 'left-start'}
       PopperProps={{
         modifiers: [
           {
@@ -250,7 +312,6 @@ const MessageTooltip = styled(({ className, ...props }) => {
       onClose={onClose}
       title={
         <Stack>
-          {' '}
           {/* Whole tooltip's content */}
           <Stack // Main options
             direction="row"
@@ -281,7 +342,7 @@ const MessageTooltip = styled(({ className, ...props }) => {
                         sx={{
                           height: '16px',
                           margin: 0,
-                          color: (theme) => theme.palette.primary.dark,
+                          color: (theme: Theme) => theme?.palette?.primary?.dark,
                         }}
                       />
                       <ListItemText
@@ -303,9 +364,11 @@ const MessageTooltip = styled(({ className, ...props }) => {
           )}
         </Stack>
       }
-    />
+    >
+      {children}
+    </Tooltip>
   );
-})(({ theme, position }) => {
+})(({ position }) => {
   const largeRadius = '20px';
   const smallRadius = '5px';
   return {
@@ -313,52 +376,64 @@ const MessageTooltip = styled(({ className, ...props }) => {
     padding: '16px',
     boxShadow: '3px 3px 7px #00000029',
     borderRadius: largeRadius,
-    borderStartStartRadius: position == 'start' ? smallRadius : largeRadius,
-    borderStartEndRadius: position == 'end' ? smallRadius : largeRadius,
+    borderStartStartRadius: position === 'start' ? smallRadius : largeRadius,
+    borderStartEndRadius: position === 'end' ? smallRadius : largeRadius,
   };
 });
 
-const MessageBubble = (props) => {
+interface MessageBubbleProps {
+  position: MessagePosition;
+  isFirstOfGroup: boolean;
+  isLastOfGroup: boolean;
+  backgroundColor: string;
+  children: ReactNode;
+}
+
+const MessageBubble = ({ position, isFirstOfGroup, isLastOfGroup, backgroundColor, children }: MessageBubbleProps) => {
   const largeRadius = '20px';
   const smallRadius = '5px';
   const radius = useMemo(() => {
-    if (props.position == 'start') {
+    if (position === 'start') {
       return {
-        borderStartStartRadius: props.isFirstOfGroup ? largeRadius : smallRadius,
+        borderStartStartRadius: isFirstOfGroup ? largeRadius : smallRadius,
         borderStartEndRadius: largeRadius,
-        borderEndStartRadius: props.isLastOfGroup ? largeRadius : smallRadius,
+        borderEndStartRadius: isLastOfGroup ? largeRadius : smallRadius,
         borderEndEndRadius: largeRadius,
       };
     }
     return {
       borderStartStartRadius: largeRadius,
-      borderStartEndRadius: props.isFirstOfGroup ? largeRadius : smallRadius,
+      borderStartEndRadius: isFirstOfGroup ? largeRadius : smallRadius,
       borderEndStartRadius: largeRadius,
-      borderEndEndRadius: props.isLastOfGroup ? largeRadius : smallRadius,
+      borderEndEndRadius: isLastOfGroup ? largeRadius : smallRadius,
     };
-  }, [props.isFirstOfGroup, props.isLastOfGroup, props.position]);
+  }, [isFirstOfGroup, isLastOfGroup, position]);
 
   return (
-    <MessageTooltip position={props.position}>
+    <MessageTooltip position={position}>
       <Box
         sx={{
           width: 'fit-content',
-          backgroundColor: props.backgroundColor,
+          backgroundColor: backgroundColor,
           padding: '16px',
           ...radius,
         }}
       >
-        {props.children}
+        {children}
       </Box>
     </MessageTooltip>
   );
 };
 
-const ParticipantName = (props) => {
+interface ParticipantNameProps {
+  name: string;
+}
+
+const ParticipantName = ({ name }: ParticipantNameProps) => {
   return (
     <Box marginBottom="6px" marginLeft="16px" marginRight="16px">
       <Typography variant="caption" color="#A7A7A7" fontWeight={700}>
-        {props.name}
+        {name}
       </Typography>
     </Box>
   );
