@@ -19,126 +19,15 @@ import log from 'loglevel';
 import { filter, firstValueFrom, Subject } from 'rxjs';
 import { Service } from 'typedi';
 
-import { itMap, itRange, itToArr, itToMap, require } from './utils.js';
-
-enum Bool {
-  False = 'false',
-  True = 'true',
-}
-
-interface SwigVec<T> {
-  size(): number;
-  get(i: number): T; // TODO: | undefined;
-}
-
-interface SwigMap<T, U> {
-  keys(): SwigVec<T>;
-  get(k: T): U; // TODO: | undefined;
-  set(k: T, v: U): void;
-}
-
-const swigVecToIt = <T>(v: SwigVec<T>) => itMap(itRange(0, v.size()), (i) => v.get(i));
-const swigMapToIt = <T, U>(m: SwigMap<T, U>) => itMap(swigVecToIt(m.keys()), (k): [T, U] => [k, m.get(k)]);
-
-// type IntVect = SwigVec<number>;
-// type UintVect = SwigVec<number>;
-// type FloatVect = SwigVec<number>;
-type StringVect = SwigVec<string>;
-// type IntegerMap = SwigMap<string, number>;
-type StringMap = SwigMap<string, string>;
-// type VectMap = SwigVec<StringMap>;
-// type Blob = SwigVec<number>;
-
-const stringVectToArr = (sv: StringVect) => itToArr(swigVecToIt(sv));
-const stringMapToMap = (sm: StringMap) => itToMap(swigMapToIt(sm));
-// const vectMapToJs = (vm: VectMap) => itToArr(itMap(swigVecToIt(vm), stringMapToMap));
-
-interface JamiSwig {
-  init(args: Record<string, unknown>): void;
-
-  // IntVect(): IntVect;
-  // UintVect(): UintVect;
-  // FloatVect(): FloatVect;
-  // StringVect(): StringVect;
-  // IntegerMap(): IntegerMap
-  // StringMap(): StringMap;
-  // VectMap(): VectMap;
-  // IntegerMap(): IntegerMap;
-
-  addAccount(details: StringMap): string;
-  removeAccount(id: string): void;
-
-  getAccountList(): StringVect;
-
-  registerName(id: string, password: string, username: string): boolean;
-  lookupName(id: string, nameserver: string, username: string): boolean;
-  lookupAddress(id: string, nameserver: string, address: string): boolean;
-
-  getAccountDetails(id: string): StringMap;
-  setAccountDetails(id: string, details: StringMap): void;
-  setAccountActive(id: string, active: Bool): void;
-}
-
-enum JamiSignal {
-  // using DRing::ConfigurationSignal;
-  AccountsChanged = 'AccountsChanged',
-  AccountDetailsChanged = 'AccountDetailsChanged',
-  RegistrationStateChanged = 'RegistrationStateChanged',
-  ContactAdded = 'ContactAdded',
-  ContactRemoved = 'ContactRemoved',
-  ExportOnRingEnded = 'ExportOnRingEnded',
-  NameRegistrationEnded = 'NameRegistrationEnded',
-  RegisteredNameFound = 'RegisteredNameFound',
-  VolatileDetailsChanged = 'VolatileDetailsChanged',
-  KnownDevicesChanged = 'KnownDevicesChanged',
-  IncomingAccountMessage = 'IncomingAccountMessage',
-  AccountMessageStatusChanged = 'AccountMessageStatusChanged',
-
-  // using DRing::CallSignal;
-  StateChange = 'StateChange',
-  IncomingMessage = 'IncomingMessage',
-  IncomingCall = 'IncomingCall',
-  IncomingCallWithMedia = 'IncomingCallWithMedia',
-  MediaChangeRequested = 'MediaChangeRequested',
-
-  // using DRing::ConversationSignal;
-  ConversationLoaded = 'ConversationLoaded',
-  MessagesFound = 'MessagesFound',
-  MessageReceived = 'MessageReceived',
-  ConversationProfileUpdated = 'ConversationProfileUpdated',
-  ConversationRequestReceived = 'ConversationRequestReceived',
-  ConversationRequestDeclined = 'ConversationRequestDeclined',
-  ConversationReady = 'ConversationReady',
-  ConversationRemoved = 'ConversationRemoved',
-  ConversationMemberEvent = 'ConversationMemberEvent',
-  OnConversationError = 'OnConversationError',
-  OnConferenceInfosUpdated = 'OnConferenceInfosUpdated',
-}
-
-interface VolatileDetailsChanged {
-  accountId: string;
-  details: Map<string, string>;
-}
-
-interface RegistrationStateChanged {
-  accountId: string;
-  state: string;
-  code: number;
-  details: string;
-}
-
-interface NameRegistrationEnded {
-  accountId: string;
-  state: number;
-  username: string;
-}
-
-interface RegisteredNameFound {
-  accountId: string;
-  state: number;
-  address: string;
-  username: string;
-}
+import { itMap, require } from '../utils.js';
+import { JamiSignal } from './jami-signal.js';
+import {
+  NameRegistrationEnded,
+  RegisteredNameFound,
+  RegistrationStateChanged,
+  VolatileDetailsChanged,
+} from './jami-signal-interfaces.js';
+import { JamiSwig, StringMap, stringMapToMap, stringVectToArr } from './jami-swig.js';
 
 @Service()
 export class Jamid {

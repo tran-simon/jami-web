@@ -15,23 +15,27 @@
  * License along with this program.  If not, see
  * <https://www.gnu.org/licenses/>.
  */
-import { Router } from 'express';
-import log from 'loglevel';
-import { Container } from 'typedi';
+export interface VolatileDetailsChanged {
+  accountId: string;
+  details: Map<string, string>;
+}
 
-import { Jamid } from '../jamid/jamid.js';
-import { authenticateToken } from '../middleware/auth.js';
+export interface RegistrationStateChanged {
+  accountId: string;
+  state: string;
+  code: number;
+  details: string;
+}
 
-const jamid = Container.get(Jamid);
+export interface NameRegistrationEnded {
+  accountId: string;
+  state: number;
+  username: string;
+}
 
-export const accountRouter = Router();
-
-accountRouter.get('/', authenticateToken, (req, res) => {
-  log.debug('TODO: Implement jamid.getAccount()');
-  res.send(`TODO: ${req.method} ${req.originalUrl} for account ID ${res.locals.accountId}`);
-});
-
-accountRouter.post('/', authenticateToken, (req, res) => {
-  log.debug('TODO: Implement jamid.getAccount().updateDetails()');
-  res.send(`TODO: ${req.method} ${req.originalUrl} for account ID ${res.locals.accountId}`);
-});
+export interface RegisteredNameFound {
+  accountId: string;
+  state: number;
+  address: string;
+  username: string;
+}

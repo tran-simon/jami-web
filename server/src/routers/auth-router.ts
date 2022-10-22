@@ -25,7 +25,7 @@ import { Container } from 'typedi';
 
 import { StatusCode } from '../constants.js';
 import { Creds } from '../creds.js';
-import { Jamid } from '../jamid.js';
+import { Jamid } from '../jamid/jamid.js';
 import { Vault } from '../vault.js';
 
 interface Credentials {
