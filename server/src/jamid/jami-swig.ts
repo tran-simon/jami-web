@@ -51,6 +51,7 @@ export const stringMapToMap = (sm: StringMap) => itToMap(swigMapToIt(sm));
 
 export interface JamiSwig {
   init(args: Record<string, unknown>): void;
+  fini(): void;
 
   // IntVect(): IntVect;
   // UintVect(): UintVect;

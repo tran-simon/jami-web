@@ -24,6 +24,7 @@ import { Container } from 'typedi';
 
 import { App } from './app.js';
 import { Creds } from './creds.js';
+import { Jamid } from './jamid/jamid.js';
 import { Vault } from './vault.js';
 import { Ws } from './ws.js';
 
@@ -33,6 +34,7 @@ const port: string | number = 5000;
 
 await Container.get(Creds).build();
 await Container.get(Vault).build();
+const jamid = Container.get(Jamid);
 const app = await Container.get(App).build();
 const wss = await Container.get(Ws).build();
 
@@ -44,6 +46,10 @@ server.on('upgrade', wss);
 server.listen(port);
 server.on('error', onError);
 server.on('listening', onListening);
+
+process.once('SIGTERM', shutdown);
+process.once('SIGINT', shutdown);
+process.once('SIGUSR2', shutdown);
 
 function onError(error: NodeJS.ErrnoException) {
   if (error.syscall !== 'listen') {
@@ -70,4 +76,14 @@ function onListening() {
   const address = server.address();
   const bind = typeof address === 'string' ? `pipe ${address}` : `port ${address?.port}`;
   log.debug('Listening on ' + bind);
+}
+
+function shutdown(signal: NodeJS.Signals) {
+  log.debug(`${signal} received: shutting down server`);
+  jamid.stop();
+  server.close(() => {
+    log.debug('Server shut down');
+    // Needed in order to actually exit the process as its shutdown is blocked by something else
+    process.exit();
+  });
 }

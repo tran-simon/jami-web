@@ -92,6 +92,10 @@ export class Jamid {
     this.jamid.init(handlers);
   }
 
+  stop() {
+    this.jamid.fini();
+  }
+
   getAccountList() {
     return stringVectToArr(this.jamid.getAccountList());
   }
