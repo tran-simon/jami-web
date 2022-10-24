@@ -15,7 +15,7 @@
  * License along with this program.  If not, see
  * <https://www.gnu.org/licenses/>.
  */
-import { itMap, itRange, itToArr, itToMap } from '../utils.js';
+import { itMap, itRange, itToArr, itToMap, itToRecord } from './utils.js';
 
 enum Bool {
   False = 'false',
@@ -33,25 +33,65 @@ interface SwigMap<T, U> {
   set(k: T, v: U): void;
 }
 
+// TODO: Review these conversion functions
 const swigVecToIt = <T>(v: SwigVec<T>) => itMap(itRange(0, v.size()), (i) => v.get(i));
 const swigMapToIt = <T, U>(m: SwigMap<T, U>) => itMap(swigVecToIt(m.keys()), (k): [T, U] => [k, m.get(k)]);
 
-// type IntVect = SwigVec<number>;
-// type UintVect = SwigVec<number>;
-// type FloatVect = SwigVec<number>;
+// export type IntVect = SwigVec<number>;
+// export type UintVect = SwigVec<number>;
+// export type FloatVect = SwigVec<number>;
 export type StringVect = SwigVec<string>;
-// type IntegerMap = SwigMap<string, number>;
+// export type IntegerMap = SwigMap<string, number>;
 export type StringMap = SwigMap<string, string>;
-// type VectMap = SwigVec<StringMap>;
-// type Blob = SwigVec<number>;
+export type VectMap = SwigVec<StringMap>;
+// export type Blob = SwigVec<number>;
 
-export const stringVectToArr = (sv: StringVect) => itToArr(swigVecToIt(sv));
+// TODO: Consider always converting to Record rather than Map as conversion to interfaces is easier
+export const stringVectToArray = (sv: StringVect) => itToArr(swigVecToIt(sv));
+export const stringMapToRecord = (sm: StringMap) => itToRecord(swigMapToIt(sm));
 export const stringMapToMap = (sm: StringMap) => itToMap(swigMapToIt(sm));
-// const vectMapToJs = (vm: VectMap) => itToArr(itMap(swigVecToIt(vm), stringMapToMap));
+// export const vectMapToArrayMap = (vm: VectMap) => itToArr(itMap(swigVecToIt(vm), stringMapToMap));
 
 export interface JamiSwig {
   init(args: Record<string, unknown>): void;
   fini(): void;
+
+  getAccountDetails(accountId: string): StringMap;
+  getVolatileAccountDetails(accountId: string): StringMap;
+  setAccountDetails(accountId: string, details: StringMap): void;
+  setAccountActive(accountId: string, active: Bool): void;
+
+  addAccount(details: StringMap): string;
+  removeAccount(accountId: string): void;
+
+  getAccountList(): StringVect;
+
+  lookupName(accountId: string, nameserver: string, username: string): boolean;
+  lookupAddress(accountId: string, nameserver: string, address: string): boolean;
+  registerName(accountId: string, password: string, username: string): boolean;
+
+  getKnownRingDevices(accountId: string): StringMap;
+
+  getAudioOutputDeviceList(): StringVect;
+
+  getVolume(device: string): number;
+  setVolume(device: string, value: number): void;
+
+  addContact(accountId: string, contactId: string): void;
+  removeContact(accountId: string, contactId: string, ban: boolean): void;
+  getContacts(accountId: string): VectMap;
+  getContactDetails(accountId: string, contactId: string): StringMap;
+
+  getDefaultModerators(accountId: string): StringVect;
+  setDefaultModerators(accountId: string, uri: string, state: boolean): void;
+
+  getConversations(accountId: string): StringVect;
+  conversationInfos(accountId: string, conversationId: string): StringMap;
+
+  getConversationMembers(accountId: string, conversationId: string): VectMap;
+
+  sendMessage(accountId: string, conversationId: string, message: string, replyTo: string): void;
+  loadConversationMessages(accountId: string, conversationId: string, fromMessage: string, n: number): number;
 
   // IntVect(): IntVect;
   // UintVect(): UintVect;
@@ -61,17 +101,4 @@ export interface JamiSwig {
   // StringMap(): StringMap;
   // VectMap(): VectMap;
   // IntegerMap(): IntegerMap;
-
-  addAccount(details: StringMap): string;
-  removeAccount(id: string): void;
-
-  getAccountList(): StringVect;
-
-  registerName(id: string, password: string, username: string): boolean;
-  lookupName(id: string, nameserver: string, username: string): boolean;
-  lookupAddress(id: string, nameserver: string, address: string): boolean;
-
-  getAccountDetails(id: string): StringMap;
-  setAccountDetails(id: string, details: StringMap): void;
-  setAccountActive(id: string, active: Bool): void;
 }

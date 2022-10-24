@@ -34,6 +34,7 @@ export class Ws {
     const wss = new WebSocketServer({ noServer: true });
     wss.on('connection', (ws: WebSocket, _req: IncomingMessage, accountId: string) => {
       log.info('New connection', accountId);
+      // TODO: Add the account ID here to a map of accountId -> WebSocket connections
 
       ws.on('message', (_data) => {
         ws.send(JSON.stringify({ accountId }));

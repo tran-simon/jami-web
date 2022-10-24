@@ -16,7 +16,7 @@
  * <https://www.gnu.org/licenses/>.
  */
 import { Router } from 'express';
-import log from 'loglevel';
+import { AccountDetails } from 'jami-web-common';
 import { Container } from 'typedi';
 
 import { Jamid } from '../jamid/jamid.js';
@@ -26,12 +26,27 @@ const jamid = Container.get(Jamid);
 
 export const accountRouter = Router();
 
-accountRouter.get('/', authenticateToken, (req, res) => {
-  log.debug('TODO: Implement jamid.getAccount()');
-  res.send(`TODO: ${req.method} ${req.originalUrl} for account ID ${res.locals.accountId}`);
+accountRouter.use(authenticateToken);
+
+// TODO: If tokens can be generated on one daemon and used on another (transferrable between daemons),
+// then add middleware to check that the currently logged-in accountId is stored in this daemon instance
+
+accountRouter.get('/', (_req, res) => {
+  const accountId = res.locals.accountId;
+
+  res.json({
+    id: accountId,
+    details: jamid.getAccountDetails(accountId),
+    volatileDetails: jamid.getVolatileAccountDetails(accountId),
+    defaultModerators: jamid.getDefaultModerators(accountId),
+    devices: jamid.getDevices(accountId),
+  });
 });
 
-accountRouter.post('/', authenticateToken, (req, res) => {
-  log.debug('TODO: Implement jamid.getAccount().updateDetails()');
-  res.send(`TODO: ${req.method} ${req.originalUrl} for account ID ${res.locals.accountId}`);
+accountRouter.post('/', (req, res) => {
+  const accountId = res.locals.accountId;
+  const currentAccountDetails = jamid.getAccountDetails(accountId);
+  const newAccountDetails: AccountDetails = { ...currentAccountDetails, ...req.body };
+  jamid.setAccountDetails(res.locals.accountId, newAccountDetails);
+  res.end();
 });

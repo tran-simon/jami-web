@@ -15,11 +15,11 @@
  * License along with this program.  If not, see
  * <https://www.gnu.org/licenses/>.
  */
+import { AccountDetails, VolatileDetails } from 'jami-web-common';
 import log from 'loglevel';
 import { filter, firstValueFrom, Subject } from 'rxjs';
 import { Service } from 'typedi';
 
-import { itMap, require } from '../utils.js';
 import { JamiSignal } from './jami-signal.js';
 import {
   NameRegistrationEnded,
@@ -27,17 +27,18 @@ import {
   RegistrationStateChanged,
   VolatileDetailsChanged,
 } from './jami-signal-interfaces.js';
-import { JamiSwig, StringMap, stringMapToMap, stringVectToArr } from './jami-swig.js';
+import { JamiSwig, StringMap, stringMapToRecord, stringVectToArray } from './jami-swig.js';
+import { require } from './utils.js';
 
 @Service()
 export class Jamid {
-  private readonly jamid: JamiSwig;
-  private readonly mapUsernameToAccountId: Map<string, string>;
+  private readonly jamiSwig: JamiSwig;
+  private readonly usernamesToAccountIds: Map<string, string>;
   private readonly events;
 
   constructor() {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    this.jamid = require('../jamid.node') as JamiSwig;
+    this.jamiSwig = require('../../jamid.node') as JamiSwig;
 
     const handlers: Record<string, unknown> = {};
     const handler = (sig: string) => {
@@ -73,7 +74,7 @@ export class Jamid {
       // Keep map of usernames to account IDs as Jamid cannot do this by itself (AFAIK)
       const username = details.get('Account.registeredName');
       if (username) {
-        this.mapUsernameToAccountId.set(username, accountId);
+        this.usernamesToAccountIds.set(username, accountId);
       }
     });
     this.events.onRegistrationStateChanged.subscribe((ctx) =>
@@ -82,62 +83,65 @@ export class Jamid {
     this.events.onNameRegistrationEnded.subscribe((ctx) => log.debug('[1] Received onNameRegistrationEnded with', ctx));
     this.events.onRegisteredNameFound.subscribe((ctx) => log.debug('[1] Received onRegisteredNameFound with', ctx));
 
-    this.mapUsernameToAccountId = new Map<string, string>();
+    this.usernamesToAccountIds = new Map<string, string>();
 
     // 1. You cannot change event handlers after init
     // 2. You cannot specify multiple handlers for the same event
     // 3. You cannot specify a default handler
-    // So we rely on the Subject() instead of Observable()
+    // So we rely on Subject() instead of Observable()
     // Also, handlers receive multiple argument instead of tuple or object!
-    this.jamid.init(handlers);
+    this.jamiSwig.init(handlers);
   }
 
   stop() {
-    this.jamid.fini();
+    this.jamiSwig.fini();
   }
 
-  getAccountList() {
-    return stringVectToArr(this.jamid.getAccountList());
+  getVolatileAccountDetails(accountId: string): VolatileDetails {
+    return stringMapToRecord(this.jamiSwig.getVolatileAccountDetails(accountId)) as unknown as VolatileDetails;
   }
 
-  async createAccount(details: Map<string, string | number | boolean>) {
-    // TODO: add proper typing directly into JamiSwig
-    const stringMapDetails: StringMap = new (this.jamid as any).StringMap();
+  getAccountDetails(accountId: string): AccountDetails {
+    return stringMapToRecord(this.jamiSwig.getAccountDetails(accountId)) as unknown as AccountDetails;
+  }
 
-    stringMapDetails.set('Account.type', 'RING');
-    itMap(details.entries(), ([k, v]) => stringMapDetails.set('Account.' + k, v.toString()));
+  setAccountDetails(accountId: string, accountDetails: AccountDetails) {
+    const accountDetailsStringMap: StringMap = new (this.jamiSwig as any).StringMap();
+    for (const [key, value] of Object.entries(accountDetails)) {
+      accountDetailsStringMap.set(key, value);
+    }
+    this.jamiSwig.setAccountDetails(accountId, accountDetailsStringMap);
+  }
 
-    const id = this.jamid.addAccount(stringMapDetails);
+  async addAccount(details: Map<string, string | number | boolean>) {
+    // TODO: Add proper typing directly into JamiSwig
+    const detailsStringMap: StringMap = new (this.jamiSwig as any).StringMap();
+
+    detailsStringMap.set('Account.type', 'RING');
+    for (const [key, value] of details.entries()) {
+      detailsStringMap.set('Account.' + key, value.toString());
+    }
+
+    const accountId = this.jamiSwig.addAccount(detailsStringMap);
     return firstValueFrom(
       this.events.onRegistrationStateChanged.pipe(
-        filter(({ accountId }) => accountId === id),
+        filter(({ accountId: addedAccountId }) => addedAccountId === accountId),
         // TODO: is it the only state?
         filter(({ state }) => state === 'REGISTERED')
       )
     );
   }
 
-  destroyAccount(id: string) {
-    this.jamid.removeAccount(id);
+  removeAccount(accountId: string) {
+    this.jamiSwig.removeAccount(accountId);
   }
 
-  async registerUsername(id: string, username: string, password: string) {
-    const hasRingNs = this.jamid.registerName(id, password, username);
-    if (!hasRingNs) {
-      log.error('Jami does not have NS');
-      throw new Error('Jami does not have NS');
-    }
-    return firstValueFrom(this.events.onNameRegistrationEnded.pipe(filter(({ accountId }) => accountId === id)));
-  }
-
-  // TODO: Ideally, we would fetch the username directly from Jami instead of
-  // keeping an internal map.
-  usernameToAccountId(username: string) {
-    return this.mapUsernameToAccountId.get(username);
+  getAccountList(): string[] {
+    return stringVectToArray(this.jamiSwig.getAccountList());
   }
 
   async lookupUsername(username: string) {
-    const hasRingNs = this.jamid.lookupName('', '', username);
+    const hasRingNs = this.jamiSwig.lookupName('', '', username);
     if (!hasRingNs) {
       log.error('Jami does not have NS');
       throw new Error('Jami does not have NS');
@@ -145,7 +149,30 @@ export class Jamid {
     return firstValueFrom(this.events.onRegisteredNameFound.pipe(filter((r) => r.username === username)));
   }
 
-  getAccountDetails(id: string) {
-    return stringMapToMap(this.jamid.getAccountDetails(id));
+  async registerUsername(accountId: string, username: string, password: string) {
+    const hasRingNs = this.jamiSwig.registerName(accountId, password, username);
+    if (!hasRingNs) {
+      log.error('Jami does not have NS');
+      throw new Error('Jami does not have NS');
+    }
+    return firstValueFrom(
+      this.events.onNameRegistrationEnded.pipe(
+        filter(({ accountId: registeredAccountId }) => registeredAccountId === accountId)
+      )
+    );
+  }
+
+  getDevices(accountId: string): Record<string, string> {
+    return stringMapToRecord(this.jamiSwig.getKnownRingDevices(accountId));
+  }
+
+  getDefaultModerators(accountId: string): string[] {
+    return stringVectToArray(this.jamiSwig.getDefaultModerators(accountId));
+  }
+
+  // TODO: Ideally, we would fetch the username directly from Jami instead of
+  // keeping an internal map.
+  getAccountIdFromUsername(username: string): string | undefined {
+    return this.usernamesToAccountIds.get(username);
   }
 }

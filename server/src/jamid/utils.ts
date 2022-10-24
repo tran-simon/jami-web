@@ -17,6 +17,8 @@
  */
 import { createRequire } from 'node:module';
 
+// TODO: Move these functions to jami-swig.ts
+
 export function* itRange(lo: number, hi: number) {
   for (let i = lo; i < hi; ++i) {
     yield i;
@@ -47,6 +49,14 @@ export const itToMap = <T, U>(it: Iterable<[T, U]>) => {
     m.set(k, v);
   }
   return m;
+};
+
+export const itToRecord = <T>(it: Iterable<[string, T]>) => {
+  const r: Record<string, T> = {};
+  for (const [k, v] of it) {
+    r[k] = v;
+  }
+  return r;
 };
 
 export const require = createRequire(import.meta.url);

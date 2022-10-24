@@ -56,12 +56,12 @@ authRouter.post(
     // TODO: find a way to store the password directly in Jami
     // Maybe by using the "password" field? But as I tested, it's not
     // returned when getting user infos.
-    const { accountId } = await jamid.createAccount(new Map());
+    const { accountId } = await jamid.addAccount(new Map());
 
     // TODO: understand why the password arg in this call must be empty
     const { state } = await jamid.registerUsername(accountId, username, '');
     if (state !== 0) {
-      jamid.destroyAccount(accountId);
+      jamid.removeAccount(accountId);
       if (state === 2) {
         res.status(StatusCode.BAD_REQUEST).send('Invalid username or password');
       } else if (state === 3) {
@@ -91,7 +91,7 @@ authRouter.post(
     // The account may either be:
     // 1. not found
     // 2. found but not on this instance (but I'm not sure about this)
-    const accountId = jamid.usernameToAccountId(username);
+    const accountId = jamid.getAccountIdFromUsername(username);
     if (accountId === undefined) {
       res.status(StatusCode.NOT_FOUND).send('Username not found');
       return;
