@@ -16,6 +16,7 @@
  * <https://www.gnu.org/licenses/>.
  */
 import express, { json, NextFunction, Request, Response } from 'express';
+import helmet from 'helmet';
 import { HttpStatusCode } from 'jami-web-common';
 import log from 'loglevel';
 import { Service } from 'typedi';
@@ -28,6 +29,8 @@ export class App {
   async build() {
     const app = express();
 
+    // Setup middleware
+    app.use(helmet());
     app.use(json());
 
     // Setup routing

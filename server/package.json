@@ -26,6 +26,7 @@
     "argon2": "^0.29.1",
     "express": "^4.18.2",
     "express-async-handler": "^1.2.0",
+    "helmet": "^6.0.0",
     "jose": "^4.10.0",
     "loglevel": "^1.8.0",
     "reflect-metadata": "^0.1.13",
