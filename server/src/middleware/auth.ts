@@ -16,10 +16,10 @@
  * <https://www.gnu.org/licenses/>.
  */
 import { NextFunction, Request, Response } from 'express';
+import { HttpStatusCode } from 'jami-web-common';
 import { jwtVerify } from 'jose';
 import { Container } from 'typedi';
 
-import { StatusCode } from '../constants.js';
 import { Vault } from '../vault.js';
 
 export async function authenticateToken(req: Request, res: Response, next: NextFunction) {
@@ -27,13 +27,13 @@ export async function authenticateToken(req: Request, res: Response, next: NextF
 
   const authorizationHeader = req.headers.authorization;
   if (!authorizationHeader) {
-    res.status(StatusCode.UNAUTHORIZED).send('Missing Authorization header');
+    res.status(HttpStatusCode.Unauthorized).send('Missing Authorization header');
     return;
   }
 
   const token = authorizationHeader.split(' ')[1];
   if (token === undefined) {
-    res.status(StatusCode.BAD_REQUEST).send('Missing JSON web token');
+    res.status(HttpStatusCode.BadRequest).send('Missing JSON web token');
     return;
   }
 
@@ -45,6 +45,6 @@ export async function authenticateToken(req: Request, res: Response, next: NextF
     res.locals.accountId = payload.id as string;
     next();
   } catch (err) {
-    res.sendStatus(StatusCode.UNAUTHORIZED);
+    res.sendStatus(HttpStatusCode.Unauthorized);
   }
 }

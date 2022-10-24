@@ -16,10 +16,9 @@
  * <https://www.gnu.org/licenses/>.
  */
 import { passwordStrength } from 'check-password-strength';
-import { LookupResolveValue } from 'jami-web-common';
+import { HttpStatusCode, LookupResolveValue } from 'jami-web-common';
 
 import { PasswordStrength } from '../enums/password-strength';
-import { StatusCode } from '../enums/status-code';
 
 interface PasswordStrengthResult {
   id: number;
@@ -39,7 +38,7 @@ export interface PasswordCheckResult {
 export async function isNameRegistered(name: string): Promise<boolean> {
   try {
     const response: Response = await fetch(`api/ns/name/${name}`);
-    if (response.status === StatusCode.Ok) {
+    if (response.status === HttpStatusCode.Ok) {
       const data: LookupResolveValue = await response.json();
       return data.name === name;
     }

@@ -16,10 +16,10 @@
  * <https://www.gnu.org/licenses/>.
  */
 import express, { json, NextFunction, Request, Response } from 'express';
+import { HttpStatusCode } from 'jami-web-common';
 import log from 'loglevel';
 import { Service } from 'typedi';
 
-import { StatusCode } from './constants.js';
 import { accountRouter } from './routers/account-router.js';
 import { authRouter } from './routers/auth-router.js';
 
@@ -36,13 +36,13 @@ export class App {
 
     // Setup 404 error handling
     app.use((_req, res) => {
-      res.sendStatus(StatusCode.NOT_FOUND);
+      res.sendStatus(HttpStatusCode.NotFound);
     });
 
     // Setup internal error handling
     app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
       log.error(err);
-      res.status(StatusCode.INTERNAL_SERVER_ERROR).send(err.message);
+      res.status(HttpStatusCode.InternalServerError).send(err.message);
     });
 
     return app;

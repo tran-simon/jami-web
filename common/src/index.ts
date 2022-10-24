@@ -19,4 +19,5 @@ export * from './Account.js';
 export * from './AccountDetails.js';
 export * from './Contact.js';
 export * from './Conversation.js';
+export * from './enums/http-status-code.js';
 export * from './util.js';

@@ -19,11 +19,11 @@ import argon2 from 'argon2';
 import { Router } from 'express';
 import asyncHandler from 'express-async-handler';
 import { ParamsDictionary, Request } from 'express-serve-static-core';
+import { HttpStatusCode } from 'jami-web-common';
 import { SignJWT } from 'jose';
 import log from 'loglevel';
 import { Container } from 'typedi';
 
-import { StatusCode } from '../constants.js';
 import { Creds } from '../creds.js';
 import { Jamid } from '../jamid/jamid.js';
 import { Vault } from '../vault.js';
@@ -44,7 +44,7 @@ authRouter.post(
   asyncHandler(async (req: Request<ParamsDictionary, any, Credentials>, res, _next) => {
     const { username, password } = req.body;
     if (!username || !password) {
-      res.status(StatusCode.BAD_REQUEST).send('Missing username or password');
+      res.status(HttpStatusCode.BadRequest).send('Missing username or password');
       return;
     }
 
@@ -63,9 +63,9 @@ authRouter.post(
     if (state !== 0) {
       jamid.removeAccount(accountId);
       if (state === 2) {
-        res.status(StatusCode.BAD_REQUEST).send('Invalid username or password');
+        res.status(HttpStatusCode.BadRequest).send('Invalid username or password');
       } else if (state === 3) {
-        res.status(StatusCode.CONFLICT).send('Username already exists');
+        res.status(HttpStatusCode.Conflict).send('Username already exists');
       } else {
         throw new Error(`Unhandled state ${state}`);
       }
@@ -75,7 +75,7 @@ authRouter.post(
     creds.set(username, hashedPassword);
     await creds.save();
 
-    res.sendStatus(StatusCode.CREATED);
+    res.sendStatus(HttpStatusCode.Created);
   })
 );
 
@@ -84,7 +84,7 @@ authRouter.post(
   asyncHandler(async (req: Request<ParamsDictionary, any, Credentials>, res, _next) => {
     const { username, password } = req.body;
     if (!username || !password) {
-      res.status(StatusCode.BAD_REQUEST).send('Missing username or password');
+      res.status(HttpStatusCode.BadRequest).send('Missing username or password');
       return;
     }
 
@@ -93,14 +93,14 @@ authRouter.post(
     // 2. found but not on this instance (but I'm not sure about this)
     const accountId = jamid.getAccountIdFromUsername(username);
     if (accountId === undefined) {
-      res.status(StatusCode.NOT_FOUND).send('Username not found');
+      res.status(HttpStatusCode.NotFound).send('Username not found');
       return;
     }
 
     // TODO: load the password from Jami
     const hashedPassword = creds.get(username);
     if (!hashedPassword) {
-      res.status(StatusCode.NOT_FOUND).send('Password not found');
+      res.status(HttpStatusCode.NotFound).send('Password not found');
       return;
     }
 
@@ -108,7 +108,7 @@ authRouter.post(
 
     const isPasswordVerified = await argon2.verify(hashedPassword, password);
     if (!isPasswordVerified) {
-      res.sendStatus(StatusCode.UNAUTHORIZED);
+      res.sendStatus(HttpStatusCode.Unauthorized);
       return;
     }
 
