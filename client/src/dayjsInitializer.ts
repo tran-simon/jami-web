@@ -15,8 +15,20 @@
  * License along with this program.  If not, see
  * <https://www.gnu.org/licenses/>.
  */
-export default {
-  locales: ['fr', 'en'],
-  output: 'src/locale/$LOCALE/$NAMESPACE.json',
-  input: ['src/**/*.{ts,tsx,js,jsx}'],
-};
+import 'dayjs/locale/en';
+import 'dayjs/locale/fr';
+
+import dayjs from 'dayjs';
+import dayOfYear from 'dayjs/plugin/dayOfYear';
+import isBetween from 'dayjs/plugin/isBetween';
+import isToday from 'dayjs/plugin/isToday';
+import isYesterday from 'dayjs/plugin/isYesterday';
+import localizedFormat from 'dayjs/plugin/localizedFormat';
+
+dayjs.extend(dayOfYear);
+dayjs.extend(isBetween);
+dayjs.extend(isToday);
+dayjs.extend(isYesterday);
+dayjs.extend(localizedFormat);
+
+export default dayjs;

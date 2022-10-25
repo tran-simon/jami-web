@@ -29,10 +29,6 @@ import {
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import dayjs, { Dayjs } from 'dayjs';
-import dayOfYear from 'dayjs/plugin/dayOfYear';
-import isBetween from 'dayjs/plugin/isBetween';
-import isToday from 'dayjs/plugin/isToday';
-import isYesterday from 'dayjs/plugin/isYesterday';
 import { Account, Contact, Message } from 'jami-web-common';
 import { ReactElement, ReactNode, useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -40,11 +36,6 @@ import { useTranslation } from 'react-i18next';
 import { EmojiButton, MoreButton, ReplyMessageButton } from './Button';
 import ConversationAvatar from './ConversationAvatar';
 import { OppositeArrowsIcon, TrashBinIcon, TwoSheetsIcon } from './SvgIcon';
-
-dayjs.extend(dayOfYear);
-dayjs.extend(isBetween);
-dayjs.extend(isToday);
-dayjs.extend(isYesterday);
 
 type MessagePosition = 'start' | 'end';
 
@@ -181,17 +172,17 @@ interface DateIndicatorProps {
 }
 
 const DateIndicator = ({ time }: DateIndicatorProps) => {
-  let textDate;
+  const { i18n } = useTranslation();
 
-  if (time.isToday()) {
-    textDate = 'Today';
-  } else if (time.isYesterday()) {
-    textDate = 'Yesterday';
-  } else {
-    const date = time.date().toString().padStart(2, '0');
-    const month = (time.month() + 1).toString().padStart(2, '0');
-    textDate = `${date}/${month}/${time.year()}`;
-  }
+  const textDate = useMemo(() => {
+    if (time.isToday()) {
+      return new Intl.RelativeTimeFormat(i18n.language, { numeric: 'auto' }).format(0, 'day');
+    } else if (time.isYesterday()) {
+      return new Intl.RelativeTimeFormat(i18n.language, { numeric: 'auto' }).format(-1, 'day');
+    } else {
+      return dayjs(time).locale(i18n.language).format('L');
+    }
+  }, [i18n, time]);
 
   return (
     <Box marginTop="30px">
@@ -215,6 +206,7 @@ const DateIndicator = ({ time }: DateIndicatorProps) => {
           border="1px solid #E5E5E5"
           borderRadius="5px"
           padding="10px 16px"
+          textTransform="capitalize"
         >
           {textDate}
         </Typography>
@@ -229,9 +221,11 @@ interface TimeIndicatorProps {
 }
 
 const TimeIndicator = ({ time, hasDateOnTop }: TimeIndicatorProps) => {
-  const hour = time.hour().toString().padStart(2, '0');
-  const minute = time.minute().toString().padStart(2, '0');
-  const textTime = `${hour}:${minute}`;
+  const { i18n } = useTranslation();
+
+  const textTime = useMemo(() => {
+    return dayjs(time).locale(i18n.language).format('LT');
+  }, [i18n, time]);
 
   return (
     <Stack direction="row" justifyContent="center" marginTop={hasDateOnTop ? '20px' : '30px'}>
