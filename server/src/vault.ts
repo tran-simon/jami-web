@@ -15,8 +15,6 @@
  * License along with this program.  If not, see
  * <https://www.gnu.org/licenses/>.
  */
-import { readFile } from 'node:fs/promises';
-
 import { importPKCS8, importSPKI, KeyLike } from 'jose';
 import { Service } from 'typedi';
 
@@ -25,13 +23,16 @@ export class Vault {
   privateKey!: KeyLike;
   publicKey!: KeyLike;
 
-  // TODO: Convert to environment variables and check if defined
   async build() {
-    const privateKeyBuffer = await readFile('privkey.pem');
-    this.privateKey = await importPKCS8(privateKeyBuffer.toString(), 'EdDSA');
+    const privatekey = process.env.PRIVATE_KEY;
+    const publicKey = process.env.PUBLIC_KEY;
 
-    const publicKeyBuffer = await readFile('pubkey.pem');
-    this.publicKey = await importSPKI(publicKeyBuffer.toString(), 'EdDSA');
+    if (!privatekey || !publicKey) {
+      throw new Error('Missing private or public key environment variables. Try running "npm run genkeys"');
+    }
+
+    this.privateKey = await importPKCS8(privatekey, 'EdDSA');
+    this.publicKey = await importSPKI(publicKey, 'EdDSA');
 
     return this;
   }

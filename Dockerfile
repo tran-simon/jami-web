@@ -13,16 +13,13 @@ RUN apt-get update && apt-get install -y \
 RUN ln -s /daemon/bin/nodejs/build/Release/jamid.node jamid.node
 
 COPY package*.json ./
-COPY common/package*.json common/
 COPY client/package*.json client/
 COPY server/package*.json server/
-
-RUN npm ci --ignore-scripts
-
-# Build common library
 COPY common common
+COPY server/misc server/misc
 COPY tsconfig.json ./
-RUN npm run build --workspace common
+
+RUN npm ci
 
 COPY . .
 

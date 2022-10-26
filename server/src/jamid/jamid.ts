@@ -38,7 +38,7 @@ export class Jamid {
 
   constructor() {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    this.jamiSwig = require('../../jamid.node') as JamiSwig;
+    this.jamiSwig = require('../../jamid.node') as JamiSwig; // TODO: we should put the path in the .env
 
     const handlers: Record<string, unknown> = {};
     const handler = (sig: string) => {
