@@ -106,7 +106,7 @@ export class Jamid {
   }
 
   setAccountDetails(accountId: string, accountDetails: AccountDetails) {
-    const accountDetailsStringMap: StringMap = new (this.jamiSwig as any).StringMap();
+    const accountDetailsStringMap: StringMap = new this.jamiSwig.StringMap();
     for (const [key, value] of Object.entries(accountDetails)) {
       accountDetailsStringMap.set(key, value);
     }
@@ -114,8 +114,7 @@ export class Jamid {
   }
 
   async addAccount(details: Map<string, string | number | boolean>) {
-    // TODO: Add proper typing directly into JamiSwig
-    const detailsStringMap: StringMap = new (this.jamiSwig as any).StringMap();
+    const detailsStringMap: StringMap = new this.jamiSwig.StringMap();
 
     detailsStringMap.set('Account.type', 'RING');
     for (const [key, value] of details.entries()) {

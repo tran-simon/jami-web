@@ -15,6 +15,7 @@
  * License along with this program.  If not, see
  * <https://www.gnu.org/licenses/>.
  */
+import { Constructable } from '../interfaces.js';
 import { itMap, itRange, itToArr, itToMap, itToRecord } from './utils.js';
 
 enum Bool {
@@ -93,12 +94,12 @@ export interface JamiSwig {
   sendMessage(accountId: string, conversationId: string, message: string, replyTo: string): void;
   loadConversationMessages(accountId: string, conversationId: string, fromMessage: string, n: number): number;
 
-  // IntVect(): IntVect;
-  // UintVect(): UintVect;
-  // FloatVect(): FloatVect;
-  // StringVect(): StringVect;
-  // IntegerMap(): IntegerMap
-  // StringMap(): StringMap;
-  // VectMap(): VectMap;
-  // IntegerMap(): IntegerMap;
+  // IntVect: Constructable<IntVect>;
+  // UintVect: Constructable<UintVect>;
+  // FloatVect: Constructable<FloatVect>;
+  // StringVect: Constructable<StringVect>;
+  // IntegerMap: Constructable<IntegerMap>
+  StringMap: Constructable<StringMap>;
+  // VectMap: Constructable<VectMap>;
+  // IntegerMap: Constructable<IntegerMap>;
 }
