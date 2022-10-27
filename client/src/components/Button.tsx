@@ -49,6 +49,7 @@ import {
   VideoCameraIcon,
   VolumeIcon,
 } from './SvgIcon';
+import CustomTooltip from './Tooltip';
 
 type ShapedButtonProps = IconButtonProps & {
   Icon: ComponentType<SvgIconProps>;
@@ -99,8 +100,15 @@ export const TakePictureButton = (props: IconButtonProps) => {
   return <RoundButton {...props} aria-label="take picture" Icon={CameraIcon} size="large" />;
 };
 
-export const InfoButton = (props: IconButtonProps) => {
-  return <RoundButton {...props} aria-label="informations" Icon={InfoIcon} size="small" />;
+type InfoButtonProps = IconButtonProps & {
+  tooltipTitle: string;
+};
+export const InfoButton = ({ tooltipTitle, ...props }: InfoButtonProps) => {
+  return (
+    <CustomTooltip className="tooltip" title={tooltipTitle}>
+      <RoundButton {...props} aria-label="informations" Icon={InfoIcon} size="small" />
+    </CustomTooltip>
+  );
 };
 
 export const TipButton = (props: IconButtonProps) => {

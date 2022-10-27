@@ -22,26 +22,10 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
 import FormControlLabel from '@mui/material/FormControlLabel';
-import Link from '@mui/material/Link';
 import TextField from '@mui/material/TextField';
-import Typography from '@mui/material/Typography';
 import { ChangeEvent, Component, MouseEvent } from 'react';
 
 import authManager from '../AuthManager';
-
-function Copyright() {
-  return (
-    <Typography variant="body2" color="textSecondary" align="center">
-      {'Copyright © 2016-'}
-      {new Date().getFullYear()}
-      {' Savoir-faire Linux Inc.'}
-      <Link color="inherit" href="https://jami.net/">
-        Jami.net
-      </Link>{' '}
-      {'.'}
-    </Typography>
-  );
-}
 
 type SignInPageProps = {
   open: boolean;

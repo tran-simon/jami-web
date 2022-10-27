@@ -15,7 +15,23 @@
  * License along with this program.  If not, see
  * <https://www.gnu.org/licenses/>.
  */
-import { createTheme } from '@mui/material';
+import { createTheme, SimplePaletteColorOptions } from '@mui/material';
+
+declare module '@mui/material/styles' {
+  interface Theme {
+    InfoTooltip: {
+      backgroundColor: SimplePaletteColorOptions;
+      color: SimplePaletteColorOptions;
+    };
+  }
+
+  interface ThemeOptions {
+    InfoTooltip: {
+      backgroundColor: SimplePaletteColorOptions;
+      color: SimplePaletteColorOptions;
+    };
+  }
+}
 
 const theme = createTheme({
   palette: {
@@ -29,6 +45,14 @@ const theme = createTheme({
     },
     success: {
       main: '#009980',
+    },
+  },
+  InfoTooltip: {
+    backgroundColor: {
+      main: '#FFFFFF',
+    },
+    color: {
+      main: '#292929',
     },
   },
   typography: {

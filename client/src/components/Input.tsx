@@ -15,11 +15,22 @@
  * License along with this program.  If not, see
  * <https://www.gnu.org/licenses/>.
  */
-import { IconButtonProps, Stack, TextField, TextFieldProps } from '@mui/material';
+import { GppMaybe, Warning } from '@mui/icons-material';
+import {
+  IconButtonProps,
+  List,
+  ListItem,
+  ListItemIcon,
+  Stack,
+  TextField,
+  TextFieldProps,
+  Typography,
+} from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { ChangeEvent, ReactElement, useCallback, useEffect, useState } from 'react';
 
 import { InfoButton, ToggleVisibilityButton } from './Button';
+import RulesDialog from './RulesDialog';
 import { CheckedIcon, LockIcon, PenIcon, PersonIcon, RoundSaltireIcon } from './SvgIcon';
 
 const iconsHeight = '16px';
@@ -36,15 +47,17 @@ const StyledPenIconDark = styled(PenIcon)(({ theme }) => ({ height: iconsHeight,
 const StyledPersonIconLight = styled(PersonIcon)({ height: iconsHeight, color: '#03B9E9' });
 const StyledLockIcon = styled(LockIcon)({ height: iconsHeight, color: '#03B9E9' });
 
-type InputProps = TextFieldProps & {
+export type InputProps = TextFieldProps & {
   infoButtonProps?: IconButtonProps;
   success?: boolean;
+  tooltipTitle: string;
 };
 
-export const UsernameInput = ({ infoButtonProps, onChange: _onChange, ...props }: InputProps) => {
+export const UsernameInput = ({ infoButtonProps, onChange: _onChange, tooltipTitle, ...props }: InputProps) => {
   const [isSelected, setIsSelected] = useState(false);
   const [input, setInput] = useState(props.defaultValue);
   const [startAdornment, setStartAdornment] = useState<ReactElement | undefined>();
+  const [isDialogOpened, setIsDialogOpened] = useState<boolean>(false);
 
   const onChange = useCallback(
     (event: ChangeEvent<HTMLInputElement>) => {
@@ -69,27 +82,35 @@ export const UsernameInput = ({ infoButtonProps, onChange: _onChange, ...props }
   }, [props.error, props.success, isSelected, input]);
 
   return (
-    <TextField
-      {...props}
-      label="Choose an identifier"
-      variant="standard"
-      InputLabelProps={{ shrink: !!(isSelected || input) }}
-      onChange={onChange}
-      InputProps={{
-        startAdornment,
-        endAdornment: <InfoButton {...infoButtonProps} />,
-      }}
-      onFocus={() => setIsSelected(true)}
-      onBlur={() => setIsSelected(false)}
-    />
+    <>
+      <RulesDialog openDialog={isDialogOpened} title="Username rules :" closeDialog={() => setIsDialogOpened(false)}>
+        <UsernameRules />
+      </RulesDialog>
+      <TextField
+        {...props}
+        label={'Choose an identifier'}
+        variant="standard"
+        InputLabelProps={{ shrink: !!(isSelected || input) }}
+        onChange={onChange}
+        InputProps={{
+          startAdornment,
+          endAdornment: (
+            <InfoButton tooltipTitle={tooltipTitle} {...infoButtonProps} onClick={() => setIsDialogOpened(true)} />
+          ),
+        }}
+        onFocus={() => setIsSelected(true)}
+        onBlur={() => setIsSelected(false)}
+      />
+    </>
   );
 };
 
-export const PasswordInput = ({ infoButtonProps, onChange: _onChange, ...props }: InputProps) => {
+export const PasswordInput = ({ infoButtonProps, onChange: _onChange, tooltipTitle, ...props }: InputProps) => {
   const [showPassword, setShowPassword] = useState(false);
   const [isSelected, setIsSelected] = useState(false);
   const [input, setInput] = useState(props.defaultValue);
   const [startAdornment, setStartAdornment] = useState<ReactElement | undefined>();
+  const [isDialogOpened, setIsDialogOpened] = useState<boolean>(false);
 
   const toggleShowPassword = () => {
     setShowPassword((showPassword) => !showPassword);
@@ -118,26 +139,31 @@ export const PasswordInput = ({ infoButtonProps, onChange: _onChange, ...props }
   }, [props.error, props.success, isSelected, input]);
 
   return (
-    <TextField
-      {...props}
-      label="Password"
-      type={showPassword ? 'text' : 'password'}
-      variant="standard"
-      autoComplete="current-password"
-      InputLabelProps={{ shrink: !!(isSelected || input) }}
-      onChange={onChange}
-      InputProps={{
-        startAdornment,
-        endAdornment: (
-          <Stack direction="row" spacing="14px">
-            <InfoButton {...infoButtonProps} />
-            <ToggleVisibilityButton visible={showPassword} onClick={toggleShowPassword} />
-          </Stack>
-        ),
-      }}
-      onFocus={() => setIsSelected(true)}
-      onBlur={() => setIsSelected(false)}
-    />
+    <>
+      <RulesDialog openDialog={isDialogOpened} title="Password rules :" closeDialog={() => setIsDialogOpened(false)}>
+        <PasswordRules />
+      </RulesDialog>
+      <TextField
+        {...props}
+        label="Password"
+        type={showPassword ? 'text' : 'password'}
+        variant="standard"
+        autoComplete="current-password"
+        InputLabelProps={{ shrink: !!(isSelected || input) }}
+        onChange={onChange}
+        InputProps={{
+          startAdornment,
+          endAdornment: (
+            <Stack direction="row" spacing="14px" alignItems="center">
+              <InfoButton tooltipTitle={tooltipTitle} {...infoButtonProps} onClick={() => setIsDialogOpened(true)} />
+              <ToggleVisibilityButton visible={showPassword} onClick={toggleShowPassword} />
+            </Stack>
+          ),
+        }}
+        onFocus={() => setIsSelected(true)}
+        onBlur={() => setIsSelected(false)}
+      />
+    </>
   );
 };
 
@@ -206,5 +232,84 @@ export const RegularInput = ({ onChange: _onChange, ...props }: TextFieldProps) 
       onFocus={() => setIsSelected(true)}
       onBlur={() => setIsSelected(false)}
     />
+  );
+};
+
+export function inputColor(
+  error?: boolean,
+  success?: boolean
+): 'success' | 'error' | 'primary' | 'secondary' | 'info' | 'warning' | undefined {
+  return error ? 'error' : success ? 'success' : 'primary';
+}
+
+const PasswordRules = () => {
+  return (
+    <Typography variant="body1">
+      <List>
+        <ListItem>
+          <ListItemIcon>
+            <GppMaybe />
+          </ListItemIcon>
+          The password must contain at least 1 lowercase alphabetical character.
+        </ListItem>
+        <ListItem>
+          <ListItemIcon>
+            <GppMaybe />
+          </ListItemIcon>
+          The password must contain at least 1 uppercase alphabetical character.
+        </ListItem>
+        <ListItem>
+          <ListItemIcon>
+            <GppMaybe />
+          </ListItemIcon>
+          The password must contain at least 1 numeric character.
+        </ListItem>
+        <ListItem>
+          <ListItemIcon>
+            <GppMaybe />
+          </ListItemIcon>
+          The password must contain at least one special character.
+        </ListItem>
+        <ListItem>
+          <ListItemIcon>
+            <GppMaybe />
+          </ListItemIcon>
+          The password must be eight characters or longer for Strong strength.
+        </ListItem>
+      </List>
+    </Typography>
+  );
+};
+
+const UsernameRules = () => {
+  return (
+    <Typography variant="body1">
+      <List>
+        <ListItem>
+          <ListItemIcon>
+            <Warning />
+          </ListItemIcon>
+          The username must be 3 to 32 characters long.
+        </ListItem>
+        <ListItem>
+          <ListItemIcon>
+            <Warning />
+          </ListItemIcon>
+          The username may contain lowercase and uppercase alphabetical characters.
+        </ListItem>
+        <ListItem>
+          <ListItemIcon>
+            <Warning />
+          </ListItemIcon>
+          The username may contain hyphens {'(-)'}.
+        </ListItem>
+        <ListItem>
+          <ListItemIcon>
+            <Warning />
+          </ListItemIcon>
+          The username may contain underscores {'(_)'}.
+        </ListItem>
+      </List>
+    </Typography>
   );
 };

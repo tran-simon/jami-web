@@ -15,9 +15,11 @@
  * License along with this program.  If not, see
  * <https://www.gnu.org/licenses/>.
  */
-import { Button, Container } from '@mui/material';
+import { Container } from '@mui/material';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useState } from 'react';
+
+import { ReactComponent as JamiLogo } from '../icons/jami-logo-icon.svg';
 
 const list = {
   hidden: { opacity: 0 },
@@ -49,29 +51,15 @@ export default function WelcomeAnimation(props) {
             onAnimationComplete={(a) => {
               if (a === 'hidden') {
                 props.onComplete();
-              } else if (!props.showSetup) {
+              } else {
                 setVisible(false);
               }
             }}
           >
             <motion.div variants={item}>
-              <img
-                src="/jami-logo-icon.svg"
-                style={{
-                  width: '32',
-                  height: '32',
-                }}
-                alt="jami n/logo"
-              />
+              <JamiLogo width="95%" />
             </motion.div>
             <motion.h1 variants={item}>Welcome to Jami</motion.h1>
-            {props.showSetup && (
-              <motion.div variants={item}>
-                <Button variant="outlined" onClick={() => setVisible(false)}>
-                  Start setup
-                </Button>
-              </motion.div>
-            )}
           </motion.div>
         )}
       </AnimatePresence>

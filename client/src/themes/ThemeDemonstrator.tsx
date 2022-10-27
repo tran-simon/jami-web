@@ -59,7 +59,7 @@ export const ThemeDemonstrator = () => {
           <TakePictureButton />
         </Stack>
         <Stack direction="row" spacing="5px">
-          <InfoButton />
+          <InfoButton tooltipTitle={''} />
           <TipButton />
         </Stack>
         <Stack direction="row" spacing="5px">
@@ -70,10 +70,10 @@ export const ThemeDemonstrator = () => {
           <Switch />
         </Stack>
         <Stack padding="5px" width="300px">
-          <UsernameInput />
-          <UsernameInput error defaultValue="Cyrille" />
-          <PasswordInput />
-          <PasswordInput error defaultValue="SavoirFaireLinux" />
+          <UsernameInput onChange={() => {}} tooltipTitle={'Test'} />
+          <UsernameInput onChange={() => {}} tooltipTitle={'Test'} error defaultValue="Cyrille" />
+          <PasswordInput onChange={() => {}} tooltipTitle={'Test'} />
+          <PasswordInput onChange={() => {}} tooltipTitle={'Test'} error defaultValue="SavoirFaireLinux" />
           <NickNameInput />
           <RegularInput />
         </Stack>
