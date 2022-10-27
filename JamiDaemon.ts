@@ -129,7 +129,7 @@ class JamiDaemon {
             console.log(`Unknown account ${accountId}`);
             return;
           }
-          if (state == 0) {
+          if (state === 0) {
             const contact = account.getContactFromCache(address);
             if (!contact.isRegisteredNameResolved()) contact.setRegisteredName(name);
           }
@@ -281,8 +281,8 @@ class JamiDaemon {
               new Promise((resolve: (value: LookupResolveValue) => void, reject) =>
                 account.lookups.push({ address: member.uri, resolve, reject })
               ).then((result) => {
-                if (result.state == 0) return result.name;
-                else if (result.state == 1) return undefined;
+                if (result.state === 0) return result.name;
+                else if (result.state === 1) return undefined;
                 else return null;
               })
             );

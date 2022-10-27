@@ -247,8 +247,8 @@ class JamiRestApi {
       this.jami
         .lookupName(req.params.accountId || '', req.params.nameQuery)
         .then((result) => {
-          if (result.state == 0) res.json(result);
-          else if (result.state == 1) res.status(400).json({});
+          if (result.state === 0) res.json(result);
+          else if (result.state === 1) res.status(400).json({});
           else res.status(404).json({});
         })
         .catch((e) => {
@@ -261,8 +261,8 @@ class JamiRestApi {
       this.jami
         .lookupAddress(req.params.accountId || '', req.params.addrQuery)
         .then((result) => {
-          if (result.state == 0) res.json(result);
-          else if (result.state == 1) res.status(400).json({});
+          if (result.state === 0) res.json(result);
+          else if (result.state === 1) res.status(400).json({});
           else res.status(404).json({});
         })
         .catch((e) => {

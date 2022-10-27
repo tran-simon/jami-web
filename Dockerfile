@@ -16,7 +16,7 @@ COPY package*.json ./
 COPY client/package*.json client/
 COPY server/package*.json server/
 COPY common common
-COPY server/misc server/misc
+COPY server/scripts server/scripts
 COPY tsconfig.json ./
 
 RUN npm ci
