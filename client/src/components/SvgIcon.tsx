@@ -64,6 +64,37 @@ export const Arrow3Icon = (props: SvgIconProps) => {
   );
 };
 
+export const ArrowLeftCurved = (props: SvgIconProps) => {
+  return (
+    <SvgIcon {...props} viewBox="0 0 16 8.814">
+      <path d="M8.184 8.813a2.761 2.761 0 0 1-1.964-.815L1.627 3.409l1.782-1.782L7.998 6.22a.268.268 0 0 0 .368 0L14.218.368 16 2.15l-5.852 5.848a2.761 2.761 0 0 1-1.964.815Z" />
+      <path d="M2.518 7.555H0v-6.3A1.259 1.259 0 0 1 1.259 0h6.3v2.518H2.518Z" />
+    </SvgIcon>
+  );
+};
+
+export const ArrowLeftDown = (props: SvgIconProps) => {
+  return (
+    <SvgIcon {...props} viewBox="6 4.5 10.5 12.5">
+      <path
+        d="M15.25009097 14.59477981h-6.3300199l8.5305362-8.5305362-1.45522575-1.45522576-8.5305362 8.5305362v-6.3300199l-2.05555942.01909189v9.82171319l9.84009797.01838477Z"
+        strokeWidth=".5"
+      />
+    </SvgIcon>
+  );
+};
+
+export const ArrowRightUp = (props: SvgIconProps) => {
+  return (
+    <SvgIcon {...props} viewBox="4.5 5.5 11.5 12.5">
+      <path
+        d="m6.82975394 7.48428721 6.3293128.0007071-8.53053621 8.53053622 1.45522575 1.45522575 8.53053621-8.5305362v6.3300199l2.05555941-.01909188V5.4294349l-9.84009796-.01838477Z"
+        strokeWidth=".5"
+      />
+    </SvgIcon>
+  );
+};
+
 export const AudioCallIcon = (props: SvgIconProps) => {
   return (
     <SvgIcon {...props} viewBox="0 0 15.338 16">

@@ -35,7 +35,14 @@ import { useTranslation } from 'react-i18next';
 
 import { EmojiButton, MoreButton, ReplyMessageButton } from './Button';
 import ConversationAvatar from './ConversationAvatar';
-import { OppositeArrowsIcon, TrashBinIcon, TwoSheetsIcon } from './SvgIcon';
+import {
+  ArrowLeftCurved,
+  ArrowLeftDown,
+  ArrowRightUp,
+  OppositeArrowsIcon,
+  TrashBinIcon,
+  TwoSheetsIcon,
+} from './SvgIcon';
 
 type MessagePosition = 'start' | 'end';
 
@@ -90,15 +97,60 @@ interface MessageCallProps {
   isLastOfGroup: boolean;
 }
 
-const MessageCall = ({ isAccountMessage, isFirstOfGroup, isLastOfGroup }: MessageCallProps) => {
+const MessageCall = ({ message, isAccountMessage, isFirstOfGroup, isLastOfGroup }: MessageCallProps) => {
   const position = isAccountMessage ? 'end' : 'start';
-  const bubbleColor = isAccountMessage ? '#005699' : '#E5E5E5';
-  const textColor = isAccountMessage ? 'white' : 'black';
+
+  const { t } = useTranslation();
+  const { bubbleColor, Icon, text, textColor } = useMemo(() => {
+    const callDuration = dayjs.duration(parseInt(message?.duration || ''));
+    if (callDuration.asSeconds() === 0) {
+      if (isAccountMessage) {
+        return {
+          text: t('message_call_outgoing_missed'),
+          Icon: ArrowLeftCurved,
+          textColor: 'white',
+          bubbleColor: '#005699' + '80', // opacity 50%
+        };
+      } else {
+        return {
+          text: t('message_call_incoming_missed'),
+          Icon: ArrowLeftCurved,
+          textColor: 'black',
+          bubbleColor: '#C6C6C6',
+        };
+      }
+    } else {
+      const minutes = Math.floor(callDuration.asMinutes()).toString().padStart(2, '0');
+      const seconds = callDuration.format('ss');
+      const interpolations = {
+        duration: `${minutes}:${seconds}`,
+      };
+      if (isAccountMessage) {
+        return {
+          text: t('message_call_outgoing', interpolations),
+          Icon: ArrowRightUp,
+          textColor: 'white',
+          bubbleColor: '#005699',
+        };
+      } else {
+        return {
+          text: t('message_call_incoming', interpolations),
+          Icon: ArrowLeftDown,
+          textcolor: 'black',
+          bubbleColor: '#E5E5E5',
+        };
+      }
+    }
+  }, [isAccountMessage, message, t]);
+
   return (
     <Bubble position={position} isFirstOfGroup={isFirstOfGroup} isLastOfGroup={isLastOfGroup} bubbleColor={bubbleColor}>
-      <Typography variant="body1" color={textColor} textAlign={position}>
-        &quot;Appel&quot;
-      </Typography>
+      <Stack direction="row" spacing="10px" alignItems="center">
+        <Icon sx={{ fontSize: '16px', color: textColor }} />
+        <Typography variant="body1" color={textColor} textAlign={position} fontWeight="bold" textTransform="uppercase">
+          {text}
+        </Typography>
+      </Stack>
     </Bubble>
   );
 };

@@ -20,12 +20,14 @@ import 'dayjs/locale/fr';
 
 import dayjs from 'dayjs';
 import dayOfYear from 'dayjs/plugin/dayOfYear';
+import duration from 'dayjs/plugin/duration';
 import isBetween from 'dayjs/plugin/isBetween';
 import isToday from 'dayjs/plugin/isToday';
 import isYesterday from 'dayjs/plugin/isYesterday';
 import localizedFormat from 'dayjs/plugin/localizedFormat';
 
 dayjs.extend(dayOfYear);
+dayjs.extend(duration);
 dayjs.extend(isBetween);
 dayjs.extend(isToday);
 dayjs.extend(isYesterday);
