@@ -17,7 +17,7 @@
  */
 import { AccountDetails, VolatileDetails } from 'jami-web-common';
 import log from 'loglevel';
-import { filter, firstValueFrom, Subject } from 'rxjs';
+import { filter, firstValueFrom, map, Subject } from 'rxjs';
 import { Service } from 'typedi';
 
 import { JamiSignal } from './jami-signal.js';
@@ -133,8 +133,9 @@ export class Jamid {
     const accountId = this.jamiSwig.addAccount(detailsStringMap);
     return firstValueFrom(
       this.events.onRegistrationStateChanged.pipe(
-        filter(({ accountId: addedAccountId }) => addedAccountId === accountId),
+        filter((value) => value.accountId === accountId),
         // TODO: is it the only state?
+        // TODO: Replace with string enum in common/
         filter(({ state }) => state === 'REGISTERED')
       )
     );
@@ -154,26 +155,38 @@ export class Jamid {
     this.jamiSwig.sendAccountTextMessage(accountId, contactId, messageStringMap);
   }
 
-  async lookupUsername(username: string) {
-    const hasRingNs = this.jamiSwig.lookupName('', '', username);
+  async lookupUsername(username: string, accountId?: string) {
+    const hasRingNs = this.jamiSwig.lookupName(accountId || '', '', username);
     if (!hasRingNs) {
-      log.error('Jami does not have NS');
       throw new Error('Jami does not have NS');
     }
-    return firstValueFrom(this.events.onRegisteredNameFound.pipe(filter((r) => r.username === username)));
+    return firstValueFrom(
+      this.events.onRegisteredNameFound.pipe(
+        filter((value) => value.username === username),
+        map(({ accountId: _, ...response }) => response) // Remove accountId from response
+      )
+    );
+  }
+
+  async lookupAddress(address: string, accountId?: string) {
+    const hasRingNs = this.jamiSwig.lookupAddress(accountId || '', '', address);
+    if (!hasRingNs) {
+      throw new Error('Jami does not have NS');
+    }
+    return firstValueFrom(
+      this.events.onRegisteredNameFound.pipe(
+        filter((value) => value.address === address),
+        map(({ accountId: _, ...response }) => response) // Remove accountId from response
+      )
+    );
   }
 
   async registerUsername(accountId: string, username: string, password: string) {
     const hasRingNs = this.jamiSwig.registerName(accountId, password, username);
     if (!hasRingNs) {
-      log.error('Jami does not have NS');
       throw new Error('Jami does not have NS');
     }
-    return firstValueFrom(
-      this.events.onNameRegistrationEnded.pipe(
-        filter(({ accountId: registeredAccountId }) => registeredAccountId === accountId)
-      )
-    );
+    return firstValueFrom(this.events.onNameRegistrationEnded.pipe(filter((value) => value.accountId === accountId)));
   }
 
   getDevices(accountId: string): Record<string, string> {

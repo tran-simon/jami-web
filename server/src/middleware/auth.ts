@@ -22,29 +22,41 @@ import { Container } from 'typedi';
 
 import { Vault } from '../vault.js';
 
-export async function authenticateToken(req: Request, res: Response, next: NextFunction) {
-  const publicKey = Container.get(Vault).publicKey;
+function createAuthenticationMiddleware(isAuthenticationRequired: boolean) {
+  return async (req: Request, res: Response, next: NextFunction) => {
+    const publicKey = Container.get(Vault).publicKey;
 
-  const authorizationHeader = req.headers.authorization;
-  if (!authorizationHeader) {
-    res.status(HttpStatusCode.Unauthorized).send('Missing Authorization header');
-    return;
-  }
+    const authorizationHeader = req.headers.authorization;
+    if (!authorizationHeader) {
+      if (isAuthenticationRequired) {
+        res.status(HttpStatusCode.Unauthorized).send('Missing Authorization header');
+      } else {
+        // Skip authentication if it is optional, in which case the Authorization header should not have been set
+        res.locals.accountId = undefined;
+        next();
+      }
+      return;
+    }
 
-  const token = authorizationHeader.split(' ')[1];
-  if (token === undefined) {
-    res.status(HttpStatusCode.BadRequest).send('Missing JSON web token');
-    return;
-  }
+    const token = authorizationHeader.split(' ')[1];
+    if (token === undefined) {
+      res.status(HttpStatusCode.BadRequest).send('Missing JSON web token');
+      return;
+    }
 
-  try {
-    const { payload } = await jwtVerify(token, publicKey, {
-      issuer: 'urn:example:issuer',
-      audience: 'urn:example:audience',
-    });
-    res.locals.accountId = payload.id as string;
-    next();
-  } catch (err) {
-    res.sendStatus(HttpStatusCode.Unauthorized);
-  }
+    try {
+      const { payload } = await jwtVerify(token, publicKey, {
+        issuer: 'urn:example:issuer',
+        audience: 'urn:example:audience',
+      });
+      res.locals.accountId = payload.id as string;
+      next();
+    } catch (err) {
+      res.sendStatus(HttpStatusCode.Unauthorized);
+    }
+  };
 }
+
+export const authenticateToken = createAuthenticationMiddleware(true);
+
+export const authenticateOptionalToken = createAuthenticationMiddleware(false);
