@@ -1,4 +1,4 @@
-FROM jami-daemon
+FROM jami-daemon AS jami-web
 
 WORKDIR /web-client
 ENV LD_LIBRARY_PATH=/daemon/src/.libs
@@ -20,7 +20,16 @@ COPY server/scripts server/scripts
 COPY tsconfig.json ./
 
 RUN npm ci
-
 COPY . .
 
+FROM jami-web AS development
 CMD ["npm", "start"]
+
+FROM jami-web AS test
+RUN npm run lint
+
+FROM jami-web AS build
+RUN npm run build
+
+FROM build AS production
+CMD ["npm", "run", "start:prod"]

@@ -71,7 +71,7 @@ cd ..
 ## 2. Build and run the web server and client
 
 ```bash
-docker build --tag jami-web .
+docker build --target development --tag jami-web .
 docker run -it \
   -p 3001:3001 \
   -p 3000:3000 \

@@ -3,7 +3,9 @@ version: "3.9"
 services:
   jami-web:
     image: jami-web
-    build: .
+    build:
+      context: .
+      target: development
     volumes:
       # Add bind mounts for hot-reload
       - ./client/src:/web-client/client/src
