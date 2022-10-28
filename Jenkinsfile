@@ -19,10 +19,40 @@
 // Requirements:
 // - gerrit-trigger plugin
 // - Docker plugin
+// - ansicolor plugin
 
 pipeline {
     agent any
+
+    triggers {
+        gerrit customUrl: '',
+            gerritProjects: [
+                [branches: [[compareType: 'PLAIN', pattern: 'master']],
+                 compareType: 'PLAIN',
+                 disableStrictForbiddenFileVerification: false,
+                 pattern: REPO_NAME],
+            triggerOnEvents: [
+                commentAddedContains('!build'),
+                patchsetCreated(excludeDrafts: true, excludeNoCodeChange: true,
+                    excludeTrivialRebase: true)]
+    }
+
+    options {
+        ansiColor('xterm')
+    }
+
+    parameters {
+            string(name: 'GERRIT_REFSPEC',
+                   defaultValue: 'refs/heads/master',
+                   description: 'The Gerrit refspec to fetch.')
+    }
+
     stages {
+        stage('Initialize submodules') {
+            steps {
+                sh "git submodule update --init --recursive"
+            }
+        }
         stage('Build jami-daemon') {
             steps {
                 dir("daemon") {
