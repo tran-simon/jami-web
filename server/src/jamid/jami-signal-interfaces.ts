@@ -15,9 +15,20 @@
  * License along with this program.  If not, see
  * <https://www.gnu.org/licenses/>.
  */
+import { AccountDetails, VolatileDetails } from 'jami-web-common';
+
+// These interfaces are used to hold all the parameters for signal handlers
+// These parameters' names and types can be found in daemon/bin/nodejs/callback.h
+// or in their relevant SWIG interface files (.i) in daemon/bin/nodejs
+
+export interface AccountDetailsChanged {
+  accountId: string;
+  details: AccountDetails;
+}
+
 export interface VolatileDetailsChanged {
   accountId: string;
-  details: Map<string, string>;
+  details: VolatileDetails;
 }
 
 export interface RegistrationStateChanged {
@@ -40,8 +51,36 @@ export interface RegisteredNameFound {
   username: string;
 }
 
+export interface KnownDevicesChanged {
+  accountId: string;
+  devices: Record<string, string>;
+}
+
 export interface IncomingAccountMessage {
   accountId: string;
   from: string;
+  message: Record<string, string>;
+}
+
+export interface ConversationReady {
+  accountId: string;
+  conversationId: string;
+}
+
+export interface ConversationRemoved {
+  accountId: string;
+  conversationId: string;
+}
+
+export interface ConversationLoaded {
+  id: number;
+  accountId: string;
+  conversationId: string;
+  messages: Record<string, string>[];
+}
+
+export interface MessageReceived {
+  accountId: string;
+  conversationId: string;
   message: Record<string, string>;
 }

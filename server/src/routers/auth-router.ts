@@ -21,7 +21,6 @@ import asyncHandler from 'express-async-handler';
 import { ParamsDictionary, Request } from 'express-serve-static-core';
 import { HttpStatusCode } from 'jami-web-common';
 import { SignJWT } from 'jose';
-import log from 'loglevel';
 import { Container } from 'typedi';
 
 import { Creds } from '../creds.js';
@@ -103,8 +102,6 @@ authRouter.post(
       res.status(HttpStatusCode.NotFound).send('Password not found');
       return;
     }
-
-    log.debug(jamid.getAccountDetails(accountId));
 
     const isPasswordVerified = await argon2.verify(hashedPassword, password);
     if (!isPasswordVerified) {

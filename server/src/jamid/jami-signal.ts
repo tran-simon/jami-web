@@ -15,8 +15,13 @@
  * License along with this program.  If not, see
  * <https://www.gnu.org/licenses/>.
  */
+/**
+ * Signals emitted by the Jami daemon.
+ *
+ * The definition of signals can be found in `daemon/bin/nodejs/callback.h`.
+ */
 export enum JamiSignal {
-  // using DRing::ConfigurationSignal;
+  // libjami::ConfigurationSignal
   AccountsChanged = 'AccountsChanged',
   AccountDetailsChanged = 'AccountDetailsChanged',
   RegistrationStateChanged = 'RegistrationStateChanged',
@@ -30,14 +35,14 @@ export enum JamiSignal {
   IncomingAccountMessage = 'IncomingAccountMessage',
   AccountMessageStatusChanged = 'AccountMessageStatusChanged',
 
-  // using DRing::CallSignal;
+  // libjami::CallSignal
   StateChange = 'StateChange',
   IncomingMessage = 'IncomingMessage',
   IncomingCall = 'IncomingCall',
   IncomingCallWithMedia = 'IncomingCallWithMedia',
   MediaChangeRequested = 'MediaChangeRequested',
 
-  // using DRing::ConversationSignal;
+  // libjami::ConversationSignal
   ConversationLoaded = 'ConversationLoaded',
   MessagesFound = 'MessagesFound',
   MessageReceived = 'MessageReceived',

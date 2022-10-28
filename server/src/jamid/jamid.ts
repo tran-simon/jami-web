@@ -22,7 +22,13 @@ import { Service } from 'typedi';
 
 import { JamiSignal } from './jami-signal.js';
 import {
+  AccountDetailsChanged,
+  ConversationLoaded,
+  ConversationReady,
+  ConversationRemoved,
   IncomingAccountMessage,
+  KnownDevicesChanged,
+  MessageReceived,
   NameRegistrationEnded,
   RegisteredNameFound,
   RegistrationStateChanged,
@@ -30,6 +36,8 @@ import {
 } from './jami-signal-interfaces.js';
 import { JamiSwig, StringMap, stringMapToRecord, stringVectToArray } from './jami-swig.js';
 import { require } from './utils.js';
+
+// TODO: Mechanism to map account IDs to a list of WebSockets
 
 @Service()
 export class Jamid {
@@ -41,15 +49,30 @@ export class Jamid {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     this.jamiSwig = require('../../jamid.node') as JamiSwig; // TODO: we should put the path in the .env
 
+    this.usernamesToAccountIds = new Map<string, string>();
+
+    // Setup signal handlers
     const handlers: Record<string, unknown> = {};
-    const handler = (sig: string) => {
-      return (...args: unknown[]) => log.warn('Unhandled', sig, args);
+
+    // Add default handler for all signals
+    const createDefaultHandler = (signal: string) => {
+      return (...args: unknown[]) => log.warn('Unhandled', signal, args);
     };
-    Object.keys(JamiSignal).forEach((sig) => (handlers[sig] = handler(sig)));
+    for (const signal in JamiSignal) {
+      handlers[signal] = createDefaultHandler(signal);
+    }
+
+    // Overwrite handlers for handled signals using RxJS Subjects, converting multiple arguments to objects
+    const onAccountsChanged = new Subject<void>();
+    handlers.AccountsChanged = () => onAccountsChanged.next();
+
+    const onAccountDetailsChanged = new Subject<AccountDetailsChanged>();
+    handlers.AccountDetailsChanged = (accountId: string, details: AccountDetails) =>
+      onAccountDetailsChanged.next({ accountId, details });
 
     const onVolatileDetailsChanged = new Subject<VolatileDetailsChanged>();
-    handlers.VolatileDetailsChanged = (accountId: string, details: Record<string, string>) =>
-      onVolatileDetailsChanged.next({ accountId, details: new Map(Object.entries(details)) });
+    handlers.VolatileDetailsChanged = (accountId: string, details: VolatileDetails) =>
+      onVolatileDetailsChanged.next({ accountId, details });
 
     const onRegistrationStateChanged = new Subject<RegistrationStateChanged>();
     handlers.RegistrationStateChanged = (accountId: string, state: string, code: number, details: string) =>
@@ -63,42 +86,56 @@ export class Jamid {
     handlers.RegisteredNameFound = (accountId: string, state: number, address: string, username: string) =>
       onRegisteredNameFound.next({ accountId, state, address, username });
 
+    const onKnownDevicesChanged = new Subject<KnownDevicesChanged>();
+    handlers.KnownDevicesChanged = (accountId: string, devices: Record<string, string>) =>
+      onKnownDevicesChanged.next({ accountId, devices });
+
     const onIncomingAccountMessage = new Subject<IncomingAccountMessage>();
     handlers.IncomingAccountMessage = (accountId: string, from: string, message: Record<string, string>) =>
       onIncomingAccountMessage.next({ accountId, from, message });
 
+    const onConversationReady = new Subject<ConversationReady>();
+    handlers.ConversationReady = (accountId: string, conversationId: string) =>
+      onConversationReady.next({ accountId, conversationId });
+
+    const onConversationRemoved = new Subject<ConversationRemoved>();
+    handlers.ConversationRemoved = (accountId: string, conversationId: string) =>
+      onConversationRemoved.next({ accountId, conversationId });
+
+    const onConversationLoaded = new Subject<ConversationLoaded>();
+    handlers.ConversationLoaded = (
+      id: number,
+      accountId: string,
+      conversationId: string,
+      messages: Record<string, string>[]
+    ) => onConversationLoaded.next({ id, accountId, conversationId, messages });
+
+    const onMessageReceived = new Subject<MessageReceived>();
+    handlers.MessageReceived = (accountId: string, conversationId: string, message: Record<string, string>) =>
+      onMessageReceived.next({ accountId, conversationId, message });
+
+    // Expose all signals in an events object to allow other handlers to subscribe after jamiSwig.init()
     this.events = {
+      onAccountsChanged: onAccountsChanged.asObservable(),
+      onAccountDetailsChanged: onAccountDetailsChanged.asObservable(),
       onVolatileDetailsChanged: onVolatileDetailsChanged.asObservable(),
       onRegistrationStateChanged: onRegistrationStateChanged.asObservable(),
       onNameRegistrationEnded: onNameRegistrationEnded.asObservable(),
       onRegisteredNameFound: onRegisteredNameFound.asObservable(),
+      onKnownDevicesChanged: onKnownDevicesChanged.asObservable(),
       onIncomingAccountMessage: onIncomingAccountMessage.asObservable(),
+      onConversationReady: onConversationReady.asObservable(),
+      onConversationRemoved: onConversationRemoved.asObservable(),
+      onConversationLoaded: onConversationLoaded.asObservable(),
+      onMessageReceived: onMessageReceived.asObservable(),
     };
 
-    this.events.onVolatileDetailsChanged.subscribe(({ accountId, details }) => {
-      log.debug('[1] Received onVolatileDetailsChanged with', { accountId, details });
-      // Keep map of usernames to account IDs as Jamid cannot do this by itself (AFAIK)
-      const username = details.get('Account.registeredName');
-      if (username) {
-        this.usernamesToAccountIds.set(username, accountId);
-      }
-    });
-    this.events.onRegistrationStateChanged.subscribe((ctx) =>
-      log.debug('[1] Received onRegistrationStateChanged with', ctx)
-    );
-    this.events.onNameRegistrationEnded.subscribe((ctx) => log.debug('[1] Received onNameRegistrationEnded with', ctx));
-    this.events.onRegisteredNameFound.subscribe((ctx) => log.debug('[1] Received onRegisteredNameFound with', ctx));
-    this.events.onIncomingAccountMessage.subscribe((ctx) =>
-      log.debug('[1] Received onIncomingAccountMessage with', ctx)
-    );
+    this.setupSignalHandlers();
 
-    this.usernamesToAccountIds = new Map<string, string>();
-
-    // 1. You cannot change event handlers after init
+    // RxJS Subjects are used as signal handlers for the following reasons:
+    // 1. You cannot change event handlers after calling jamiSwig.init()
     // 2. You cannot specify multiple handlers for the same event
     // 3. You cannot specify a default handler
-    // So we rely on Subject() instead of Observable()
-    // Also, handlers receive multiple argument instead of tuple or object!
     this.jamiSwig.init(handlers);
   }
 
@@ -201,5 +238,61 @@ export class Jamid {
   // keeping an internal map.
   getAccountIdFromUsername(username: string): string | undefined {
     return this.usernamesToAccountIds.get(username);
+  }
+
+  private setupSignalHandlers() {
+    this.events.onAccountsChanged.subscribe(() => {
+      log.debug('Received AccountsChanged');
+    });
+
+    this.events.onAccountDetailsChanged.subscribe((signal) => {
+      log.debug('Received AccountsDetailsChanged', JSON.stringify(signal));
+    });
+
+    this.events.onVolatileDetailsChanged.subscribe(({ accountId, details }) => {
+      log.debug(`Received VolatileDetailsChanged: {"accountId":"${accountId}", ...}`);
+      // Keep map of usernames to account IDs
+      const username = details['Account.registeredName'];
+      if (username) {
+        this.usernamesToAccountIds.set(username, accountId);
+      }
+    });
+
+    this.events.onRegistrationStateChanged.subscribe((signal) => {
+      log.debug('Received RegistrationStateChanged:', JSON.stringify(signal));
+    });
+
+    this.events.onNameRegistrationEnded.subscribe((signal) => {
+      log.debug('Received NameRegistrationEnded:', JSON.stringify(signal));
+    });
+
+    this.events.onRegisteredNameFound.subscribe((signal) => {
+      log.debug('Received RegisteredNameFound:', JSON.stringify(signal));
+    });
+
+    this.events.onKnownDevicesChanged.subscribe(({ accountId }) => {
+      log.debug(`Received KnownDevicesChanged: {"accountId":"${accountId}", ...}`);
+    });
+
+    this.events.onIncomingAccountMessage.subscribe((signal) => {
+      log.debug('Received IncomingAccountMessage:', JSON.stringify(signal));
+    });
+
+    this.events.onConversationReady.subscribe((signal) => {
+      log.debug('Received ConversationReady:', JSON.stringify(signal));
+    });
+
+    this.events.onConversationRemoved.subscribe((signal) => {
+      log.debug('Received ConversationRemoved:', JSON.stringify(signal));
+    });
+
+    this.events.onConversationLoaded.subscribe((signal) => {
+      log.debug('Received ConversationLoaded:', JSON.stringify(signal));
+    });
+
+    this.events.onMessageReceived.subscribe((signal) => {
+      log.debug('Received MessageReceived:', JSON.stringify(signal));
+      // TODO: Send message to client using WebSocket
+    });
   }
 }

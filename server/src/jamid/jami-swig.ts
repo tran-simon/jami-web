@@ -53,6 +53,11 @@ export const stringMapToRecord = (sm: StringMap) => itToRecord(swigMapToIt(sm));
 export const stringMapToMap = (sm: StringMap) => itToMap(swigMapToIt(sm));
 // export const vectMapToArrayMap = (vm: VectMap) => itToArr(itMap(swigVecToIt(vm), stringMapToMap));
 
+/**
+ * Non-exhaustive list of properties for JamiSwig.
+ *
+ * The full list of methods can be found in SWIG interface files (`.i`) in `daemon/bin/nodejs`.
+ */
 export interface JamiSwig {
   init(args: Record<string, unknown>): void;
   fini(): void;
@@ -74,11 +79,6 @@ export interface JamiSwig {
   registerName(accountId: string, password: string, username: string): boolean;
 
   getKnownRingDevices(accountId: string): StringMap;
-
-  getAudioOutputDeviceList(): StringVect;
-
-  getVolume(device: string): number;
-  setVolume(device: string, value: number): void;
 
   addContact(accountId: string, contactId: string): void;
   removeContact(accountId: string, contactId: string, ban: boolean): void;
