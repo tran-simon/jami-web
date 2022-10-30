@@ -39,3 +39,9 @@ export interface RegisteredNameFound {
   address: string;
   username: string;
 }
+
+export interface IncomingAccountMessage {
+  accountId: string;
+  from: string;
+  message: Record<string, string>;
+}

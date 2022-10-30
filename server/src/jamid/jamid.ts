@@ -22,6 +22,7 @@ import { Service } from 'typedi';
 
 import { JamiSignal } from './jami-signal.js';
 import {
+  IncomingAccountMessage,
   NameRegistrationEnded,
   RegisteredNameFound,
   RegistrationStateChanged,
@@ -62,11 +63,16 @@ export class Jamid {
     handlers.RegisteredNameFound = (accountId: string, state: number, address: string, username: string) =>
       onRegisteredNameFound.next({ accountId, state, address, username });
 
+    const onIncomingAccountMessage = new Subject<IncomingAccountMessage>();
+    handlers.IncomingAccountMessage = (accountId: string, from: string, message: Record<string, string>) =>
+      onIncomingAccountMessage.next({ accountId, from, message });
+
     this.events = {
       onVolatileDetailsChanged: onVolatileDetailsChanged.asObservable(),
       onRegistrationStateChanged: onRegistrationStateChanged.asObservable(),
       onNameRegistrationEnded: onNameRegistrationEnded.asObservable(),
       onRegisteredNameFound: onRegisteredNameFound.asObservable(),
+      onIncomingAccountMessage: onIncomingAccountMessage.asObservable(),
     };
 
     this.events.onVolatileDetailsChanged.subscribe(({ accountId, details }) => {
@@ -82,6 +88,9 @@ export class Jamid {
     );
     this.events.onNameRegistrationEnded.subscribe((ctx) => log.debug('[1] Received onNameRegistrationEnded with', ctx));
     this.events.onRegisteredNameFound.subscribe((ctx) => log.debug('[1] Received onRegisteredNameFound with', ctx));
+    this.events.onIncomingAccountMessage.subscribe((ctx) =>
+      log.debug('[1] Received onIncomingAccountMessage with', ctx)
+    );
 
     this.usernamesToAccountIds = new Map<string, string>();
 
@@ -137,6 +146,12 @@ export class Jamid {
 
   getAccountList(): string[] {
     return stringVectToArray(this.jamiSwig.getAccountList());
+  }
+
+  sendAccountTextMessage(accountId: string, contactId: string, type: string, message: string) {
+    const messageStringMap: StringMap = new this.jamiSwig.StringMap();
+    messageStringMap.set(type, message);
+    this.jamiSwig.sendAccountTextMessage(accountId, contactId, messageStringMap);
   }
 
   async lookupUsername(username: string) {

@@ -15,12 +15,20 @@
  * License along with this program.  If not, see
  * <https://www.gnu.org/licenses/>.
  */
-import { Router } from 'express';
-import { AccountDetails } from 'jami-web-common';
+import { Request, Router } from 'express';
+import { ParamsDictionary } from 'express-serve-static-core';
+import { AccountDetails, HttpStatusCode } from 'jami-web-common';
 import { Container } from 'typedi';
 
 import { Jamid } from '../jamid/jamid.js';
 import { authenticateToken } from '../middleware/auth.js';
+
+interface SendAccountTextMessageApi {
+  from?: string;
+  to?: string;
+  type?: string;
+  data?: string;
+}
 
 const jamid = Container.get(Jamid);
 
@@ -48,5 +56,15 @@ accountRouter.post('/', (req, res) => {
   const currentAccountDetails = jamid.getAccountDetails(accountId);
   const newAccountDetails: AccountDetails = { ...currentAccountDetails, ...req.body };
   jamid.setAccountDetails(res.locals.accountId, newAccountDetails);
+  res.end();
+});
+
+accountRouter.post('/send-account-message', (req: Request<ParamsDictionary, any, SendAccountTextMessageApi>, res) => {
+  const { from, to, type, data } = req.body;
+  if (!from || !to || !type || !data) {
+    res.status(HttpStatusCode.BadRequest).send('Missing arguments in request');
+    return;
+  }
+  jamid.sendAccountTextMessage(from, to, type, data);
   res.end();
 });
