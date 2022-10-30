@@ -30,7 +30,7 @@ pipeline {
                 [branches: [[compareType: 'PLAIN', pattern: 'master']],
                  compareType: 'PLAIN',
                  disableStrictForbiddenFileVerification: false,
-                 pattern: REPO_NAME],
+                 pattern: 'jami-web']],
             triggerOnEvents: [
                 commentAddedContains('!build'),
                 patchsetCreated(excludeDrafts: true, excludeNoCodeChange: true,
