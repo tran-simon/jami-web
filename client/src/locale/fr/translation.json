@@ -1,4 +1,11 @@
 {
+  "conversation_message": "Envoyer un message",
+  "conversation_start_audiocall": "Démarrer appel audio",
+  "conversation_start_videocall": "Démarrer appel vidéo",
+  "conversation_close": "Fermer la conversation",
+  "conversation_details": "Détails de la conversation",
+  "conversation_block_contact": "Bloquer le contact",
+  "conversation_delete_contact": "Supprimer le contact",
   "conversation_title_one": "{{member0}}",
   "conversation_title_two": "{{member0}} et {{member1}}",
   "conversation_title_three": "{{member0}}, {{member1}} et {{member2}}",

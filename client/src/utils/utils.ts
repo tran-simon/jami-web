@@ -15,8 +15,10 @@
  * License along with this program.  If not, see
  * <https://www.gnu.org/licenses/>.
  */
-import { ReactNode } from 'react';
+import { Dispatch, ReactNode, SetStateAction } from 'react';
 
 export type WithChildren = {
   children: ReactNode;
 };
+
+export type SetState<T> = Dispatch<SetStateAction<T>>;

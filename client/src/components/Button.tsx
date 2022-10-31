@@ -15,7 +15,7 @@
  * License along with this program.  If not, see
  * <https://www.gnu.org/licenses/>.
  */
-import { QuestionMark } from '@mui/icons-material';
+import { QuestionMark, RadioButtonChecked, RadioButtonUnchecked } from '@mui/icons-material';
 import { Box, ClickAwayListener, IconButton, IconButtonProps, Popper, SvgIconProps } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import EmojiPicker, { IEmojiData } from 'emoji-picker-react';
@@ -26,32 +26,22 @@ import {
   Arrow3Icon,
   ArrowIcon,
   AudioCallIcon,
-  CallEndIcon,
   CameraIcon,
   CameraInBubbleIcon,
   CancelIcon,
-  ChatBubbleIcon,
   CrossedEyeIcon,
   CrossIcon,
   EmojiIcon,
-  ExtensionIcon,
   EyeIcon,
   FolderIcon,
-  FullscreenIcon,
-  GroupAddIcon,
   InfoIcon,
   ListIcon,
-  MicroIcon,
   MicroInBubbleIcon,
   PaperClipIcon,
   PenIcon,
   PeopleWithPlusSignIcon,
-  RecordingIcon,
   SaltireIcon,
-  ScreenShareIcon,
   VideoCallIcon,
-  VideoCameraIcon,
-  VolumeIcon,
 } from './SvgIcon';
 import CustomTooltip from './Tooltip';
 
@@ -157,81 +147,27 @@ export const BackButton = styled((props: IconButtonProps) => {
   },
 }));
 
-export const CallingChatButton = (props: IconButtonProps) => {
-  return (
-    <IconButton {...props} aria-label="chat" sx={{ color: 'white' }}>
-      <ChatBubbleIcon />
-    </IconButton>
-  );
+export type ToggleIconButtonProps = IconButtonProps & {
+  selected: boolean;
+  toggle: () => void;
+  IconOn?: ComponentType<SvgIconProps>;
+  IconOff?: ComponentType<SvgIconProps>;
 };
-
-export const CallingEndButton = (props: IconButtonProps) => {
+export const ToggleIconButton = ({
+  IconOn = RadioButtonChecked,
+  IconOff = RadioButtonUnchecked,
+  selected,
+  toggle,
+  ...props
+}: ToggleIconButtonProps) => {
   return (
-    <IconButton {...props} aria-label="end call" sx={{ color: 'white', backgroundColor: 'red' }}>
-      <CallEndIcon />
-    </IconButton>
-  );
-};
-
-export const CallingExtensionButton = (props: IconButtonProps) => {
-  return (
-    <IconButton {...props} aria-label="extensions" sx={{ color: 'white' }}>
-      <ExtensionIcon />
-    </IconButton>
-  );
-};
-
-export const CallingFullscreenButton = (props: IconButtonProps) => {
-  return (
-    <IconButton {...props} aria-label="fullscreen" sx={{ color: 'white' }}>
-      <FullscreenIcon />
-    </IconButton>
-  );
-};
-
-export const CallingGroupButton = (props: IconButtonProps) => {
-  return (
-    <IconButton {...props} aria-label="group options" sx={{ color: 'white' }}>
-      <GroupAddIcon />
-    </IconButton>
-  );
-};
-
-export const CallingMicButton = (props: IconButtonProps) => {
-  return (
-    <IconButton {...props} aria-label="microphone options" sx={{ color: 'white' }}>
-      <MicroIcon />
-    </IconButton>
-  );
-};
-
-export const CallingRecordButton = (props: IconButtonProps) => {
-  return (
-    <IconButton {...props} aria-label="recording options" sx={{ color: 'white' }}>
-      <RecordingIcon />
-    </IconButton>
-  );
-};
-
-export const CallingScreenShareButton = (props: IconButtonProps) => {
-  return (
-    <IconButton {...props} aria-label="screen share" sx={{ color: 'white' }}>
-      <ScreenShareIcon />
-    </IconButton>
-  );
-};
-
-export const CallingVideoCameraButton = (props: IconButtonProps) => {
-  return (
-    <IconButton {...props} aria-label="camera options" sx={{ color: 'white' }}>
-      <VideoCameraIcon />
-    </IconButton>
-  );
-};
-export const CallingVolumeButton = (props: IconButtonProps) => {
-  return (
-    <IconButton {...props} aria-label="volume options" sx={{ color: 'white' }}>
-      <VolumeIcon />
+    <IconButton
+      {...props}
+      onClick={() => {
+        toggle();
+      }}
+    >
+      {selected ? <IconOn /> : <IconOff />}
     </IconButton>
   );
 };

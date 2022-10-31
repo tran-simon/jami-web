@@ -19,6 +19,7 @@ import { Divider, Stack, Typography } from '@mui/material';
 import { Account, Conversation, ConversationMember, Message } from 'jami-web-common';
 import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router';
 
 import { SocketContext } from '../contexts/Socket';
 import { useAccountQuery } from '../services/Account';
@@ -105,6 +106,7 @@ const ConversationView = ({ accountId, conversationId }: ConversationViewProps) 
           account={account}
           members={conversation.getMembers()}
           adminTitle={conversation.infos.title as string}
+          conversationId={conversationId}
         />
       </Stack>
       <Divider
@@ -130,12 +132,14 @@ const ConversationView = ({ accountId, conversationId }: ConversationViewProps) 
 
 type ConversationHeaderProps = {
   account: Account;
+  conversationId: string;
   members: ConversationMember[];
   adminTitle: string | undefined;
 };
 
-const ConversationHeader = ({ account, members, adminTitle }: ConversationHeaderProps) => {
+const ConversationHeader = ({ account, members, adminTitle, conversationId }: ConversationHeaderProps) => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
 
   const title = useMemo(() => {
     if (adminTitle) {
@@ -160,6 +164,14 @@ const ConversationHeader = ({ account, members, adminTitle }: ConversationHeader
     return translateEnumeration<ConversationMember>(members, options);
   }, [account, members, adminTitle, t]);
 
+  const startCall = (withVideo = false) => {
+    let url = `/account/${account.getId()}/call/${conversationId}`;
+    if (withVideo) {
+      url += '?video=true';
+    }
+    navigate(url);
+  };
+
   return (
     <Stack direction="row">
       <Stack flex={1} justifyContent="center" whiteSpace="nowrap" overflow="hidden">
@@ -168,8 +180,8 @@ const ConversationHeader = ({ account, members, adminTitle }: ConversationHeader
         </Typography>
       </Stack>
       <Stack direction="row" spacing="20px">
-        <StartAudioCallButton />
-        <StartVideoCallButton />
+        <StartAudioCallButton onClick={() => startCall(false)} />
+        <StartVideoCallButton onClick={() => startCall(true)} />
         <AddParticipantButton />
         <ShowOptionsMenuButton />
       </Stack>

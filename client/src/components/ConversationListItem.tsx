@@ -15,10 +15,21 @@
  * License along with this program.  If not, see
  * <https://www.gnu.org/licenses/>.
  */
-import { Box, ListItem, ListItemAvatar, ListItemText, Stack, StackProps, Typography } from '@mui/material';
+import {
+  Box,
+  ListItem,
+  ListItemAvatar,
+  ListItemIcon,
+  ListItemText,
+  Menu,
+  MenuItem,
+  Stack,
+  Typography,
+} from '@mui/material';
 import { Conversation } from 'jami-web-common';
 import { QRCodeCanvas } from 'qrcode.react';
 import { MouseEvent, useState } from 'react';
+import { Trans } from 'react-i18next';
 import Modal from 'react-modal';
 import { useNavigate, useParams } from 'react-router-dom';
 
@@ -26,32 +37,8 @@ import authManager from '../AuthManager';
 import { setRefreshFromSlice } from '../redux/appSlice';
 import { useAppDispatch } from '../redux/hooks';
 import ConversationAvatar from './ConversationAvatar';
-import { RemoveContactIcon, VideoCallIcon } from './SvgIcon';
-import { AudioCallIcon, BlockContactIcon, ContactDetailsIcon, CrossIcon, MessageIcon } from './SvgIcon';
-
-const customStyles: Modal.Styles = {
-  content: {
-    // right: "auto",
-    // bottom: "auto",
-    // // marginRight: "-50%",
-    // transform: "translate(-50%, -50%)",
-    // padding: "16px"
-
-    // top: "1364px",
-    left: '94px',
-    width: '180px',
-    height: '262px',
-    background: '#FFFFFF 0% 0% no-repeat padding-box',
-    boxShadow: '3px 3px 7px #00000029',
-    borderRadius: '5px 20px 20px 20px',
-    opacity: '1',
-
-    textAlign: 'left',
-    font: 'normal normal normal 12px/26px Ubuntu',
-    letterSpacing: '0px',
-    color: '#000000',
-  },
-};
+import { CancelIcon, RemoveContactIcon, VideoCallIcon } from './SvgIcon';
+import { AudioCallIcon, BlockContactIcon, ContactDetailsIcon, MessageIcon } from './SvgIcon';
 
 const cancelStyles: Modal.Styles = {
   content: {
@@ -87,18 +74,6 @@ const contactDetailsStyles: Modal.Styles = {
   },
 };
 
-const stackStyles: StackProps = {
-  flexDirection: 'row',
-  marginBottom: '4px',
-  spacing: '40px',
-  flex: 1,
-  alignItems: 'center',
-};
-
-const iconTextStyle = {
-  marginRight: '10px',
-};
-
 const iconColor = '#005699';
 
 type ConversationListItemProps = {
@@ -113,21 +88,21 @@ export default function ConversationListItem({ conversation }: ConversationListI
   const isSelected = conversation.getDisplayUri() === pathId;
   const navigate = useNavigate();
 
-  const [modalIsOpen, setIsOpen] = useState(false);
+  const [menuAnchorEl, setMenuAnchorEl] = useState<HTMLElement | null>(null);
   const [modalDetailsIsOpen, setModalDetailsIsOpen] = useState(false);
   const [modalDeleteIsOpen, setModalDeleteIsOpen] = useState(false);
   const [blockOrRemove, setBlockOrRemove] = useState(true);
   const [userId, setUserId] = useState(conversation?.getFirstMember()?.contact.getUri());
-  const [isSwarm, setIsSwarm] = useState('true');
+  const [isSwarm, setIsSwarm] = useState(true);
 
-  const openModal = (e: MouseEvent<HTMLDivElement>) => {
+  const openMenu = (e: MouseEvent<HTMLDivElement>) => {
     e.preventDefault();
     console.log(e);
-    setIsOpen(true);
+    setMenuAnchorEl(e.currentTarget);
   };
   const openModalDetails = () => setModalDetailsIsOpen(true);
   const openModalDelete = () => setModalDeleteIsOpen(true);
-  const closeModal = () => setIsOpen(false);
+  const closeModal = () => setMenuAnchorEl(null);
   const closeModalDetails = () => setModalDetailsIsOpen(false);
   const closeModalDelete = () => setModalDeleteIsOpen(false);
 
@@ -170,97 +145,110 @@ export default function ConversationListItem({ conversation }: ConversationListI
 
   const uri = conversation.getId() ? `conversation/${conversation.getId()}` : `addContact/${userId}`;
   return (
-    <div onContextMenu={openModal}>
+    <div onContextMenu={openMenu}>
       <div>
-        <Modal
-          isOpen={modalIsOpen}
-          //   onAfterOpen={afterOpenModal}
-          onRequestClose={closeModal}
-          style={customStyles}
-          contentLabel="Example Modal"
-        >
-          <Stack
+        <Menu open={!!menuAnchorEl} onClose={closeModal} anchorEl={menuAnchorEl}>
+          <MenuItem
             onClick={() => {
               navigate(`/account/${conversation.getAccountId()}/${uri}`);
               closeModal();
             }}
-            {...stackStyles}
           >
-            <div style={{ ...iconTextStyle }}>
+            <ListItemIcon>
               <MessageIcon style={{ color: iconColor }} />
-            </div>
-            Message
-          </Stack>
-          <Stack {...stackStyles}>
-            <div style={{ ...iconTextStyle }}>
-              <AudioCallIcon style={{ color: iconColor }} />
-            </div>
-            Démarrer appel audio
-          </Stack>
-
-          <Stack {...stackStyles}>
-            <div style={{ ...iconTextStyle }}>
-              <VideoCallIcon style={{ color: iconColor }} />
-            </div>
-            Démarrer appel vidéo
-          </Stack>
-
-          <Stack
-            {...stackStyles}
+            </ListItemIcon>
+            <ListItemText>
+              <Trans i18nKey="conversation_message" />
+            </ListItemText>
+          </MenuItem>
+          <MenuItem
             onClick={() => {
-              navigate(`/account/${conversation.getAccountId()}/`);
-              closeModal();
+              navigate(`/account/${conversation.getAccountId()}/call/${conversation.getId()}`);
             }}
           >
-            <div style={{ ...iconTextStyle }}>
-              <CrossIcon style={{ color: iconColor }} />
-            </div>
-            Fermer la conversation
-          </Stack>
+            <ListItemIcon>
+              <AudioCallIcon style={{ color: iconColor }} />
+            </ListItemIcon>
+            <ListItemText>
+              <Trans i18nKey="conversation_start_audiocall" />
+            </ListItemText>
+          </MenuItem>
 
-          <Stack
+          <MenuItem
+            onClick={() => {
+              navigate(`/account/${conversation.getAccountId()}/call/${conversation.getId()}?video=true`);
+            }}
+          >
+            <ListItemIcon>
+              <VideoCallIcon style={{ color: iconColor }} />
+            </ListItemIcon>
+            <ListItemText>
+              <Trans i18nKey="conversation_start_videocall" />
+            </ListItemText>
+          </MenuItem>
+
+          {isSelected && (
+            <MenuItem
+              onClick={() => {
+                navigate(`/account/${conversation.getAccountId()}/`);
+                closeModal();
+              }}
+            >
+              <ListItemIcon>
+                <CancelIcon style={{ color: iconColor }} />
+              </ListItemIcon>
+              <ListItemText>
+                <Trans i18nKey="conversation_close" />
+              </ListItemText>
+            </MenuItem>
+          )}
+
+          <MenuItem
             onClick={() => {
               console.log('open details contact for: ');
               closeModal();
               openModalDetails();
               getContactDetails();
             }}
-            {...stackStyles}
           >
-            <div style={{ ...iconTextStyle }}>
+            <ListItemIcon>
               <ContactDetailsIcon style={{ color: iconColor }} />
-            </div>
-            Détails de la conversation
-          </Stack>
+            </ListItemIcon>
+            <ListItemText>
+              <Trans i18nKey="conversation_details" />
+            </ListItemText>
+          </MenuItem>
 
-          <Stack
+          <MenuItem
             onClick={() => {
               setBlockOrRemove(true);
               closeModal();
               openModalDelete();
             }}
-            {...stackStyles}
           >
-            <div style={{ ...iconTextStyle }}>
+            <ListItemIcon>
               <BlockContactIcon style={{ color: iconColor }} />
-            </div>
-            Bloquer le contact
-          </Stack>
+            </ListItemIcon>
+            <ListItemText>
+              <Trans i18nKey="conversation_block_contact" />
+            </ListItemText>
+          </MenuItem>
 
-          <Stack
+          <MenuItem
             onClick={() => {
               setBlockOrRemove(false);
               closeModal();
               openModalDelete();
             }}
-            {...stackStyles}
           >
-            <div style={{ ...iconTextStyle }}>
+            <ListItemIcon>
               <RemoveContactIcon style={{ color: iconColor }} />
-            </div>
-            Supprimer contact
-          </Stack>
-        </Modal>
+            </ListItemIcon>
+            <ListItemText>
+              <Trans i18nKey="conversation_delete_contact" />
+            </ListItemText>
+          </MenuItem>
+        </Menu>
       </div>
 
       <div>
@@ -338,7 +326,7 @@ export default function ConversationListItem({ conversation }: ConversationListI
               </div>
 
               <Typography variant="caption">
-                <div style={{ fontWeight: 'bold' }}> {isSwarm}</div>
+                <div style={{ fontWeight: 'bold' }}> {String(isSwarm)}</div>
               </Typography>
             </Stack>
           </Stack>

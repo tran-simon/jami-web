@@ -16,6 +16,7 @@
  * <https://www.gnu.org/licenses/>.
  */
 import { Box, Card, Grid, Stack, Typography } from '@mui/material';
+import React from 'react';
 
 import {
   CallingChatButton,
@@ -28,9 +29,24 @@ import {
   CallingScreenShareButton,
   CallingVideoCameraButton,
   CallingVolumeButton,
-} from '../components/Button';
+} from '../components/CallButtons';
+import CallProvider from '../contexts/CallProvider';
+import { useUrlParams } from '../utils/hooks';
+import { CallRouteParams } from './JamiMessenger';
 
-export default function CallInterface() {
+export default () => {
+  const {
+    queryParams: { video },
+  } = useUrlParams<CallRouteParams>();
+
+  return (
+    <CallProvider camOn={video === 'true'}>
+      <CallInterface />
+    </CallProvider>
+  );
+};
+
+const CallInterface = () => {
   return (
     <>
       <Box sx={{ backgroundColor: 'blue', width: '100%', height: '100%', position: 'absolute' }}>
@@ -77,7 +93,7 @@ export default function CallInterface() {
       </Stack>
     </>
   );
-}
+};
 
 const CallInterfaceInformation = () => {
   return (

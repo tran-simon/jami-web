@@ -15,21 +15,23 @@
  * License along with this program.  If not, see
  * <https://www.gnu.org/licenses/>.
  */
-import { Route, Routes } from 'react-router-dom';
+import { useMemo } from 'react';
+import { useLocation, useParams } from 'react-router-dom';
 
-import { RouteParams } from '../utils/hooks';
-import CallInterface from './CallInterface';
-import Messenger from './Messenger';
-
-export type CallRouteParams = RouteParams<{ conversationId: string }, { video?: 'true' }>;
-
-export default function JamiMessenger() {
-  return (
-    <Routes>
-      <Route path="addContact/:contactId" element={<Messenger />} />
-      <Route path="conversation/:conversationId" element={<Messenger />} />
-      <Route path="call/:conversationId" element={<CallInterface />} />
-      <Route path="*" element={<Messenger />} />
-    </Routes>
-  );
+export interface RouteParams<U = Record<string, string>, Q = Record<string, string>> {
+  urlParams: U;
+  queryParams: Q;
 }
+
+export const useUrlParams = <T extends RouteParams>() => {
+  const { search } = useLocation();
+  const urlParams = useParams() as T['urlParams'];
+
+  return useMemo(() => {
+    const queryParams = Object.fromEntries(new URLSearchParams(search)) as T['queryParams'];
+    return {
+      queryParams,
+      urlParams,
+    };
+  }, [search, urlParams]);
+};
