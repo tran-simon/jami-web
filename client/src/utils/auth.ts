@@ -29,8 +29,12 @@ interface PasswordStrengthResult {
 
 export interface PasswordCheckResult {
   strong: boolean;
-  value: string;
+  valueCode: StrengthValueCode;
 }
+
+export type StrengthValueCode = 'default' | 'too_weak' | 'weak' | 'medium' | 'strong';
+
+const idToStrengthValueCode: StrengthValueCode[] = ['too_weak', 'weak', 'medium', 'strong'];
 
 // TODO: Find a way to do it differently or remove this check from account creation.
 // It doesn't work if the server has secured this path, so I tweaked the server for test.
@@ -41,8 +45,10 @@ export async function isNameRegistered(name: string): Promise<boolean> {
     if (response.status === HttpStatusCode.Ok) {
       const data: LookupResolveValue = await response.json();
       return data.name === name;
+    } else if (response.status === HttpStatusCode.NotFound) {
+      return false;
     }
-    return false;
+    return true;
   } catch (err) {
     return true;
   }
@@ -53,7 +59,7 @@ export function checkPasswordStrength(password: string): PasswordCheckResult {
 
   const checkResult: PasswordCheckResult = {
     strong: strengthResult.id === PasswordStrength.Strong.valueOf(),
-    value: strengthResult.value,
+    valueCode: idToStrengthValueCode[strengthResult.id] ?? 'default',
   };
 
   return checkResult;

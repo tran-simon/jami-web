@@ -46,6 +46,9 @@ const theme = createTheme({
     success: {
       main: '#009980',
     },
+    secondary: {
+      main: '#A3C2DA',
+    },
   },
   InfoTooltip: {
     backgroundColor: {

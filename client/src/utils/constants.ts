@@ -15,7 +15,7 @@
  * License along with this program.  If not, see
  * <https://www.gnu.org/licenses/>.
  */
-export const jamiUsernamePattern = '^[a-zA-Z0-9-_]{3,32}$';
+export const jamiUsernamePattern = /^[a-zA-Z0-9-_]{3,32}$/;
 
 export const inputWidth = 260;
 

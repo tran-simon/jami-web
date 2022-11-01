@@ -88,6 +88,7 @@ export const UsernameInput = ({ infoButtonProps, onChange: _onChange, tooltipTit
       </RulesDialog>
       <TextField
         {...props}
+        color={inputColor(props.error, props.success)}
         label={'Choose an identifier'}
         variant="standard"
         InputLabelProps={{ shrink: !!(isSelected || input) }}
@@ -145,6 +146,7 @@ export const PasswordInput = ({ infoButtonProps, onChange: _onChange, tooltipTit
       </RulesDialog>
       <TextField
         {...props}
+        color={inputColor(props.error, props.success)}
         label="Password"
         type={showPassword ? 'text' : 'password'}
         variant="standard"
@@ -235,7 +237,7 @@ export const RegularInput = ({ onChange: _onChange, ...props }: TextFieldProps) 
   );
 };
 
-export function inputColor(
+function inputColor(
   error?: boolean,
   success?: boolean
 ): 'success' | 'error' | 'primary' | 'secondary' | 'info' | 'warning' | undefined {
@@ -268,13 +270,13 @@ const PasswordRules = () => {
           <ListItemIcon>
             <GppMaybe />
           </ListItemIcon>
-          The password must contain at least one special character.
+          The password must contain at least 1 special character.
         </ListItem>
         <ListItem>
           <ListItemIcon>
             <GppMaybe />
           </ListItemIcon>
-          The password must be eight characters or longer for Strong strength.
+          The password must be 10 characters or longer to be considered strong.
         </ListItem>
       </List>
     </Typography>

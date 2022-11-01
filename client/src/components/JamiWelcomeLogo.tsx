@@ -15,31 +15,29 @@
  * License along with this program.  If not, see
  * <https://www.gnu.org/licenses/>.
  */
-import { Box, SxProps, Typography } from '@mui/material';
+import { Stack, StackProps, Typography } from '@mui/material';
 
 import { ReactComponent as JamiLogo } from '../icons/jami-logo-icon.svg';
 import { jamiLogoDefaultSize } from '../utils/constants';
 
-interface WelcomeLogoProps {
+interface WelcomeLogoProps extends StackProps {
   logoWidth?: string;
   logoHeight?: string;
-  boxSxProps?: SxProps;
 }
 
-export default function JamiWelcomeLogo(props: WelcomeLogoProps) {
+export default function JamiWelcomeLogo({ logoWidth, logoHeight, ...stackProps }: WelcomeLogoProps) {
   return (
-    <Box
+    <Stack
+      {...stackProps}
       sx={{
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        textAlign: 'center',
-        flexDirection: 'column',
-        ...props.boxSxProps,
+        ...stackProps.sx,
       }}
     >
-      <JamiLogo width={props.logoWidth ?? jamiLogoDefaultSize} height={props.logoHeight ?? jamiLogoDefaultSize} />
+      <JamiLogo width={logoWidth ?? jamiLogoDefaultSize} height={logoHeight ?? jamiLogoDefaultSize} />
       <Typography variant="h1">Welcome to Jami!</Typography>
-    </Box>
+    </Stack>
   );
 }
