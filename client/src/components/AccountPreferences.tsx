@@ -58,7 +58,6 @@ const thumbnailVariants = {
 
 type AccountPreferencesProps = {
   account: Account;
-  onAccountChanged?: (account: Account) => void;
 };
 
 export default function AccountPreferences({ account }: AccountPreferencesProps) {

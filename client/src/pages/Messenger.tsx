@@ -37,7 +37,7 @@ type MessengerProps = {
 };
 
 const Messenger = (props: MessengerProps) => {
-  const { refresh } = useAppSelector((state) => state.app);
+  const { refresh } = useAppSelector((state) => state.userInfo);
 
   const [conversations, setConversations] = useState<Conversation[] | undefined>(undefined);
   const [searchQuery, setSearchQuery] = useState('');

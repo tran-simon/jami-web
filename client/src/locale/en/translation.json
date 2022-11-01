@@ -32,5 +32,10 @@
   "password_input_weak_helper_text": "Weak",
   "password_input_medium_helper_text": "Medium",
   "password_input_strong_helper_text": "Strong",
-  "password_input_registration_failed_helper_text": "Choose another password!"
+  "password_input_registration_failed_helper_text": "Choose another password!",
+  "login_username_not_found": "Username not found",
+  "login_invalid_password": "Incorrect password",
+  "severity_error": "Error",
+  "severity_success": "Success",
+  "registration_success": "You've successfully registered! — Logging you in..."
 }

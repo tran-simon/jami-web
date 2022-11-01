@@ -15,6 +15,7 @@
  * License along with this program.  If not, see
  * <https://www.gnu.org/licenses/>.
  */
+import cors from 'cors';
 import express, { json, NextFunction, Request, Response } from 'express';
 import helmet from 'helmet';
 import { HttpStatusCode } from 'jami-web-common';
@@ -33,6 +34,7 @@ export class App {
 
     // Setup middleware
     app.use(helmet());
+    app.use(cors());
     app.use(json());
 
     // Setup routing

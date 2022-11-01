@@ -17,12 +17,16 @@
  */
 import { Box, Button, Stack, Typography, useMediaQuery } from '@mui/material';
 import { Theme, useTheme } from '@mui/material/styles';
-import { ChangeEvent, FormEvent, MouseEvent, useState } from 'react';
-import { Form } from 'react-router-dom';
+import { ChangeEvent, FormEvent, MouseEvent, ReactNode, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { Form, useNavigate } from 'react-router-dom';
 
+import { AlertSnackbar } from '../components/AlertSnackbar';
 import { PasswordInput, UsernameInput } from '../components/Input';
 import ProcessingRequest from '../components/ProcessingRequest';
+import { loginUser, setAccessToken } from '../utils/auth';
 import { inputWidth } from '../utils/constants';
+import { InvalidPassword, UsernameNotFound } from '../utils/errors';
 
 type JamiLoginProps = {
   register: () => void;
@@ -30,9 +34,13 @@ type JamiLoginProps = {
 
 export default function JamiLogin(props: JamiLoginProps) {
   const theme: Theme = useTheme();
+  const navigate = useNavigate();
+  const { t } = useTranslation();
+
   const [username, setUsername] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [isLoggingInUser, setIsLoggingInUser] = useState<boolean>(false);
+  const [errorAlertContent, setErrorAlertContent] = useState<ReactNode>(undefined);
 
   const handleUsername = (event: ChangeEvent<HTMLInputElement>) => {
     setUsername(event.target.value);
@@ -52,10 +60,20 @@ export default function JamiLogin(props: JamiLoginProps) {
     if (username.length > 0 && password.length > 0) {
       setIsLoggingInUser(true);
 
-      // TODO: Replace with login logic (https://git.jami.net/savoirfairelinux/jami-web/-/issues/75).
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-      console.log('Login');
-      setIsLoggingInUser(false);
+      try {
+        const accessToken = await loginUser(username, password);
+        setAccessToken(accessToken);
+        navigate('/settings', { replace: true });
+      } catch (err) {
+        setIsLoggingInUser(false);
+        if (err instanceof UsernameNotFound) {
+          setErrorAlertContent(t('login_username_not_found'));
+        } else if (err instanceof InvalidPassword) {
+          setErrorAlertContent(t('login_invalid_password'));
+        } else {
+          throw err;
+        }
+      }
     }
   };
 
@@ -64,6 +82,10 @@ export default function JamiLogin(props: JamiLoginProps) {
   return (
     <>
       <ProcessingRequest open={isLoggingInUser} />
+
+      <AlertSnackbar severity={'error'} open={!!errorAlertContent} onClose={() => setErrorAlertContent(undefined)}>
+        {errorAlertContent}
+      </AlertSnackbar>
 
       <Stack
         sx={{

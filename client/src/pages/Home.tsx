@@ -18,8 +18,10 @@
 import { Box, Grid, Paper, useMediaQuery } from '@mui/material';
 import { Theme, useTheme } from '@mui/material/styles';
 import { useState } from 'react';
+import { Navigate } from 'react-router-dom';
 
 import JamiWelcomeLogo from '../components/JamiWelcomeLogo';
+import { getAccessToken } from '../utils/auth';
 import JamiLogin from './JamiLogin';
 import JamiRegistration from './JamiRegistration';
 
@@ -38,6 +40,11 @@ export default function Home() {
   const isDesktopOrLaptop: boolean = useMediaQuery(theme.breakpoints.up('md'));
   const isMobile: boolean = useMediaQuery(theme.breakpoints.only('xs'));
 
+  const accessToken = getAccessToken();
+
+  if (accessToken) {
+    return <Navigate to="/settings" replace />;
+  }
   return (
     <Box
       sx={{

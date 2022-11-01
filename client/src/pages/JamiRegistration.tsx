@@ -17,14 +17,23 @@
  */
 import { Box, Button, Stack, Typography, useMediaQuery } from '@mui/material';
 import { Theme, useTheme } from '@mui/material/styles';
-import { ChangeEvent, FormEvent, MouseEvent, useEffect, useState } from 'react';
+import { ChangeEvent, FormEvent, MouseEvent, ReactNode, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Form } from 'react-router-dom';
+import { Form, useNavigate } from 'react-router-dom';
 
+import { AlertSnackbar } from '../components/AlertSnackbar';
 import { PasswordInput, UsernameInput } from '../components/Input';
 import ProcessingRequest from '../components/ProcessingRequest';
-import { checkPasswordStrength, isNameRegistered, StrengthValueCode } from '../utils/auth';
+import {
+  checkPasswordStrength,
+  isNameRegistered,
+  loginUser,
+  registerUser,
+  setAccessToken,
+  StrengthValueCode,
+} from '../utils/auth';
 import { inputWidth, jamiUsernamePattern } from '../utils/constants';
+import { InvalidPassword, UsernameNotFound } from '../utils/errors';
 
 const usernameTooltipTitle =
   'Choose a password hard to guess for others but easy to remember for you, ' +
@@ -44,13 +53,19 @@ type JamiRegistrationProps = {
 
 export default function JamiRegistration(props: JamiRegistrationProps) {
   const theme: Theme = useTheme();
+  const navigate = useNavigate();
   const { t } = useTranslation();
 
   const [isCreatingUser, setIsCreatingUser] = useState(false);
-  const [usernameValue, setUsernameValue] = useState('');
-  const [passwordValue, setPasswordValue] = useState('');
+
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+
   const [usernameStatus, setUsernameStatus] = useState<NameStatus>('default');
   const [passwordStatus, setPasswordStatus] = useState<PasswordStatus>('default');
+
+  const [errorAlertContent, setErrorAlertContent] = useState<ReactNode>(undefined);
+  const [successAlertContent, setSuccessAlertContent] = useState<ReactNode>(undefined);
 
   const usernameError = usernameStatus !== 'success' && usernameStatus !== 'default';
   const usernameSuccess = usernameStatus === 'success';
@@ -59,9 +74,9 @@ export default function JamiRegistration(props: JamiRegistrationProps) {
 
   useEffect(() => {
     // To prevent lookup if field is empty, in error state or lookup already done
-    if (usernameValue.length > 0 && usernameStatus === 'default') {
+    if (username.length > 0 && usernameStatus === 'default') {
       const validateUsername = async () => {
-        if (await isNameRegistered(usernameValue)) {
+        if (await isNameRegistered(username)) {
           setUsernameStatus('taken');
         } else {
           setUsernameStatus('success');
@@ -71,13 +86,36 @@ export default function JamiRegistration(props: JamiRegistrationProps) {
 
       return () => clearTimeout(timeout);
     }
-  }, [usernameValue, usernameStatus]);
+  }, [username, usernameStatus]);
+
+  const firstUserLogin = async () => {
+    try {
+      const accessToken = await loginUser(username, password);
+      setAccessToken(accessToken);
+      navigate('/settings', { replace: true });
+    } catch (err) {
+      setIsCreatingUser(false);
+      if (err instanceof UsernameNotFound) {
+        setErrorAlertContent(t('login_username_not_found'));
+      } else if (err instanceof InvalidPassword) {
+        setErrorAlertContent(t('login_invalid_password'));
+      } else {
+        throw err;
+      }
+    }
+  };
+
+  const createAccount = async () => {
+    await registerUser(username, password);
+    setSuccessAlertContent(t('registration_success'));
+    await firstUserLogin();
+  };
 
   const handleUsername = async (event: ChangeEvent<HTMLInputElement>) => {
-    const username: string = event.target.value;
-    setUsernameValue(username);
+    const usernameValue: string = event.target.value;
+    setUsername(usernameValue);
 
-    if (username.length > 0 && !jamiUsernamePattern.test(username)) {
+    if (usernameValue.length > 0 && !jamiUsernamePattern.test(usernameValue)) {
       setUsernameStatus('invalid');
     } else {
       setUsernameStatus('default');
@@ -85,11 +123,11 @@ export default function JamiRegistration(props: JamiRegistrationProps) {
   };
 
   const handlePassword = (event: ChangeEvent<HTMLInputElement>) => {
-    const password: string = event.target.value;
-    setPasswordValue(password);
+    const passwordValue: string = event.target.value;
+    setPassword(passwordValue);
 
-    if (password.length > 0) {
-      const checkResult = checkPasswordStrength(password);
+    if (passwordValue.length > 0) {
+      const checkResult = checkPasswordStrength(passwordValue);
       setPasswordStatus(checkResult.valueCode);
     } else {
       setPasswordStatus('default');
@@ -107,12 +145,9 @@ export default function JamiRegistration(props: JamiRegistrationProps) {
 
     if (canCreate) {
       setIsCreatingUser(true);
-      // TODO: Replace with registration logic (https://git.jami.net/savoirfairelinux/jami-web/-/issues/75).
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-      console.log('Account created');
-      setIsCreatingUser(false);
+      createAccount();
     } else {
-      if (usernameError || usernameValue.length === 0) {
+      if (usernameError || username.length === 0) {
         setUsernameStatus('registration_failed');
       }
       if (!passwordSuccess) {
@@ -126,6 +161,18 @@ export default function JamiRegistration(props: JamiRegistrationProps) {
   return (
     <>
       <ProcessingRequest open={isCreatingUser} />
+
+      <AlertSnackbar
+        severity={'success'}
+        open={!!successAlertContent}
+        onClose={() => setSuccessAlertContent(undefined)}
+      >
+        {successAlertContent}
+      </AlertSnackbar>
+
+      <AlertSnackbar severity={'error'} open={!!errorAlertContent} onClose={() => setErrorAlertContent(undefined)}>
+        {errorAlertContent}
+      </AlertSnackbar>
 
       <Stack
         sx={{
@@ -144,7 +191,7 @@ export default function JamiRegistration(props: JamiRegistrationProps) {
         <Form method="post" id="register-form">
           <div>
             <UsernameInput
-              value={usernameValue}
+              value={username}
               onChange={handleUsername}
               error={usernameError}
               success={usernameSuccess}
@@ -155,7 +202,7 @@ export default function JamiRegistration(props: JamiRegistrationProps) {
           </div>
           <div>
             <PasswordInput
-              value={passwordValue}
+              value={password}
               onChange={handlePassword}
               error={passwordError}
               success={passwordSuccess}

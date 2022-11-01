@@ -19,7 +19,7 @@ import { Box, Button, Menu, MenuItem } from '@mui/material';
 import { MouseEvent, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
-import authManager from '../AuthManager';
+import { setAccessToken } from '../utils/auth';
 
 export default function Header() {
   const navigate = useNavigate();
@@ -28,9 +28,13 @@ export default function Header() {
   const handleClose = () => setAnchorEl(null);
   const params = useParams();
 
-  const goToAccountSelection = () => navigate(`/account`);
-  const goToContacts = () => navigate(`/Contacts`);
+  const goToContacts = () => navigate(`/contacts`);
   const goToAccountSettings = () => navigate(`/account/${params.accountId}/settings`);
+
+  const logout = () => {
+    setAccessToken('');
+    navigate('/', { replace: true });
+  };
 
   return (
     <Box>
@@ -38,10 +42,9 @@ export default function Header() {
         Menu
       </Button>
       <Menu id="simple-menu" anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleClose}>
-        <MenuItem onClick={goToAccountSelection}>Change account</MenuItem>
         <MenuItem onClick={goToContacts}>Contacts</MenuItem>
         {params.accountId && <MenuItem onClick={goToAccountSettings}>Account settings</MenuItem>}
-        <MenuItem onClick={() => authManager.disconnect()}>Log out</MenuItem>
+        <MenuItem onClick={logout}>Log out</MenuItem>
       </Menu>
     </Box>
   );

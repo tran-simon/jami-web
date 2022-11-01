@@ -31,7 +31,7 @@ type ConversationListProps = {
   search?: Conversation;
 };
 export default function ConversationList(props: ConversationListProps) {
-  const { refresh } = useAppSelector((state) => state.app);
+  const { refresh } = useAppSelector((state) => state.userInfo);
 
   useEffect(() => {
     console.log('refresh list');

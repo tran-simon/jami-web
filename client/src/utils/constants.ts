@@ -20,3 +20,5 @@ export const jamiUsernamePattern = /^[a-zA-Z0-9-_]{3,32}$/;
 export const inputWidth = 260;
 
 export const jamiLogoDefaultSize = '512px';
+
+export const apiUrl = new URL(import.meta.env.VITE_API_URL);

@@ -53,7 +53,13 @@ export type InputProps = TextFieldProps & {
   tooltipTitle: string;
 };
 
-export const UsernameInput = ({ infoButtonProps, onChange: _onChange, tooltipTitle, ...props }: InputProps) => {
+export const UsernameInput = ({
+  infoButtonProps,
+  onChange: _onChange,
+  success,
+  tooltipTitle,
+  ...props
+}: InputProps) => {
   const [isSelected, setIsSelected] = useState(false);
   const [input, setInput] = useState(props.defaultValue);
   const [startAdornment, setStartAdornment] = useState<ReactElement | undefined>();
@@ -73,13 +79,13 @@ export const UsernameInput = ({ infoButtonProps, onChange: _onChange, tooltipTit
     let visibility = 'visible';
     if (props.error) {
       Icon = StyledRoundSaltireIconError;
-    } else if (props.success) {
+    } else if (success) {
       Icon = StyledCheckedIconSuccess;
     } else if (!isSelected && !input) {
       visibility = 'hidden'; // keep icon's space so text does not move
     }
     setStartAdornment(<Icon sx={{ visibility }} />);
-  }, [props.error, props.success, isSelected, input]);
+  }, [props.error, success, isSelected, input]);
 
   return (
     <>
@@ -88,7 +94,7 @@ export const UsernameInput = ({ infoButtonProps, onChange: _onChange, tooltipTit
       </RulesDialog>
       <TextField
         {...props}
-        color={inputColor(props.error, props.success)}
+        color={inputColor(props.error, success)}
         label={'Choose an identifier'}
         variant="standard"
         InputLabelProps={{ shrink: !!(isSelected || input) }}
@@ -106,7 +112,13 @@ export const UsernameInput = ({ infoButtonProps, onChange: _onChange, tooltipTit
   );
 };
 
-export const PasswordInput = ({ infoButtonProps, onChange: _onChange, tooltipTitle, ...props }: InputProps) => {
+export const PasswordInput = ({
+  infoButtonProps,
+  onChange: _onChange,
+  success,
+  tooltipTitle,
+  ...props
+}: InputProps) => {
   const [showPassword, setShowPassword] = useState(false);
   const [isSelected, setIsSelected] = useState(false);
   const [input, setInput] = useState(props.defaultValue);
@@ -131,13 +143,13 @@ export const PasswordInput = ({ infoButtonProps, onChange: _onChange, tooltipTit
     let visibility = 'visible';
     if (props.error) {
       Icon = StyledRoundSaltireIconError;
-    } else if (props.success) {
+    } else if (success) {
       Icon = StyledCheckedIconSuccess;
     } else if (!isSelected && !input) {
       visibility = 'hidden'; // keep icon's space so text does not move
     }
     setStartAdornment(<Icon sx={{ visibility }} />);
-  }, [props.error, props.success, isSelected, input]);
+  }, [props.error, success, isSelected, input]);
 
   return (
     <>
@@ -146,7 +158,7 @@ export const PasswordInput = ({ infoButtonProps, onChange: _onChange, tooltipTit
       </RulesDialog>
       <TextField
         {...props}
-        color={inputColor(props.error, props.success)}
+        color={inputColor(props.error, success)}
         label="Password"
         type={showPassword ? 'text' : 'password'}
         variant="standard"

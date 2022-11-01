@@ -37,7 +37,7 @@ const customStyles = {
 };
 
 export default function ContactList() {
-  const { accountId, accountObject } = useAppSelector((state) => state.app);
+  const { accountId, account } = useAppSelector((state) => state.userInfo);
   const dispatch = useAppDispatch();
 
   const [contacts, setContacts] = useState([]);
