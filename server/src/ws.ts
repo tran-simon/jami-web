@@ -18,6 +18,7 @@
 import { IncomingMessage } from 'node:http';
 import { Duplex } from 'node:stream';
 
+import { WebSocketMessage, WebSocketMessageType } from 'jami-web-common';
 import { jwtVerify } from 'jose';
 import log from 'loglevel';
 import { Service } from 'typedi';
@@ -28,16 +29,34 @@ import { Vault } from './vault.js';
 
 @Service()
 export class Ws {
-  constructor(private readonly vault: Vault) {}
+  private sockets: Map<string, WebSocket[]>;
+  private callbacks: Map<WebSocketMessageType, ((message: WebSocketMessage) => void)[]>;
+
+  constructor(private readonly vault: Vault) {
+    this.sockets = new Map();
+    this.callbacks = new Map();
+  }
 
   async build() {
     const wss = new WebSocketServer({ noServer: true });
+
     wss.on('connection', (ws: WebSocket, _req: IncomingMessage, accountId: string) => {
       log.info('New connection', accountId);
-      // TODO: Add the account ID here to a map of accountId -> WebSocket connections
+      const accountSockets = this.sockets.get(accountId);
+      if (accountSockets) {
+        accountSockets.push(ws);
+      } else {
+        this.sockets.set(accountId, [ws]);
+      }
 
-      ws.on('message', (_data) => {
-        ws.send(JSON.stringify({ accountId }));
+      ws.on('message', (messageString: string) => {
+        const message: WebSocketMessage = JSON.parse(messageString);
+        const callbacks = this.callbacks.get(message.type);
+        if (callbacks) {
+          for (const callback of callbacks) {
+            callback(message);
+          }
+        }
       });
     });
 
@@ -66,5 +85,25 @@ export class Ws {
           socket.destroy();
         });
     };
+  }
+
+  bind(messageType: WebSocketMessageType, callback: (message: WebSocketMessage) => void): void {
+    const messageTypeCallbacks = this.callbacks.get(messageType);
+    if (messageTypeCallbacks) {
+      messageTypeCallbacks.push(callback);
+    } else {
+      this.callbacks.set(messageType, [callback]);
+    }
+  }
+
+  send(accountId: string, message: WebSocketMessage): boolean {
+    const accountSockets = this.sockets.get(accountId);
+    if (!accountSockets) {
+      return false;
+    }
+    for (const accountSocket of accountSockets) {
+      accountSocket.send(message);
+    }
+    return true;
   }
 }

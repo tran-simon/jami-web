@@ -138,6 +138,8 @@ export class Jamid {
     // 2. You cannot specify multiple handlers for the same event
     // 3. You cannot specify a default handler
     this.jamiSwig.init(handlers);
+
+    // TODO: Bind websocket callbacks for webrtc action on Incoming account message
   }
 
   stop() {
@@ -189,7 +191,7 @@ export class Jamid {
 
   sendAccountTextMessage(accountId: string, contactId: string, type: string, message: string) {
     const messageStringMap: StringMap = new this.jamiSwig.StringMap();
-    messageStringMap.set(type, message);
+    messageStringMap.set(type, JSON.stringify(message));
     this.jamiSwig.sendAccountTextMessage(accountId, contactId, messageStringMap);
   }
 
@@ -313,7 +315,7 @@ export class Jamid {
 
     this.events.onMessageReceived.subscribe((signal) => {
       log.debug('Received MessageReceived:', JSON.stringify(signal));
-      // TODO: Send message to client using WebSocket
+      // TODO: Send message to client using WS service
     });
   }
 }

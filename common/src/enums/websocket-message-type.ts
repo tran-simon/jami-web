@@ -15,11 +15,7 @@
  * License along with this program.  If not, see
  * <https://www.gnu.org/licenses/>.
  */
-export * from './Account.js';
-export * from './AccountDetails.js';
-export * from './Contact.js';
-export * from './Conversation.js';
-export * from './enums/http-status-code.js';
-export * from './enums/websocket-message-type.js';
-export * from './interfaces/websocket-message.js';
-export * from './util.js';
+export enum WebSocketMessageType {
+  WebRTCOffer = 'webrtc-offer',
+  WebRCTAnswer = 'webrtc-answer',
+}
