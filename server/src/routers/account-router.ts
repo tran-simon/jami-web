@@ -51,12 +51,12 @@ accountRouter.get('/', (_req, res) => {
   });
 });
 
-accountRouter.post('/', (req, res) => {
+accountRouter.patch('/', (req, res) => {
   const accountId = res.locals.accountId;
   const currentAccountDetails = jamid.getAccountDetails(accountId);
   const newAccountDetails: AccountDetails = { ...currentAccountDetails, ...req.body };
   jamid.setAccountDetails(res.locals.accountId, newAccountDetails);
-  res.end();
+  res.sendStatus(HttpStatusCode.NoContent);
 });
 
 accountRouter.post('/send-account-message', (req: Request<ParamsDictionary, any, SendAccountTextMessageApi>, res) => {

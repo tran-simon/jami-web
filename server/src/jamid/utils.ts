@@ -43,14 +43,6 @@ export function* itFilter<T>(it: Iterable<T>, cb: (value: T, index: number) => b
 
 export const itToArr = <T>(it: Iterable<T>) => Array.from(it);
 
-export const itToMap = <T, U>(it: Iterable<[T, U]>) => {
-  const m = new Map<T, U>();
-  for (const [k, v] of it) {
-    m.set(k, v);
-  }
-  return m;
-};
-
 export const itToRecord = <T>(it: Iterable<[string, T]>) => {
   const r: Record<string, T> = {};
   for (const [k, v] of it) {

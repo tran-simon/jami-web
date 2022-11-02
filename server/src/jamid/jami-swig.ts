@@ -16,7 +16,7 @@
  * <https://www.gnu.org/licenses/>.
  */
 import { Constructable } from '../interfaces.js';
-import { itMap, itRange, itToArr, itToMap, itToRecord } from './utils.js';
+import { itMap, itRange, itToArr, itToRecord } from './utils.js';
 
 enum Bool {
   False = 'false',
@@ -47,11 +47,9 @@ export type StringMap = SwigMap<string, string>;
 export type VectMap = SwigVec<StringMap>;
 // export type Blob = SwigVec<number>;
 
-// TODO: Consider always converting to Record rather than Map as conversion to interfaces is easier
 export const stringVectToArray = (sv: StringVect) => itToArr(swigVecToIt(sv));
 export const stringMapToRecord = (sm: StringMap) => itToRecord(swigMapToIt(sm));
-export const stringMapToMap = (sm: StringMap) => itToMap(swigMapToIt(sm));
-// export const vectMapToArrayMap = (vm: VectMap) => itToArr(itMap(swigVecToIt(vm), stringMapToMap));
+export const vectMapToRecordArray = (vm: VectMap) => itToArr(itMap(swigVecToIt(vm), stringMapToRecord));
 
 /**
  * Non-exhaustive list of properties for JamiSwig.

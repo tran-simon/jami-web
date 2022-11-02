@@ -23,6 +23,7 @@ import { Service } from 'typedi';
 
 import { accountRouter } from './routers/account-router.js';
 import { authRouter } from './routers/auth-router.js';
+import { contactsRouter } from './routers/contacts-router.js';
 import { nameserverRouter } from './routers/nameserver-router.js';
 
 @Service()
@@ -37,6 +38,7 @@ export class App {
     // Setup routing
     app.use('/auth', authRouter);
     app.use('/account', accountRouter);
+    app.use('/contacts', contactsRouter);
     app.use('/ns', nameserverRouter);
 
     // Setup 404 error handling

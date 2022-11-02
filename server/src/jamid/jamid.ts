@@ -34,10 +34,11 @@ import {
   RegistrationStateChanged,
   VolatileDetailsChanged,
 } from './jami-signal-interfaces.js';
-import { JamiSwig, StringMap, stringMapToRecord, stringVectToArray } from './jami-swig.js';
+import { JamiSwig, StringMap, stringMapToRecord, stringVectToArray, vectMapToRecordArray } from './jami-swig.js';
 import { require } from './utils.js';
 
 // TODO: Mechanism to map account IDs to a list of WebSockets
+// TODO: Convert Records to interfaces and replace them in common/ (e.g. Contact)
 
 @Service()
 export class Jamid {
@@ -228,6 +229,26 @@ export class Jamid {
 
   getDevices(accountId: string): Record<string, string> {
     return stringMapToRecord(this.jamiSwig.getKnownRingDevices(accountId));
+  }
+
+  addContact(accountId: string, contactId: string) {
+    this.jamiSwig.addContact(accountId, contactId);
+  }
+
+  removeContact(accountId: string, contactId: string) {
+    this.jamiSwig.removeContact(accountId, contactId, false);
+  }
+
+  blockContact(accountId: string, contactId: string) {
+    this.jamiSwig.removeContact(accountId, contactId, true);
+  }
+
+  getContacts(accountId: string): Record<string, string>[] {
+    return vectMapToRecordArray(this.jamiSwig.getContacts(accountId));
+  }
+
+  getContactDetails(accountId: string, contactId: string): Record<string, string> {
+    return stringMapToRecord(this.jamiSwig.getContactDetails(accountId, contactId));
   }
 
   getDefaultModerators(accountId: string): string[] {
