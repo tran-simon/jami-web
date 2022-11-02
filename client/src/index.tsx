@@ -24,13 +24,14 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { Provider } from 'react-redux';
-import { createBrowserRouter, createRoutesFromElements, Route, RouterProvider } from 'react-router-dom';
+import { createBrowserRouter, createRoutesFromElements, Outlet, Route, RouterProvider } from 'react-router-dom';
 import socketio from 'socket.io-client';
 
 import App from './App';
 import ContactList from './components/ContactList';
 import AuthProvider from './contexts/AuthProvider';
 import { SocketProvider } from './contexts/Socket';
+import WebSocketProvider from './contexts/WebSocketProvider';
 import AccountSelection from './pages/AccountSelection';
 import AccountSettings from './pages/AccountSettings';
 import CallInterface from './pages/CallInterface';
@@ -58,7 +59,15 @@ const router = createBrowserRouter(
     <Route path="/" element={<App />}>
       <Route index element={<Welcome />} />
       <Route path="theme" element={<ThemeDemonstrator />} />
-      <Route element={<AuthProvider />}>
+      <Route
+        element={
+          <AuthProvider>
+            <WebSocketProvider>
+              <Outlet />
+            </WebSocketProvider>
+          </AuthProvider>
+        }
+      >
         <Route path="account" element={<JamiMessenger />} />
         <Route path="settings" element={<AccountSettings />} />
         <Route path="contacts" element={<ContactList />} />

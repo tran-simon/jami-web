@@ -18,10 +18,11 @@
 import { Account } from 'jami-web-common/dist/Account';
 import { HttpStatusCode } from 'jami-web-common/dist/enums/http-status-code';
 import { createContext, useCallback, useContext, useEffect, useState } from 'react';
-import { Outlet, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 import ProcessingRequest from '../components/ProcessingRequest';
 import { apiUrl } from '../utils/constants';
+import { WithChildren } from '../utils/utils';
 
 interface IAuthContext {
   token: string;
@@ -31,7 +32,7 @@ interface IAuthContext {
 
 const AuthContext = createContext<IAuthContext | undefined>(undefined);
 
-export default () => {
+export default ({ children }: WithChildren) => {
   const [token, setToken] = useState<string | undefined>();
   const [account, setAccount] = useState<Account | undefined>();
   const navigate = useNavigate();
@@ -91,7 +92,7 @@ export default () => {
         account,
       }}
     >
-      <Outlet />
+      {children}
     </AuthContext.Provider>
   );
 };
