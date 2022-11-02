@@ -15,8 +15,8 @@
  * License along with this program.  If not, see
  * <https://www.gnu.org/licenses/>.
  */
-import { Box, Card, Grid, Stack, Typography } from '@mui/material';
-import React from 'react';
+import { Box, Button, Card, Grid, Stack, Typography } from '@mui/material';
+import { useContext } from 'react';
 
 import {
   CallingChatButton,
@@ -30,7 +30,7 @@ import {
   CallingVideoCameraButton,
   CallingVolumeButton,
 } from '../components/CallButtons';
-import CallProvider from '../contexts/CallProvider';
+import WebRTCProvider, { WebRTCContext } from '../contexts/WebRTCProvider';
 import { useUrlParams } from '../utils/hooks';
 import { CallRouteParams } from './JamiMessenger';
 
@@ -40,18 +40,22 @@ export default () => {
   } = useUrlParams<CallRouteParams>();
 
   return (
-    <CallProvider camOn={video === 'true'}>
+    <WebRTCProvider isVideoOn={video === 'true'}>
       <CallInterface />
-    </CallProvider>
+    </WebRTCProvider>
   );
 };
 
 const CallInterface = () => {
+  const { localVideoRef, remoteVideoRef, isVideoOn } = useContext(WebRTCContext);
+
   return (
     <>
-      <Box sx={{ backgroundColor: 'blue', width: '100%', height: '100%', position: 'absolute' }}>
-        {/* Host video will be shown here */}
-      </Box>
+      <video
+        ref={remoteVideoRef}
+        autoPlay
+        style={{ backgroundColor: 'black', width: '100%', height: '100%', position: 'absolute' }}
+      />
       <Stack
         position="absolute"
         direction="column"
@@ -65,20 +69,22 @@ const CallInterface = () => {
         </Box>
         {/* Guest video, with empty space to be moved around and stickied to walls */}
         <Box height="100%">
-          <Box
-            sx={{
-              aspectRatio: '16/9',
-              position: 'absolute',
-              right: 0,
-              zIndex: 2,
-              backgroundColor: 'white',
-              borderRadius: '12px',
-              minWidth: '25%',
-              minHeight: '25%',
-              maxWidth: '50%',
-              maxHeight: '50%',
-            }}
-          />
+          {isVideoOn && (
+            <video
+              ref={localVideoRef}
+              autoPlay
+              style={{
+                position: 'absolute',
+                right: 0,
+                zIndex: 2,
+                borderRadius: '12px',
+                minWidth: '25%',
+                minHeight: '25%',
+                maxWidth: '50%',
+                maxHeight: '50%',
+              }}
+            />
+          )}
         </Box>
         {/* Bottom panel with calling buttons */}
         <Grid container justifyContent="space-between">
@@ -109,8 +115,19 @@ const CallInterfaceInformation = () => {
 };
 
 const CallInterfacePrimaryButtons = () => {
+  const { sendWebRTCOffer } = useContext(WebRTCContext);
+
   return (
     <Card sx={{ backgroundColor: 'black', textAlign: 'center' }}>
+      <Button
+        variant="contained"
+        onClick={() => {
+          sendWebRTCOffer();
+        }}
+      >
+        {/* TODO: Remove this button and make calling automatic (https://git.jami.net/savoirfairelinux/jami-web/-/issues/91)*/}
+        Call
+      </Button>
       <CallingMicButton />
       <CallingEndButton />
       <CallingVideoCameraButton />

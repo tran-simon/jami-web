@@ -16,7 +16,7 @@
  * <https://www.gnu.org/licenses/>.
  */
 
-import React, { createContext, useCallback, useRef } from 'react';
+import React, { createContext, useCallback, useEffect, useRef, useState } from 'react';
 import { connect, Socket } from 'socket.io-client';
 
 import { WithChildren } from '../utils/utils';
@@ -25,140 +25,203 @@ import { WithChildren } from '../utils/utils';
  * TODO: This socket is temporary, it will be replaced by the real socket
  * for communication with webrtc
  * */
-const socket = connect('http://192.168.0.12:8080', { transports: ['websocket'] });
+const socket = connect(import.meta.env.VITE_SOCKET_URL, { transports: ['websocket'] });
 
 interface IWebRTCContext {
   localVideoRef: React.RefObject<HTMLVideoElement> | null;
   remoteVideoRef: React.RefObject<HTMLVideoElement> | null;
-  createWebRTCConnection: () => void;
-  sendWebRTCOffer: () => void;
-  sendWebRTCAnswer: (remoteSdp: RTCSessionDescriptionInit) => void;
-  handleWebRTCAnswer: (remoteSdp: RTCSessionDescriptionInit) => void;
-  addIceCandidate: (candidate: RTCIceCandidateInit) => void;
   socket: Socket;
+
+  isAudioOn: boolean;
+  setAudioStatus: (isOn: boolean) => void;
+  isVideoOn: boolean;
+  setVideoStatus: (isOn: boolean) => void;
+  sendWebRTCOffer: () => void;
 }
 
-const DefaultWebRTCContext: IWebRTCContext = {
+const defaultWebRTCContext: IWebRTCContext = {
   localVideoRef: null,
   remoteVideoRef: null,
-  createWebRTCConnection: () => {},
+  socket,
+
+  isAudioOn: false,
+  setAudioStatus: () => {},
+  isVideoOn: false,
+  setVideoStatus: () => {},
+
   sendWebRTCOffer: () => {},
-  sendWebRTCAnswer: () => {},
-  handleWebRTCAnswer: () => {},
-  addIceCandidate: () => {},
-  socket: socket,
 };
 
-export const WebRTCContext = createContext<IWebRTCContext>(DefaultWebRTCContext);
+export const WebRTCContext = createContext<IWebRTCContext>(defaultWebRTCContext);
 
-export default ({ children }: WithChildren) => {
+type WebRTCProviderProps = WithChildren & {
+  isAudioOn?: boolean;
+  isVideoOn?: boolean;
+};
+
+// TODO: This is a WIP. The calling logic will be improved in other CRs
+export default ({
+  children,
+  isAudioOn: _isAudioOn = defaultWebRTCContext.isAudioOn,
+  isVideoOn: _isVideoOn = defaultWebRTCContext.isVideoOn,
+}: WebRTCProviderProps) => {
+  const [isAudioOn, setIsAudioOn] = useState(_isAudioOn);
+  const [isVideoOn, setIsVideoOn] = useState(_isVideoOn);
   const localVideoRef = useRef<HTMLVideoElement>(null);
   const remoteVideoRef = useRef<HTMLVideoElement>(null);
-  const webRTCConnectionRef = useRef<RTCPeerConnection>();
+  const [webRTCConnection, setWebRTCConnection] = useState<RTCPeerConnection | undefined>();
+  const localStreamRef = useRef<MediaStream>();
 
-  const createWebRTCConnection = useCallback(async () => {
-    //TODO use SFL iceServers
-    const iceConfig = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
-    webRTCConnectionRef.current = new RTCPeerConnection(iceConfig);
-    const localStream = await navigator.mediaDevices.getUserMedia({
-      video: true,
-      audio: true,
-    });
+  useEffect(() => {
+    if (!webRTCConnection) {
+      // TODO use SFL iceServers
+      const iceConfig = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
+      setWebRTCConnection(new RTCPeerConnection(iceConfig));
+    }
+  }, [webRTCConnection]);
 
-    if (localVideoRef.current) {
-      localVideoRef.current.srcObject = localStream;
+  useEffect(() => {
+    if (!webRTCConnection) {
+      return;
     }
 
-    localStream.getTracks().forEach((track) => {
-      if (webRTCConnectionRef.current) {
-        webRTCConnectionRef.current.addTrack(track, localStream);
+    if (isVideoOn || isAudioOn) {
+      try {
+        // TODO: When toggling mute on/off, the camera flickers
+        // https://git.jami.net/savoirfairelinux/jami-web/-/issues/90
+        navigator.mediaDevices
+          .getUserMedia({
+            audio: true,
+            video: true,
+          })
+          .then((stream) => {
+            if (localVideoRef.current) {
+              localVideoRef.current.srcObject = stream;
+            }
+
+            stream.getTracks().forEach((track) => {
+              if (track.kind === 'audio') {
+                track.enabled = isAudioOn;
+              } else if (track.kind === 'video') {
+                track.enabled = isVideoOn;
+              }
+              webRTCConnection.addTrack(track, stream);
+            });
+            localStreamRef.current = stream;
+          });
+      } catch (e) {
+        console.error('Could not get media devices: ', e);
       }
-    });
-    webRTCConnectionRef.current.addEventListener('icecandidate', (event) => {
-      if (event.candidate && socket) {
+    }
+
+    const icecandidateEventListener = (event: RTCPeerConnectionIceEvent) => {
+      if (event.candidate) {
         console.log('webRTCConnection : onicecandidate');
         socket.emit('candidate', event.candidate);
       }
-    });
-    webRTCConnectionRef.current.addEventListener('track', async (event) => {
+    };
+
+    const trackEventListener = (event: RTCTrackEvent) => {
+      console.log('remote TrackEvent');
       if (remoteVideoRef.current) {
         remoteVideoRef.current.srcObject = event.streams[0];
         console.log('webRTCConnection : add remotetrack success');
       }
+    };
+
+    webRTCConnection.addEventListener('icecandidate', icecandidateEventListener);
+    webRTCConnection.addEventListener('track', trackEventListener);
+
+    return () => {
+      webRTCConnection.removeEventListener('icecandidate', icecandidateEventListener);
+      webRTCConnection.removeEventListener('track', trackEventListener);
+    };
+  }, [webRTCConnection, isVideoOn, isAudioOn]);
+
+  useEffect(() => {
+    if (!webRTCConnection) {
+      return;
+    }
+
+    const sendWebRTCAnswer = async (remoteSdp: RTCSessionDescriptionInit) => {
+      await webRTCConnection.setRemoteDescription(new RTCSessionDescription(remoteSdp));
+      const mySdp = await webRTCConnection.createAnswer({
+        offerToReceiveAudio: true,
+        offerToReceiveVideo: true,
+      });
+      await webRTCConnection.setLocalDescription(new RTCSessionDescription(mySdp));
+      socket.emit('answer', mySdp);
+    };
+
+    const handleWebRTCAnswer = async (remoteSdp: RTCSessionDescriptionInit) => {
+      await webRTCConnection.setRemoteDescription(new RTCSessionDescription(remoteSdp));
+    };
+
+    const addIceCandidate = async (candidate: RTCIceCandidateInit) => {
+      await webRTCConnection.addIceCandidate(new RTCIceCandidate(candidate));
+    };
+
+    socket.on('getOffer', (remoteSdp: RTCSessionDescription) => {
+      sendWebRTCAnswer(remoteSdp);
+      console.log('get offer and aswering');
     });
-  }, [webRTCConnectionRef, localVideoRef, remoteVideoRef]);
+
+    socket.on('getAnswer', (remoteSdp: RTCSessionDescription) => {
+      handleWebRTCAnswer(remoteSdp);
+      console.log('get answer');
+    });
+
+    socket.on('getCandidate', (candidate: RTCIceCandidateInit) => {
+      addIceCandidate(candidate);
+      console.log('webRTCConnection : candidate add success');
+    });
+
+    return () => {
+      socket.off('getOffer');
+      socket.off('getAnswer');
+      socket.off('getCandidate');
+    };
+  }, [webRTCConnection]);
+
+  const setAudioStatus = useCallback((isOn: boolean) => {
+    setIsAudioOn(isOn);
+    localStreamRef.current?.getAudioTracks().forEach((track) => {
+      track.enabled = isOn;
+    });
+  }, []);
+
+  const setVideoStatus = useCallback((isOn: boolean) => {
+    setIsVideoOn(isOn);
+    localStreamRef.current?.getVideoTracks().forEach((track) => {
+      track.enabled = isOn;
+    });
+  }, []);
 
   const sendWebRTCOffer = useCallback(async () => {
-    try {
-      if (webRTCConnectionRef.current && socket) {
-        const sdp = await webRTCConnectionRef.current.createOffer({
+    if (webRTCConnection) {
+      webRTCConnection
+        .createOffer({
           offerToReceiveAudio: true,
           offerToReceiveVideo: true,
+        })
+        .then((sdp) => {
+          socket.emit('offer', sdp);
+          webRTCConnection.setLocalDescription(new RTCSessionDescription(sdp));
         });
-        await webRTCConnectionRef.current.setLocalDescription(new RTCSessionDescription(sdp));
-        socket.emit('offer', sdp);
-      }
-    } catch (e) {
-      console.error(e);
     }
-  }, [webRTCConnectionRef]);
-
-  const sendWebRTCAnswer = useCallback(
-    async (remoteSdp: RTCSessionDescriptionInit) => {
-      try {
-        if (webRTCConnectionRef.current && socket && remoteSdp) {
-          await webRTCConnectionRef.current.setRemoteDescription(new RTCSessionDescription(remoteSdp));
-          const mySdp = await webRTCConnectionRef.current.createAnswer({
-            offerToReceiveAudio: true,
-            offerToReceiveVideo: true,
-          });
-          await webRTCConnectionRef.current.setLocalDescription(new RTCSessionDescription(mySdp));
-          socket.emit('answer', mySdp);
-        }
-      } catch (e) {
-        console.error(e);
-      }
-    },
-    [webRTCConnectionRef]
-  );
-
-  const handleWebRTCAnswer = useCallback(
-    async (remoteSdp: RTCSessionDescriptionInit) => {
-      try {
-        if (webRTCConnectionRef.current && remoteSdp) {
-          await webRTCConnectionRef.current.setRemoteDescription(new RTCSessionDescription(remoteSdp));
-        }
-      } catch (e) {
-        console.error(e);
-      }
-    },
-    [webRTCConnectionRef]
-  );
-
-  const addIceCandidate = useCallback(
-    async (candidate: RTCIceCandidateInit) => {
-      try {
-        if (webRTCConnectionRef.current) {
-          await webRTCConnectionRef.current.addIceCandidate(new RTCIceCandidate(candidate));
-        }
-      } catch (e) {
-        console.error(e);
-      }
-    },
-    [webRTCConnectionRef]
-  );
+  }, [webRTCConnection]);
 
   return (
     <WebRTCContext.Provider
       value={{
         localVideoRef,
         remoteVideoRef,
-        createWebRTCConnection,
-        sendWebRTCOffer,
-        sendWebRTCAnswer,
-        handleWebRTCAnswer,
-        addIceCandidate,
         socket,
+        isAudioOn,
+        setAudioStatus,
+        isVideoOn,
+        setVideoStatus,
+        sendWebRTCOffer,
       }}
     >
       {children}

@@ -19,7 +19,7 @@ import { IconButton, IconButtonProps } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import React, { useContext } from 'react';
 
-import { CallContext } from '../contexts/CallProvider';
+import { WebRTCContext } from '../contexts/WebRTCProvider';
 import { ToggleIconButton, ToggleIconButtonProps } from './Button';
 import {
   CallEndIcon,
@@ -100,7 +100,7 @@ export const CallingVolumeButton = (props: IconButtonProps) => {
 };
 
 export const CallingMicButton = (props: Partial<ToggleIconButtonProps>) => {
-  const { micOn, setMicOn } = useContext(CallContext);
+  const { isAudioOn, setAudioStatus } = useContext(WebRTCContext);
 
   return (
     <ToggleIconButton
@@ -108,15 +108,15 @@ export const CallingMicButton = (props: Partial<ToggleIconButtonProps>) => {
       sx={{ color: 'white' }}
       IconOn={MicroIcon}
       IconOff={MicroOffIcon}
-      selected={micOn}
-      toggle={() => setMicOn((s) => !s)}
+      selected={isAudioOn}
+      toggle={() => setAudioStatus(!isAudioOn)}
       {...props}
     />
   );
 };
 
 export const CallingVideoCameraButton = (props: Partial<ToggleIconButtonProps>) => {
-  const { camOn, setCamOn } = useContext(CallContext);
+  const { isVideoOn, setVideoStatus } = useContext(WebRTCContext);
 
   return (
     <ToggleIconButton
@@ -124,8 +124,8 @@ export const CallingVideoCameraButton = (props: Partial<ToggleIconButtonProps>) 
       sx={{ color: 'white' }}
       IconOn={VideoCameraIcon}
       IconOff={VideoCameraOffIcon}
-      selected={camOn}
-      toggle={() => setCamOn((s) => !s)}
+      selected={isVideoOn}
+      toggle={() => setVideoStatus(!isVideoOn)}
       {...props}
     />
   );
