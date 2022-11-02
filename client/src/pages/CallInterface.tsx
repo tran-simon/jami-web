@@ -16,15 +16,18 @@
  * <https://www.gnu.org/licenses/>.
  */
 import { Box, Button, Card, Grid, Stack, Typography } from '@mui/material';
-import { useContext } from 'react';
+import { ComponentType, Fragment, ReactNode, useContext, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import Draggable from 'react-draggable';
 
+import { ExpandableButtonProps } from '../components/Button';
 import {
   CallingChatButton,
   CallingEndButton,
   CallingExtensionButton,
-  CallingFullscreenButton,
+  CallingFullScreenButton,
   CallingGroupButton,
   CallingMicButton,
+  CallingMoreVerticalButton,
   CallingRecordButton,
   CallingScreenShareButton,
   CallingVideoCameraButton,
@@ -38,7 +41,6 @@ export default () => {
   const {
     queryParams: { video },
   } = useUrlParams<CallRouteParams>();
-
   return (
     <WebRTCProvider isVideoOn={video === 'true'}>
       <CallInterface />
@@ -46,8 +48,23 @@ export default () => {
   );
 };
 
+export enum SecondaryButtons {
+  Volume = 1,
+  Group,
+  Chat,
+  ScreenShare,
+  Record,
+  Extension,
+  FullScreen,
+}
+
+interface Props {
+  children?: ReactNode;
+}
+
 const CallInterface = () => {
   const { localVideoRef, remoteVideoRef, isVideoOn } = useContext(WebRTCContext);
+  const gridItemRef = useRef(null);
 
   return (
     <>
@@ -70,30 +87,34 @@ const CallInterface = () => {
         {/* Guest video, with empty space to be moved around and stickied to walls */}
         <Box height="100%">
           {isVideoOn && (
-            <video
-              ref={localVideoRef}
-              autoPlay
-              style={{
-                position: 'absolute',
-                right: 0,
-                zIndex: 2,
-                borderRadius: '12px',
-                minWidth: '25%',
-                minHeight: '25%',
-                maxWidth: '50%',
-                maxHeight: '50%',
-              }}
-            />
+            <Draggable bounds="parent">
+              <video
+                ref={localVideoRef}
+                autoPlay
+                style={{
+                  position: 'absolute',
+                  right: 0,
+                  zIndex: 2,
+                  borderRadius: '12px',
+                  minWidth: '25%',
+                  minHeight: '25%',
+                  maxWidth: '50%',
+                  maxHeight: '50%',
+                }}
+              />
+            </Draggable>
           )}
         </Box>
         {/* Bottom panel with calling buttons */}
-        <Grid container justifyContent="space-between">
+        <Grid container>
           <Grid item xs />
-          <Grid item>
-            <CallInterfacePrimaryButtons />
+          <Grid item sx={{ display: 'flex', justifyContent: 'center' }}>
+            <div>
+              <CallInterfacePrimaryButtons />
+            </div>
           </Grid>
-          <Grid item xs sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-            <CallInterfaceSecondaryButtons />
+          <Grid item xs sx={{ display: 'flex', justifyContent: 'flex-end' }} ref={gridItemRef}>
+            <CallInterfaceSecondaryButtons gridItemRef={gridItemRef} />
           </Grid>
         </Grid>
       </Stack>
@@ -118,33 +139,100 @@ const CallInterfacePrimaryButtons = () => {
   const { sendWebRTCOffer } = useContext(WebRTCContext);
 
   return (
-    <Card sx={{ backgroundColor: 'black', textAlign: 'center' }}>
-      <Button
-        variant="contained"
-        onClick={() => {
-          sendWebRTCOffer();
-        }}
-      >
-        {/* TODO: Remove this button and make calling automatic (https://git.jami.net/savoirfairelinux/jami-web/-/issues/91)*/}
-        Call
-      </Button>
-      <CallingMicButton />
-      <CallingEndButton />
-      <CallingVideoCameraButton />
+    <Card sx={{ backgroundColor: '#00000088', overflow: 'visible', textAlign: 'center' }}>
+      <Stack direction="row" justifyContent="flex-end" alignItems="flex-end">
+        <Button
+          variant="contained"
+          onClick={() => {
+            sendWebRTCOffer();
+          }}
+        >
+          {/* TODO: Remove this button and make calling automatic (https://git.jami.net/savoirfairelinux/jami-web/-/issues/91)*/}
+          Call
+        </Button>
+        <CallingMicButton />
+        <CallingEndButton />
+        <CallingVideoCameraButton />
+      </Stack>
     </Card>
   );
 };
 
-const CallInterfaceSecondaryButtons = () => {
+const SECONDARY_BUTTONS = [
+  CallingVolumeButton,
+  CallingGroupButton,
+  CallingChatButton,
+  CallingScreenShareButton,
+  CallingRecordButton,
+  CallingExtensionButton,
+  CallingFullScreenButton,
+];
+
+const CallInterfaceSecondaryButtons = (props: Props & { gridItemRef: React.RefObject<HTMLElement> }) => {
+  const stackRef = useRef<HTMLElement>(null);
+
+  const [hiddenStackCount, setHiddenStackCount] = useState(0);
+  const [hiddenMenuVisible, setHiddenMenuVisible] = useState(false);
+
+  useLayoutEffect(() => {
+    const onResize = () => {
+      if (stackRef?.current && props.gridItemRef?.current) {
+        const buttonWidth = stackRef.current.children[0].clientWidth;
+        const availableSpace = props.gridItemRef.current.clientWidth;
+        let availableButtons = Math.floor((availableSpace - 1) / buttonWidth);
+        if (availableButtons < SECONDARY_BUTTONS.length) {
+          availableButtons -= 1; // Leave room for CallingMoreVerticalButton
+        }
+        setHiddenStackCount(SECONDARY_BUTTONS.length - availableButtons);
+      }
+    };
+    window.addEventListener('resize', onResize);
+    return () => {
+      window.removeEventListener('resize', onResize);
+    };
+  }, [props.gridItemRef]);
+
+  const { displayedButtons, hiddenButtons } = useMemo(() => {
+    const displayedButtons: ComponentType<ExpandableButtonProps>[] = [];
+    const hiddenButtons: ComponentType<ExpandableButtonProps>[] = [];
+    SECONDARY_BUTTONS.forEach((button, i) => {
+      if (i < SECONDARY_BUTTONS.length - hiddenStackCount) {
+        displayedButtons.push(button);
+      } else {
+        hiddenButtons.push(button);
+      }
+    });
+
+    return {
+      displayedButtons,
+      hiddenButtons,
+    };
+  }, [hiddenStackCount]);
+
   return (
-    <Card style={{ backgroundColor: 'black' }}>
-      <CallingVolumeButton />
-      <CallingGroupButton />
-      <CallingChatButton />
-      <CallingScreenShareButton />
-      <CallingRecordButton />
-      <CallingExtensionButton />
-      <CallingFullscreenButton />
+    <Card sx={{ backgroundColor: '#00000088', overflow: 'visible' }}>
+      <Stack direction="row" justifyContent="flex-end" alignItems="flex-end" ref={stackRef}>
+        {displayedButtons.map((SecondaryButton, i) => (
+          <Fragment key={i}>
+            <SecondaryButton />
+          </Fragment>
+        ))}
+        {!!hiddenButtons.length && (
+          <Card sx={{ position: 'relative', backgroundColor: '#00000088', overflow: 'visible' }}>
+            <CallingMoreVerticalButton onClick={() => setHiddenMenuVisible(!hiddenMenuVisible)} />
+            <Stack
+              direction="column-reverse"
+              sx={{ bottom: 0, right: 0, height: '100%', position: 'absolute', top: '-40px' }}
+            >
+              {hiddenButtons.map((SecondaryButton, i) => (
+                <Fragment key={i}>
+                  <SecondaryButton key={i} />
+                </Fragment>
+              ))}
+            </Stack>
+          </Card>
+        )}
+      </Stack>
     </Card>
   );
 };

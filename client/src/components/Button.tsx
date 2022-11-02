@@ -16,10 +16,23 @@
  * <https://www.gnu.org/licenses/>.
  */
 import { QuestionMark, RadioButtonChecked, RadioButtonUnchecked } from '@mui/icons-material';
-import { Box, ClickAwayListener, IconButton, IconButtonProps, Popper, SvgIconProps } from '@mui/material';
+import {
+  Box,
+  ClickAwayListener,
+  IconButton,
+  IconButtonProps,
+  ListItemIcon,
+  ListItemText,
+  Menu,
+  MenuItem,
+  Popper,
+  Radio,
+  RadioGroup,
+  SvgIconProps,
+} from '@mui/material';
 import { styled } from '@mui/material/styles';
 import EmojiPicker, { IEmojiData } from 'emoji-picker-react';
-import { ComponentType, MouseEvent, useCallback, useState } from 'react';
+import React, { ComponentType, MouseEvent, ReactNode, useCallback, useState } from 'react';
 
 import {
   Arrow2Icon,
@@ -32,6 +45,7 @@ import {
   CrossedEyeIcon,
   CrossIcon,
   EmojiIcon,
+  ExpandLessIcon,
   EyeIcon,
   FolderIcon,
   InfoIcon,
@@ -76,6 +90,101 @@ const RoundButton = styled(({ Icon, ...props }: ShapedButtonProps) => (
     height: '53px',
     width: '53px',
   },
+}));
+
+type ExpandMenuOption = {
+  description: ReactNode;
+  icon?: ReactNode;
+};
+
+type ExpandMenuRadioOption = {
+  options: {
+    key: string;
+    description: ReactNode;
+  }[];
+  defaultSelectedOption?: string;
+};
+
+export type ExpandableButtonProps = IconButtonProps & {
+  Icon?: ComponentType<SvgIconProps>;
+  expandMenuOptions?: (ExpandMenuOption | ExpandMenuRadioOption)[];
+};
+
+export const ExpandableButton = styled(({ Icon, expandMenuOptions = [], ...props }: ExpandableButtonProps) => {
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
+  const hasExpandMenuOptions = expandMenuOptions.length > 0;
+  return (
+    <Box>
+      <Menu
+        anchorEl={anchorEl}
+        open={!!anchorEl}
+        onClose={handleClose}
+        anchorOrigin={{
+          vertical: 'top',
+          horizontal: 'center',
+        }}
+        transformOrigin={{
+          vertical: 'bottom',
+          horizontal: 'center',
+        }}
+      >
+        {expandMenuOptions.map((option, id) => {
+          if ('options' in option) {
+            const { options, defaultSelectedOption } = option;
+            return (
+              <RadioGroup key={id} defaultValue={defaultSelectedOption}>
+                {options.map(({ description, key }) => {
+                  return (
+                    <MenuItem key={key}>
+                      <ListItemIcon>
+                        <Radio value={key} />
+                      </ListItemIcon>
+                      <ListItemText>{description}</ListItemText>
+                    </MenuItem>
+                  );
+                })}
+              </RadioGroup>
+            );
+          }
+
+          return (
+            <MenuItem key={id} onClick={handleClose}>
+              <ListItemIcon>{option.icon}</ListItemIcon>
+              <ListItemText>{option.description}</ListItemText>
+            </MenuItem>
+          );
+        })}
+      </Menu>
+      <Box position="relative">
+        {hasExpandMenuOptions && (
+          <IconButton
+            {...props}
+            onClick={(e) => setAnchorEl(e.currentTarget)}
+            aria-label="expand options"
+            size="small"
+            sx={{
+              position: 'absolute',
+              left: 0,
+              right: 0,
+              top: '-50%',
+              color: 'white',
+            }}
+          >
+            <ExpandLessIcon sx={{ backgroundColor: '#555555', borderRadius: '5px' }} />
+          </IconButton>
+        )}
+        <IconButton {...props} disableRipple={true}>
+          {Icon && <Icon fontSize="inherit" />}
+        </IconButton>
+      </Box>
+    </Box>
+  );
+})(({ theme }) => ({
+  color: 'white',
 }));
 
 export const CancelPictureButton = (props: IconButtonProps) => {
@@ -153,6 +262,7 @@ export type ToggleIconButtonProps = IconButtonProps & {
   IconOn?: ComponentType<SvgIconProps>;
   IconOff?: ComponentType<SvgIconProps>;
 };
+
 export const ToggleIconButton = ({
   IconOn = RadioButtonChecked,
   IconOff = RadioButtonUnchecked,

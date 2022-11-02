@@ -15,90 +15,102 @@
  * License along with this program.  If not, see
  * <https://www.gnu.org/licenses/>.
  */
-import { IconButton, IconButtonProps } from '@mui/material';
-import { styled } from '@mui/material/styles';
+
 import React, { useContext } from 'react';
+import { Trans } from 'react-i18next';
 
 import { WebRTCContext } from '../contexts/WebRTCProvider';
-import { ToggleIconButton, ToggleIconButtonProps } from './Button';
+import { ExpandableButton, ExpandableButtonProps, ToggleIconButton, ToggleIconButtonProps } from './Button';
 import {
   CallEndIcon,
   ChatBubbleIcon,
   ExtensionIcon,
-  FullscreenIcon,
+  FileIcon,
+  FullScreenIcon,
   GroupAddIcon,
   MicroIcon,
   MicroOffIcon,
+  MoreVerticalIcon,
   RecordingIcon,
-  ScreenShareIcon,
+  ScreenShareArrowIcon,
+  ScreenShareRegularIcon,
+  ScreenShareScreenAreaIcon,
   VideoCameraIcon,
   VideoCameraOffIcon,
   VolumeIcon,
 } from './SvgIcon';
 
-export const CallingChatButton = (props: IconButtonProps) => {
-  return (
-    <IconButton {...props} aria-label="chat" sx={{ color: 'white' }}>
-      <ChatBubbleIcon />
-    </IconButton>
-  );
+export const CallingChatButton = (props: ExpandableButtonProps) => {
+  return <ExpandableButton aria-label="chat" Icon={ChatBubbleIcon} {...props} />;
 };
-export const CallingEndButton = styled((props: IconButtonProps) => {
-  return (
-    <IconButton {...props} aria-label="end call">
-      <CallEndIcon />
-    </IconButton>
-  );
-})(() => ({
-  color: 'white',
-  backgroundColor: 'red',
-  '&:hover': {
-    backgroundColor: 'darkred',
-  },
-}));
-export const CallingExtensionButton = (props: IconButtonProps) => {
-  return (
-    <IconButton {...props} aria-label="extensions" sx={{ color: 'white' }}>
-      <ExtensionIcon />
-    </IconButton>
-  );
+
+export const CallingEndButton = (props: ExpandableButtonProps) => {
+  return <ExpandableButton aria-label="call end" Icon={CallEndIcon} sx={{ backgroundColor: 'red' }} {...props} />;
 };
-export const CallingFullscreenButton = (props: IconButtonProps) => {
-  return (
-    <IconButton {...props} aria-label="fullscreen" sx={{ color: 'white' }}>
-      <FullscreenIcon />
-    </IconButton>
-  );
+
+export const CallingExtensionButton = (props: ExpandableButtonProps) => {
+  return <ExpandableButton aria-label="extensions" Icon={ExtensionIcon} {...props} />;
 };
-export const CallingGroupButton = (props: IconButtonProps) => {
-  return (
-    <IconButton {...props} aria-label="group options" sx={{ color: 'white' }}>
-      <GroupAddIcon />
-    </IconButton>
-  );
+
+export const CallingFullScreenButton = (props: ExpandableButtonProps) => {
+  return <ExpandableButton aria-label="full screen" Icon={FullScreenIcon} {...props} />;
 };
-export const CallingRecordButton = (props: IconButtonProps) => {
-  return (
-    <IconButton {...props} aria-label="recording options" sx={{ color: 'white' }}>
-      <RecordingIcon />
-    </IconButton>
-  );
+
+export const CallingGroupButton = (props: ExpandableButtonProps) => {
+  return <ExpandableButton aria-label="group options" Icon={GroupAddIcon} {...props} />;
 };
-export const CallingScreenShareButton = (props: IconButtonProps) => {
-  return (
-    <IconButton {...props} aria-label="screen share" sx={{ color: 'white' }}>
-      <ScreenShareIcon />
-    </IconButton>
-  );
+
+export const CallingMoreVerticalButton = (props: ExpandableButtonProps) => {
+  return <ExpandableButton aria-label="more vertical" Icon={MoreVerticalIcon} {...props} />;
 };
-export const CallingVolumeButton = (props: IconButtonProps) => {
+
+export const CallingRecordButton = (props: ExpandableButtonProps) => {
+  return <ExpandableButton aria-label="recording options" Icon={RecordingIcon} {...props} />;
+};
+
+export const CallingScreenShareButton = (props: ExpandableButtonProps) => {
   return (
-    <IconButton {...props} aria-label="volume options" sx={{ color: 'white' }}>
-      <VolumeIcon />
-    </IconButton>
+    <ExpandableButton
+      aria-label="screen share"
+      Icon={ScreenShareArrowIcon}
+      expandMenuOptions={[
+        {
+          description: <Trans i18nKey="share_screen" />,
+          icon: <ScreenShareRegularIcon />,
+        },
+        {
+          description: <Trans i18nKey="share_screen_area" />,
+          icon: <ScreenShareScreenAreaIcon />,
+        },
+        {
+          description: <Trans i18nKey="share_file" />,
+          icon: <FileIcon />,
+        },
+      ]}
+      {...props}
+    />
   );
 };
 
+export const CallingVolumeButton = (props: ExpandableButtonProps) => {
+  return (
+    <ExpandableButton
+      aria-label="volume options"
+      Icon={VolumeIcon}
+      expandMenuOptions={[
+        {
+          options: [
+            {
+              key: '0',
+              description: <Trans i18nKey="dummy_option_string" />,
+            },
+          ],
+        },
+      ]}
+      {...props}
+    />
+  );
+};
 export const CallingMicButton = (props: Partial<ToggleIconButtonProps>) => {
   const { isAudioOn, setAudioStatus } = useContext(WebRTCContext);
 

@@ -11,31 +11,44 @@
   "conversation_title_three": "{{member0}}, {{member1}} and {{member2}}",
   "conversation_title_four": "{{member0}}, {{member1}}, {{member2}}, +1 other member",
   "conversation_title_more": "{{member0}}, {{member1}}, {{member2}}, +{{excess}} other members",
+
   "message_call_outgoing_missed": "Missed outgoing call",
   "message_call_incoming_missed": "Missed incoming call",
   "message_call_outgoing": "Outgoing call - {{duration}}",
   "message_call_incoming": "Incoming call - {{duration}}",
+
   "message_swarm_created": "Swarm created",
   "message_user_joined": "{{user}} joined",
+
   "message_input_placeholder_one": "Write to {{member0}}",
   "message_input_placeholder_two": "Write to {{member0}} and {{member1}}",
   "message_input_placeholder_three": "Write to {{member0}}, {{member1}} and {{member2}}",
   "message_input_placeholder_four": "Write to {{member0}}, {{member1}}, {{member2}}, +1 other member",
   "message_input_placeholder_more": "Write to {{member0}}, {{member1}}, {{member2}}, +{{excess}} other members",
+
   "username_input_default_helper_text": "",
   "username_input_success_helper_text": "Username available",
   "username_input_taken_helper_text": "Username already taken",
   "username_input_invalid_helper_text": "Username doesn't follow required pattern",
   "username_input_registration_failed_helper_text": "Username not correct!",
+
   "password_input_default_helper_text": "",
   "password_input_too_weak_helper_text": "Too weak",
   "password_input_weak_helper_text": "Weak",
   "password_input_medium_helper_text": "Medium",
   "password_input_strong_helper_text": "Strong",
   "password_input_registration_failed_helper_text": "Choose another password!",
+
   "login_username_not_found": "Username not found",
   "login_invalid_password": "Incorrect password",
+
   "severity_error": "Error",
   "severity_success": "Success",
-  "registration_success": "You've successfully registered! — Logging you in..."
+  "registration_success": "You've successfully registered! — Logging you in...",
+
+  "share_screen": "Share your screen",
+  "share_screen_area": "Share an area of your screen",
+  "share_file": "Share a file",
+
+  "dummy_option_string": "Test option"
 }
