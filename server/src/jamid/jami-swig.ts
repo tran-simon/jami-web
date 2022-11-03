@@ -88,7 +88,6 @@ export interface JamiSwig {
 
   getConversations(accountId: string): StringVect;
   conversationInfos(accountId: string, conversationId: string): StringMap;
-
   getConversationMembers(accountId: string, conversationId: string): VectMap;
 
   sendMessage(accountId: string, conversationId: string, message: string, replyTo: string): void;

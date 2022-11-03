@@ -40,7 +40,7 @@ export const authRouter = Router();
 
 authRouter.post(
   '/new-account',
-  asyncHandler(async (req: Request<ParamsDictionary, any, Credentials>, res, _next) => {
+  asyncHandler(async (req: Request<ParamsDictionary, string, Credentials>, res, _next) => {
     const { username, password } = req.body;
     if (!username || !password) {
       res.status(HttpStatusCode.BadRequest).send('Missing username or password');
@@ -55,10 +55,10 @@ authRouter.post(
     // TODO: find a way to store the password directly in Jami
     // Maybe by using the "password" field? But as I tested, it's not
     // returned when getting user infos.
-    const { accountId } = await jamid.addAccount(new Map());
+    const accountId = await jamid.addAccount(new Map());
 
     // TODO: understand why the password arg in this call must be empty
-    const { state } = await jamid.registerUsername(accountId, username, '');
+    const state = await jamid.registerUsername(accountId, username, '');
     if (state !== 0) {
       jamid.removeAccount(accountId);
       if (state === 2) {
@@ -80,7 +80,7 @@ authRouter.post(
 
 authRouter.post(
   '/login',
-  asyncHandler(async (req: Request<ParamsDictionary, any, Credentials>, res, _next) => {
+  asyncHandler(async (req: Request<ParamsDictionary, { accessToken: string } | string, Credentials>, res, _next) => {
     const { username, password } = req.body;
     if (!username || !password) {
       res.status(HttpStatusCode.BadRequest).send('Missing username or password');
@@ -117,6 +117,6 @@ authRouter.post(
       .setAudience('urn:example:audience')
       .setExpirationTime('2h')
       .sign(vault.privateKey);
-    res.json({ accessToken: jwt });
+    res.send({ accessToken: jwt });
   })
 );

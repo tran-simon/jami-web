@@ -49,9 +49,9 @@ function createAuthenticationMiddleware(isAuthenticationRequired: boolean) {
         issuer: 'urn:example:issuer',
         audience: 'urn:example:audience',
       });
-      res.locals.accountId = payload.id as string;
+      res.locals.accountId = payload.id;
       next();
-    } catch (err) {
+    } catch (e) {
       res.sendStatus(HttpStatusCode.Unauthorized);
     }
   };

@@ -15,7 +15,7 @@
  * License along with this program.  If not, see
  * <https://www.gnu.org/licenses/>.
  */
-import { AccountDetails, VolatileDetails } from 'jami-web-common';
+import { AccountDetails, Message, VolatileDetails } from 'jami-web-common';
 import log from 'loglevel';
 import { filter, firstValueFrom, map, Subject } from 'rxjs';
 import { Service } from 'typedi';
@@ -104,15 +104,11 @@ export class Jamid {
       onConversationRemoved.next({ accountId, conversationId });
 
     const onConversationLoaded = new Subject<ConversationLoaded>();
-    handlers.ConversationLoaded = (
-      id: number,
-      accountId: string,
-      conversationId: string,
-      messages: Record<string, string>[]
-    ) => onConversationLoaded.next({ id, accountId, conversationId, messages });
+    handlers.ConversationLoaded = (id: number, accountId: string, conversationId: string, messages: Message[]) =>
+      onConversationLoaded.next({ id, accountId, conversationId, messages });
 
     const onMessageReceived = new Subject<MessageReceived>();
-    handlers.MessageReceived = (accountId: string, conversationId: string, message: Record<string, string>) =>
+    handlers.MessageReceived = (accountId: string, conversationId: string, message: Message) =>
       onMessageReceived.next({ accountId, conversationId, message });
 
     // Expose all signals in an events object to allow other handlers to subscribe after jamiSwig.init()
@@ -142,7 +138,7 @@ export class Jamid {
     // TODO: Bind websocket callbacks for webrtc action on Incoming account message
   }
 
-  stop() {
+  stop(): void {
     this.jamiSwig.fini();
   }
 
@@ -154,7 +150,7 @@ export class Jamid {
     return stringMapToRecord(this.jamiSwig.getAccountDetails(accountId)) as unknown as AccountDetails;
   }
 
-  setAccountDetails(accountId: string, accountDetails: AccountDetails) {
+  setAccountDetails(accountId: string, accountDetails: AccountDetails): void {
     const accountDetailsStringMap: StringMap = new this.jamiSwig.StringMap();
     for (const [key, value] of Object.entries(accountDetails)) {
       accountDetailsStringMap.set(key, value);
@@ -162,7 +158,7 @@ export class Jamid {
     this.jamiSwig.setAccountDetails(accountId, accountDetailsStringMap);
   }
 
-  async addAccount(details: Map<string, string | number | boolean>) {
+  async addAccount(details: Map<string, string | number | boolean>): Promise<string> {
     const detailsStringMap: StringMap = new this.jamiSwig.StringMap();
 
     detailsStringMap.set('Account.type', 'RING');
@@ -176,25 +172,27 @@ export class Jamid {
         filter((value) => value.accountId === accountId),
         // TODO: is it the only state?
         // TODO: Replace with string enum in common/
-        filter(({ state }) => state === 'REGISTERED')
+        filter((value) => value.state === 'REGISTERED'),
+        map((value) => value.accountId)
       )
     );
   }
 
-  removeAccount(accountId: string) {
+  removeAccount(accountId: string): void {
     this.jamiSwig.removeAccount(accountId);
   }
 
-  getAccountList(): string[] {
+  getAccountIds(): string[] {
     return stringVectToArray(this.jamiSwig.getAccountList());
   }
 
-  sendAccountTextMessage(accountId: string, contactId: string, type: string, message: string) {
+  sendAccountTextMessage(accountId: string, contactId: string, type: string, message: string): void {
     const messageStringMap: StringMap = new this.jamiSwig.StringMap();
     messageStringMap.set(type, JSON.stringify(message));
     this.jamiSwig.sendAccountTextMessage(accountId, contactId, messageStringMap);
   }
 
+  // TODO: Add interface for returned type
   async lookupUsername(username: string, accountId?: string) {
     const hasRingNs = this.jamiSwig.lookupName(accountId || '', '', username);
     if (!hasRingNs) {
@@ -208,6 +206,7 @@ export class Jamid {
     );
   }
 
+  // TODO: Add interface for returned type
   async lookupAddress(address: string, accountId?: string) {
     const hasRingNs = this.jamiSwig.lookupAddress(accountId || '', '', address);
     if (!hasRingNs) {
@@ -221,34 +220,42 @@ export class Jamid {
     );
   }
 
-  async registerUsername(accountId: string, username: string, password: string) {
+  // TODO: Create enum for state and return that rather than a number
+  async registerUsername(accountId: string, username: string, password: string): Promise<number> {
     const hasRingNs = this.jamiSwig.registerName(accountId, password, username);
     if (!hasRingNs) {
       throw new Error('Jami does not have NS');
     }
-    return firstValueFrom(this.events.onNameRegistrationEnded.pipe(filter((value) => value.accountId === accountId)));
+    return firstValueFrom(
+      this.events.onNameRegistrationEnded.pipe(
+        filter((value) => value.accountId === accountId),
+        map((value) => value.state)
+      )
+    );
   }
 
   getDevices(accountId: string): Record<string, string> {
     return stringMapToRecord(this.jamiSwig.getKnownRingDevices(accountId));
   }
 
-  addContact(accountId: string, contactId: string) {
+  addContact(accountId: string, contactId: string): void {
     this.jamiSwig.addContact(accountId, contactId);
   }
 
-  removeContact(accountId: string, contactId: string) {
+  removeContact(accountId: string, contactId: string): void {
     this.jamiSwig.removeContact(accountId, contactId, false);
   }
 
-  blockContact(accountId: string, contactId: string) {
+  blockContact(accountId: string, contactId: string): void {
     this.jamiSwig.removeContact(accountId, contactId, true);
   }
 
+  // TODO: Replace Record with interface
   getContacts(accountId: string): Record<string, string>[] {
     return vectMapToRecordArray(this.jamiSwig.getContacts(accountId));
   }
 
+  // TODO: Replace Record with interface
   getContactDetails(accountId: string, contactId: string): Record<string, string> {
     return stringMapToRecord(this.jamiSwig.getContactDetails(accountId, contactId));
   }
@@ -257,13 +264,39 @@ export class Jamid {
     return stringVectToArray(this.jamiSwig.getDefaultModerators(accountId));
   }
 
-  // TODO: Ideally, we would fetch the username directly from Jami instead of
-  // keeping an internal map.
+  getConversationIds(accountId: string): string[] {
+    return stringVectToArray(this.jamiSwig.getConversations(accountId));
+  }
+
+  // TODO: Replace Record with interface
+  getConversationInfos(accountId: string, conversationId: string): Record<string, string> {
+    return stringMapToRecord(this.jamiSwig.conversationInfos(accountId, conversationId));
+  }
+
+  // TODO: Replace Record with interface
+  getConversationMembers(accountId: string, conversationId: string): Record<string, string>[] {
+    return vectMapToRecordArray(this.jamiSwig.getConversationMembers(accountId, conversationId));
+  }
+
+  async getConversationMessages(accountId: string, conversationId: string, fromMessage?: string): Promise<Message[]> {
+    const requestId = this.jamiSwig.loadConversationMessages(accountId, conversationId, fromMessage || '', 32);
+    return firstValueFrom(
+      this.events.onConversationLoaded.pipe(
+        filter((value) => value.id === requestId),
+        map((value) => value.messages)
+      )
+    );
+  }
+
+  sendConversationMessage(accountId: string, conversationId: string, message: string, replyTo?: string): void {
+    this.jamiSwig.sendMessage(accountId, conversationId, message, replyTo || '');
+  }
+
   getAccountIdFromUsername(username: string): string | undefined {
     return this.usernamesToAccountIds.get(username);
   }
 
-  private setupSignalHandlers() {
+  private setupSignalHandlers(): void {
     this.events.onAccountsChanged.subscribe(() => {
       log.debug('Received AccountsChanged');
     });
@@ -273,9 +306,12 @@ export class Jamid {
     });
 
     this.events.onVolatileDetailsChanged.subscribe(({ accountId, details }) => {
-      log.debug(`Received VolatileDetailsChanged: {"accountId":"${accountId}", ...}`);
-      // Keep map of usernames to account IDs
       const username = details['Account.registeredName'];
+      log.debug(
+        `Received VolatileDetailsChanged: {"accountId":"${accountId}",` +
+          `"details":{"Account.registeredName":"${username}", ...}}`
+      );
+      // Keep map of usernames to account IDs
       if (username) {
         this.usernamesToAccountIds.set(username, accountId);
       }
@@ -309,8 +345,11 @@ export class Jamid {
       log.debug('Received ConversationRemoved:', JSON.stringify(signal));
     });
 
-    this.events.onConversationLoaded.subscribe((signal) => {
-      log.debug('Received ConversationLoaded:', JSON.stringify(signal));
+    this.events.onConversationLoaded.subscribe(({ id, accountId, conversationId }) => {
+      log.debug(
+        `Received ConversationLoaded: {"id":"${id}","accountId":"${accountId}",` +
+          `"conversationId":"${conversationId}","messages":[...]}`
+      );
     });
 
     this.events.onMessageReceived.subscribe((signal) => {

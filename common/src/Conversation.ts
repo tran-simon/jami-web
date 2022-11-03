@@ -25,7 +25,7 @@ export interface ConversationMember {
 
 type ConversationInfos = Record<string, unknown>;
 
-export type Message = {
+export interface Message {
   id: string;
   author: string;
   timestamp: string;
@@ -44,7 +44,7 @@ export type Message = {
   duration?: string;
   to?: string;
   invited?: string;
-};
+}
 
 type ConversationRequest = PromiseExecutor<Message[]>;
 

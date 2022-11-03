@@ -15,7 +15,7 @@
  * License along with this program.  If not, see
  * <https://www.gnu.org/licenses/>.
  */
-import { AccountDetails, VolatileDetails } from 'jami-web-common';
+import { AccountDetails, Message, VolatileDetails } from 'jami-web-common';
 
 // These interfaces are used to hold all the parameters for signal handlers
 // These parameters' names and types can be found in daemon/bin/nodejs/callback.h
@@ -76,11 +76,11 @@ export interface ConversationLoaded {
   id: number;
   accountId: string;
   conversationId: string;
-  messages: Record<string, string>[];
+  messages: Message[];
 }
 
 export interface MessageReceived {
   accountId: string;
   conversationId: string;
-  message: Record<string, string>;
+  message: Message;
 }

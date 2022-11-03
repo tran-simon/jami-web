@@ -59,12 +59,16 @@ accountRouter.patch('/', (req, res) => {
   res.sendStatus(HttpStatusCode.NoContent);
 });
 
-accountRouter.post('/send-account-message', (req: Request<ParamsDictionary, any, SendAccountTextMessageApi>, res) => {
-  const { from, to, type, data } = req.body;
-  if (!from || !to || !type || !data) {
-    res.status(HttpStatusCode.BadRequest).send('Missing arguments in request');
-    return;
+accountRouter.post(
+  '/send-account-message',
+  (req: Request<ParamsDictionary, string, SendAccountTextMessageApi>, res) => {
+    const { from, to, type, data } = req.body;
+    if (!from || !to || !type || !data) {
+      res.status(HttpStatusCode.BadRequest).send('Missing arguments in request');
+      return;
+    }
+
+    jamid.sendAccountTextMessage(from, to, type, data);
+    res.end();
   }
-  jamid.sendAccountTextMessage(from, to, type, data);
-  res.end();
-});
+);

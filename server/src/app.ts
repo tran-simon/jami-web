@@ -25,6 +25,7 @@ import { Service } from 'typedi';
 import { accountRouter } from './routers/account-router.js';
 import { authRouter } from './routers/auth-router.js';
 import { contactsRouter } from './routers/contacts-router.js';
+import { conversationRouter } from './routers/conversation-router.js';
 import { nameserverRouter } from './routers/nameserver-router.js';
 
 @Service()
@@ -41,6 +42,9 @@ export class App {
     app.use('/auth', authRouter);
     app.use('/account', accountRouter);
     app.use('/contacts', contactsRouter);
+    // TODO: Moderator routes: https://git.jami.net/savoirfairelinux/jami-web/-/issues/93
+    app.use('/conversations', conversationRouter);
+    // TODO: Call routes: https://git.jami.net/savoirfairelinux/jami-web/-/issues/107
     app.use('/ns', nameserverRouter);
 
     // Setup 404 error handling
