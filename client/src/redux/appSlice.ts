@@ -16,14 +16,12 @@
  * <https://www.gnu.org/licenses/>.
  */
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { Account } from 'jami-web-common';
 
 // Define a type for the slice state
 export interface AppState {
   // TODO: Remove accountId when account endpoints available.
   // Left for backwards compatibility, not necessary, included in token.
   accountId: string;
-  account?: Account;
   // TODO : Evaluate need for this when WebSocket will be available.
   refresh: boolean;
 }
@@ -31,7 +29,6 @@ export interface AppState {
 // Define the initial state using that type
 const initialState: AppState = {
   accountId: '',
-  account: undefined,
   refresh: true,
 };
 
@@ -43,16 +40,13 @@ export const userInfoSlice = createSlice({
     setAccountId: (state, action: PayloadAction<string>) => {
       state.accountId = action.payload;
     },
-    setAccount: (state, action: PayloadAction<Account | undefined>) => {
-      state.account = action.payload;
-    },
     setRefreshFromSlice: (state) => {
       state.refresh = !state.refresh;
     },
   },
 });
 
-export const { setAccountId, setAccount, setRefreshFromSlice } = userInfoSlice.actions;
+export const { setAccountId, setRefreshFromSlice } = userInfoSlice.actions;
 
 // Other code such as selectors can use the imported `RootState` type
 // export const selectCount = (state: RootState) => state.app.value;

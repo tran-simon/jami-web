@@ -213,7 +213,7 @@ const SquareButton = styled(({ Icon, ...props }: ShapedButtonProps) => (
   <IconButton {...props} disableRipple={true}>
     <Icon fontSize="inherit" />
   </IconButton>
-))(({ theme }) => ({
+))(() => ({
   color: '#7E7E7E',
   fontSize: '25px',
   height: '36px',
@@ -278,7 +278,7 @@ export const EmojiButton = styled(({ emoji, ...props }: EmojiButtonProps) => (
   <IconButton {...props} disableRipple={true}>
     {emoji}
   </IconButton>
-))(({ theme }) => ({
+))(() => ({
   color: 'white',
   fontSize: '20px',
   height: '20px',
@@ -288,7 +288,7 @@ export const EmojiButton = styled(({ emoji, ...props }: EmojiButtonProps) => (
 type SelectEmojiButtonProps = {
   onEmojiSelected: (emoji: string) => void;
 };
-export const SelectEmojiButton = ({ onEmojiSelected, ...props }: SelectEmojiButtonProps) => {
+export const SelectEmojiButton = ({ onEmojiSelected }: SelectEmojiButtonProps) => {
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
 
   const handleOpenEmojiPicker = useCallback(

@@ -11,6 +11,7 @@ RUN apt-get update && apt-get install -y \
 
 # Create a symlink to the daemon node app
 RUN ln -s /daemon/bin/nodejs/build/Release/jamid.node jamid.node
+RUN mkdir server && ln -s /daemon/bin/nodejs/build/Release/jamid.node server/jamid.node
 
 COPY package*.json ./
 COPY client/package*.json client/

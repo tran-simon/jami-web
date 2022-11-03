@@ -35,11 +35,11 @@ import {
   Typography,
 } from '@mui/material';
 import { motion } from 'framer-motion';
-import { Account } from 'jami-web-common';
-import { AccountDetails } from 'jami-web-common';
+import { Account, AccountDetails } from 'jami-web-common';
 import { useState } from 'react';
 
 import authManager from '../AuthManager';
+import { useAuthContext } from '../contexts/AuthProvider';
 import ConversationAvatar from './ConversationAvatar';
 import ConversationsOverviewCard from './ConversationsOverviewCard';
 import JamiIdCard from './JamiIdCard';
@@ -57,10 +57,17 @@ const thumbnailVariants = {
 };
 
 type AccountPreferencesProps = {
-  account: Account;
+  // TODO: Remove account prop after migration to new server
+  account?: Account;
 };
 
-export default function AccountPreferences({ account }: AccountPreferencesProps) {
+export default function AccountPreferences({ account: _account }: AccountPreferencesProps) {
+  const authContext = useAuthContext(true);
+  const account = _account ?? authContext?.account;
+  if (!account) {
+    throw new Error('Account not defined');
+  }
+
   const devices: string[][] = [];
   const accountDevices = account.getDevices();
   for (const i in accountDevices) devices.push([i, accountDevices[i]]);
@@ -241,7 +248,7 @@ export default function AccountPreferences({ account }: AccountPreferencesProps)
                     </ListItemAvatar>
                     <ListItemText primary={moderator.getDisplayName()} />
                     <ListItemSecondaryAction>
-                      <IconButton onClick={(e) => removeModerator(moderator.getUri())} size="large">
+                      <IconButton onClick={() => removeModerator(moderator.getUri())} size="large">
                         <DeleteRounded />
                       </IconButton>
                     </ListItemSecondaryAction>

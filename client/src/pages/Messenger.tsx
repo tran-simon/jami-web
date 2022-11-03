@@ -83,7 +83,7 @@ const Messenger = (props: MessengerProps) => {
         contact.setRegisteredName(response.name);
         setSearchResults(contact ? Conversation.fromSingleContact(accountId, contact) : undefined);
       })
-      .catch((e) => {
+      .catch(() => {
         setSearchResults(undefined);
       });
     // return () => controller.abort() // crash on React18

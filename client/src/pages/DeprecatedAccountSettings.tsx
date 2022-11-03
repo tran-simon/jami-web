@@ -23,7 +23,7 @@ import { useParams } from 'react-router';
 import authManager from '../AuthManager';
 import AccountPreferences from '../components/AccountPreferences';
 import Header from '../components/Header';
-import { setAccount, setAccountId } from '../redux/appSlice';
+import { setAccountId } from '../redux/appSlice';
 import { useAppDispatch } from '../redux/hooks';
 
 type AccountSettingsProps = {
@@ -55,7 +55,6 @@ const DeprecatedAccountSettings = (props: AccountSettingsProps) => {
         console.log(result);
         const account = Account.from(result);
         account.setDevices(result.devices);
-        dispatch(setAccount(account));
         setLocalAccount(account);
       })
       .catch((e) => console.log(e));

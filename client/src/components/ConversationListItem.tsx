@@ -92,8 +92,8 @@ export default function ConversationListItem({ conversation }: ConversationListI
   const [modalDetailsIsOpen, setModalDetailsIsOpen] = useState(false);
   const [modalDeleteIsOpen, setModalDeleteIsOpen] = useState(false);
   const [blockOrRemove, setBlockOrRemove] = useState(true);
-  const [userId, setUserId] = useState(conversation?.getFirstMember()?.contact.getUri());
-  const [isSwarm, setIsSwarm] = useState(true);
+  const [userId] = useState(conversation?.getFirstMember()?.contact.getUri());
+  const [isSwarm] = useState(true);
 
   const navigateUrlPrefix = `/deprecated-account/${conversation.getAccountId()}`;
 
@@ -134,7 +134,7 @@ export default function ConversationListItem({ conversation }: ConversationListI
         method: 'DELETE',
       })
       .then((res) => res.json())
-      .then((result) => {
+      .then(() => {
         console.log('propre');
         dispatch(setRefreshFromSlice());
       })

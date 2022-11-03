@@ -27,7 +27,7 @@ import JamiRegistration from './JamiRegistration';
 
 const borderRadius = 30;
 
-export default function Home() {
+export default function Welcome() {
   const theme: Theme = useTheme();
   const [isRegistrationDisplayed, setIsRegistrationDisplayed] = useState<boolean>(false);
 
@@ -90,9 +90,7 @@ export default function Home() {
                 sx={{ mt: theme.typography.pxToRem(30), mb: theme.typography.pxToRem(20) }}
               />
             )}
-            <Box className="home-child" sx={{ height: `${isMobile ? 'auto' : '100%'}` }}>
-              {child}
-            </Box>
+            <Box sx={{ height: `${isMobile ? 'auto' : '100%'}` }}>{child}</Box>
           </Grid>
         </Grid>
       </Paper>

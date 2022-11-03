@@ -19,9 +19,12 @@ import { Box, Button, Menu, MenuItem } from '@mui/material';
 import { MouseEvent, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
+import { useAuthContext } from '../contexts/AuthProvider';
 import { setAccessToken } from '../utils/auth';
 
 export default function Header() {
+  const authContext = useAuthContext(true);
+
   const navigate = useNavigate();
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
   const handleClick = (event: MouseEvent<HTMLButtonElement>) => setAnchorEl(event.currentTarget);
@@ -31,10 +34,12 @@ export default function Header() {
   const goToContacts = () => navigate(`/contacts`);
   const goToAccountSettings = () => navigate(`/deprecated-account/${params.accountId}/settings`);
 
-  const logout = () => {
+  const deprecatedLogout = () => {
     setAccessToken('');
-    navigate('/', { replace: true });
+    navigate('/deprecated-account', { replace: true });
   };
+  // TODO: Remove deprecated_logout once migration to new server is complete
+  const logout = authContext?.logout ?? deprecatedLogout;
 
   return (
     <Box>

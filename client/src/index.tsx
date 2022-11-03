@@ -29,15 +29,16 @@ import socketio from 'socket.io-client';
 
 import App from './App';
 import ContactList from './components/ContactList';
+import AuthProvider from './contexts/AuthProvider';
 import { SocketProvider } from './contexts/Socket';
 import AccountSelection from './pages/AccountSelection';
 import AccountSettings from './pages/AccountSettings';
 import CallInterface from './pages/CallInterface';
 import DeprecatedAccountSettings from './pages/DeprecatedAccountSettings';
-import Home from './pages/Home';
 import JamiMessenger from './pages/JamiMessenger';
 import Messenger from './pages/Messenger';
 import ServerSetup from './pages/ServerSetup';
+import Welcome from './pages/Welcome';
 import { store } from './redux/store';
 import defaultTheme from './themes/Default';
 import { ThemeDemonstrator } from './themes/ThemeDemonstrator';
@@ -55,11 +56,13 @@ const socket = socketio();
 const router = createBrowserRouter(
   createRoutesFromElements(
     <Route path="/" element={<App />}>
-      <Route index element={<Home />} />
+      <Route index element={<Welcome />} />
       <Route path="theme" element={<ThemeDemonstrator />} />
-      <Route path="account" element={<JamiMessenger />} />
-      <Route path="settings" element={<AccountSettings />} />
-      <Route path="contacts" element={<ContactList />} />
+      <Route element={<AuthProvider />}>
+        <Route path="account" element={<JamiMessenger />} />
+        <Route path="settings" element={<AccountSettings />} />
+        <Route path="contacts" element={<ContactList />} />
+      </Route>
       <Route path="setup" element={<ServerSetup />} />
       {/* TODO: Remove this block after migration to new server*/}
       <Route path="deprecated-account" element={<AccountSelection />} />

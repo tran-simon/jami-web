@@ -36,7 +36,7 @@ const variants = {
 const AccountSelection = () => {
   const navigate = useNavigate();
   const [loaded, setLoaded] = useState(false);
-  const [error, setError] = useState(false);
+  const [, setError] = useState(false);
   const [accounts, setAccounts] = useState<Account[]>([]);
 
   authManager.authenticate('admin', 'admin');

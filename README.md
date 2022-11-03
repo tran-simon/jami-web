@@ -23,10 +23,11 @@ LD_LIBRARY_PATH=$PATH_TO_JAMI_PROJECT/ring-project/install/daemon/lib node
 
 To build the dring.node Javascript interface to talk to the daemon api go to the daemon repo and use ./configure --with-nodejs then execute make -j4 to build the daemon
 
-Create a symbolic link to `jamid.node` at the root of jami-web:
+Create a symbolic link to `jamid.node` at the root of jami-web and inside `server/`:
 
 ```bash
 ln -s daemon/bin/nodejs/build/Release/jamid.node jamid.node
+ln -s daemon/bin/nodejs/build/Release/jamid.node server/jamid.node
 ```
 
 Then, start the servers:
