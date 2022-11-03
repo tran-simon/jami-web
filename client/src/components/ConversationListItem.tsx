@@ -95,6 +95,8 @@ export default function ConversationListItem({ conversation }: ConversationListI
   const [userId, setUserId] = useState(conversation?.getFirstMember()?.contact.getUri());
   const [isSwarm, setIsSwarm] = useState(true);
 
+  const navigateUrlPrefix = `/deprecated-account/${conversation.getAccountId()}`;
+
   const openMenu = (e: MouseEvent<HTMLDivElement>) => {
     e.preventDefault();
     console.log(e);
@@ -150,7 +152,7 @@ export default function ConversationListItem({ conversation }: ConversationListI
         <Menu open={!!menuAnchorEl} onClose={closeModal} anchorEl={menuAnchorEl}>
           <MenuItem
             onClick={() => {
-              navigate(`/account/${conversation.getAccountId()}/${uri}`);
+              navigate(`${navigateUrlPrefix}/${uri}`);
               closeModal();
             }}
           >
@@ -163,7 +165,7 @@ export default function ConversationListItem({ conversation }: ConversationListI
           </MenuItem>
           <MenuItem
             onClick={() => {
-              navigate(`/account/${conversation.getAccountId()}/call/${conversation.getId()}`);
+              navigate(`${navigateUrlPrefix}/call/${conversation.getId()}`);
             }}
           >
             <ListItemIcon>
@@ -176,7 +178,7 @@ export default function ConversationListItem({ conversation }: ConversationListI
 
           <MenuItem
             onClick={() => {
-              navigate(`/account/${conversation.getAccountId()}/call/${conversation.getId()}?video=true`);
+              navigate(`${navigateUrlPrefix}/call/${conversation.getId()}?video=true`);
             }}
           >
             <ListItemIcon>
@@ -190,7 +192,7 @@ export default function ConversationListItem({ conversation }: ConversationListI
           {isSelected && (
             <MenuItem
               onClick={() => {
-                navigate(`/account/${conversation.getAccountId()}/`);
+                navigate(`${navigateUrlPrefix}/`);
                 closeModal();
               }}
             >
@@ -400,7 +402,7 @@ export default function ConversationListItem({ conversation }: ConversationListI
         button
         alignItems="flex-start"
         selected={isSelected}
-        onClick={() => navigate(`/account/${conversation.getAccountId()}/${uri}`)}
+        onClick={() => navigate(`${navigateUrlPrefix}/${uri}`)}
       >
         <ListItemAvatar>
           <ConversationAvatar displayName={conversation.getDisplayNameNoFallback()} />

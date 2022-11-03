@@ -45,7 +45,7 @@ export default function ConversationsOverviewCard(props) {
   }, [accountId]);
 
   return (
-    <Card onClick={() => navigate(`/account/${accountId}`)}>
+    <Card onClick={() => navigate(`/deprecated-account/${accountId}`)}>
       <CardActionArea>
         <CardContent>
           <Typography color="textSecondary" gutterBottom>

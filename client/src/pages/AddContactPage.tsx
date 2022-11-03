@@ -53,7 +53,7 @@ export default function AddContactPage(props: AddContactPageProps) {
 
     console.log(response);
     if (response.conversationId) {
-      navigate(`/account/${accountId}/conversation/${response.conversationId}`);
+      navigate(`/deprecated-account/${accountId}/conversation/${response.conversationId}`);
     }
   };
 

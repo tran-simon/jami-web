@@ -29,7 +29,7 @@ export default function Header() {
   const params = useParams();
 
   const goToContacts = () => navigate(`/contacts`);
-  const goToAccountSettings = () => navigate(`/account/${params.accountId}/settings`);
+  const goToAccountSettings = () => navigate(`/deprecated-account/${params.accountId}/settings`);
 
   const logout = () => {
     setAccessToken('');

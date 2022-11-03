@@ -30,9 +30,13 @@ import socketio from 'socket.io-client';
 import App from './App';
 import ContactList from './components/ContactList';
 import { SocketProvider } from './contexts/Socket';
+import AccountSelection from './pages/AccountSelection';
 import AccountSettings from './pages/AccountSettings';
+import CallInterface from './pages/CallInterface';
+import DeprecatedAccountSettings from './pages/DeprecatedAccountSettings';
 import Home from './pages/Home';
 import JamiMessenger from './pages/JamiMessenger';
+import Messenger from './pages/Messenger';
 import ServerSetup from './pages/ServerSetup';
 import { store } from './redux/store';
 import defaultTheme from './themes/Default';
@@ -57,6 +61,14 @@ const router = createBrowserRouter(
       <Route path="settings" element={<AccountSettings />} />
       <Route path="contacts" element={<ContactList />} />
       <Route path="setup" element={<ServerSetup />} />
+      {/* TODO: Remove this block after migration to new server*/}
+      <Route path="deprecated-account" element={<AccountSelection />} />
+      <Route path="deprecated-account/:accountId" element={<Messenger />}>
+        <Route path="addContact/:contactId" element={<Messenger />} />
+        <Route path="conversation/:conversationId" element={<Messenger />} />
+        <Route path="call/:conversationId" element={<CallInterface />} />
+      </Route>
+      <Route path="deprecated-account/:accountId/settings" element={<DeprecatedAccountSettings />} />
     </Route>
   )
 );

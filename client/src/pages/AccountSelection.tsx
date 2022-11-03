@@ -39,6 +39,8 @@ const AccountSelection = () => {
   const [error, setError] = useState(false);
   const [accounts, setAccounts] = useState<Account[]>([]);
 
+  authManager.authenticate('admin', 'admin');
+
   useEffect(() => {
     const controller = new AbortController();
     authManager
@@ -77,7 +79,7 @@ const AccountSelection = () => {
                 <ListItemLink
                   key={account.getId()}
                   icon={<ConversationAvatar displayName={account.getDisplayNameNoFallback()} />}
-                  to={`/account/${account.getId()}/settings`}
+                  to={`/deprecated-account/${account.getId()}/settings`}
                   primary={account.getDisplayName()}
                   secondary={account.getDisplayUri()}
                 />

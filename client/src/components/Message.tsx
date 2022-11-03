@@ -28,11 +28,12 @@ import {
   Typography,
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
-import dayjs, { Dayjs } from 'dayjs';
+import { Dayjs } from 'dayjs';
 import { Account, Contact, Message } from 'jami-web-common';
 import { ReactElement, ReactNode, useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import dayjs from '../dayjsInitializer';
 import { EmojiButton, MoreButton, ReplyMessageButton } from './Button';
 import ConversationAvatar from './ConversationAvatar';
 import {
