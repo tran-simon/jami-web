@@ -51,6 +51,10 @@ export class Ws {
 
       ws.on('message', (messageString: string) => {
         const message: WebSocketMessage = JSON.parse(messageString);
+        if (!message.type || !message.data) {
+          ws.send('Incorrect format (require type and data)');
+          return;
+        }
         const callbacks = this.callbacks.get(message.type);
         if (callbacks) {
           for (const callback of callbacks) {

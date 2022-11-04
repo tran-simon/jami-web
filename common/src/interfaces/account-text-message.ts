@@ -15,7 +15,8 @@
  * License along with this program.  If not, see
  * <https://www.gnu.org/licenses/>.
  */
-export enum WebSocketMessageType {
-  WebRTCOffer = 'webrtc-offer',
-  WebRTCAnswer = 'webrtc-answer',
+export interface AccountTextMessage {
+  from: string;
+  to: string;
+  message: JSON;
 }

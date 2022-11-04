@@ -15,11 +15,12 @@
  * License along with this program.  If not, see
  * <https://www.gnu.org/licenses/>.
  */
-import { AccountDetails, Message, VolatileDetails } from 'jami-web-common';
+import { AccountDetails, Message, VolatileDetails, WebSocketMessageType } from 'jami-web-common';
 import log from 'loglevel';
 import { filter, firstValueFrom, map, Subject } from 'rxjs';
 import { Service } from 'typedi';
 
+import { Ws } from '../ws.js';
 import { JamiSignal } from './jami-signal.js';
 import {
   AccountDetailsChanged,
@@ -46,7 +47,7 @@ export class Jamid {
   private readonly usernamesToAccountIds: Map<string, string>;
   private readonly events;
 
-  constructor() {
+  constructor(private ws: Ws) {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     this.jamiSwig = require('../../jamid.node') as JamiSwig; // TODO: we should put the path in the .env
 
@@ -134,8 +135,6 @@ export class Jamid {
     // 2. You cannot specify multiple handlers for the same event
     // 3. You cannot specify a default handler
     this.jamiSwig.init(handlers);
-
-    // TODO: Bind websocket callbacks for webrtc action on Incoming account message
   }
 
   stop(): void {
@@ -186,10 +185,10 @@ export class Jamid {
     return stringVectToArray(this.jamiSwig.getAccountList());
   }
 
-  sendAccountTextMessage(accountId: string, contactId: string, type: string, message: string): void {
+  sendAccountTextMessage(from: string, to: string, message: string): void {
     const messageStringMap: StringMap = new this.jamiSwig.StringMap();
-    messageStringMap.set(type, JSON.stringify(message));
-    this.jamiSwig.sendAccountTextMessage(accountId, contactId, messageStringMap);
+    messageStringMap.set('application/json', message);
+    this.jamiSwig.sendAccountTextMessage(from, to, messageStringMap);
   }
 
   // TODO: Add interface for returned type
@@ -352,6 +351,22 @@ export class Jamid {
 
     this.events.onIncomingAccountMessage.subscribe((signal) => {
       log.debug('Received IncomingAccountMessage:', JSON.stringify(signal));
+      const message = JSON.parse(signal.message['application/json']);
+
+      if (message === undefined) {
+        log.debug('Undefined account message');
+        return;
+      }
+
+      if (!Object.values(WebSocketMessageType).includes(message.type)) {
+        log.warn(`Unhandled account message type: ${message.type}`);
+        return;
+      }
+
+      message.data.from = signal.from;
+      message.data.to = signal.accountId;
+      log.info(`Sending ${JSON.stringify(message)} to ${signal.accountId}`);
+      this.ws.send(signal.accountId, message);
     });
 
     this.events.onConversationReady.subscribe((signal) => {

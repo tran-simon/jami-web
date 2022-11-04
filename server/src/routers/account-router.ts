@@ -18,18 +18,11 @@
 import { Request, Router } from 'express';
 import asyncHandler from 'express-async-handler';
 import { ParamsDictionary } from 'express-serve-static-core';
-import { AccountDetails, HttpStatusCode } from 'jami-web-common';
+import { AccountDetails, AccountTextMessage, HttpStatusCode } from 'jami-web-common';
 import { Container } from 'typedi';
 
 import { Jamid } from '../jamid/jamid.js';
 import { authenticateToken } from '../middleware/auth.js';
-
-interface SendAccountTextMessageApi {
-  from?: string;
-  to?: string;
-  type?: string;
-  data?: string;
-}
 
 const jamid = Container.get(Jamid);
 
@@ -76,16 +69,12 @@ accountRouter.patch('/', (req, res) => {
   res.sendStatus(HttpStatusCode.NoContent);
 });
 
-accountRouter.post(
-  '/send-account-message',
-  (req: Request<ParamsDictionary, string, SendAccountTextMessageApi>, res) => {
-    const { from, to, type, data } = req.body;
-    if (!from || !to || !type || !data) {
-      res.status(HttpStatusCode.BadRequest).send('Missing arguments in request');
-      return;
-    }
-
-    jamid.sendAccountTextMessage(from, to, type, data);
-    res.end();
+accountRouter.post('/send-account-message', (req: Request<ParamsDictionary, any, AccountTextMessage>, res) => {
+  const { from, to, message } = req.body;
+  if (!from || !to || !message) {
+    res.status(HttpStatusCode.BadRequest).send('Missing arguments in request');
+    return;
   }
-);
+  jamid.sendAccountTextMessage(from, to, JSON.stringify(message));
+  res.end();
+});

@@ -16,8 +16,9 @@
  * <https://www.gnu.org/licenses/>.
  */
 import { WebSocketMessageType } from '../enums/websocket-message-type';
+import { AccountTextMessage } from './account-text-message';
 
 export interface WebSocketMessage {
   type: WebSocketMessageType;
-  data: any;
+  data: AccountTextMessage; // Union type for data (Ex: data: AccountTextMessage | SomethingElse)
 }

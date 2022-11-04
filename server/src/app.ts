@@ -22,6 +22,7 @@ import { HttpStatusCode } from 'jami-web-common';
 import log from 'loglevel';
 import { Service } from 'typedi';
 
+import { bindWebRTCCallbacks } from './handlers/webrtc-handler.js';
 import { accountRouter } from './routers/account-router.js';
 import { authRouter } from './routers/auth-router.js';
 import { callRouter } from './routers/call-router.js';
@@ -48,6 +49,9 @@ export class App {
     app.use('/conversations', conversationRouter);
     app.use('/calls', callRouter);
     app.use('/ns', nameserverRouter);
+
+    // Setup WebSocket callbacks
+    bindWebRTCCallbacks();
 
     // Setup 404 error handling
     app.use((_req, res) => {
