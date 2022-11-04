@@ -93,6 +93,9 @@ export interface JamiSwig {
   sendMessage(accountId: string, conversationId: string, message: string, replyTo: string): void;
   loadConversationMessages(accountId: string, conversationId: string, fromMessage: string, n: number): number;
 
+  getCallList(accountId: string): StringVect;
+  getCallDetails(accountId: string, callId: string): StringMap;
+
   // IntVect: Constructable<IntVect>;
   // UintVect: Constructable<UintVect>;
   // FloatVect: Constructable<FloatVect>;

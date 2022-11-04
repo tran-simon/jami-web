@@ -292,6 +292,15 @@ export class Jamid {
     this.jamiSwig.sendMessage(accountId, conversationId, message, replyTo || '');
   }
 
+  getCallIds(accountId: string): string[] {
+    return stringVectToArray(this.jamiSwig.getCallList(accountId));
+  }
+
+  // TODO: Replace Record with interface
+  getCallDetails(accountId: string, callId: string): Record<string, string> {
+    return stringMapToRecord(this.jamiSwig.getCallDetails(accountId, callId));
+  }
+
   getAccountIdFromUsername(username: string): string | undefined {
     return this.usernamesToAccountIds.get(username);
   }
