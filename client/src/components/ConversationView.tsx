@@ -16,19 +16,18 @@
  * <https://www.gnu.org/licenses/>.
  */
 import { Divider, Stack, Typography } from '@mui/material';
-import { Account, Conversation, ConversationMember, Message } from 'jami-web-common';
-import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { Account, Conversation, ConversationMember } from 'jami-web-common';
+import { useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router';
 
 import { SocketContext } from '../contexts/Socket';
+import ChatInterface from '../pages/ChatInterface';
 import { useAccountQuery } from '../services/Account';
-import { useConversationQuery, useMessagesQuery, useSendMessageMutation } from '../services/Conversation';
+import { useConversationQuery } from '../services/Conversation';
 import { translateEnumeration, TranslateEnumerationOptions } from '../utils/translations';
 import { AddParticipantButton, ShowOptionsMenuButton, StartAudioCallButton, StartVideoCallButton } from './Button';
 import LoadingPage from './Loading';
-import MessageList from './MessageList';
-import SendMessageForm from './SendMessageForm';
 
 type ConversationViewProps = {
   accountId: string;
@@ -38,14 +37,11 @@ const ConversationView = ({ accountId, conversationId }: ConversationViewProps) 
   const socket = useContext(SocketContext);
   const [account, setAccount] = useState<Account | undefined>();
   const [conversation, setConversation] = useState<Conversation | undefined>();
-  const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(false);
 
   const accountQuery = useAccountQuery(accountId);
   const conversationQuery = useConversationQuery(accountId, conversationId);
-  const messagesQuery = useMessagesQuery(accountId, conversationId);
-  const sendMessageMutation = useSendMessageMutation(accountId, conversationId);
 
   useEffect(() => {
     if (accountQuery.isSuccess) {
@@ -61,21 +57,12 @@ const ConversationView = ({ accountId, conversationId }: ConversationViewProps) 
   }, [accountId, conversationQuery.isSuccess, conversationQuery.data]);
 
   useEffect(() => {
-    if (messagesQuery.isSuccess) {
-      const sortedMessages = sortMessages(messagesQuery.data);
-      setMessages(sortedMessages);
-    }
-  }, [messagesQuery.isSuccess, messagesQuery.data]);
+    setIsLoading(accountQuery.isLoading || conversationQuery.isLoading);
+  }, [accountQuery.isLoading, conversationQuery.isLoading]);
 
   useEffect(() => {
-    setIsLoading(accountQuery.isLoading || conversationQuery.isLoading || messagesQuery.isLoading);
-  }, [accountQuery.isLoading, conversationQuery.isLoading, messagesQuery.isLoading]);
-
-  useEffect(() => {
-    setError(accountQuery.isLoading || conversationQuery.isError || messagesQuery.isError);
-  }, [accountQuery.isLoading, conversationQuery.isError, messagesQuery.isError]);
-
-  const sendMessage = useCallback((message: string) => sendMessageMutation.mutate(message), [sendMessageMutation]);
+    setError(accountQuery.isError || conversationQuery.isError);
+  }, [accountQuery.isError, conversationQuery.isError]);
 
   useEffect(() => {
     if (!conversation) return;
@@ -84,11 +71,6 @@ const ConversationView = ({ accountId, conversationId }: ConversationViewProps) 
       socket.emit('conversation', {
         accountId,
         conversationId,
-      });
-      socket.off('newMessage');
-      socket.on('newMessage', (data) => {
-        console.log('newMessage');
-        setMessages((messages) => addMessage(messages, data));
       });
     }
   }, [accountId, conversation, conversationId, socket]);
@@ -112,14 +94,7 @@ const ConversationView = ({ accountId, conversationId }: ConversationViewProps) 
           borderTop: '1px solid #E5E5E5',
         }}
       />
-      <MessageList account={account} members={conversation.getMembers()} messages={messages} />
-      <Divider
-        sx={{
-          margin: '30px 16px 0px 16px',
-          borderTop: '1px solid #E5E5E5',
-        }}
-      />
-      <SendMessageForm account={account} members={conversation.getMembers()} onSend={sendMessage} />
+      <ChatInterface account={account} conversationId={conversationId} members={conversation.getMembers()} />
     </Stack>
   );
 };
@@ -167,7 +142,7 @@ const ConversationHeader = ({ account, members, adminTitle, conversationId }: Co
   };
 
   return (
-    <Stack direction="row" padding="16px">
+    <Stack direction="row" padding="16px" overflow="hidden">
       <Stack flex={1} justifyContent="center" whiteSpace="nowrap" overflow="hidden">
         <Typography variant="h3" textOverflow="ellipsis">
           {title}
@@ -186,25 +161,6 @@ const ConversationHeader = ({ account, members, adminTitle, conversationId }: Co
 const getMemberName = (member: ConversationMember) => {
   const contact = member.contact;
   return contact.getDisplayName();
-};
-
-const addMessage = (sortedMessages: Message[], message: Message) => {
-  if (sortedMessages.length === 0) {
-    return [message];
-  } else if (message.id === sortedMessages[sortedMessages.length - 1].linearizedParent) {
-    return [...sortedMessages, message];
-  } else if (message.linearizedParent === sortedMessages[0].id) {
-    return [message, ...sortedMessages];
-  } else {
-    console.log("Can't insert message " + message.id);
-    return sortedMessages;
-  }
-};
-
-const sortMessages = (messages: Message[]) => {
-  let sortedMessages: Message[] = [];
-  messages.forEach((message) => (sortedMessages = addMessage(sortedMessages, message)));
-  return sortedMessages;
 };
 
 export default ConversationView;
