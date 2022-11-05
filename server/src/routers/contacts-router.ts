@@ -38,6 +38,11 @@ contactsRouter.get('/:contactId', (req, res) => {
   res.send(contactDetails);
 });
 
+contactsRouter.put('/:contactId', (req, res) => {
+  jamid.addContact(res.locals.accountId, req.params.contactId);
+  res.sendStatus(HttpStatusCode.NoContent);
+});
+
 contactsRouter.delete('/:contactId', (req, res) => {
   jamid.removeContact(res.locals.accountId, req.params.contactId);
   res.sendStatus(HttpStatusCode.NoContent);
