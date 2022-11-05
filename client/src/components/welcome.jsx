@@ -18,6 +18,7 @@
 import { Container } from '@mui/material';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { ReactComponent as JamiLogo } from '../icons/jami-logo-icon.svg';
 
@@ -37,6 +38,7 @@ const item = {
 };
 
 export default function WelcomeAnimation(props) {
+  const { t } = useTranslation();
   const [visible, setVisible] = useState(true);
 
   return (
@@ -59,7 +61,7 @@ export default function WelcomeAnimation(props) {
             <motion.div variants={item}>
               <JamiLogo width="95%" />
             </motion.div>
-            <motion.h1 variants={item}>Welcome to Jami</motion.h1>
+            <motion.h1 variants={item}>{t('welcome_text')}</motion.h1>
           </motion.div>
         )}
       </AnimatePresence>

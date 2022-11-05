@@ -35,15 +35,6 @@ import {
 import { inputWidth, jamiUsernamePattern } from '../utils/constants';
 import { InvalidPassword, UsernameNotFound } from '../utils/errors';
 
-const usernameTooltipTitle =
-  'Choose a password hard to guess for others but easy to remember for you, ' +
-  'it must be at least 8 characters. ' +
-  "Your account won't be recovered if you forget it!\n\n" +
-  'Click for more details';
-
-const passwordTooltipTitle =
-  'Username may be from 3 to 32 chraracters long and contain a-z, A-Z, -, _\n\n' + 'Click for more details';
-
 type NameStatus = 'default' | 'success' | 'taken' | 'invalid' | 'registration_failed';
 type PasswordStatus = StrengthValueCode | 'registration_failed';
 
@@ -184,31 +175,46 @@ export default function JamiRegistration(props: JamiRegistrationProps) {
       >
         <Box sx={{ mt: theme.typography.pxToRem(50), mb: theme.typography.pxToRem(20) }}>
           <Typography component={'span'} variant="h2">
-            REGISTRATION
+            {t('registration_form_title')}
           </Typography>
         </Box>
 
         <Form method="post" id="register-form">
           <div>
+            {/* For i18n-parser.
+              t('username_input_helper_text_default')
+              t('username_input_helper_text_success')
+              t('username_input_helper_text_taken')
+              t('username_input_helper_text_invalid')
+              t('username_input_helper_text_registration_failed')
+            */}
             <UsernameInput
               value={username}
               onChange={handleUsername}
               error={usernameError}
               success={usernameSuccess}
-              helperText={t(`username_input_${usernameStatus}_helper_text`)}
+              helperText={usernameStatus === 'default' ? '' : t(`username_input_helper_text_${usernameStatus}`)}
               sx={{ width: theme.typography.pxToRem(inputWidth) }}
-              tooltipTitle={usernameTooltipTitle}
+              tooltipTitle={t('registration_form_username_tooltip')}
             />
           </div>
           <div>
+            {/* For i18n-parser.
+              t('password_input_helper_text_default')
+              t('password_input_helper_text_too_weak')
+              t('password_input_helper_text_weak')
+              t('password_input_helper_text_medium')
+              t('password_input_helper_text_strong')
+              t('password_input_helper_text_registration_failed')
+            */}
             <PasswordInput
               value={password}
               onChange={handlePassword}
               error={passwordError}
               success={passwordSuccess}
-              helperText={t(`password_input_${passwordStatus}_helper_text`)}
+              helperText={passwordStatus === 'default' ? '' : t(`password_input_helper_text_${passwordStatus}`)}
               sx={{ width: theme.typography.pxToRem(inputWidth) }}
-              tooltipTitle={passwordTooltipTitle}
+              tooltipTitle={t('registration_form_password_tooltip')}
             />
           </div>
 
@@ -218,15 +224,15 @@ export default function JamiRegistration(props: JamiRegistrationProps) {
             onClick={handleSubmit}
             sx={{ width: theme.typography.pxToRem(inputWidth), mt: theme.typography.pxToRem(20) }}
           >
-            REGISTER
+            {t('registration_form_submit_button')}
           </Button>
         </Form>
 
         <Box sx={{ mt: theme.typography.pxToRem(50), mb: theme.typography.pxToRem(50) }}>
           <Typography variant="body1">
-            Already have an account ? &nbsp;
+            {t('registration_form_to_login_text')} &nbsp;
             <a href="" onClick={login}>
-              LOG IN
+              {t('registration_form_to_login_link')}
             </a>
           </Typography>
         </Box>

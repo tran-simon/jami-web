@@ -16,6 +16,7 @@
  * <https://www.gnu.org/licenses/>.
  */
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 
 interface RulesDialogProps {
   openDialog: boolean;
@@ -25,6 +26,8 @@ interface RulesDialogProps {
 }
 
 export default function RulesDialog(props: RulesDialogProps) {
+  const { t } = useTranslation();
+
   return (
     <Dialog open={props.openDialog} onClose={props.closeDialog}>
       <DialogTitle>
@@ -34,7 +37,7 @@ export default function RulesDialog(props: RulesDialogProps) {
       <DialogContent>{props.children}</DialogContent>
       <DialogActions>
         <Button onClick={props.closeDialog} autoFocus>
-          Close
+          {t('dialog_close')}
         </Button>
       </DialogActions>
     </Dialog>

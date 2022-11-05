@@ -38,6 +38,10 @@ export function AlertSnackbar({ severity, open, snackBarProps, children, ...aler
       }}
     >
       <Alert severity={severity} {...alertProps}>
+        {/* For i18n-parser.
+          t('severity_error')
+          t('severity_success')
+        */}
         <AlertTitle>{t(`severity_${severity}`)}</AlertTitle>
         {children}
       </Alert>

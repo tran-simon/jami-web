@@ -28,6 +28,7 @@ import {
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { ChangeEvent, ReactElement, useCallback, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { InfoButton, ToggleVisibilityButton } from './Button';
 import RulesDialog from './RulesDialog';
@@ -60,6 +61,7 @@ export const UsernameInput = ({
   tooltipTitle,
   ...props
 }: InputProps) => {
+  const { t } = useTranslation();
   const [isSelected, setIsSelected] = useState(false);
   const [input, setInput] = useState(props.defaultValue);
   const [startAdornment, setStartAdornment] = useState<ReactElement | undefined>();
@@ -89,13 +91,17 @@ export const UsernameInput = ({
 
   return (
     <>
-      <RulesDialog openDialog={isDialogOpened} title="Username rules :" closeDialog={() => setIsDialogOpened(false)}>
+      <RulesDialog
+        openDialog={isDialogOpened}
+        title={t('username_rules_dialog_title')}
+        closeDialog={() => setIsDialogOpened(false)}
+      >
         <UsernameRules />
       </RulesDialog>
       <TextField
         {...props}
         color={inputColor(props.error, success)}
-        label={'Choose an identifier'}
+        label={t('username_input_label')}
         variant="standard"
         InputLabelProps={{ shrink: !!(isSelected || input) }}
         onChange={onChange}
@@ -119,6 +125,7 @@ export const PasswordInput = ({
   tooltipTitle,
   ...props
 }: InputProps) => {
+  const { t } = useTranslation();
   const [showPassword, setShowPassword] = useState(false);
   const [isSelected, setIsSelected] = useState(false);
   const [input, setInput] = useState(props.defaultValue);
@@ -153,13 +160,17 @@ export const PasswordInput = ({
 
   return (
     <>
-      <RulesDialog openDialog={isDialogOpened} title="Password rules :" closeDialog={() => setIsDialogOpened(false)}>
+      <RulesDialog
+        openDialog={isDialogOpened}
+        title={t('password_rules_dialog_title')}
+        closeDialog={() => setIsDialogOpened(false)}
+      >
         <PasswordRules />
       </RulesDialog>
       <TextField
         {...props}
         color={inputColor(props.error, success)}
-        label="Password"
+        label={t('password_input_label')}
         type={showPassword ? 'text' : 'password'}
         variant="standard"
         autoComplete="current-password"
@@ -257,73 +268,73 @@ function inputColor(
 }
 
 const PasswordRules = () => {
+  const { t } = useTranslation();
+
   return (
-    <Typography variant="body1">
-      <List>
-        <ListItem>
-          <ListItemIcon>
-            <GppMaybe />
-          </ListItemIcon>
-          The password must contain at least 1 lowercase alphabetical character.
-        </ListItem>
-        <ListItem>
-          <ListItemIcon>
-            <GppMaybe />
-          </ListItemIcon>
-          The password must contain at least 1 uppercase alphabetical character.
-        </ListItem>
-        <ListItem>
-          <ListItemIcon>
-            <GppMaybe />
-          </ListItemIcon>
-          The password must contain at least 1 numeric character.
-        </ListItem>
-        <ListItem>
-          <ListItemIcon>
-            <GppMaybe />
-          </ListItemIcon>
-          The password must contain at least 1 special character.
-        </ListItem>
-        <ListItem>
-          <ListItemIcon>
-            <GppMaybe />
-          </ListItemIcon>
-          The password must be 10 characters or longer to be considered strong.
-        </ListItem>
-      </List>
-    </Typography>
+    <List>
+      <ListItem>
+        <ListItemIcon>
+          <GppMaybe />
+        </ListItemIcon>
+        <Typography variant="body1">{t('password_rule_one')}</Typography>
+      </ListItem>
+      <ListItem>
+        <ListItemIcon>
+          <GppMaybe />
+        </ListItemIcon>
+        <Typography variant="body1">{t('password_rule_two')}</Typography>
+      </ListItem>
+      <ListItem>
+        <ListItemIcon>
+          <GppMaybe />
+        </ListItemIcon>
+        <Typography variant="body1">{t('password_rule_three')}</Typography>
+      </ListItem>
+      <ListItem>
+        <ListItemIcon>
+          <GppMaybe />
+        </ListItemIcon>
+        <Typography variant="body1">{t('password_rule_four')}</Typography>
+      </ListItem>
+      <ListItem>
+        <ListItemIcon>
+          <GppMaybe />
+        </ListItemIcon>
+        <Typography variant="body1">{t('password_rule_five')}</Typography>
+      </ListItem>
+    </List>
   );
 };
 
 const UsernameRules = () => {
+  const { t } = useTranslation();
+
   return (
-    <Typography variant="body1">
-      <List>
-        <ListItem>
-          <ListItemIcon>
-            <Warning />
-          </ListItemIcon>
-          The username must be 3 to 32 characters long.
-        </ListItem>
-        <ListItem>
-          <ListItemIcon>
-            <Warning />
-          </ListItemIcon>
-          The username may contain lowercase and uppercase alphabetical characters.
-        </ListItem>
-        <ListItem>
-          <ListItemIcon>
-            <Warning />
-          </ListItemIcon>
-          The username may contain hyphens {'(-)'}.
-        </ListItem>
-        <ListItem>
-          <ListItemIcon>
-            <Warning />
-          </ListItemIcon>
-          The username may contain underscores {'(_)'}.
-        </ListItem>
-      </List>
-    </Typography>
+    <List>
+      <ListItem>
+        <ListItemIcon>
+          <Warning />
+        </ListItemIcon>
+        <Typography variant="body1">{t('username_rule_one')}</Typography>
+      </ListItem>
+      <ListItem>
+        <ListItemIcon>
+          <Warning />
+        </ListItemIcon>
+        <Typography variant="body1">{t('username_rule_two')}</Typography>
+      </ListItem>
+      <ListItem>
+        <ListItemIcon>
+          <Warning />
+        </ListItemIcon>
+        <Typography variant="body1">{t('username_rule_three')}</Typography>
+      </ListItem>
+      <ListItem>
+        <ListItemIcon>
+          <Warning />
+        </ListItemIcon>
+        <Typography variant="body1">{t('username_rule_four')}</Typography>
+      </ListItem>
+    </List>
   );
 };

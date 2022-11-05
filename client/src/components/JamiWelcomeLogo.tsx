@@ -16,6 +16,7 @@
  * <https://www.gnu.org/licenses/>.
  */
 import { Stack, StackProps, Typography } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 
 import { ReactComponent as JamiLogo } from '../icons/jami-logo-icon.svg';
 import { jamiLogoDefaultSize } from '../utils/constants';
@@ -26,6 +27,8 @@ interface WelcomeLogoProps extends StackProps {
 }
 
 export default function JamiWelcomeLogo({ logoWidth, logoHeight, ...stackProps }: WelcomeLogoProps) {
+  const { t } = useTranslation();
+
   return (
     <Stack
       {...stackProps}
@@ -37,7 +40,7 @@ export default function JamiWelcomeLogo({ logoWidth, logoHeight, ...stackProps }
       }}
     >
       <JamiLogo width={logoWidth ?? jamiLogoDefaultSize} height={logoHeight ?? jamiLogoDefaultSize} />
-      <Typography variant="h1">Welcome to Jami!</Typography>
+      <Typography variant="h1">{t('welcome_text')}</Typography>
     </Stack>
   );
 }

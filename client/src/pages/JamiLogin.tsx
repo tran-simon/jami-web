@@ -97,7 +97,7 @@ export default function JamiLogin(props: JamiLoginProps) {
       >
         <Box sx={{ mt: theme.typography.pxToRem(50), mb: theme.typography.pxToRem(20) }}>
           <Typography component={'span'} variant="h2">
-            LOGIN
+            {t('login_form_title')}
           </Typography>
         </Box>
 
@@ -105,14 +105,14 @@ export default function JamiLogin(props: JamiLoginProps) {
           <div>
             <UsernameInput
               onChange={handleUsername}
-              tooltipTitle={'The username you registered with'}
+              tooltipTitle={t('login_form_username_tooltip')}
               sx={{ width: theme.typography.pxToRem(inputWidth) }}
             />
           </div>
           <div>
             <PasswordInput
               onChange={handlePassword}
-              tooltipTitle={'The password you registered with'}
+              tooltipTitle={t('login_form_password_tooltip')}
               sx={{ width: theme.typography.pxToRem(inputWidth) }}
             />
           </div>
@@ -123,15 +123,15 @@ export default function JamiLogin(props: JamiLoginProps) {
             onClick={authenticateUser}
             sx={{ width: theme.typography.pxToRem(inputWidth), mt: theme.typography.pxToRem(20) }}
           >
-            LOG IN
+            {t('login_form_submit_button')}
           </Button>
         </Form>
 
         <Box sx={{ mt: theme.typography.pxToRem(50), mb: theme.typography.pxToRem(50) }}>
           <Typography variant="body1">
-            Need an account ? &nbsp;
+            {t('login_form_to_registration_text')} &nbsp;
             <a href="" onClick={register}>
-              REGISTER
+              {t('login_form_to_registration_link')}
             </a>
           </Typography>
         </Box>
