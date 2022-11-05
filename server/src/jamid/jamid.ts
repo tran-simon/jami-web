@@ -260,8 +260,16 @@ export class Jamid {
     return stringMapToRecord(this.jamiSwig.getContactDetails(accountId, contactId));
   }
 
-  getDefaultModerators(accountId: string): string[] {
+  getDefaultModeratorUris(accountId: string): string[] {
     return stringVectToArray(this.jamiSwig.getDefaultModerators(accountId));
+  }
+
+  addDefaultModerator(accountId: string, contactId: string): void {
+    this.jamiSwig.setDefaultModerator(accountId, contactId, true);
+  }
+
+  removeDefaultModerator(accountId: string, contactId: string): void {
+    this.jamiSwig.setDefaultModerator(accountId, contactId, false);
   }
 
   getConversationIds(accountId: string): string[] {

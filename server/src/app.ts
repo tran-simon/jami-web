@@ -27,6 +27,7 @@ import { authRouter } from './routers/auth-router.js';
 import { callRouter } from './routers/call-router.js';
 import { contactsRouter } from './routers/contacts-router.js';
 import { conversationRouter } from './routers/conversation-router.js';
+import { defaultModeratorsRouter } from './routers/default-moderators-router.js';
 import { nameserverRouter } from './routers/nameserver-router.js';
 
 @Service()
@@ -43,7 +44,7 @@ export class App {
     app.use('/auth', authRouter);
     app.use('/account', accountRouter);
     app.use('/contacts', contactsRouter);
-    // TODO: Moderator routes: https://git.jami.net/savoirfairelinux/jami-web/-/issues/93
+    app.use('/default-moderators', defaultModeratorsRouter);
     app.use('/conversations', conversationRouter);
     app.use('/calls', callRouter);
     app.use('/ns', nameserverRouter);

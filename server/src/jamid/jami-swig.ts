@@ -63,7 +63,6 @@ export interface JamiSwig {
   getAccountDetails(accountId: string): StringMap;
   getVolatileAccountDetails(accountId: string): StringMap;
   setAccountDetails(accountId: string, details: StringMap): void;
-  setAccountActive(accountId: string, active: Bool): void;
 
   addAccount(details: StringMap): string;
   removeAccount(accountId: string): void;
@@ -84,7 +83,7 @@ export interface JamiSwig {
   getContactDetails(accountId: string, contactId: string): StringMap;
 
   getDefaultModerators(accountId: string): StringVect;
-  setDefaultModerators(accountId: string, uri: string, state: boolean): void;
+  setDefaultModerator(accountId: string, uri: string, state: boolean): void;
 
   getConversations(accountId: string): StringVect;
   conversationInfos(accountId: string, conversationId: string): StringMap;

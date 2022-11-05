@@ -16,6 +16,7 @@
  * <https://www.gnu.org/licenses/>.
  */
 import { Request, Router } from 'express';
+import asyncHandler from 'express-async-handler';
 import { ParamsDictionary } from 'express-serve-static-core';
 import { AccountDetails, HttpStatusCode } from 'jami-web-common';
 import { Container } from 'typedi';
@@ -39,17 +40,33 @@ accountRouter.use(authenticateToken);
 // TODO: If tokens can be generated on one daemon and used on another (transferrable between daemons),
 // then add middleware to check that the currently logged-in accountId is stored in this daemon instance
 
-accountRouter.get('/', (_req, res) => {
-  const accountId = res.locals.accountId;
+// TODO: Do we really need this route to return the default moderators?
+// It would be cleaner just to GET /default-moderators for this
+accountRouter.get(
+  '/',
+  asyncHandler(async (_req, res) => {
+    const accountId = res.locals.accountId;
 
-  res.json({
-    id: accountId,
-    details: jamid.getAccountDetails(accountId),
-    volatileDetails: jamid.getVolatileAccountDetails(accountId),
-    defaultModerators: jamid.getDefaultModerators(accountId),
-    devices: jamid.getDevices(accountId),
-  });
-});
+    // Add usernames for default moderators
+    const defaultModeratorUris = jamid.getDefaultModeratorUris(accountId);
+    const namedDefaultModerators = [];
+    for (const defaultModeratorUri of defaultModeratorUris) {
+      const { username } = await jamid.lookupAddress(defaultModeratorUri, accountId);
+      namedDefaultModerators.push({
+        uri: defaultModeratorUri,
+        registeredName: username,
+      });
+    }
+
+    res.json({
+      id: accountId,
+      details: jamid.getAccountDetails(accountId),
+      volatileDetails: jamid.getVolatileAccountDetails(accountId),
+      defaultModerators: namedDefaultModerators,
+      devices: jamid.getDevices(accountId),
+    });
+  })
+);
 
 accountRouter.patch('/', (req, res) => {
   const accountId = res.locals.accountId;
