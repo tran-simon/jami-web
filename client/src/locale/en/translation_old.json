@@ -1,0 +1,15 @@
+{
+  "password_input_default_helper_text": "",
+  "password_input_medium_helper_text": "Medium",
+  "password_input_registration_failed_helper_text": "Choose another password!",
+  "password_input_strong_helper_text": "Strong",
+  "password_input_too_weak_helper_text": "Too weak",
+  "password_input_weak_helper_text": "Weak",
+  "severity_error": "Error",
+  "severity_success": "Success",
+  "username_input_default_helper_text": "",
+  "username_input_invalid_helper_text": "Username doesn't follow required pattern",
+  "username_input_registration_failed_helper_text": "Username not correct!",
+  "username_input_success_helper_text": "Username available",
+  "username_input_taken_helper_text": "Username already taken"
+}

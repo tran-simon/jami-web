@@ -55,7 +55,7 @@ export default function SendMessageForm(props: SendMessageFormProps) {
   );
 
   return (
-    <Stack component="form" onSubmit={handleSubmit} direction="row" alignItems="center" spacing="20px">
+    <Stack component="form" onSubmit={handleSubmit} direction="row" alignItems="center" spacing="20px" padding="16px">
       <UploadFileButton />
       <RecordVoiceMessageButton />
       <RecordVideoMessageButton />

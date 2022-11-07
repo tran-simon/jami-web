@@ -26,6 +26,8 @@
   "message_input_placeholder_four": "Write to {{member0}}, {{member1}}, {{member2}}, +1 other member",
   "message_input_placeholder_more": "Write to {{member0}}, {{member1}}, {{member2}}, +{{excess}} other members",
 
+  "messages_scroll_to_end": "Scroll to the end of the conversation",
+
   "username_input_default_helper_text": "",
   "username_input_success_helper_text": "Username available",
   "username_input_taken_helper_text": "Username already taken",

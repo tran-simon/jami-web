@@ -101,31 +101,25 @@ const ConversationView = ({ accountId, conversationId }: ConversationViewProps) 
 
   return (
     <Stack height="100%">
-      <Stack padding="16px">
-        <ConversationHeader
-          account={account}
-          members={conversation.getMembers()}
-          adminTitle={conversation.infos.title as string}
-          conversationId={conversationId}
-        />
-      </Stack>
+      <ConversationHeader
+        account={account}
+        members={conversation.getMembers()}
+        adminTitle={conversation.infos.title as string}
+        conversationId={conversationId}
+      />
       <Divider
         sx={{
           borderTop: '1px solid #E5E5E5',
         }}
       />
-      <Stack flex={1} overflow="auto" direction="column-reverse" padding="0px 16px">
-        <MessageList account={account} members={conversation.getMembers()} messages={messages} />
-      </Stack>
+      <MessageList account={account} members={conversation.getMembers()} messages={messages} />
       <Divider
         sx={{
           margin: '30px 16px 0px 16px',
           borderTop: '1px solid #E5E5E5',
         }}
       />
-      <Stack padding="16px">
-        <SendMessageForm account={account} members={conversation.getMembers()} onSend={sendMessage} />
-      </Stack>
+      <SendMessageForm account={account} members={conversation.getMembers()} onSend={sendMessage} />
     </Stack>
   );
 };
@@ -173,7 +167,7 @@ const ConversationHeader = ({ account, members, adminTitle, conversationId }: Co
   };
 
   return (
-    <Stack direction="row">
+    <Stack direction="row" padding="16px">
       <Stack flex={1} justifyContent="center" whiteSpace="nowrap" overflow="hidden">
         <Typography variant="h3" textOverflow="ellipsis">
           {title}

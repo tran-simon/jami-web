@@ -15,10 +15,15 @@
  * License along with this program.  If not, see
  * <https://www.gnu.org/licenses/>.
  */
-import { Stack } from '@mui/system';
+import { Typography } from '@mui/material';
+import { Box, Stack } from '@mui/system';
 import { Account, ConversationMember, Message } from 'jami-web-common';
+import { MutableRefObject, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { Waypoint } from 'react-waypoint';
 
 import { MessageRow } from './Message';
+import { ArrowDownIcon } from './SvgIcon';
 
 interface MessageListProps {
   account: Account;
@@ -27,31 +32,82 @@ interface MessageListProps {
 }
 
 export default function MessageList({ account, members, messages }: MessageListProps) {
+  const [showScrollButton, setShowScrollButton] = useState(false);
+  const listBottomRef = useRef<HTMLElement>();
+
   return (
-    <Stack direction="column-reverse">
-      {
-        // most recent messages first
-        messages.map((message, index) => {
-          const isAccountMessage = message.author === account.getUri();
-          let author;
-          if (isAccountMessage) {
-            author = account;
-          } else {
-            const member = members.find((member) => message.author === member.contact.getUri());
-            author = member?.contact;
+    <>
+      <Stack flex={1} overflow="auto" padding="0px 16px" direction="column-reverse">
+        {/* Here is the bottom of the list of messages because of 'column-reverse' */}
+        <Box ref={listBottomRef} />
+        <Waypoint
+          onEnter={() => setShowScrollButton(false)}
+          onLeave={() => setShowScrollButton(true)}
+          bottomOffset="-100px"
+        />
+        <Stack direction="column-reverse">
+          {
+            // most recent messages first
+            messages.map((message, index) => {
+              const isAccountMessage = message.author === account.getUri();
+              let author;
+              if (isAccountMessage) {
+                author = account;
+              } else {
+                const member = members.find((member) => message.author === member.contact.getUri());
+                author = member?.contact;
+              }
+              if (!author) {
+                return null;
+              }
+              const props = {
+                messageIndex: index,
+                messages,
+                isAccountMessage,
+                author,
+              };
+              return <MessageRow key={message.id} {...props} />;
+            })
           }
-          if (!author) {
-            return null;
-          }
-          const props = {
-            messageIndex: index,
-            messages,
-            isAccountMessage,
-            author,
-          };
-          return <MessageRow key={message.id} {...props} />;
-        })
-      }
-    </Stack>
+        </Stack>
+        <Waypoint onEnter={() => console.log('should load more messages')} topOffset="-200px" />
+      </Stack>
+      {showScrollButton && (
+        <Box position="relative">
+          <Box position="absolute" bottom="10px" left="50%" sx={{ transform: 'translate(-50%)' }}>
+            <ScrollToEndButton listBottomRef={listBottomRef} />
+          </Box>
+        </Box>
+      )}
+    </>
   );
 }
+
+interface ScrollToEndButtonProps {
+  listBottomRef: MutableRefObject<HTMLElement | undefined>;
+}
+
+const ScrollToEndButton = ({ listBottomRef }: ScrollToEndButtonProps) => {
+  const { t } = useTranslation();
+  const textColor = 'white';
+  return (
+    <Stack
+      direction="row"
+      borderRadius="5px"
+      height="30px"
+      alignItems="center"
+      padding="0 16px"
+      spacing="12px"
+      sx={{
+        backgroundColor: '#005699', // Should be same color as message bubble
+        cursor: 'pointer',
+      }}
+      onClick={() => listBottomRef.current?.scrollIntoView({ behavior: 'smooth' })}
+    >
+      <ArrowDownIcon sx={{ fontSize: '12px', color: textColor }} />
+      <Typography variant="caption" fontWeight="bold" color={textColor}>
+        {t('messages_scroll_to_end')}
+      </Typography>
+    </Stack>
+  );
+};

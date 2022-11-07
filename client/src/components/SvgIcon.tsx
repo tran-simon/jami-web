@@ -64,6 +64,17 @@ export const Arrow3Icon = (props: SvgIconProps) => {
   );
 };
 
+export const ArrowDownIcon = (props: SvgIconProps) => {
+  return (
+    <SvgIcon {...props} viewBox="0 0 8 11.607">
+      <path
+        fillRule="evenodd"
+        d="m4.353 11.43 3.441-3.5.058-.058a.564.564 0 0 0-.058-.816.62.62 0 0 0-.816.058l-2.45 2.508V.583A.551.551 0 0 0 3.945 0a.551.551 0 0 0-.581.583v9.039L.912 7.114a.613.613 0 0 0-.758 0 .621.621 0 0 0 0 .816l3.441 3.5a.452.452 0 0 0 .583.117c.058 0 .117-.058.175-.117"
+      />
+    </SvgIcon>
+  );
+};
+
 export const ArrowLeftCurved = (props: SvgIconProps) => {
   return (
     <SvgIcon {...props} viewBox="0 0 16 8.814">
