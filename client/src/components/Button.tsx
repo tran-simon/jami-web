@@ -106,86 +106,102 @@ type ExpandMenuRadioOption = {
 };
 
 export type ExpandableButtonProps = IconButtonProps & {
+  hidden?: boolean;
   Icon?: ComponentType<SvgIconProps>;
   expandMenuOptions?: (ExpandMenuOption | ExpandMenuRadioOption)[];
+  IconButtonComp?: ComponentType<IconButtonProps>;
 };
 
-export const ExpandableButton = styled(({ Icon, expandMenuOptions = [], ...props }: ExpandableButtonProps) => {
+export const ExpandableButton = ({
+  hidden,
+  Icon,
+  expandMenuOptions = undefined,
+  IconButtonComp = IconButton,
+  ...props
+}: ExpandableButtonProps) => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const handleClose = () => {
     setAnchorEl(null);
   };
 
-  const hasExpandMenuOptions = expandMenuOptions.length > 0;
   return (
     <Box>
-      <Menu
-        anchorEl={anchorEl}
-        open={!!anchorEl}
-        onClose={handleClose}
-        anchorOrigin={{
-          vertical: 'top',
-          horizontal: 'center',
-        }}
-        transformOrigin={{
-          vertical: 'bottom',
-          horizontal: 'center',
-        }}
-      >
-        {expandMenuOptions.map((option, id) => {
-          if ('options' in option) {
-            const { options, defaultSelectedOption } = option;
-            return (
-              <RadioGroup key={id} defaultValue={defaultSelectedOption}>
-                {options.map(({ description, key }) => {
-                  return (
-                    <MenuItem key={key}>
-                      <ListItemIcon>
-                        <Radio value={key} />
-                      </ListItemIcon>
-                      <ListItemText>{description}</ListItemText>
-                    </MenuItem>
-                  );
-                })}
-              </RadioGroup>
-            );
-          }
+      {expandMenuOptions && (
+        <Menu
+          anchorEl={anchorEl}
+          open={!!anchorEl}
+          onClose={handleClose}
+          anchorOrigin={{
+            vertical: !hidden ? 'top' : 'center',
+            horizontal: !hidden ? 'center' : 'left',
+          }}
+          transformOrigin={{
+            vertical: !hidden ? 'bottom' : 'center',
+            horizontal: !hidden ? 'center' : 'right',
+          }}
+        >
+          {expandMenuOptions?.map((option, id) => {
+            if ('options' in option) {
+              const { options, defaultSelectedOption } = option;
+              return (
+                <RadioGroup key={id} defaultValue={defaultSelectedOption}>
+                  {options.map(({ description, key }) => {
+                    return (
+                      <MenuItem key={key}>
+                        <ListItemIcon>
+                          <Radio value={key} />
+                        </ListItemIcon>
+                        <ListItemText>{description}</ListItemText>
+                      </MenuItem>
+                    );
+                  })}
+                </RadioGroup>
+              );
+            }
 
-          return (
-            <MenuItem key={id} onClick={handleClose}>
-              <ListItemIcon>{option.icon}</ListItemIcon>
-              <ListItemText>{option.description}</ListItemText>
-            </MenuItem>
-          );
-        })}
-      </Menu>
-      <Box position="relative">
-        {hasExpandMenuOptions && (
+            return (
+              <MenuItem key={id} onClick={handleClose}>
+                <ListItemIcon>{option.icon}</ListItemIcon>
+                <ListItemText>{option.description}</ListItemText>
+              </MenuItem>
+            );
+          })}
+        </Menu>
+      )}
+      <Box
+        position="relative"
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        onClick={(e) => setAnchorEl(e.currentTarget)}
+      >
+        {expandMenuOptions && (
           <IconButton
             {...props}
-            onClick={(e) => setAnchorEl(e.currentTarget)}
             aria-label="expand options"
             size="small"
             sx={{
+              transform: !hidden ? 'scale(0.5)' : 'scale(0.5) rotate(-90deg)',
               position: 'absolute',
-              left: 0,
-              right: 0,
-              top: '-50%',
-              color: 'white',
+              top: !hidden ? '-50%' : 0,
+              left: hidden ? '-50%' : 0,
+              width: '100%',
+              height: '100%',
             }}
           >
-            <ExpandLessIcon sx={{ backgroundColor: '#555555', borderRadius: '5px' }} />
+            <ExpandLessIcon
+              sx={{
+                backgroundColor: '#444444',
+                borderRadius: '5px',
+              }}
+            />
           </IconButton>
         )}
-        <IconButton {...props} disableRipple={true}>
-          {Icon && <Icon fontSize="inherit" />}
-        </IconButton>
+        <IconButtonComp {...props}>{Icon && <Icon />}</IconButtonComp>
       </Box>
     </Box>
   );
-})(({ theme }) => ({
-  color: 'white',
-}));
+};
 
 export const CancelPictureButton = (props: IconButtonProps) => {
   return <RoundButton {...props} aria-label="remove picture" Icon={CancelIcon} size="large" />;
@@ -273,6 +289,10 @@ export const ToggleIconButton = ({
   return (
     <IconButton
       {...props}
+      sx={{
+        color: selected ? 'white' : 'red',
+        ...props.sx,
+      }}
       onClick={() => {
         toggle();
       }}

@@ -16,7 +16,17 @@
  * <https://www.gnu.org/licenses/>.
  */
 import { Box, Button, Card, Grid, Stack, Typography } from '@mui/material';
-import { ComponentType, Fragment, ReactNode, useContext, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import {
+  ComponentType,
+  Fragment,
+  ReactNode,
+  useCallback,
+  useContext,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import Draggable from 'react-draggable';
 
 import { ExpandableButtonProps } from '../components/Button';
@@ -49,16 +59,6 @@ export default () => {
   );
 };
 
-export enum SecondaryButtons {
-  Volume = 1,
-  Group,
-  Chat,
-  ScreenShare,
-  Record,
-  Extension,
-  FullScreen,
-}
-
 interface Props {
   children?: ReactNode;
 }
@@ -69,6 +69,7 @@ const CallInterface = () => {
 
   return (
     <>
+      {/* Guest video, takes the whole screen */}
       <video
         ref={remoteVideoRef}
         autoPlay
@@ -85,10 +86,10 @@ const CallInterface = () => {
         <Box>
           <CallInterfaceInformation />
         </Box>
-        {/* Guest video, with empty space to be moved around and stickied to walls */}
+        {/* Local video, with empty space to be moved around and stickied to walls */}
         <Box height="100%">
           {isVideoOn && (
-            <Draggable bounds="parent">
+            <Draggable bounds="parent" nodeRef={localVideoRef ?? undefined}>
               <video
                 ref={localVideoRef}
                 autoPlay
@@ -140,10 +141,11 @@ const CallInterfacePrimaryButtons = () => {
   const { sendWebRTCOffer } = useContext(WebRTCContext);
 
   return (
-    <Card sx={{ backgroundColor: '#00000088', overflow: 'visible', textAlign: 'center' }}>
-      <Stack direction="row" justifyContent="flex-end" alignItems="flex-end">
+    <Card sx={{ backgroundColor: '#00000088', overflow: 'visible' }}>
+      <Stack direction="row" justifyContent="center" alignItems="center">
         <Button
           variant="contained"
+          size="small"
           onClick={() => {
             sendWebRTCOffer();
           }}
@@ -152,7 +154,7 @@ const CallInterfacePrimaryButtons = () => {
           Call
         </Button>
         <CallingMicButton />
-        <CallingEndButton />
+        <CallingEndButton hidden={false} />
         <CallingVideoCameraButton />
       </Stack>
     </Card>
@@ -172,26 +174,37 @@ const SECONDARY_BUTTONS = [
 const CallInterfaceSecondaryButtons = (props: Props & { gridItemRef: React.RefObject<HTMLElement> }) => {
   const stackRef = useRef<HTMLElement>(null);
 
+  const [initialMeasurementDone, setInitialMeasurementDone] = useState(false);
   const [hiddenStackCount, setHiddenStackCount] = useState(0);
   const [hiddenMenuVisible, setHiddenMenuVisible] = useState(false);
 
-  useLayoutEffect(() => {
-    const onResize = () => {
-      if (stackRef?.current && props.gridItemRef?.current) {
-        const buttonWidth = stackRef.current.children[0].clientWidth;
-        const availableSpace = props.gridItemRef.current.clientWidth;
-        let availableButtons = Math.floor((availableSpace - 1) / buttonWidth);
-        if (availableButtons < SECONDARY_BUTTONS.length) {
-          availableButtons -= 1; // Leave room for CallingMoreVerticalButton
-        }
-        setHiddenStackCount(SECONDARY_BUTTONS.length - availableButtons);
+  const calculateStackCount = useCallback(() => {
+    if (stackRef?.current && props.gridItemRef?.current) {
+      const buttonWidth = stackRef.current.children[0].clientWidth;
+      const availableSpace = props.gridItemRef.current.clientWidth;
+      let availableButtons = Math.floor((availableSpace - 1) / buttonWidth);
+      if (availableButtons < SECONDARY_BUTTONS.length) {
+        availableButtons -= 1; // Leave room for CallingMoreVerticalButton
       }
+      setHiddenStackCount(SECONDARY_BUTTONS.length - availableButtons);
+    }
+  }, [props.gridItemRef]);
+
+  useLayoutEffect(() => {
+    // Run once, at the beginning, for initial measurements
+    if (!initialMeasurementDone) {
+      calculateStackCount();
+      setInitialMeasurementDone(true);
+    }
+
+    const onResize = () => {
+      calculateStackCount();
     };
     window.addEventListener('resize', onResize);
     return () => {
       window.removeEventListener('resize', onResize);
     };
-  }, [props.gridItemRef]);
+  }, [calculateStackCount, initialMeasurementDone]);
 
   const { displayedButtons, hiddenButtons } = useMemo(() => {
     const displayedButtons: ComponentType<ExpandableButtonProps>[] = [];
@@ -211,29 +224,37 @@ const CallInterfaceSecondaryButtons = (props: Props & { gridItemRef: React.RefOb
   }, [hiddenStackCount]);
 
   return (
-    <Card sx={{ backgroundColor: '#00000088', overflow: 'visible' }}>
-      <Stack direction="row" justifyContent="flex-end" alignItems="flex-end" ref={stackRef}>
-        {displayedButtons.map((SecondaryButton, i) => (
-          <Fragment key={i}>
-            <SecondaryButton />
-          </Fragment>
-        ))}
-        {!!hiddenButtons.length && (
-          <Card sx={{ position: 'relative', backgroundColor: '#00000088', overflow: 'visible' }}>
-            <CallingMoreVerticalButton onClick={() => setHiddenMenuVisible(!hiddenMenuVisible)} />
+    <Card sx={{ backgroundColor: '#00000088', overflow: 'visible', height: '100%' }}>
+      <Stack direction="row" justifyContent="center" alignItems="center" height="100%" ref={stackRef}>
+        {initialMeasurementDone &&
+          displayedButtons.map((SecondaryButton, i) => (
+            <Fragment key={i}>
+              <SecondaryButton hidden={false} />
+            </Fragment>
+          ))}
+        {(!!hiddenButtons.length || !initialMeasurementDone) && (
+          <CallingMoreVerticalButton hidden={true} onClick={() => setHiddenMenuVisible(!hiddenMenuVisible)} />
+        )}
+      </Stack>
+
+      {!!hiddenButtons.length && hiddenMenuVisible && (
+        <Box sx={{ position: 'absolute', right: 0, bottom: '50px' }}>
+          <Card sx={{ backgroundColor: '#00000088', overflow: 'visible', justifyContent: 'flex-end' }}>
             <Stack
-              direction="column-reverse"
-              sx={{ bottom: 0, right: 0, height: '100%', position: 'absolute', top: '-40px' }}
+              direction="column"
+              justifyContent="flex-end"
+              alignItems="flex-end"
+              sx={{ bottom: 0, right: 0, height: '100%' }}
             >
               {hiddenButtons.map((SecondaryButton, i) => (
                 <Fragment key={i}>
-                  <SecondaryButton key={i} />
+                  <SecondaryButton hidden={true} />
                 </Fragment>
               ))}
             </Stack>
           </Card>
-        )}
-      </Stack>
+        </Box>
+      )}
     </Card>
   );
 };
