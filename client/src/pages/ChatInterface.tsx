@@ -15,15 +15,18 @@
  * License along with this program.  If not, see
  * <https://www.gnu.org/licenses/>.
  */
-import { Divider, Stack } from '@mui/material';
+import { Box, Divider, Stack } from '@mui/material';
 import { Account, ConversationMember, Message } from 'jami-web-common';
 import { useCallback, useContext, useEffect, useState } from 'react';
+import { useDropzone } from 'react-dropzone';
 
+import { FilePreviewRemovable } from '../components/FilePreview';
 import LoadingPage from '../components/Loading';
 import MessageList from '../components/MessageList';
 import SendMessageForm from '../components/SendMessageForm';
 import { SocketContext } from '../contexts/Socket';
 import { useMessagesQuery, useSendMessageMutation } from '../services/Conversation';
+import { FileHandler } from '../utils/files';
 
 type ChatInterfaceProps = {
   account: Account;
@@ -38,6 +41,34 @@ const ChatInterface = ({ account, conversationId, members }: ChatInterfaceProps)
 
   const messagesQuery = useMessagesQuery(account.getId(), conversationId);
   const sendMessageMutation = useSendMessageMutation(account.getId(), conversationId);
+
+  const [fileHandlers, setFileHandlers] = useState<FileHandler[]>([]);
+
+  const onFilesDrop = useCallback(
+    (acceptedFiles: File[]) => {
+      const newFileHandlers = acceptedFiles.map((file) => new FileHandler(file));
+      setFileHandlers((oldFileHandlers) => [...oldFileHandlers, ...newFileHandlers]);
+    },
+    [setFileHandlers]
+  );
+
+  const removeFile = useCallback(
+    (fileId: string | number) => {
+      setFileHandlers((fileHandlers) => fileHandlers.filter((fileHandler) => fileHandler.id !== fileId));
+    },
+    [setFileHandlers]
+  );
+
+  const {
+    getRootProps,
+    getInputProps,
+    open: openFilePicker,
+    isDragActive,
+  } = useDropzone({
+    onDrop: onFilesDrop,
+    noClick: true,
+    noKeyboard: true,
+  });
 
   useEffect(() => {
     if (messagesQuery.isSuccess) {
@@ -73,7 +104,21 @@ const ChatInterface = ({ account, conversationId, members }: ChatInterfaceProps)
   }
 
   return (
-    <Stack flex={1} overflow="hidden">
+    <Stack flex={1} overflow="hidden" {...getRootProps()} paddingBottom="16px">
+      {isDragActive && (
+        // dark overlay when the user is dragging a file
+        <Box
+          sx={{
+            position: 'absolute',
+            width: '100%',
+            height: '100%',
+            backgroundColor: 'black',
+            opacity: '30%',
+            zIndex: 100,
+          }}
+        />
+      )}
+      <input {...getInputProps()} />
       <MessageList account={account} members={members} messages={messages} />
       <Divider
         sx={{
@@ -81,7 +126,37 @@ const ChatInterface = ({ account, conversationId, members }: ChatInterfaceProps)
           borderTop: '1px solid #E5E5E5',
         }}
       />
-      <SendMessageForm account={account} members={members} onSend={sendMessage} />
+      <SendMessageForm account={account} members={members} onSend={sendMessage} openFilePicker={openFilePicker} />
+      {fileHandlers.length > 0 && <FilePreviewsList fileHandlers={fileHandlers} removeFile={removeFile} />}
+    </Stack>
+  );
+};
+
+interface FilePreviewsListProps {
+  fileHandlers: FileHandler[];
+  removeFile: (fileId: string | number) => void;
+}
+
+const FilePreviewsList = ({ fileHandlers, removeFile }: FilePreviewsListProps) => {
+  return (
+    <Stack
+      direction="row"
+      flexWrap="wrap"
+      gap="16px"
+      overflow="auto"
+      maxHeight="30%"
+      paddingX="16px"
+      marginTop="12px" // spacing with the component on top
+      paddingTop="4px" // spacing so "RemoveButton" are not cut
+    >
+      {fileHandlers.map((fileHandler) => (
+        <FilePreviewRemovable
+          key={fileHandler.id}
+          remove={() => removeFile(fileHandler.id)}
+          fileHandler={fileHandler}
+          borderColor={'#005699' /* Should be same color as message bubble */}
+        />
+      ))}
     </Stack>
   );
 };

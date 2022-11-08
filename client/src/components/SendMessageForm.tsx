@@ -34,16 +34,17 @@ type SendMessageFormProps = {
   account: Account;
   members: ConversationMember[];
   onSend: (message: string) => void;
+  openFilePicker: () => void;
 };
 
-export default function SendMessageForm(props: SendMessageFormProps) {
+export default function SendMessageForm({ account, members, onSend, openFilePicker }: SendMessageFormProps) {
   const [currentMessage, setCurrentMessage] = useState('');
-  const placeholder = usePlaceholder(props.account, props.members);
+  const placeholder = usePlaceholder(account, members);
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (currentMessage) {
-      props.onSend(currentMessage);
+      onSend(currentMessage);
       setCurrentMessage('');
     }
   };
@@ -55,8 +56,16 @@ export default function SendMessageForm(props: SendMessageFormProps) {
   );
 
   return (
-    <Stack component="form" onSubmit={handleSubmit} direction="row" alignItems="center" spacing="20px" padding="16px">
-      <UploadFileButton />
+    <Stack
+      component="form"
+      onSubmit={handleSubmit}
+      direction="row"
+      alignItems="center"
+      spacing="20px"
+      paddingX="16px"
+      paddingTop="16px"
+    >
+      <UploadFileButton onClick={openFilePicker} />
       <RecordVoiceMessageButton />
       <RecordVideoMessageButton />
       <Stack flexGrow={1}>
