@@ -16,9 +16,27 @@
  * <https://www.gnu.org/licenses/>.
  */
 import { useState } from 'react';
-import { Outlet } from 'react-router-dom';
+import { json, LoaderFunctionArgs, Outlet, redirect } from 'react-router-dom';
 
 import WelcomeAnimation from './components/welcome';
+import { apiUrl } from './utils/constants';
+
+export async function checkSetupStatus(): Promise<boolean> {
+  const url = new URL('/setup/check', apiUrl);
+  const response = await fetch(url);
+  const { isSetupComplete } = await response.json();
+  return isSetupComplete;
+}
+
+export async function appLoader({ request }: LoaderFunctionArgs) {
+  const initialUrl = new URL(request.url);
+  const isSetupComplete = await checkSetupStatus();
+
+  if (!isSetupComplete && initialUrl.pathname !== '/setup/login') {
+    return redirect('/setup/login');
+  }
+  return json({ isSetupComplete }, { status: 200 });
+}
 
 const App = () => {
   const [displayWelcome, setDisplayWelcome] = useState<boolean>(true);

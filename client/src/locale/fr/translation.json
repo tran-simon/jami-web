@@ -70,6 +70,14 @@
   "registration_form_submit_button": "S'INSCRIRE",
   "registration_form_to_login_text": "Déjà inscrit?",
   "registration_form_to_login_link": "SE CONNECTER",
+  "logout": "SE DÉCONNECTER",
+  "setup_login_title": "Configuration du noeud web Jami",
+  "setup_login_welcome": "Bienvenue à la configuration du noeud web Jami.",
+  "setup_login_admin_creation": "Commençons par créer un nouveau compte administrateur pour contrôler l'accès à la configuration du serveur.",
+  "password_placeholder": "Mot de passe",
+  "setup_login_password_placeholder_creation": "Nouveau mot de passe",
+  "setup_login_password_placeholder_repeat": "Répéter le mot de passe",
+  "admin_creation_submit_button": "CRÉER UN COMPTE ADMIN",
   "severity_error": "Erreur",
   "severity_success": "Succès"
 }

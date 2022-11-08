@@ -70,6 +70,14 @@
   "registration_form_submit_button": "REGISTER",
   "registration_form_to_login_text": "Already have an account?",
   "registration_form_to_login_link": "LOG IN",
+  "logout": "LOGOUT",
+  "setup_login_title": "Jami web node setup",
+  "setup_login_welcome": "Welcome to the Jami web node setup.",
+  "setup_login_admin_creation": "Let's start by creating a new administrator account to control access to the server configuration.",
+  "password_placeholder": "Password",
+  "setup_login_password_placeholder_creation": "New password",
+  "setup_login_password_placeholder_repeat": "Repeat password",
+  "admin_creation_submit_button": "CREATE ADMIN ACCOUNT",
   "severity_error": "Error",
   "severity_success": "Success"
 }

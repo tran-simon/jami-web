@@ -17,14 +17,15 @@
  */
 import { createBrowserRouter, createRoutesFromElements, Outlet, Route } from 'react-router-dom';
 
-import App from './App';
+import App, { appLoader } from './App';
 import ContactList from './components/ContactList';
 import AuthProvider from './contexts/AuthProvider';
 import WebSocketProvider from './contexts/WebSocketProvider';
 import AccountSettings from './pages/AccountSettings';
 import CallInterface from './pages/CallInterface';
 import Messenger from './pages/Messenger';
-import ServerSetup from './pages/ServerSetup';
+import Setup from './pages/Setup';
+import SetupLogin from './pages/SetupLogin';
 import Welcome from './pages/Welcome';
 import { ThemeDemonstrator } from './themes/ThemeDemonstrator';
 import { RouteParams } from './utils/hooks';
@@ -34,8 +35,10 @@ export type CallRouteParams = RouteParams<{ conversationId: string }, { video?: 
 
 export const router = createBrowserRouter(
   createRoutesFromElements(
-    <Route path="/" element={<App />}>
+    <Route path="/" element={<App />} loader={appLoader}>
       <Route path="login" element={<Welcome />} />
+      <Route path="setup/login" element={<SetupLogin />} />
+      <Route path="setup" element={<Setup />} />
       <Route path="theme" element={<ThemeDemonstrator />} />
       <Route
         element={
@@ -53,7 +56,6 @@ export const router = createBrowserRouter(
         <Route path="contacts" element={<ContactList />} />
         <Route index element={<Messenger />} />
       </Route>
-      <Route path="setup" element={<ServerSetup />} />
     </Route>
   )
 );

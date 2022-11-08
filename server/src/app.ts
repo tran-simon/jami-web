@@ -23,6 +23,7 @@ import log from 'loglevel';
 import { Service } from 'typedi';
 
 import { bindWebRTCCallbacks } from './handlers/webrtc-handler.js';
+import { checkAdminSetup } from './middleware/setup.js';
 import { accountRouter } from './routers/account-router.js';
 import { authRouter } from './routers/auth-router.js';
 import { callRouter } from './routers/call-router.js';
@@ -30,6 +31,7 @@ import { contactsRouter } from './routers/contacts-router.js';
 import { conversationRouter } from './routers/conversation-router.js';
 import { defaultModeratorsRouter } from './routers/default-moderators-router.js';
 import { nameserverRouter } from './routers/nameserver-router.js';
+import { setupRouter } from './routers/setup-router.js';
 
 @Service()
 export class App {
@@ -40,6 +42,10 @@ export class App {
     app.use(helmet());
     app.use(cors());
     app.use(json());
+
+    // Enforce admin setup
+    app.use('/setup', setupRouter);
+    app.use(checkAdminSetup);
 
     // Setup routing
     app.use('/auth', authRouter);
