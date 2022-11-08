@@ -62,6 +62,18 @@ export class Ws {
           }
         }
       });
+
+      ws.on('close', () => {
+        log.info('Connection close', accountId);
+        const accountSockets = this.sockets.get(accountId);
+        const index = accountSockets?.indexOf(ws);
+        if (index !== undefined) {
+          accountSockets?.splice(index, 1);
+          if (accountSockets?.length === 0) {
+            this.sockets.delete(accountId);
+          }
+        }
+      });
     });
 
     return (request: IncomingMessage, socket: Duplex, head: Buffer) => {
