@@ -9,5 +9,5 @@
 **/tsconfig.tsbuildinfo
 
 daemon/
-dring.node
-jamid.node
+**/dring.node
+**/jamid.node

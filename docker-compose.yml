@@ -10,6 +10,8 @@ services:
       # Add bind mounts for hot-reload
       - ./client/src:/web-client/client/src
       - ./server/src:/web-client/server/src
+      - ./client/.env.development:/web-client/client/.env.development
+      - ./server/.env:/web-client/server/.env
     ports:
       - "3001:3001"
       - "3000:3000"

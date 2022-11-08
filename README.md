@@ -79,6 +79,8 @@ docker run -it \
   -p 5000:5000 \
   --volume $(pwd)/client/src:/web-client/client/src \
   --volume $(pwd)/server/src:/web-client/server/src \
+  --volume $(pwd)/client/.env.development:/web-client/client/.env.development \
+  --volume $(pwd)/server/.env:/web-client/server/.env \
   jami-web
 ```
 

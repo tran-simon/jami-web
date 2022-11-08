@@ -1,3 +1,22 @@
 #!/usr/bin/env sh
 
-npm run lint
+confirm () {
+  if ! eval "$@" ; then
+    printf "Found some problems. Do you still want to push? [y/N] "
+    read -r REPLY
+
+    if [ "$REPLY" = "${REPLY#[Yy]}" ]
+    then
+      echo "Cancelling push..."
+      exit 1
+    fi
+  else
+    echo "OK!"
+  fi
+}
+
+echo "Checking for i18next warnings..."
+confirm "npm run extract-translations -w client -- --fail-on-warnings --fail-on-update"
+
+echo "Checking for eslint warnings..."
+confirm "npm run lint --workspaces -- --max-warnings 0"

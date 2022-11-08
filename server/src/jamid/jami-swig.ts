@@ -18,11 +18,6 @@
 import { Constructable } from '../interfaces.js';
 import { itMap, itRange, itToArr, itToRecord } from './utils.js';
 
-enum Bool {
-  False = 'false',
-  True = 'true',
-}
-
 interface SwigVec<T> {
   size(): number;
   get(i: number): T; // TODO: | undefined;
