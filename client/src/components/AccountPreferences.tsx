@@ -38,8 +38,8 @@ import { motion } from 'framer-motion';
 import { Account, AccountDetails } from 'jami-web-common';
 import { useState } from 'react';
 
-import authManager from '../AuthManager';
 import { useAuthContext } from '../contexts/AuthProvider';
+import { apiUrl } from '../utils/constants';
 import ConversationAvatar from './ConversationAvatar';
 import ConversationsOverviewCard from './ConversationsOverviewCard';
 import JamiIdCard from './JamiIdCard';
@@ -64,7 +64,8 @@ type AccountPreferencesProps = {
 export default function AccountPreferences({ account: _account }: AccountPreferencesProps) {
   const authContext = useAuthContext(true);
   const account = _account ?? authContext?.account;
-  if (!account) {
+  const token = authContext?.token;
+  if (!account || !token) {
     throw new Error('Account not defined');
   }
 
@@ -83,23 +84,34 @@ export default function AccountPreferences({ account: _account }: AccountPrefere
 
   const addModerator = () => {
     if (defaultModeratorUri) {
-      authManager.fetch(`/api/accounts/${account.getId()}/defaultModerators/${defaultModeratorUri}`, { method: 'PUT' });
+      fetch(new URL(`/default-moderators/${defaultModeratorUri}`, apiUrl), {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        method: 'PUT',
+      });
       setDefaultModeratorUri('');
     }
   };
 
   const removeModerator = (uri: string) =>
-    authManager.fetch(`/api/accounts/${account.getId()}/defaultModerators/${uri}`, { method: 'DELETE' });
+    fetch(new URL(`/default-moderators/${uri}`, apiUrl), {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      method: 'DELETE',
+    });
 
   const handleToggle = (key: keyof AccountDetails, value: boolean) => {
     console.log(`handleToggle ${key} ${value}`);
     const newDetails: Partial<AccountDetails> = {};
     newDetails[key] = value ? 'true' : 'false';
     console.log(newDetails);
-    authManager.fetch(`/api/accounts/${account.getId()}`, {
-      method: 'POST',
+    fetch(new URL('/account', apiUrl), {
+      method: 'PATCH',
       headers: {
         Accept: 'application/json',
+        Authorization: `Bearer ${token}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(newDetails),
@@ -133,7 +145,7 @@ export default function AccountPreferences({ account: _account }: AccountPrefere
 
         <Grid item xs={12} sm={6}>
           <motion.div variants={thumbnailVariants}>
-            <ConversationsOverviewCard accountId={account.getId()} />
+            <ConversationsOverviewCard />
           </motion.div>
         </Grid>
 

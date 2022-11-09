@@ -21,33 +21,27 @@ import { useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router';
 
+import { useAuthContext } from '../contexts/AuthProvider';
 import { SocketContext } from '../contexts/Socket';
 import ChatInterface from '../pages/ChatInterface';
-import { useAccountQuery } from '../services/Account';
 import { useConversationQuery } from '../services/Conversation';
 import { translateEnumeration, TranslateEnumerationOptions } from '../utils/translations';
 import { AddParticipantButton, ShowOptionsMenuButton, StartAudioCallButton, StartVideoCallButton } from './Button';
 import LoadingPage from './Loading';
 
 type ConversationViewProps = {
-  accountId: string;
   conversationId: string;
 };
-const ConversationView = ({ accountId, conversationId }: ConversationViewProps) => {
+const ConversationView = ({ conversationId }: ConversationViewProps) => {
+  const { account } = useAuthContext();
   const socket = useContext(SocketContext);
-  const [account, setAccount] = useState<Account | undefined>();
   const [conversation, setConversation] = useState<Conversation | undefined>();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(false);
 
-  const accountQuery = useAccountQuery(accountId);
-  const conversationQuery = useConversationQuery(accountId, conversationId);
+  const accountId = account.getId();
 
-  useEffect(() => {
-    if (accountQuery.isSuccess) {
-      setAccount(Account.from(accountQuery.data));
-    }
-  }, [accountQuery.isSuccess, accountQuery.data]);
+  const conversationQuery = useConversationQuery(conversationId);
 
   useEffect(() => {
     if (conversationQuery.isSuccess) {
@@ -57,12 +51,12 @@ const ConversationView = ({ accountId, conversationId }: ConversationViewProps) 
   }, [accountId, conversationQuery.isSuccess, conversationQuery.data]);
 
   useEffect(() => {
-    setIsLoading(accountQuery.isLoading || conversationQuery.isLoading);
-  }, [accountQuery.isLoading, conversationQuery.isLoading]);
+    setIsLoading(conversationQuery.isLoading);
+  }, [conversationQuery.isLoading]);
 
   useEffect(() => {
-    setError(accountQuery.isError || conversationQuery.isError);
-  }, [accountQuery.isError, conversationQuery.isError]);
+    setError(conversationQuery.isError);
+  }, [conversationQuery.isError]);
 
   useEffect(() => {
     if (!conversation) return;
@@ -94,7 +88,7 @@ const ConversationView = ({ accountId, conversationId }: ConversationViewProps) 
           borderTop: '1px solid #E5E5E5',
         }}
       />
-      <ChatInterface account={account} conversationId={conversationId} members={conversation.getMembers()} />
+      <ChatInterface conversationId={conversationId} members={conversation.getMembers()} />
     </Stack>
   );
 };

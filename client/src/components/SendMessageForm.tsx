@@ -17,10 +17,11 @@
  */
 import { InputBase } from '@mui/material';
 import { Stack } from '@mui/system';
-import { Account, ConversationMember } from 'jami-web-common';
+import { ConversationMember } from 'jami-web-common';
 import { ChangeEvent, FormEvent, useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { useAuthContext } from '../contexts/AuthProvider';
 import { translateEnumeration, TranslateEnumerationOptions } from '../utils/translations';
 import {
   RecordVideoMessageButton,
@@ -31,15 +32,14 @@ import {
 } from './Button';
 
 type SendMessageFormProps = {
-  account: Account;
   members: ConversationMember[];
   onSend: (message: string) => void;
   openFilePicker: () => void;
 };
 
-export default function SendMessageForm({ account, members, onSend, openFilePicker }: SendMessageFormProps) {
+export default function SendMessageForm({ members, onSend, openFilePicker }: SendMessageFormProps) {
   const [currentMessage, setCurrentMessage] = useState('');
-  const placeholder = usePlaceholder(account, members);
+  const placeholder = usePlaceholder(members);
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -90,7 +90,8 @@ export default function SendMessageForm({ account, members, onSend, openFilePick
   );
 }
 
-const usePlaceholder = (account: Account, members: ConversationMember[]) => {
+const usePlaceholder = (members: ConversationMember[]) => {
+  const { account } = useAuthContext();
   const { t } = useTranslation();
 
   return useMemo(() => {

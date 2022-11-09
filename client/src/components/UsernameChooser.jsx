@@ -20,7 +20,7 @@ import { InputAdornment, TextField } from '@mui/material';
 import { useEffect, useState } from 'react';
 import usePromise from 'react-fetch-hook/usePromise';
 
-import authManager from '../AuthManager';
+import { apiUrl } from '../utils/constants.js';
 
 const isInputValid = (input) => input && input.length > 2;
 
@@ -30,7 +30,7 @@ export default function UsernameChooser({ setName, ...props }) {
   const { isLoading, data, error } = usePromise(
     () =>
       isInputValid(query)
-        ? authManager.fetch(`/api/ns/name/${query}`).then((res) => {
+        ? fetch(new URL(`/ns/username/${query}`, apiUrl)).then((res) => {
             if (res.status === 200) return res.json();
             else throw res.status;
           })

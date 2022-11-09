@@ -17,29 +17,19 @@
  */
 import { Box, Button, Menu, MenuItem } from '@mui/material';
 import { MouseEvent, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 import { useAuthContext } from '../contexts/AuthProvider';
-import { setAccessToken } from '../utils/auth';
 
 export default function Header() {
-  const authContext = useAuthContext(true);
+  const { logout } = useAuthContext();
 
   const navigate = useNavigate();
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
   const handleClick = (event: MouseEvent<HTMLButtonElement>) => setAnchorEl(event.currentTarget);
   const handleClose = () => setAnchorEl(null);
-  const params = useParams();
 
   const goToContacts = () => navigate(`/contacts`);
-  const goToAccountSettings = () => navigate(`/deprecated-account/${params.accountId}/settings`);
-
-  const deprecatedLogout = () => {
-    setAccessToken('');
-    navigate('/deprecated-account', { replace: true });
-  };
-  // TODO: Remove deprecated_logout once migration to new server is complete
-  const logout = authContext?.logout ?? deprecatedLogout;
 
   return (
     <Box>
@@ -48,7 +38,7 @@ export default function Header() {
       </Button>
       <Menu id="simple-menu" anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleClose}>
         <MenuItem onClick={goToContacts}>Contacts</MenuItem>
-        {params.accountId && <MenuItem onClick={goToAccountSettings}>Account settings</MenuItem>}
+        <MenuItem onClick={() => navigate('/settings')}>Account settings</MenuItem>
         <MenuItem onClick={logout}>Log out</MenuItem>
       </Menu>
     </Box>

@@ -65,7 +65,7 @@ accountRouter.patch('/', (req, res) => {
   const accountId = res.locals.accountId;
   const currentAccountDetails = jamid.getAccountDetails(accountId);
   const newAccountDetails: AccountDetails = { ...currentAccountDetails, ...req.body };
-  jamid.setAccountDetails(res.locals.accountId, newAccountDetails);
+  jamid.setAccountDetails(accountId, newAccountDetails);
   res.sendStatus(HttpStatusCode.NoContent);
 });
 

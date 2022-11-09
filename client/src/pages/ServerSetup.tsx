@@ -19,8 +19,6 @@ import GroupAddRounded from '@mui/icons-material/GroupAddRounded';
 import { Box, Card, CardContent, Container, Fab, Input, Typography } from '@mui/material';
 import { FormEvent, useState } from 'react';
 
-import authManager from '../AuthManager';
-
 export default function ServerSetup() {
   const [password, setPassword] = useState('');
   const [passwordRepeat, setPasswordRepeat] = useState('');
@@ -32,7 +30,8 @@ export default function ServerSetup() {
     e.preventDefault();
     setLoading(true);
     if (!isValid()) return;
-    authManager.setup(password);
+    // TODO: Migrate to new server
+    // authManager.setup(password);
   };
 
   return (

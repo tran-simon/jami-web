@@ -18,58 +18,60 @@
 import { Stack } from '@mui/material';
 import { Contact, Conversation } from 'jami-web-common';
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router';
 
-import authManager from '../AuthManager';
 //import Sound from 'react-sound';
 import ConversationList from '../components/ConversationList';
 import ConversationView from '../components/ConversationView';
 import Header from '../components/Header';
 import LoadingPage from '../components/Loading';
 import NewContactForm from '../components/NewContactForm';
+import { useAuthContext } from '../contexts/AuthProvider';
 import { useAppSelector } from '../redux/hooks';
+import { apiUrl } from '../utils/constants';
+import { useUrlParams } from '../utils/hooks';
 import AddContactPage from './AddContactPage';
+import { MessengerRouteParams } from './JamiMessenger';
 
-type MessengerProps = {
-  accountId?: string;
-  conversationId?: string;
-  contactId?: string;
-};
-
-const Messenger = (props: MessengerProps) => {
+const Messenger = () => {
   const { refresh } = useAppSelector((state) => state.userInfo);
+  const { token, account } = useAuthContext();
 
   const [conversations, setConversations] = useState<Conversation[] | undefined>(undefined);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResult, setSearchResults] = useState<Conversation | undefined>(undefined);
 
-  const params = useParams();
-  const accountId = props.accountId || params.accountId;
-  const conversationId = props.conversationId || params.conversationId;
-  const contactId = props.contactId || params.contactId;
+  const {
+    urlParams: { conversationId, contactId },
+  } = useUrlParams<MessengerRouteParams>();
 
-  if (accountId == null) {
-    throw new Error('Missing accountId');
-  }
+  const accountId = account.getId();
 
   useEffect(() => {
     console.log('REFRESH CONVERSATIONS FROM MESSENGER');
     const controller = new AbortController();
-    authManager
-      .fetch(`/api/accounts/${accountId}/conversations`, { signal: controller.signal })
+    fetch(new URL(`/conversations`, apiUrl), {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      signal: controller.signal,
+    })
       .then((res) => res.json())
       .then((result: Conversation[]) => {
         console.log(result);
         setConversations(Object.values(result).map((c) => Conversation.from(accountId, c)));
       });
     // return () => controller.abort()
-  }, [accountId, refresh]);
+  }, [token, accountId, refresh]);
 
   useEffect(() => {
     if (!searchQuery) return;
     const controller = new AbortController();
-    authManager
-      .fetch(`/api/accounts/${accountId}/ns/name/${searchQuery}`, { signal: controller.signal })
+    fetch(new URL(`/ns/username/${searchQuery}`, apiUrl), {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      signal: controller.signal,
+    })
       .then((response) => {
         if (response.status === 200) {
           return response.json();
@@ -80,14 +82,14 @@ const Messenger = (props: MessengerProps) => {
       .then((response) => {
         console.log(response);
         const contact = new Contact(response.address);
-        contact.setRegisteredName(response.name);
+        contact.setRegisteredName(response.username);
         setSearchResults(contact ? Conversation.fromSingleContact(accountId, contact) : undefined);
       })
       .catch(() => {
         setSearchResults(undefined);
       });
     // return () => controller.abort() // crash on React18
-  }, [accountId, searchQuery]);
+  }, [accountId, searchQuery, token]);
 
   console.log('Messenger render');
   return (
@@ -95,7 +97,7 @@ const Messenger = (props: MessengerProps) => {
       <Stack flexGrow={0} flexShrink={0} overflow="auto">
         <Header />
         <NewContactForm onChange={setSearchQuery} />
-        {contactId && <AddContactPage accountId={accountId} contactId={contactId} />}
+        {contactId && <AddContactPage contactId={contactId} />}
         {conversations ? (
           <ConversationList search={searchResult} conversations={conversations} accountId={accountId} />
         ) : (
@@ -104,9 +106,7 @@ const Messenger = (props: MessengerProps) => {
           </div>
         )}
       </Stack>
-      <Stack flexGrow={1}>
-        {conversationId && <ConversationView accountId={accountId} conversationId={conversationId} />}
-      </Stack>
+      <Stack flexGrow={1}>{conversationId && <ConversationView conversationId={conversationId} />}</Stack>
     </Stack>
   );
 };

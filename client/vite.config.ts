@@ -23,12 +23,6 @@ export default defineConfig({
   server: {
     host: '0.0.0.0',
     port: 3000,
-    proxy: {
-      '^/(api)|^/(auth)|^/(setup)': {
-        target: 'http://localhost:3001',
-        secure: false,
-      },
-    },
   },
   preview: {
     port: 8080,

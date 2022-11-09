@@ -33,12 +33,20 @@ import { Trans } from 'react-i18next';
 import Modal from 'react-modal';
 import { useNavigate, useParams } from 'react-router-dom';
 
-import authManager from '../AuthManager';
+import { useAuthContext } from '../contexts/AuthProvider';
 import { setRefreshFromSlice } from '../redux/appSlice';
 import { useAppDispatch } from '../redux/hooks';
+import { apiUrl } from '../utils/constants';
 import ConversationAvatar from './ConversationAvatar';
-import { CancelIcon, RemoveContactIcon, VideoCallIcon } from './SvgIcon';
-import { AudioCallIcon, BlockContactIcon, ContactDetailsIcon, MessageIcon } from './SvgIcon';
+import {
+  AudioCallIcon,
+  BlockContactIcon,
+  CancelIcon,
+  ContactDetailsIcon,
+  MessageIcon,
+  RemoveContactIcon,
+  VideoCallIcon,
+} from './SvgIcon';
 
 const cancelStyles: Modal.Styles = {
   content: {
@@ -81,6 +89,7 @@ type ConversationListItemProps = {
 };
 
 export default function ConversationListItem({ conversation }: ConversationListItemProps) {
+  const { token } = useAuthContext();
   const { conversationId, contactId } = useParams();
   const dispatch = useAppDispatch();
 
@@ -95,8 +104,6 @@ export default function ConversationListItem({ conversation }: ConversationListI
   const [userId] = useState(conversation?.getFirstMember()?.contact.getUri());
   const [isSwarm] = useState(true);
 
-  const navigateUrlPrefix = `/deprecated-account/${conversation.getAccountId()}`;
-
   const openMenu = (e: MouseEvent<HTMLDivElement>) => {
     e.preventDefault();
     console.log(e);
@@ -110,10 +117,12 @@ export default function ConversationListItem({ conversation }: ConversationListI
 
   const getContactDetails = () => {
     const controller = new AbortController();
-    authManager
-      .fetch(`/api/accounts/${conversation.getAccountId()}/contacts/details/${userId}`, {
-        signal: controller.signal,
-      })
+    fetch(new URL(`/contacts/${userId}`, apiUrl), {
+      signal: controller.signal,
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
       .then((res) => res.json())
       .then((result) => {
         console.log('CONTACT LIST - DETAILS: ', result);
@@ -121,38 +130,43 @@ export default function ConversationListItem({ conversation }: ConversationListI
       .catch((e) => console.log('ERROR GET CONTACT DETAILS: ', e));
   };
 
-  const removeOrBlock = (typeOfRemove: 'block' | 'remove') => {
-    console.log(typeOfRemove);
+  const removeOrBlock = (block = false) => {
     setBlockOrRemove(false);
 
-    console.log('EEEH', typeOfRemove, conversation.getAccountId(), userId);
+    console.log('EEEH', conversation.getAccountId(), userId);
 
     const controller = new AbortController();
-    authManager
-      .fetch(`/api/accounts/${conversation.getAccountId()}/contacts/${typeOfRemove}/${userId}`, {
-        signal: controller.signal,
-        method: 'DELETE',
-      })
+    let url = `/contacts/${userId}`;
+    if (block) {
+      url += '/block';
+    }
+    fetch(new URL(url, apiUrl), {
+      signal: controller.signal,
+      method: block ? 'POST' : 'DELETE',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
       .then((res) => res.json())
       .then(() => {
         console.log('propre');
         dispatch(setRefreshFromSlice());
       })
       .catch((e) => {
-        console.log(`ERROR ${typeOfRemove}ing CONTACT : `, e);
+        console.log(`ERROR ${block ? 'blocking' : 'removing'} CONTACT : `, e);
         dispatch(setRefreshFromSlice());
       });
     closeModalDelete();
   };
 
-  const uri = conversation.getId() ? `conversation/${conversation.getId()}` : `addContact/${userId}`;
+  const uri = conversation.getId() ? `/account/conversation/${conversation.getId()}` : `/account/addContact/${userId}`;
   return (
     <div onContextMenu={openMenu}>
       <div>
         <Menu open={!!menuAnchorEl} onClose={closeModal} anchorEl={menuAnchorEl}>
           <MenuItem
             onClick={() => {
-              navigate(`${navigateUrlPrefix}/${uri}`);
+              navigate(uri);
               closeModal();
             }}
           >
@@ -165,7 +179,7 @@ export default function ConversationListItem({ conversation }: ConversationListI
           </MenuItem>
           <MenuItem
             onClick={() => {
-              navigate(`${navigateUrlPrefix}/call/${conversation.getId()}`);
+              navigate(`/account/call/${conversation.getId()}`);
             }}
           >
             <ListItemIcon>
@@ -178,7 +192,7 @@ export default function ConversationListItem({ conversation }: ConversationListI
 
           <MenuItem
             onClick={() => {
-              navigate(`${navigateUrlPrefix}/call/${conversation.getId()}?video=true`);
+              navigate(`call/${conversation.getId()}?video=true`);
             }}
           >
             <ListItemIcon>
@@ -192,7 +206,7 @@ export default function ConversationListItem({ conversation }: ConversationListI
           {isSelected && (
             <MenuItem
               onClick={() => {
-                navigate(`${navigateUrlPrefix}/`);
+                navigate(`/account`);
                 closeModal();
               }}
             >
@@ -366,8 +380,8 @@ export default function ConversationListItem({ conversation }: ConversationListI
             <Stack direction={'row'} top={'25px'} alignSelf="center" spacing={1}>
               <Box
                 onClick={() => {
-                  if (blockOrRemove) removeOrBlock('block');
-                  else removeOrBlock('remove');
+                  if (blockOrRemove) removeOrBlock(true);
+                  else removeOrBlock(false);
                 }}
                 style={{
                   width: '100px',
@@ -398,12 +412,7 @@ export default function ConversationListItem({ conversation }: ConversationListI
         </Modal>
       </div>
 
-      <ListItem
-        button
-        alignItems="flex-start"
-        selected={isSelected}
-        onClick={() => navigate(`${navigateUrlPrefix}/${uri}`)}
-      >
+      <ListItem button alignItems="flex-start" selected={isSelected} onClick={() => navigate(uri)}>
         <ListItemAvatar>
           <ConversationAvatar displayName={conversation.getDisplayNameNoFallback()} />
         </ListItemAvatar>

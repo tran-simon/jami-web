@@ -21,8 +21,9 @@ import List from '@mui/material/List';
 import { useEffect, useState } from 'react';
 import Modal from 'react-modal';
 
-import authManager from '../AuthManager';
+import { useAuthContext } from '../contexts/AuthProvider';
 import { useAppDispatch, useAppSelector } from '../redux/hooks';
+import { apiUrl } from '../utils/constants';
 import ConversationAvatar from './ConversationAvatar';
 
 const customStyles = {
@@ -37,6 +38,7 @@ const customStyles = {
 };
 
 export default function ContactList() {
+  const { token } = useAuthContext();
   const { accountId } = useAppSelector((state) => state.userInfo);
   const dispatch = useAppDispatch();
 
@@ -59,10 +61,12 @@ export default function ContactList() {
 
   const getContactDetails = () => {
     const controller = new AbortController();
-    authManager
-      .fetch(`/api/accounts/${accountId}/contacts/details/${currentContact.id}`, {
-        signal: controller.signal,
-      })
+    fetch(new URL(`/contacts/${currentContact.id}`, apiUrl), {
+      signal: controller.signal,
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
       .then((res) => res.json())
       .then((result) => {
         console.log('CONTACT LIST - DETAILS: ', result);
@@ -70,33 +74,41 @@ export default function ContactList() {
       .catch((e) => console.log('ERROR GET CONTACT DETAILS: ', e));
   };
 
-  const removeOrBlock = (typeOfRemove) => {
+  const removeOrBlock = (block = false) => {
     console.log('REMOVE');
     setBlockOrRemove(false);
     const controller = new AbortController();
-    authManager
-      .fetch(`/api/accounts/${accountId}/contacts/${typeOfRemove}/${currentContact.id}`, {
-        signal: controller.signal,
-        method: 'DELETE',
-      })
+    let url = `/contacts/${currentContact.id}`;
+    if (block) {
+      url += '/block';
+    }
+    fetch(new URL(url, apiUrl), {
+      signal: controller.signal,
+      method: block ? 'POST' : 'DELETE',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
       .then((res) => res.json())
-      .catch((e) => console.log(`ERROR ${typeOfRemove}ing CONTACT : `, e));
+      .catch((e) => console.log(`ERROR ${block ? 'blocking' : 'removing'} CONTACT : `, e));
     closeModalDelete();
   };
 
   useEffect(() => {
     const controller = new AbortController();
-    authManager
-      .fetch(`/api/accounts/${accountId}/contacts`, {
-        signal: controller.signal,
-      })
+    fetch(new URL(`/contacts`, apiUrl), {
+      signal: controller.signal,
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
       .then((res) => res.json())
       .then((result) => {
         console.log('CONTACTS: ', result);
         setContacts(result);
       });
     return () => controller.abort();
-  }, [accountId, blockOrRemove]);
+  }, [token]);
 
   return (
     <div className="rooms-list">
@@ -165,9 +177,9 @@ export default function ContactList() {
         Voulez vous vraiment {blockOrRemove ? 'bloquer' : 'supprimer'} ce contact?
         <br />
         {blockOrRemove ? (
-          <button onClick={() => removeOrBlock('block')}>Bloquer</button>
+          <button onClick={() => removeOrBlock(true)}>Bloquer</button>
         ) : (
-          <button onClick={() => removeOrBlock('remove')}>Supprimer</button>
+          <button onClick={() => removeOrBlock()}>Supprimer</button>
         )}
         <button onClick={closeModalDelete}>Annuler</button>
       </Modal>

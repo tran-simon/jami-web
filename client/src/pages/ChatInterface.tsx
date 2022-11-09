@@ -16,7 +16,7 @@
  * <https://www.gnu.org/licenses/>.
  */
 import { Box, Divider, Stack } from '@mui/material';
-import { Account, ConversationMember, Message } from 'jami-web-common';
+import { ConversationMember, Message } from 'jami-web-common';
 import { useCallback, useContext, useEffect, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
 
@@ -29,18 +29,17 @@ import { useMessagesQuery, useSendMessageMutation } from '../services/Conversati
 import { FileHandler } from '../utils/files';
 
 type ChatInterfaceProps = {
-  account: Account;
   conversationId: string;
   members: ConversationMember[];
 };
-const ChatInterface = ({ account, conversationId, members }: ChatInterfaceProps) => {
+const ChatInterface = ({ conversationId, members }: ChatInterfaceProps) => {
   const socket = useContext(SocketContext);
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(false);
 
-  const messagesQuery = useMessagesQuery(account.getId(), conversationId);
-  const sendMessageMutation = useSendMessageMutation(account.getId(), conversationId);
+  const messagesQuery = useMessagesQuery(conversationId);
+  const sendMessageMutation = useSendMessageMutation(conversationId);
 
   const [fileHandlers, setFileHandlers] = useState<FileHandler[]>([]);
 
@@ -119,14 +118,14 @@ const ChatInterface = ({ account, conversationId, members }: ChatInterfaceProps)
         />
       )}
       <input {...getInputProps()} />
-      <MessageList account={account} members={members} messages={messages} />
+      <MessageList members={members} messages={messages} />
       <Divider
         sx={{
           margin: '30px 16px 0px 16px',
           borderTop: '1px solid #E5E5E5',
         }}
       />
-      <SendMessageForm account={account} members={members} onSend={sendMessage} openFilePicker={openFilePicker} />
+      <SendMessageForm members={members} onSend={sendMessage} openFilePicker={openFilePicker} />
       {fileHandlers.length > 0 && <FilePreviewsList fileHandlers={fileHandlers} removeFile={removeFile} />}
     </Stack>
   );

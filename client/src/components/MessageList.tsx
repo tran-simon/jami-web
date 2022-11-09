@@ -17,21 +17,22 @@
  */
 import { Typography } from '@mui/material';
 import { Box, Stack } from '@mui/system';
-import { Account, ConversationMember, Message } from 'jami-web-common';
+import { ConversationMember, Message } from 'jami-web-common';
 import { MutableRefObject, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Waypoint } from 'react-waypoint';
 
+import { useAuthContext } from '../contexts/AuthProvider';
 import { MessageRow } from './Message';
 import { ArrowDownIcon } from './SvgIcon';
 
 interface MessageListProps {
-  account: Account;
   members: ConversationMember[];
   messages: Message[];
 }
 
-export default function MessageList({ account, members, messages }: MessageListProps) {
+export default function MessageList({ members, messages }: MessageListProps) {
+  const { account } = useAuthContext();
   const [showScrollButton, setShowScrollButton] = useState(false);
   const listBottomRef = useRef<HTMLElement>();
 

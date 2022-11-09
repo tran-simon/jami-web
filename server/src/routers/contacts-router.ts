@@ -49,6 +49,6 @@ contactsRouter.delete('/:contactId', (req, res) => {
 });
 
 contactsRouter.post('/:contactId/block', (req, res) => {
-  jamid.removeContact(res.locals.accountId, req.params.contactId);
+  jamid.blockContact(res.locals.accountId, req.params.contactId);
   res.sendStatus(HttpStatusCode.NoContent);
 });

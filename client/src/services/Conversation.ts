@@ -18,30 +18,57 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
 
-export const useConversationQuery = (accountId: string, conversationId: string) => {
-  return useQuery(['conversation', accountId, conversationId], () => fetchConversation(accountId, conversationId), {
-    enabled: !!(accountId && conversationId),
+import { useAuthContext } from '../contexts/AuthProvider';
+import { apiUrl } from '../utils/constants';
+
+export const useConversationQuery = (conversationId: string) => {
+  const { token } = useAuthContext();
+  return useQuery(['conversation', conversationId], () => fetchConversation(conversationId, token), {
+    enabled: !!conversationId,
   });
 };
 
-export const useMessagesQuery = (accountId: string, conversationId: string) => {
-  return useQuery(['messages', accountId, conversationId], () => fetchMessages(accountId, conversationId), {
-    enabled: !!(accountId && conversationId),
+export const useMessagesQuery = (conversationId: string) => {
+  const { token } = useAuthContext();
+  return useQuery(['messages', conversationId], () => fetchMessages(conversationId, token), {
+    enabled: !!conversationId,
   });
 };
 
-export const useSendMessageMutation = (accountId: string, conversationId: string) => {
+export const useSendMessageMutation = (conversationId: string) => {
+  const { token } = useAuthContext();
   const queryClient = useQueryClient();
   return useMutation(
-    (message: string) => axios.post(`/api/accounts/${accountId}/conversations/${conversationId}`, { message }),
+    (message: string) =>
+      axios.post(
+        new URL(`/conversations/${conversationId}/messages`, apiUrl).toString(),
+        { message },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      ),
     {
-      onSuccess: () => queryClient.invalidateQueries(['messages', accountId, conversationId]),
+      onSuccess: () => queryClient.invalidateQueries(['messages', conversationId]),
     }
   );
 };
 
-const fetchConversation = (accountId: string, conversationId: string) =>
-  axios.get(`/api/accounts/${accountId}/conversations/${conversationId}`).then((result) => result.data);
+const fetchConversation = (conversationId: string, token: string) =>
+  axios
+    .get(new URL(`/conversations/${conversationId}`, apiUrl).toString(), {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+    .then((result) => result.data);
 
-const fetchMessages = (accountId: string, conversationId: string) =>
-  axios.get(`/api/accounts/${accountId}/conversations/${conversationId}/messages`).then((result) => result.data);
+const fetchMessages = (conversationId: string, token: string) =>
+  axios
+    .get(new URL(`/conversations/${conversationId}/messages`, apiUrl).toString(), {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+    .then((result) => result.data);

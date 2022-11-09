@@ -21,6 +21,7 @@ import { RouteParams } from '../utils/hooks';
 import CallInterface from './CallInterface';
 import Messenger from './Messenger';
 
+export type MessengerRouteParams = RouteParams<{ conversationId?: string; contactId?: string }, Record<string, never>>;
 export type CallRouteParams = RouteParams<{ conversationId: string }, { video?: 'true' }>;
 
 export default function JamiMessenger() {

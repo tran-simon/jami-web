@@ -17,43 +17,40 @@
  */
 import GroupAddRounded from '@mui/icons-material/GroupAddRounded';
 import { Box, Card, CardContent, Container, Fab, Typography } from '@mui/material';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
-import authManager from '../AuthManager';
+import { useAuthContext } from '../contexts/AuthProvider';
 import { setRefreshFromSlice } from '../redux/appSlice';
 import { useAppDispatch } from '../redux/hooks';
+import { apiUrl } from '../utils/constants';
 
 type AddContactPageProps = {
-  accountId: string;
   contactId: string;
 };
 
-export default function AddContactPage(props: AddContactPageProps) {
+export default function AddContactPage({ contactId }: AddContactPageProps) {
+  const { token } = useAuthContext();
   const navigate = useNavigate();
 
-  const params = useParams();
-  const accountId = props.accountId || params.accountId;
-  const contactId = props.contactId || params.contactId;
   const dispatch = useAppDispatch();
 
   const handleClick = async () => {
-    const response = await authManager
-      .fetch(`/api/accounts/${accountId}/conversations`, {
-        method: 'POST',
-        headers: {
-          Accept: 'application/json',
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ members: [contactId] }),
-      })
-      .then((res) => {
-        dispatch(setRefreshFromSlice());
-        return res.json();
-      });
+    const response = await fetch(new URL(`/conversations`, apiUrl), {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ members: [contactId] }),
+    }).then((res) => {
+      dispatch(setRefreshFromSlice());
+      return res.json();
+    });
 
     console.log(response);
     if (response.conversationId) {
-      navigate(`/deprecated-account/${accountId}/conversation/${response.conversationId}`);
+      navigate(`/account/conversation/${response.conversationId}`);
     }
   };
 
