@@ -50,7 +50,7 @@ export default function AddContactPage({ contactId }: AddContactPageProps) {
 
     console.log(response);
     if (response.conversationId) {
-      navigate(`/account/conversation/${response.conversationId}`);
+      navigate(`/conversation/${response.conversationId}`);
     }
   };
 

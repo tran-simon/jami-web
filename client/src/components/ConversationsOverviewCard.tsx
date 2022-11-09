@@ -48,7 +48,7 @@ export default function ConversationsOverviewCard() {
   }, [token, accountId]);
 
   return (
-    <Card onClick={() => navigate(`/account`)}>
+    <Card onClick={() => navigate(`/`)}>
       <CardActionArea>
         <CardContent>
           <Typography color="textSecondary" gutterBottom>

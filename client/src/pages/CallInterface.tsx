@@ -44,8 +44,8 @@ import {
   CallingVolumeButton,
 } from '../components/CallButtons';
 import WebRTCProvider, { WebRTCContext } from '../contexts/WebRTCProvider';
+import { CallRouteParams } from '../router';
 import { useUrlParams } from '../utils/hooks';
-import { CallRouteParams } from './JamiMessenger';
 
 export default () => {
   const {

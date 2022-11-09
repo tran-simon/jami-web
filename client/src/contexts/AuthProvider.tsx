@@ -39,7 +39,7 @@ export default ({ children }: WithChildren) => {
 
   const logout = useCallback(() => {
     localStorage.removeItem('accessToken');
-    navigate('/');
+    navigate('/login');
   }, [navigate]);
 
   useEffect(() => {

@@ -27,10 +27,10 @@ import LoadingPage from '../components/Loading';
 import NewContactForm from '../components/NewContactForm';
 import { useAuthContext } from '../contexts/AuthProvider';
 import { useAppSelector } from '../redux/hooks';
+import { MessengerRouteParams } from '../router';
 import { apiUrl } from '../utils/constants';
 import { useUrlParams } from '../utils/hooks';
 import AddContactPage from './AddContactPage';
-import { MessengerRouteParams } from './JamiMessenger';
 
 const Messenger = () => {
   const { refresh } = useAppSelector((state) => state.userInfo);

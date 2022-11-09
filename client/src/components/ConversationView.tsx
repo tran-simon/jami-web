@@ -128,7 +128,7 @@ const ConversationHeader = ({ account, members, adminTitle, conversationId }: Co
   }, [account, members, adminTitle, t]);
 
   const startCall = (withVideo = false) => {
-    let url = `/account/call/${conversationId}`;
+    let url = `/call/${conversationId}`;
     if (withVideo) {
       url += '?video=true';
     }

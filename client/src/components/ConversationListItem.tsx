@@ -159,7 +159,7 @@ export default function ConversationListItem({ conversation }: ConversationListI
     closeModalDelete();
   };
 
-  const uri = conversation.getId() ? `/account/conversation/${conversation.getId()}` : `/account/addContact/${userId}`;
+  const uri = conversation.getId() ? `/conversation/${conversation.getId()}` : `/addContact/${userId}`;
   return (
     <div onContextMenu={openMenu}>
       <div>
@@ -206,7 +206,7 @@ export default function ConversationListItem({ conversation }: ConversationListI
           {isSelected && (
             <MenuItem
               onClick={() => {
-                navigate(`/account`);
+                navigate(`/`);
                 closeModal();
               }}
             >
