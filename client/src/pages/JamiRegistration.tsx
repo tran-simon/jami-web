@@ -22,21 +22,11 @@ import { useTranslation } from 'react-i18next';
 import { Form, useNavigate } from 'react-router-dom';
 
 import { AlertSnackbar } from '../components/AlertSnackbar';
-import { PasswordInput, UsernameInput } from '../components/Input';
+import { NameStatus, PasswordInput, PasswordStatus, UsernameInput } from '../components/Input';
 import ProcessingRequest from '../components/ProcessingRequest';
-import {
-  checkPasswordStrength,
-  isNameRegistered,
-  loginUser,
-  registerUser,
-  setAccessToken,
-  StrengthValueCode,
-} from '../utils/auth';
+import { checkPasswordStrength, isNameRegistered, loginUser, registerUser, setAccessToken } from '../utils/auth';
 import { inputWidth, jamiUsernamePattern } from '../utils/constants';
 import { InvalidPassword, UsernameNotFound } from '../utils/errors';
-
-type NameStatus = 'default' | 'success' | 'taken' | 'invalid' | 'registration_failed';
-type PasswordStatus = StrengthValueCode | 'registration_failed';
 
 type JamiRegistrationProps = {
   login: () => void;
@@ -181,38 +171,23 @@ export default function JamiRegistration(props: JamiRegistrationProps) {
 
         <Form method="post" id="register-form">
           <div>
-            {/* For i18n-parser.
-              t('username_input_helper_text_default')
-              t('username_input_helper_text_success')
-              t('username_input_helper_text_taken')
-              t('username_input_helper_text_invalid')
-              t('username_input_helper_text_registration_failed')
-            */}
             <UsernameInput
               value={username}
               onChange={handleUsername}
               error={usernameError}
               success={usernameSuccess}
-              helperText={usernameStatus === 'default' ? '' : t(`username_input_helper_text_${usernameStatus}`)}
+              status={usernameStatus}
               sx={{ width: theme.typography.pxToRem(inputWidth) }}
               tooltipTitle={t('registration_form_username_tooltip')}
             />
           </div>
           <div>
-            {/* For i18n-parser.
-              t('password_input_helper_text_default')
-              t('password_input_helper_text_too_weak')
-              t('password_input_helper_text_weak')
-              t('password_input_helper_text_medium')
-              t('password_input_helper_text_strong')
-              t('password_input_helper_text_registration_failed')
-            */}
             <PasswordInput
               value={password}
               onChange={handlePassword}
               error={passwordError}
               success={passwordSuccess}
-              helperText={passwordStatus === 'default' ? '' : t(`password_input_helper_text_${passwordStatus}`)}
+              status={passwordStatus}
               sx={{ width: theme.typography.pxToRem(inputWidth) }}
               tooltipTitle={t('registration_form_password_tooltip')}
             />

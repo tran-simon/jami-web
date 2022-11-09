@@ -30,6 +30,7 @@ import { styled } from '@mui/material/styles';
 import { ChangeEvent, ReactElement, useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { StrengthValueCode } from '../utils/auth';
 import { InfoButton, ToggleVisibilityButton } from './Button';
 import RulesDialog from './RulesDialog';
 import { CheckedIcon, LockIcon, PenIcon, PersonIcon, RoundSaltireIcon } from './SvgIcon';
@@ -48,7 +49,11 @@ const StyledPenIconDark = styled(PenIcon)(({ theme }) => ({ height: iconsHeight,
 const StyledPersonIconLight = styled(PersonIcon)({ height: iconsHeight, color: '#03B9E9' });
 const StyledLockIcon = styled(LockIcon)({ height: iconsHeight, color: '#03B9E9' });
 
-export type InputProps = TextFieldProps & {
+export type NameStatus = 'default' | 'success' | 'taken' | 'invalid' | 'registration_failed';
+export type PasswordStatus = StrengthValueCode | 'registration_failed';
+
+export type InputProps<StatusType extends NameStatus | PasswordStatus> = TextFieldProps & {
+  status: StatusType;
   infoButtonProps?: IconButtonProps;
   success?: boolean;
   tooltipTitle: string;
@@ -58,9 +63,10 @@ export const UsernameInput = ({
   infoButtonProps,
   onChange: _onChange,
   success,
+  status,
   tooltipTitle,
   ...props
-}: InputProps) => {
+}: InputProps<NameStatus>) => {
   const { t } = useTranslation();
   const [isSelected, setIsSelected] = useState(false);
   const [input, setInput] = useState(props.defaultValue);
@@ -89,6 +95,14 @@ export const UsernameInput = ({
     setStartAdornment(<Icon sx={{ visibility }} />);
   }, [props.error, success, isSelected, input]);
 
+  /*
+  t('username_input_helper_text_success')
+  t('username_input_helper_text_taken')
+  t('username_input_helper_text_invalid')
+  t('username_input_helper_text_registration_failed')
+ */
+  const helperText = t('username_input_helper_text', { context: `${status}` });
+
   return (
     <>
       <RulesDialog
@@ -99,20 +113,25 @@ export const UsernameInput = ({
         <UsernameRules />
       </RulesDialog>
       <TextField
-        {...props}
         color={inputColor(props.error, success)}
         label={t('username_input_label')}
         variant="standard"
-        InputLabelProps={{ shrink: !!(isSelected || input) }}
+        helperText={status !== 'default' ? helperText : ''}
         onChange={onChange}
+        onFocus={() => setIsSelected(true)}
+        onBlur={() => setIsSelected(false)}
+        {...props}
+        InputLabelProps={{
+          shrink: !!(isSelected || input),
+          ...props.InputLabelProps,
+        }}
         InputProps={{
           startAdornment,
           endAdornment: (
             <InfoButton tooltipTitle={tooltipTitle} {...infoButtonProps} onClick={() => setIsDialogOpened(true)} />
           ),
+          ...props.InputProps,
         }}
-        onFocus={() => setIsSelected(true)}
-        onBlur={() => setIsSelected(false)}
       />
     </>
   );
@@ -123,8 +142,9 @@ export const PasswordInput = ({
   onChange: _onChange,
   success,
   tooltipTitle,
+  status,
   ...props
-}: InputProps) => {
+}: InputProps<PasswordStatus>) => {
   const { t } = useTranslation();
   const [showPassword, setShowPassword] = useState(false);
   const [isSelected, setIsSelected] = useState(false);
@@ -158,6 +178,15 @@ export const PasswordInput = ({
     setStartAdornment(<Icon sx={{ visibility }} />);
   }, [props.error, success, isSelected, input]);
 
+  /*
+  t('password_input_helper_text_too_weak')
+  t('password_input_helper_text_weak')
+  t('password_input_helper_text_medium')
+  t('password_input_helper_text_strong')
+  t('password_input_helper_text_registration_failed')
+   */
+  const helperText = t('password_input_helper_text', { context: `${status}` });
+
   return (
     <>
       <RulesDialog
@@ -168,14 +197,17 @@ export const PasswordInput = ({
         <PasswordRules />
       </RulesDialog>
       <TextField
-        {...props}
         color={inputColor(props.error, success)}
         label={t('password_input_label')}
         type={showPassword ? 'text' : 'password'}
         variant="standard"
         autoComplete="current-password"
-        InputLabelProps={{ shrink: !!(isSelected || input) }}
+        helperText={status !== 'default' ? helperText : ''}
         onChange={onChange}
+        onFocus={() => setIsSelected(true)}
+        onBlur={() => setIsSelected(false)}
+        {...props}
+        InputLabelProps={{ shrink: !!(isSelected || input), ...props.InputLabelProps }}
         InputProps={{
           startAdornment,
           endAdornment: (
@@ -184,9 +216,8 @@ export const PasswordInput = ({
               <ToggleVisibilityButton visible={showPassword} onClick={toggleShowPassword} />
             </Stack>
           ),
+          ...props.InputProps,
         }}
-        onFocus={() => setIsSelected(true)}
-        onBlur={() => setIsSelected(false)}
       />
     </>
   );
