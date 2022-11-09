@@ -68,7 +68,7 @@ const router = createBrowserRouter(
           </AuthProvider>
         }
       >
-        <Route path="account" element={<JamiMessenger />} />
+        <Route path="account/*" element={<JamiMessenger />} />
         <Route path="settings" element={<AccountSettings />} />
         <Route path="contacts" element={<ContactList />} />
       </Route>
