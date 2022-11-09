@@ -552,6 +552,23 @@ export const PersonIcon = (props: SvgIconProps) => {
   );
 };
 
+export const PlaceAudioCallIcon = (props: SvgIconProps) => {
+  return (
+    <SvgIcon {...props} viewBox="0 0 24 24">
+      <g id="Icons_Outline" stroke="#ffffff" strokeWidth="1.75" fill="none" fillRule="evenodd">
+        <g id="Phone">
+          <g id="Ico_TEL" transform="translate(3.000000, 3.000000)">
+            <path
+              d="M2.08318114,0.702801822 C3.47221232,-0.375546383 4.67183016,-0.185249641 5.24007015,1.08339531 C6.37655021,3.36695621 7.19734136,4.50873667 6.37655021,5.39678812 C4.86124348,6.41170409 3.78790122,6.91916206 4.35614125,7.99751029 C5.49262131,10.7250969 7.70244359,13.0720901 10.3542304,14.4675995 C11.3644349,15.101922 11.9326749,14.0235738 13.0691549,12.6280643 C14.0162216,11.8668773 15.0895639,12.6914966 17.2993862,14.0235738 C18.4990041,14.7213285 18.5621418,15.8631089 17.4256618,17.1951861 C10.7961949,24.6801913 -5.80904142,6.85572983 2.08318114,0.702801822"
+              id="Path"
+            ></path>
+          </g>
+        </g>
+      </g>
+    </SvgIcon>
+  );
+};
+
 export const RecordingIcon = (props: SvgIconProps) => {
   return (
     <SvgIcon {...props} viewBox="0 0 24 24">
@@ -584,6 +601,15 @@ export const RemoveContactIcon = (props: SvgIconProps) => {
         </g>
       </g>
       {/* </svg> */}
+    </SvgIcon>
+  );
+};
+
+export const RoundCloseIcon = (props: SvgIconProps) => {
+  return (
+    <SvgIcon {...props} viewBox="0 0 24 24">
+      <path fill="none" stroke="none" d="M0 0h24v24H0V0z" />
+      <path d="M18.3 5.71c-.39-.39-1.02-.39-1.41 0L12 10.59 7.11 5.7c-.39-.39-1.02-.39-1.41 0-.39.39-.39 1.02 0 1.41L10.59 12 5.7 16.89c-.39.39-.39 1.02 0 1.41.39.39 1.02.39 1.41 0L12 13.41l4.89 4.89c.39.39 1.02.39 1.41 0 .39-.39.39-1.02 0-1.41L13.41 12l4.89-4.89c.38-.38.38-1.02 0-1.4z" />
     </SvgIcon>
   );
 };
@@ -763,7 +789,7 @@ export const VideoCameraIcon = (props: SvgIconProps) => {
 export const VideoCameraOffIcon = (props: SvgIconProps) => {
   return (
     <SvgIcon {...props} viewBox="0 0 24 24">
-      <g id="Icones_Outline" stroke="none" strokeWidth="1" fill="none" fillRule="evenodd">
+      <g id="Icons_Outline" stroke="none" strokeWidth="1" fill="none" fillRule="evenodd">
         <g id="Camera-Off" stroke="#ffffff" strokeWidth="1.5">
           <line x1="4.5" y1="18.5" x2="15.5" y2="6.5" id="Line" strokeLinecap="round"></line>
           <g id="Ico_Camera" transform="translate(3.000000, 5.000000)" fillRule="nonzero" strokeLinejoin="round">

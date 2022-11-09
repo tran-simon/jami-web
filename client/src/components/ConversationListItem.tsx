@@ -147,7 +147,7 @@ export default function ConversationListItem({ conversation }: ConversationListI
     closeModalDelete();
   };
 
-  const uri = conversation.getId() ? `/conversation/${conversation.getId()}` : `/addContact/${userId}`;
+  const uri = conversation.getId() ? `/conversation/${conversation.getId()}` : `/add-contact/${userId}`;
   return (
     <div onContextMenu={openMenu}>
       <div>

@@ -49,7 +49,7 @@ export const router = createBrowserRouter(
           </AuthProvider>
         }
       >
-        <Route path="addContact/:contactId" element={<Messenger />} />
+        <Route path="add-contact/:contactId" element={<Messenger />} />
         <Route path="conversation/:conversationId" element={<Messenger />} />
         <Route path="call/:conversationId" element={<CallInterface />} />
         <Route path="settings" element={<AccountSettings />} />

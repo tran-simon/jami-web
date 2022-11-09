@@ -32,7 +32,9 @@ import {
   MicroIcon,
   MicroOffIcon,
   MoreVerticalIcon,
+  PlaceAudioCallIcon,
   RecordingIcon,
+  RoundCloseIcon,
   ScreenShareArrowIcon,
   ScreenShareRegularIcon,
   ScreenShareScreenAreaIcon,
@@ -42,23 +44,33 @@ import {
   WindowIcon,
 } from './SvgIcon';
 
+type ColoredCallButtonColor = 'red' | 'green';
+
 const CallButton = styled((props: ExpandableButtonProps) => {
   return <ExpandableButton {...props} />;
 })({
+  color: 'white',
   '&:hover': {
     backgroundColor: 'rgba(255, 255, 255, 0.15)',
   },
-  color: 'white',
 });
 
-const ColoredCallButton = styled((props: ExpandableButtonProps) => {
-  return <ExpandableButton {...props} />;
-})({
-  color: 'white',
-  backgroundColor: '#a30000',
-  '&:hover': {
-    backgroundColor: '#ff0000',
-  },
+const ColoredCallButton = styled(
+  ({
+    ...props
+  }: ExpandableButtonProps & {
+    buttonColor: ColoredCallButtonColor;
+  }) => {
+    return <ExpandableButton {...props} />;
+  }
+)(({ buttonColor }) => {
+  return {
+    color: 'white',
+    backgroundColor: buttonColor === 'green' ? '#183722' : '#5E070D',
+    '&:hover': {
+      backgroundColor: buttonColor === 'green' ? '#0B8271' : '#CC0022',
+    },
+  };
 });
 
 export const CallingChatButton = (props: ExpandableButtonProps) => {
@@ -66,7 +78,7 @@ export const CallingChatButton = (props: ExpandableButtonProps) => {
 };
 
 export const CallingEndButton = (props: ExpandableButtonProps) => {
-  return <ColoredCallButton sx={{}} aria-label="call end" Icon={CallEndIcon} {...props} />;
+  return <ColoredCallButton buttonColor="red" aria-label="call end" Icon={CallEndIcon} {...props} />;
 };
 
 export const CallingExtensionButton = (props: ExpandableButtonProps) => {
@@ -159,7 +171,6 @@ export const CallingMicButton = (props: ExpandableButtonProps) => {
 
 export const CallingVideoCameraButton = (props: ExpandableButtonProps) => {
   const { isVideoOn, setVideoStatus } = useContext(WebRTCContext);
-
   return (
     <CallButton
       aria-label="camera options"
@@ -175,4 +186,17 @@ export const CallingVideoCameraButton = (props: ExpandableButtonProps) => {
       {...props}
     />
   );
+};
+
+// Calling pending/receiving interface
+export const CallingAnswerAudioButton = (props: ExpandableButtonProps) => {
+  return <ColoredCallButton aria-label="answer audio" buttonColor="green" Icon={PlaceAudioCallIcon} {...props} />;
+};
+
+export const CallingAnswerVideoButton = (props: ExpandableButtonProps) => {
+  return <ColoredCallButton aria-label="answer video" buttonColor="green" Icon={VideoCameraIcon} {...props} />;
+};
+
+export const CallingRefuseButton = (props: ExpandableButtonProps) => {
+  return <ColoredCallButton aria-label="reject" buttonColor="red" Icon={RoundCloseIcon} {...props} />;
 };
