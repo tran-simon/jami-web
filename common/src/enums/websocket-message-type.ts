@@ -18,4 +18,5 @@
 export enum WebSocketMessageType {
   WebRTCOffer = 'webrtc-offer',
   WebRTCAnswer = 'webrtc-answer',
+  IceCandidate = 'ice-candidate',
 }

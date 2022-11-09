@@ -16,21 +16,18 @@
  * <https://www.gnu.org/licenses/>.
  */
 
-import React, { createContext, useCallback, useEffect, useRef, useState } from 'react';
-import { connect, Socket } from 'socket.io-client';
+import { WebRTCIceCandidate, WebRTCSDP, WebSocketMessage, WebSocketMessageType } from 'jami-web-common';
+import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
 
 import { WithChildren } from '../utils/utils';
-
-/*
- * TODO: This socket is temporary, it will be replaced by the real socket
- * for communication with webrtc
- * */
-const socket = connect(import.meta.env.VITE_SOCKET_URL, { transports: ['websocket'] });
+import { useAuthContext } from './AuthProvider';
+import { WebSocketContext } from './WebSocketProvider';
 
 interface IWebRTCContext {
   localVideoRef: React.RefObject<HTMLVideoElement> | null;
   remoteVideoRef: React.RefObject<HTMLVideoElement> | null;
-  socket: Socket;
+
+  contactId: string;
 
   isAudioOn: boolean;
   setAudioStatus: (isOn: boolean) => void;
@@ -42,7 +39,8 @@ interface IWebRTCContext {
 const defaultWebRTCContext: IWebRTCContext = {
   localVideoRef: null,
   remoteVideoRef: null,
-  socket,
+
+  contactId: '',
 
   isAudioOn: false,
   setAudioStatus: () => {},
@@ -55,6 +53,7 @@ const defaultWebRTCContext: IWebRTCContext = {
 export const WebRTCContext = createContext<IWebRTCContext>(defaultWebRTCContext);
 
 type WebRTCProviderProps = WithChildren & {
+  contactId: string;
   isAudioOn?: boolean;
   isVideoOn?: boolean;
 };
@@ -64,13 +63,17 @@ export default ({
   children,
   isAudioOn: _isAudioOn = defaultWebRTCContext.isAudioOn,
   isVideoOn: _isVideoOn = defaultWebRTCContext.isVideoOn,
+  contactId: _contactId = defaultWebRTCContext.contactId,
 }: WebRTCProviderProps) => {
   const [isAudioOn, setIsAudioOn] = useState(_isAudioOn);
   const [isVideoOn, setIsVideoOn] = useState(_isVideoOn);
   const localVideoRef = useRef<HTMLVideoElement>(null);
   const remoteVideoRef = useRef<HTMLVideoElement>(null);
+  const { account } = useAuthContext();
+  const contactId = _contactId;
   const [webRTCConnection, setWebRTCConnection] = useState<RTCPeerConnection | undefined>();
   const localStreamRef = useRef<MediaStream>();
+  const socket = useContext(WebSocketContext);
 
   useEffect(() => {
     if (!webRTCConnection) {
@@ -115,9 +118,18 @@ export default ({
     }
 
     const icecandidateEventListener = (event: RTCPeerConnectionIceEvent) => {
-      if (event.candidate) {
+      if (event.candidate && socket) {
         console.log('webRTCConnection : onicecandidate');
-        socket.emit('candidate', event.candidate);
+        socket.send({
+          type: WebSocketMessageType.IceCandidate,
+          data: {
+            from: account.getId(),
+            to: contactId,
+            message: {
+              candidate: event.candidate,
+            },
+          },
+        });
       }
     };
 
@@ -136,52 +148,52 @@ export default ({
       webRTCConnection.removeEventListener('icecandidate', icecandidateEventListener);
       webRTCConnection.removeEventListener('track', trackEventListener);
     };
-  }, [webRTCConnection, isVideoOn, isAudioOn]);
+  }, [webRTCConnection, isVideoOn, isAudioOn, socket, contactId, account]);
 
   useEffect(() => {
-    if (!webRTCConnection) {
+    if (!webRTCConnection || !socket) {
       return;
     }
 
-    const sendWebRTCAnswer = async (remoteSdp: RTCSessionDescriptionInit) => {
+    const sendWebRTCAnswer = async (message: WebSocketMessage) => {
+      if (webRTCConnection && socket) {
+        const remoteSdp: RTCSessionDescriptionInit = (message.data.message as WebRTCSDP).sdp;
+        await webRTCConnection.setRemoteDescription(new RTCSessionDescription(remoteSdp));
+        const mySdp = await webRTCConnection.createAnswer({
+          offerToReceiveAudio: true,
+          offerToReceiveVideo: true,
+        });
+        await webRTCConnection.setLocalDescription(new RTCSessionDescription(mySdp));
+        socket.send({
+          type: WebSocketMessageType.WebRTCAnswer,
+          data: {
+            from: account.getId(),
+            to: contactId,
+            message: {
+              sdp: mySdp,
+            },
+          },
+        });
+        console.log('get offer and aswering');
+      }
+    };
+
+    const handleWebRTCAnswer = async (message: WebSocketMessage) => {
+      const remoteSdp: RTCSessionDescriptionInit = (message.data.message as WebRTCSDP).sdp;
       await webRTCConnection.setRemoteDescription(new RTCSessionDescription(remoteSdp));
-      const mySdp = await webRTCConnection.createAnswer({
-        offerToReceiveAudio: true,
-        offerToReceiveVideo: true,
-      });
-      await webRTCConnection.setLocalDescription(new RTCSessionDescription(mySdp));
-      socket.emit('answer', mySdp);
-    };
-
-    const handleWebRTCAnswer = async (remoteSdp: RTCSessionDescriptionInit) => {
-      await webRTCConnection.setRemoteDescription(new RTCSessionDescription(remoteSdp));
-    };
-
-    const addIceCandidate = async (candidate: RTCIceCandidateInit) => {
-      await webRTCConnection.addIceCandidate(new RTCIceCandidate(candidate));
-    };
-
-    socket.on('getOffer', (remoteSdp: RTCSessionDescription) => {
-      sendWebRTCAnswer(remoteSdp);
-      console.log('get offer and aswering');
-    });
-
-    socket.on('getAnswer', (remoteSdp: RTCSessionDescription) => {
-      handleWebRTCAnswer(remoteSdp);
       console.log('get answer');
-    });
-
-    socket.on('getCandidate', (candidate: RTCIceCandidateInit) => {
-      addIceCandidate(candidate);
-      console.log('webRTCConnection : candidate add success');
-    });
-
-    return () => {
-      socket.off('getOffer');
-      socket.off('getAnswer');
-      socket.off('getCandidate');
     };
-  }, [webRTCConnection]);
+
+    const addIceCandidate = async (message: WebSocketMessage) => {
+      const candidate: RTCIceCandidateInit = (message.data.message as WebRTCIceCandidate).candidate;
+      await webRTCConnection.addIceCandidate(new RTCIceCandidate(candidate));
+      console.log('webRTCConnection : candidate add success');
+    };
+
+    socket.bind(WebSocketMessageType.WebRTCOffer, sendWebRTCAnswer);
+    socket.bind(WebSocketMessageType.WebRTCAnswer, handleWebRTCAnswer);
+    socket.bind(WebSocketMessageType.IceCandidate, addIceCandidate);
+  }, [account, contactId, socket, webRTCConnection]);
 
   const setAudioStatus = useCallback((isOn: boolean) => {
     setIsAudioOn(isOn);
@@ -198,25 +210,34 @@ export default ({
   }, []);
 
   const sendWebRTCOffer = useCallback(async () => {
-    if (webRTCConnection) {
+    if (webRTCConnection && socket) {
       webRTCConnection
         .createOffer({
           offerToReceiveAudio: true,
           offerToReceiveVideo: true,
         })
         .then((sdp) => {
-          socket.emit('offer', sdp);
+          socket.send({
+            type: WebSocketMessageType.WebRTCOffer,
+            data: {
+              from: account.getId(),
+              to: contactId,
+              message: {
+                sdp: sdp,
+              },
+            },
+          });
           webRTCConnection.setLocalDescription(new RTCSessionDescription(sdp));
         });
     }
-  }, [webRTCConnection]);
+  }, [account, contactId, socket, webRTCConnection]);
 
   return (
     <WebRTCContext.Provider
       value={{
         localVideoRef,
         remoteVideoRef,
-        socket,
+        contactId,
         isAudioOn,
         setAudioStatus,
         isVideoOn,

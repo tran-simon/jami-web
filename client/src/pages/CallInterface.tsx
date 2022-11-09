@@ -42,7 +42,8 @@ export default () => {
     queryParams: { video },
   } = useUrlParams<CallRouteParams>();
   return (
-    <WebRTCProvider isVideoOn={video === 'true'}>
+    //TODO: set contactID
+    <WebRTCProvider isVideoOn={video === 'true'} contactId={'contactIdToBeAdded'}>
       <CallInterface />
     </WebRTCProvider>
   );

@@ -37,4 +37,5 @@ function sendWebRTCData(message: Partial<WebSocketMessage>) {
 export function bindWebRTCCallbacks() {
   ws.bind(WebSocketMessageType.WebRTCOffer, sendWebRTCData);
   ws.bind(WebSocketMessageType.WebRTCAnswer, sendWebRTCData);
+  ws.bind(WebSocketMessageType.IceCandidate, sendWebRTCData);
 }

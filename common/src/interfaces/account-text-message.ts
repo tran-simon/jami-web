@@ -15,8 +15,10 @@
  * License along with this program.  If not, see
  * <https://www.gnu.org/licenses/>.
  */
+import { WebRTCIceCandidate } from './webrtc-ice-candidate';
+import { WebRTCSDP } from './webrtc-sdp';
 export interface AccountTextMessage {
   from: string;
   to: string;
-  message: JSON;
+  message: WebRTCIceCandidate | WebRTCSDP;
 }
