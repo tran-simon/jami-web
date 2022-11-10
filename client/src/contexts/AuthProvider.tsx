@@ -15,9 +15,10 @@
  * License along with this program.  If not, see
  * <https://www.gnu.org/licenses/>.
  */
+import axios, { AxiosInstance } from 'axios';
 import { Account } from 'jami-web-common/dist/Account';
 import { HttpStatusCode } from 'jami-web-common/dist/enums/http-status-code';
-import { createContext, useCallback, useContext, useEffect, useState } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import ProcessingRequest from '../components/ProcessingRequest';
@@ -28,6 +29,7 @@ interface IAuthContext {
   token: string;
   account: Account;
   logout: () => void;
+  axiosInstance: AxiosInstance;
 }
 
 const AuthContext = createContext<IAuthContext | undefined>(undefined);
@@ -42,6 +44,33 @@ export default ({ children }: WithChildren) => {
     navigate('/login');
   }, [navigate]);
 
+  const axiosInstance = useMemo(() => {
+    if (!token) {
+      return;
+    }
+
+    const instance = axios.create({
+      baseURL: apiUrl,
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    instance.interceptors.response.use(
+      (res) => res,
+      (e) => {
+        switch (e.response?.status) {
+          case HttpStatusCode.Unauthorized:
+            logout();
+            break;
+        }
+        throw e;
+      }
+    );
+
+    return instance;
+  }, [token, logout]);
+
   useEffect(() => {
     const accessToken = localStorage.getItem('accessToken');
 
@@ -54,33 +83,14 @@ export default ({ children }: WithChildren) => {
   }, [logout]);
 
   useEffect(() => {
-    if (token) {
-      const getAccount = async () => {
-        const url = new URL('/account', apiUrl);
-        const response = await fetch(url, {
-          method: 'GET',
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        if (response.status === HttpStatusCode.Ok) {
-          const serializedAccount = await response.json();
-          const account = Account.from(serializedAccount);
-          setAccount(account);
-        } else {
-          throw new Error(response.statusText);
-        }
-      };
-
-      getAccount().catch((e) => {
-        console.error('Error while retrieving account: ', e);
-        logout();
-      });
+    if (!axiosInstance) {
+      return;
     }
-  }, [token, logout]);
 
-  if (!token || !account) {
+    axiosInstance.get('/account').then(({ data }) => setAccount(Account.from(data)));
+  }, [axiosInstance, logout]);
+
+  if (!token || !account || !axiosInstance) {
     return <ProcessingRequest open />;
   }
 
@@ -90,6 +100,7 @@ export default ({ children }: WithChildren) => {
         token,
         logout,
         account,
+        axiosInstance,
       }}
     >
       {children}

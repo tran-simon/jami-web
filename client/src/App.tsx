@@ -15,6 +15,7 @@
  * License along with this program.  If not, see
  * <https://www.gnu.org/licenses/>.
  */
+import axios from 'axios';
 import { useState } from 'react';
 import { json, LoaderFunctionArgs, Outlet, redirect } from 'react-router-dom';
 
@@ -22,10 +23,10 @@ import WelcomeAnimation from './components/welcome';
 import { apiUrl } from './utils/constants';
 
 export async function checkSetupStatus(): Promise<boolean> {
-  const url = new URL('/setup/check', apiUrl);
-  const response = await fetch(url);
-  const { isSetupComplete } = await response.json();
-  return isSetupComplete;
+  const { data } = await axios.get('/setup/check', {
+    baseURL: apiUrl,
+  });
+  return data.isSetupComplete;
 }
 
 export async function appLoader({ request }: LoaderFunctionArgs) {

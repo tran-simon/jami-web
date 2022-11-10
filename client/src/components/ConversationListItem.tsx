@@ -36,7 +36,6 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useAuthContext } from '../contexts/AuthProvider';
 import { setRefreshFromSlice } from '../redux/appSlice';
 import { useAppDispatch } from '../redux/hooks';
-import { apiUrl } from '../utils/constants';
 import ConversationAvatar from './ConversationAvatar';
 import {
   AudioCallIcon,
@@ -89,7 +88,7 @@ type ConversationListItemProps = {
 };
 
 export default function ConversationListItem({ conversation }: ConversationListItemProps) {
-  const { token } = useAuthContext();
+  const { axiosInstance } = useAuthContext();
   const { conversationId, contactId } = useParams();
   const dispatch = useAppDispatch();
 
@@ -115,47 +114,36 @@ export default function ConversationListItem({ conversation }: ConversationListI
   const closeModalDetails = () => setModalDetailsIsOpen(false);
   const closeModalDelete = () => setModalDeleteIsOpen(false);
 
-  const getContactDetails = () => {
+  const getContactDetails = async () => {
     const controller = new AbortController();
-    fetch(new URL(`/contacts/${userId}`, apiUrl), {
-      signal: controller.signal,
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    })
-      .then((res) => res.json())
-      .then((result) => {
-        console.log('CONTACT LIST - DETAILS: ', result);
-      })
-      .catch((e) => console.log('ERROR GET CONTACT DETAILS: ', e));
+    try {
+      const data = await axiosInstance.get(`/contacts/${userId}`, {
+        signal: controller.signal,
+      });
+      console.log('CONTACT LIST - DETAILS: ', data);
+    } catch (e) {
+      console.log('ERROR GET CONTACT DETAILS: ', e);
+    }
   };
 
-  const removeOrBlock = (block = false) => {
+  const removeOrBlock = async (block = false) => {
     setBlockOrRemove(false);
-
-    console.log('EEEH', conversation.getAccountId(), userId);
 
     const controller = new AbortController();
     let url = `/contacts/${userId}`;
     if (block) {
       url += '/block';
     }
-    fetch(new URL(url, apiUrl), {
-      signal: controller.signal,
-      method: block ? 'POST' : 'DELETE',
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    })
-      .then((res) => res.json())
-      .then(() => {
-        console.log('propre');
-        dispatch(setRefreshFromSlice());
-      })
-      .catch((e) => {
-        console.log(`ERROR ${block ? 'blocking' : 'removing'} CONTACT : `, e);
-        dispatch(setRefreshFromSlice());
+    try {
+      await axiosInstance(url, {
+        signal: controller.signal,
+        method: block ? 'POST' : 'DELETE',
       });
+      dispatch(setRefreshFromSlice());
+    } catch (e) {
+      console.error(`Error ${block ? 'blocking' : 'removing'} contact : `, e);
+      dispatch(setRefreshFromSlice());
+    }
     closeModalDelete();
   };
 

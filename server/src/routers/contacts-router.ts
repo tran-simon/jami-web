@@ -39,8 +39,13 @@ contactsRouter.get('/:contactId', (req, res) => {
 });
 
 contactsRouter.put('/:contactId', (req, res) => {
-  jamid.addContact(res.locals.accountId, req.params.contactId);
-  res.sendStatus(HttpStatusCode.NoContent);
+  const accountId = res.locals.accountId;
+  const contactId = req.params.contactId;
+
+  jamid.addContact(accountId, contactId);
+
+  const contactDetails = jamid.getContactDetails(accountId, contactId);
+  res.send(contactDetails);
 });
 
 contactsRouter.delete('/:contactId', (req, res) => {

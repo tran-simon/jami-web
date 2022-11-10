@@ -21,4 +21,10 @@ export const inputWidth = 260;
 
 export const jamiLogoDefaultSize = '512px';
 
-export const apiUrl = new URL(import.meta.env.VITE_API_URL);
+const apiUrl: string = import.meta.env.VITE_API_URL;
+
+if (!apiUrl) {
+  throw new Error('VITE_API_URL not defined');
+}
+
+export { apiUrl };

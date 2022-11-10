@@ -23,7 +23,6 @@ import Modal from 'react-modal';
 
 import { useAuthContext } from '../contexts/AuthProvider';
 import { useAppDispatch, useAppSelector } from '../redux/hooks';
-import { apiUrl } from '../utils/constants';
 import ConversationAvatar from './ConversationAvatar';
 
 const customStyles = {
@@ -38,7 +37,7 @@ const customStyles = {
 };
 
 export default function ContactList() {
-  const { token } = useAuthContext();
+  const { axiosInstance } = useAuthContext();
   const { accountId } = useAppSelector((state) => state.userInfo);
   const dispatch = useAppDispatch();
 
@@ -59,22 +58,19 @@ export default function ContactList() {
   const closeModalDetails = () => setModalDetailsIsOpen(false);
   const closeModalDelete = () => setModalDeleteIsOpen(false);
 
-  const getContactDetails = () => {
+  const getContactDetails = async () => {
     const controller = new AbortController();
-    fetch(new URL(`/contacts/${currentContact.id}`, apiUrl), {
-      signal: controller.signal,
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    })
-      .then((res) => res.json())
-      .then((result) => {
-        console.log('CONTACT LIST - DETAILS: ', result);
-      })
-      .catch((e) => console.log('ERROR GET CONTACT DETAILS: ', e));
+    try {
+      const data = await axiosInstance.get(`/contacts/${currentContact.id}`, {
+        signal: controller.signal,
+      });
+      console.log('CONTACT LIST - DETAILS: ', data);
+    } catch (e) {
+      console.log('ERROR GET CONTACT DETAILS: ', e);
+    }
   };
 
-  const removeOrBlock = (block = false) => {
+  const removeOrBlock = async (block = false) => {
     console.log('REMOVE');
     setBlockOrRemove(false);
     const controller = new AbortController();
@@ -82,33 +78,29 @@ export default function ContactList() {
     if (block) {
       url += '/block';
     }
-    fetch(new URL(url, apiUrl), {
-      signal: controller.signal,
-      method: block ? 'POST' : 'DELETE',
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    })
-      .then((res) => res.json())
-      .catch((e) => console.log(`ERROR ${block ? 'blocking' : 'removing'} CONTACT : `, e));
+    try {
+      await axiosInstance(url, {
+        signal: controller.signal,
+        method: block ? 'POST' : 'DELETE',
+      });
+    } catch (e) {
+      console.log(`ERROR ${block ? 'blocking' : 'removing'} CONTACT : `, e);
+    }
     closeModalDelete();
   };
 
   useEffect(() => {
     const controller = new AbortController();
-    fetch(new URL(`/contacts`, apiUrl), {
-      signal: controller.signal,
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    })
-      .then((res) => res.json())
-      .then((result) => {
-        console.log('CONTACTS: ', result);
-        setContacts(result);
+    axiosInstance
+      .get(`/contacts`, {
+        signal: controller.signal,
+      })
+      .then(({ data }) => {
+        console.log('CONTACTS: ', data);
+        setContacts(data);
       });
     return () => controller.abort();
-  }, [token]);
+  }, [axiosInstance]);
 
   return (
     <div className="rooms-list">

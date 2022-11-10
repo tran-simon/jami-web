@@ -21,10 +21,9 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
 
 import { useAuthContext } from '../contexts/AuthProvider';
-import { apiUrl } from '../utils/constants';
 
 export default function ConversationsOverviewCard() {
-  const { token, account } = useAuthContext();
+  const { axiosInstance, account } = useAuthContext();
   const navigate = useNavigate();
 
   const [conversationCount, setConversationCount] = useState<number | undefined>();
@@ -33,19 +32,16 @@ export default function ConversationsOverviewCard() {
 
   useEffect(() => {
     const controller = new AbortController();
-    fetch(new URL('/conversations', apiUrl), {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-      signal: controller.signal,
-    })
-      .then((res) => res.json())
-      .then((result: Conversation[]) => {
-        console.log(result);
-        setConversationCount(result.length);
+    axiosInstance
+      .get<Conversation[]>('/conversations', {
+        signal: controller.signal,
+      })
+      .then(({ data }) => {
+        console.log(data);
+        setConversationCount(data.length);
       });
     return () => controller.abort(); // crash on React18
-  }, [token, accountId]);
+  }, [axiosInstance, accountId]);
 
   return (
     <Card onClick={() => navigate(`/`)}>

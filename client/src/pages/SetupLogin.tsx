@@ -17,6 +17,7 @@
  */
 import GroupAddRounded from '@mui/icons-material/GroupAddRounded';
 import { Box, Card, CardContent, Container, Fab, Input, Typography } from '@mui/material';
+import axios from 'axios';
 import { HttpStatusCode } from 'jami-web-common';
 import { FormEvent, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -38,17 +39,15 @@ export default function SetupLogin() {
   }, []);
 
   const adminCreation = async (password: string) => {
-    const url = new URL('/setup/admin/create', apiUrl);
-
     let response: Response;
     try {
-      response = await fetch(url, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ password }),
-      });
+      response = await axios.post(
+        '/setup/admin/create',
+        { password },
+        {
+          baseURL: apiUrl,
+        }
+      );
     } catch (e) {
       throw new Error(`Admin creation failed`);
     }
@@ -59,18 +58,16 @@ export default function SetupLogin() {
   };
 
   const adminLogin = async (password: string) => {
-    const url = new URL('/setup/admin/login', apiUrl);
-
     let response: Response;
     try {
-      response = await fetch(url, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ password }),
-      });
-    } catch (err) {
+      response = await axios.post(
+        '/setup/admin/login',
+        { password },
+        {
+          baseURL: apiUrl,
+        }
+      );
+    } catch (e) {
       throw new Error(`Admin login failed`);
     }
 

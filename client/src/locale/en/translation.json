@@ -55,6 +55,7 @@
   "message_input_placeholder_three": "Write to {{member0}}, {{member1}} and {{member2}}",
   "message_input_placeholder_four": "Write to {{member0}}, {{member1}}, {{member2}}, +1 other member",
   "message_input_placeholder_more": "Write to {{member0}}, {{member1}}, {{member2}}, +{{excess}} other members",
+  "conversation_add_contact": "Add contact",
   "login_username_not_found": "Username not found",
   "login_invalid_password": "Incorrect password",
   "login_form_title": "LOGIN",

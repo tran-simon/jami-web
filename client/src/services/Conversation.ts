@@ -16,59 +16,44 @@
  * <https://www.gnu.org/licenses/>.
  */
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import axios from 'axios';
 
 import { useAuthContext } from '../contexts/AuthProvider';
-import { apiUrl } from '../utils/constants';
 
 export const useConversationQuery = (conversationId: string) => {
-  const { token } = useAuthContext();
-  return useQuery(['conversation', conversationId], () => fetchConversation(conversationId, token), {
-    enabled: !!conversationId,
-  });
+  const { axiosInstance } = useAuthContext();
+  return useQuery(
+    ['conversation', conversationId],
+    async () => {
+      const { data } = await axiosInstance.get(`/conversations/${conversationId}`);
+      return data;
+    },
+    {
+      enabled: !!conversationId,
+    }
+  );
 };
 
 export const useMessagesQuery = (conversationId: string) => {
-  const { token } = useAuthContext();
-  return useQuery(['messages', conversationId], () => fetchMessages(conversationId, token), {
-    enabled: !!conversationId,
-  });
+  const { axiosInstance } = useAuthContext();
+  return useQuery(
+    ['messages', conversationId],
+    async () => {
+      const { data } = await axiosInstance.get(`/conversations/${conversationId}/messages`);
+      return data;
+    },
+    {
+      enabled: !!conversationId,
+    }
+  );
 };
 
 export const useSendMessageMutation = (conversationId: string) => {
-  const { token } = useAuthContext();
+  const { axiosInstance } = useAuthContext();
   const queryClient = useQueryClient();
   return useMutation(
-    (message: string) =>
-      axios.post(
-        new URL(`/conversations/${conversationId}/messages`, apiUrl).toString(),
-        { message },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      ),
+    (message: string) => axiosInstance.post(`/conversations/${conversationId}/messages`, { message }),
     {
       onSuccess: () => queryClient.invalidateQueries(['messages', conversationId]),
     }
   );
 };
-
-const fetchConversation = (conversationId: string, token: string) =>
-  axios
-    .get(new URL(`/conversations/${conversationId}`, apiUrl).toString(), {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    })
-    .then((result) => result.data);
-
-const fetchMessages = (conversationId: string, token: string) =>
-  axios
-    .get(new URL(`/conversations/${conversationId}/messages`, apiUrl).toString(), {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    })
-    .then((result) => result.data);

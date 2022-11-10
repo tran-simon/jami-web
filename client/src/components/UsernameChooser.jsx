@@ -17,8 +17,8 @@
  */
 import { SearchRounded } from '@mui/icons-material';
 import { InputAdornment, TextField } from '@mui/material';
+import axios from 'axios';
 import { useEffect, useState } from 'react';
-import usePromise from 'react-fetch-hook/usePromise';
 
 import { apiUrl } from '../utils/constants.js';
 
@@ -26,17 +26,29 @@ const isInputValid = (input) => input && input.length > 2;
 
 export default function UsernameChooser({ setName, ...props }) {
   const [query, setQuery] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState();
+  const [data, setData] = useState();
 
-  const { isLoading, data, error } = usePromise(
-    () =>
-      isInputValid(query)
-        ? fetch(new URL(`/ns/username/${query}`, apiUrl)).then((res) => {
-            if (res.status === 200) return res.json();
-            else throw res.status;
-          })
-        : new Promise((res, rej) => rej(400)),
-    [query]
-  );
+  useEffect(() => {
+    if (isInputValid(query)) {
+      setIsLoading(true);
+      axios
+        .get(`/ns/username/${query}`, {
+          baseURL: apiUrl,
+        })
+        .then((res) => {
+          setIsLoading(false);
+          if (res.status === 200) {
+            setData(res.data);
+          } else {
+            throw res.status;
+          }
+        });
+    } else {
+      setError(400);
+    }
+  }, [query]);
 
   useEffect(() => {
     if (!isLoading) {

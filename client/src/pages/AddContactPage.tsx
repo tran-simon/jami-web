@@ -17,40 +17,29 @@
  */
 import GroupAddRounded from '@mui/icons-material/GroupAddRounded';
 import { Box, Card, CardContent, Container, Fab, Typography } from '@mui/material';
+import { Trans } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
 import { useAuthContext } from '../contexts/AuthProvider';
 import { setRefreshFromSlice } from '../redux/appSlice';
 import { useAppDispatch } from '../redux/hooks';
-import { apiUrl } from '../utils/constants';
 
 type AddContactPageProps = {
   contactId: string;
 };
 
 export default function AddContactPage({ contactId }: AddContactPageProps) {
-  const { token } = useAuthContext();
+  const { axiosInstance } = useAuthContext();
   const navigate = useNavigate();
 
   const dispatch = useAppDispatch();
 
   const handleClick = async () => {
-    const response = await fetch(new URL(`/conversations`, apiUrl), {
-      method: 'POST',
-      headers: {
-        Accept: 'application/json',
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ members: [contactId] }),
-    }).then((res) => {
-      dispatch(setRefreshFromSlice());
-      return res.json();
-    });
+    const { data } = await axiosInstance.put(`/contacts/${contactId}`);
+    dispatch(setRefreshFromSlice());
 
-    console.log(response);
-    if (response.conversationId) {
-      navigate(`/conversation/${response.conversationId}`);
+    if (data.conversationId) {
+      navigate(`/conversation/${data.conversationId}`);
     }
   };
 
@@ -63,7 +52,7 @@ export default function AddContactPage({ contactId }: AddContactPageProps) {
           <Box style={{ textAlign: 'center', marginTop: 16 }}>
             <Fab variant="extended" color="primary" onClick={handleClick}>
               <GroupAddRounded />
-              Add contact
+              <Trans key="conversation_add_contact" />
             </Fab>
           </Box>
         </CardContent>

@@ -15,6 +15,7 @@
  * License along with this program.  If not, see
  * <https://www.gnu.org/licenses/>.
  */
+import axios from 'axios';
 import { passwordStrength } from 'check-password-strength';
 import { HttpStatusCode } from 'jami-web-common';
 
@@ -39,68 +40,58 @@ export type StrengthValueCode = 'default' | 'too_weak' | 'weak' | 'medium' | 'st
 const idToStrengthValueCode: StrengthValueCode[] = ['too_weak', 'weak', 'medium', 'strong'];
 
 export async function isNameRegistered(name: string): Promise<boolean> {
-  const url = new URL(`/ns/username/${name}`, apiUrl);
-  const response = await fetch(url);
-
-  switch (response.status) {
-    case HttpStatusCode.Ok:
-      return true;
-    case HttpStatusCode.NotFound:
-      return false;
-    default:
-      throw new Error(await response.text());
+  try {
+    await axios.get(`/ns/username/${name}`, {
+      baseURL: apiUrl,
+    });
+    return true;
+  } catch (e: any) {
+    if (e.response?.status !== HttpStatusCode.NotFound) {
+      throw e;
+    }
+    return false;
   }
 }
 
 export function checkPasswordStrength(password: string): PasswordCheckResult {
   const strengthResult: PasswordStrengthResult = passwordStrength(password);
 
-  const checkResult: PasswordCheckResult = {
+  return {
     strong: strengthResult.id === PasswordStrength.Strong.valueOf(),
     valueCode: idToStrengthValueCode[strengthResult.id] ?? 'default',
   };
-
-  return checkResult;
 }
 
 export async function registerUser(username: string, password: string): Promise<void> {
-  const url = new URL('/auth/new-account', apiUrl);
-  const response: Response = await fetch(url, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ username, password }),
-  });
-
-  if (response.status !== HttpStatusCode.Created) {
-    throw new Error(await response.text());
-  }
+  await axios.post(
+    '/auth/new-account',
+    { username, password },
+    {
+      baseURL: apiUrl,
+    }
+  );
 }
 
 export async function loginUser(username: string, password: string): Promise<string> {
-  const url = new URL('/auth/login', apiUrl);
-  const response = await fetch(url, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ username, password }),
-  });
-
-  switch (response.status) {
-    case HttpStatusCode.Ok:
-      break;
-    case HttpStatusCode.NotFound:
-      throw new UsernameNotFound();
-    case HttpStatusCode.Unauthorized:
-      throw new InvalidPassword();
-    default:
-      throw new Error(await response.text());
+  try {
+    const { data } = await axios.post(
+      '/auth/login',
+      { username, password },
+      {
+        baseURL: apiUrl,
+      }
+    );
+    return data.accessToken;
+  } catch (e: any) {
+    switch (e.response?.status) {
+      case HttpStatusCode.NotFound:
+        throw new UsernameNotFound();
+      case HttpStatusCode.Unauthorized:
+        throw new InvalidPassword();
+      default:
+        throw e;
+    }
   }
-
-  const data: { accessToken: string } = await response.json();
-  return data.accessToken;
 }
 
 export function getAccessToken(): string {

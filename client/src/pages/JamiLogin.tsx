@@ -64,14 +64,14 @@ export default function JamiLogin(props: JamiLoginProps) {
         const accessToken = await loginUser(username, password);
         setAccessToken(accessToken);
         navigate('/settings', { replace: true });
-      } catch (err) {
+      } catch (e) {
         setIsLoggingInUser(false);
-        if (err instanceof UsernameNotFound) {
+        if (e instanceof UsernameNotFound) {
           setErrorAlertContent(t('login_username_not_found'));
-        } else if (err instanceof InvalidPassword) {
+        } else if (e instanceof InvalidPassword) {
           setErrorAlertContent(t('login_invalid_password'));
         } else {
-          throw err;
+          throw e;
         }
       }
     }

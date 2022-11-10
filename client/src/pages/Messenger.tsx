@@ -28,13 +28,12 @@ import NewContactForm from '../components/NewContactForm';
 import { useAuthContext } from '../contexts/AuthProvider';
 import { useAppSelector } from '../redux/hooks';
 import { MessengerRouteParams } from '../router';
-import { apiUrl } from '../utils/constants';
 import { useUrlParams } from '../utils/hooks';
 import AddContactPage from './AddContactPage';
 
 const Messenger = () => {
   const { refresh } = useAppSelector((state) => state.userInfo);
-  const { token, account } = useAuthContext();
+  const { account, axiosInstance } = useAuthContext();
 
   const [conversations, setConversations] = useState<Conversation[] | undefined>(undefined);
   const [searchQuery, setSearchQuery] = useState('');
@@ -47,51 +46,36 @@ const Messenger = () => {
   const accountId = account.getId();
 
   useEffect(() => {
-    console.log('REFRESH CONVERSATIONS FROM MESSENGER');
     const controller = new AbortController();
-    fetch(new URL(`/conversations`, apiUrl), {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-      signal: controller.signal,
-    })
-      .then((res) => res.json())
-      .then((result: Conversation[]) => {
-        console.log(result);
-        setConversations(Object.values(result).map((c) => Conversation.from(accountId, c)));
+    axiosInstance
+      .get<Conversation[]>('/conversations', {
+        signal: controller.signal,
+      })
+      .then(({ data }) => {
+        setConversations(Object.values(data).map((c) => Conversation.from(accountId, c)));
       });
     // return () => controller.abort()
-  }, [token, accountId, refresh]);
+  }, [axiosInstance, accountId, refresh]);
 
   useEffect(() => {
     if (!searchQuery) return;
     const controller = new AbortController();
-    fetch(new URL(`/ns/username/${searchQuery}`, apiUrl), {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-      signal: controller.signal,
-    })
-      .then((response) => {
-        if (response.status === 200) {
-          return response.json();
-        } else {
-          throw new Error(response.status.toString());
-        }
+    // TODO: Type properly https://git.jami.net/savoirfairelinux/jami-web/-/issues/92
+    axiosInstance
+      .get<{ state: number; address: string; username: string }>(`/ns/username/${searchQuery}`, {
+        signal: controller.signal,
       })
-      .then((response) => {
-        console.log(response);
-        const contact = new Contact(response.address);
-        contact.setRegisteredName(response.username);
+      .then(({ data }) => {
+        const contact = new Contact(data.address);
+        contact.setRegisteredName(data.username);
         setSearchResults(contact ? Conversation.fromSingleContact(accountId, contact) : undefined);
       })
       .catch(() => {
         setSearchResults(undefined);
       });
     // return () => controller.abort() // crash on React18
-  }, [accountId, searchQuery, token]);
+  }, [accountId, searchQuery, axiosInstance]);
 
-  console.log('Messenger render');
   return (
     <Stack direction="row" height="100vh" width="100vw">
       <Stack flexGrow={0} flexShrink={0} overflow="auto">

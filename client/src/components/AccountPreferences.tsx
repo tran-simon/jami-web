@@ -39,7 +39,6 @@ import { Account, AccountDetails } from 'jami-web-common';
 import { useState } from 'react';
 
 import { useAuthContext } from '../contexts/AuthProvider';
-import { apiUrl } from '../utils/constants';
 import ConversationAvatar from './ConversationAvatar';
 import ConversationsOverviewCard from './ConversationsOverviewCard';
 import JamiIdCard from './JamiIdCard';
@@ -56,18 +55,8 @@ const thumbnailVariants = {
   },
 };
 
-type AccountPreferencesProps = {
-  // TODO: Remove account prop after migration to new server
-  account?: Account;
-};
-
-export default function AccountPreferences({ account: _account }: AccountPreferencesProps) {
-  const authContext = useAuthContext(true);
-  const account = _account ?? authContext?.account;
-  const token = authContext?.token;
-  if (!account || !token) {
-    throw new Error('Account not defined');
-  }
+export default function AccountPreferences() {
+  const { account, axiosInstance } = useAuthContext();
 
   const devices: string[][] = [];
   const accountDevices = account.getDevices();
@@ -82,40 +71,21 @@ export default function AccountPreferences({ account: _account }: AccountPrefere
 
   const [details, setDetails] = useState(account.getDetails());
 
-  const addModerator = () => {
+  const addModerator = async () => {
     if (defaultModeratorUri) {
-      fetch(new URL(`/default-moderators/${defaultModeratorUri}`, apiUrl), {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        method: 'PUT',
-      });
+      await axiosInstance.put(`/default-moderators/${defaultModeratorUri}`);
       setDefaultModeratorUri('');
     }
   };
 
-  const removeModerator = (uri: string) =>
-    fetch(new URL(`/default-moderators/${uri}`, apiUrl), {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-      method: 'DELETE',
-    });
+  const removeModerator = async (uri: string) => await axiosInstance.delete(`/default-moderators/${uri}`);
 
-  const handleToggle = (key: keyof AccountDetails, value: boolean) => {
+  const handleToggle = async (key: keyof AccountDetails, value: boolean) => {
     console.log(`handleToggle ${key} ${value}`);
     const newDetails: Partial<AccountDetails> = {};
     newDetails[key] = value ? 'true' : 'false';
     console.log(newDetails);
-    fetch(new URL('/account', apiUrl), {
-      method: 'PATCH',
-      headers: {
-        Accept: 'application/json',
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(newDetails),
-    });
+    await axiosInstance.patch('/account', newDetails);
     setDetails({ ...account.updateDetails(newDetails) });
   };
 

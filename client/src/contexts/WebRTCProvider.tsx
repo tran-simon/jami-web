@@ -211,24 +211,21 @@ export default ({
 
   const sendWebRTCOffer = useCallback(async () => {
     if (webRTCConnection && socket) {
-      webRTCConnection
-        .createOffer({
-          offerToReceiveAudio: true,
-          offerToReceiveVideo: true,
-        })
-        .then((sdp) => {
-          socket.send({
-            type: WebSocketMessageType.WebRTCOffer,
-            data: {
-              from: account.getId(),
-              to: contactId,
-              message: {
-                sdp: sdp,
-              },
-            },
-          });
-          webRTCConnection.setLocalDescription(new RTCSessionDescription(sdp));
-        });
+      const sdp = await webRTCConnection.createOffer({
+        offerToReceiveAudio: true,
+        offerToReceiveVideo: true,
+      });
+      socket.send({
+        type: WebSocketMessageType.WebRTCOffer,
+        data: {
+          from: account.getId(),
+          to: contactId,
+          message: {
+            sdp,
+          },
+        },
+      });
+      await webRTCConnection.setLocalDescription(new RTCSessionDescription(sdp));
     }
   }, [account, contactId, socket, webRTCConnection]);
 
