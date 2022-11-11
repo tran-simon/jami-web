@@ -35,6 +35,12 @@ contactsRouter.get('/', (_req, res) => {
 
 contactsRouter.get('/:contactId', (req, res) => {
   const contactDetails = jamid.getContactDetails(res.locals.accountId, req.params.contactId);
+
+  if (Object.keys(contactDetails).length === 0) {
+    res.status(HttpStatusCode.NotFound).send('No such contact found');
+    return;
+  }
+
   res.send(contactDetails);
 });
 
@@ -45,6 +51,11 @@ contactsRouter.put('/:contactId', (req, res) => {
   jamid.addContact(accountId, contactId);
 
   const contactDetails = jamid.getContactDetails(accountId, contactId);
+  if (Object.keys(contactDetails).length === 0) {
+    res.status(HttpStatusCode.NotFound).send('No such contact found');
+    return;
+  }
+
   res.send(contactDetails);
 });
 

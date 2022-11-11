@@ -24,6 +24,9 @@ import { Ws } from '../ws.js';
 import { JamiSignal } from './jami-signal.js';
 import {
   AccountDetailsChanged,
+  AccountMessageStatusChanged,
+  ContactAdded,
+  ContactRemoved,
   ConversationLoaded,
   ConversationReady,
   ConversationRemoved,
@@ -93,8 +96,20 @@ export class Jamid {
       onKnownDevicesChanged.next({ accountId, devices });
 
     const onIncomingAccountMessage = new Subject<IncomingAccountMessage>();
-    handlers.IncomingAccountMessage = (accountId: string, from: string, message: Record<string, string>) =>
-      onIncomingAccountMessage.next({ accountId, from, message });
+    handlers.IncomingAccountMessage = (accountId: string, from: string, payload: Record<string, string>) =>
+      onIncomingAccountMessage.next({ accountId, from, payload });
+
+    const onAccountMessageStatusChanged = new Subject<AccountMessageStatusChanged>();
+    handlers.AccountMessageStatusChanged = (accountId: string, messageId: string, peer: string, state: number) =>
+      onAccountMessageStatusChanged.next({ accountId, messageId, peer, state });
+
+    const onContactAdded = new Subject<ContactAdded>();
+    handlers.ContactAdded = (accountId: string, contactId: string, confirmed: boolean) =>
+      onContactAdded.next({ accountId, contactId, confirmed });
+
+    const onContactRemoved = new Subject<ContactRemoved>();
+    handlers.ContactRemoved = (accountId: string, contactId: string, banned: boolean) =>
+      onContactRemoved.next({ accountId, contactId, banned });
 
     const onConversationReady = new Subject<ConversationReady>();
     handlers.ConversationReady = (accountId: string, conversationId: string) =>
@@ -122,6 +137,9 @@ export class Jamid {
       onRegisteredNameFound: onRegisteredNameFound.asObservable(),
       onKnownDevicesChanged: onKnownDevicesChanged.asObservable(),
       onIncomingAccountMessage: onIncomingAccountMessage.asObservable(),
+      onAccountMessageStatusChanged: onAccountMessageStatusChanged.asObservable(),
+      onContactAdded: onContactAdded.asObservable(),
+      onContactRemoved: onContactRemoved.asObservable(),
       onConversationReady: onConversationReady.asObservable(),
       onConversationRemoved: onConversationRemoved.asObservable(),
       onConversationLoaded: onConversationLoaded.asObservable(),
@@ -351,7 +369,7 @@ export class Jamid {
 
     this.events.onIncomingAccountMessage.subscribe((signal) => {
       log.debug('Received IncomingAccountMessage:', JSON.stringify(signal));
-      const message = JSON.parse(signal.message['application/json']);
+      const message = JSON.parse(signal.payload['application/json']);
 
       if (message === undefined) {
         log.debug('Undefined account message');
@@ -367,6 +385,18 @@ export class Jamid {
       message.data.to = signal.accountId;
       log.info(`Sending ${JSON.stringify(message)} to ${signal.accountId}`);
       this.ws.send(signal.accountId, message);
+    });
+
+    this.events.onAccountMessageStatusChanged.subscribe((signal) => {
+      log.debug('Received AccountMessageStatusChanged:', JSON.stringify(signal));
+    });
+
+    this.events.onContactAdded.subscribe((signal) => {
+      log.debug('Received ContactAdded:', JSON.stringify(signal));
+    });
+
+    this.events.onContactRemoved.subscribe((signal) => {
+      log.debug('Received ContactRemoved:', JSON.stringify(signal));
     });
 
     this.events.onConversationReady.subscribe((signal) => {

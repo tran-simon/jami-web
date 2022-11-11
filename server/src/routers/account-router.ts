@@ -30,9 +30,6 @@ export const accountRouter = Router();
 
 accountRouter.use(authenticateToken);
 
-// TODO: If tokens can be generated on one daemon and used on another (transferrable between daemons),
-// then add middleware to check that the currently logged-in accountId is stored in this daemon instance
-
 // TODO: Do we really need this route to return the default moderators?
 // It would be cleaner just to GET /default-moderators for this
 accountRouter.get(
@@ -51,7 +48,7 @@ accountRouter.get(
       });
     }
 
-    res.json({
+    res.send({
       id: accountId,
       details: jamid.getAccountDetails(accountId),
       volatileDetails: jamid.getVolatileAccountDetails(accountId),
@@ -63,18 +60,22 @@ accountRouter.get(
 
 accountRouter.patch('/', (req, res) => {
   const accountId = res.locals.accountId;
+
   const currentAccountDetails = jamid.getAccountDetails(accountId);
   const newAccountDetails: AccountDetails = { ...currentAccountDetails, ...req.body };
   jamid.setAccountDetails(accountId, newAccountDetails);
+
   res.sendStatus(HttpStatusCode.NoContent);
 });
 
+// TODO: Should this endpoint be removed?
 accountRouter.post('/send-account-message', (req: Request<ParamsDictionary, any, AccountTextMessage>, res) => {
   const { from, to, message } = req.body;
-  if (!from || !to || !message) {
-    res.status(HttpStatusCode.BadRequest).send('Missing arguments in request');
+  if (from === undefined || to === undefined || message === undefined) {
+    res.status(HttpStatusCode.BadRequest).send('Missing from, to, or message in body');
     return;
   }
+
   jamid.sendAccountTextMessage(from, to, JSON.stringify(message));
-  res.end();
+  res.sendStatus(HttpStatusCode.NoContent);
 });

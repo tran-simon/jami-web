@@ -59,7 +59,26 @@ export interface KnownDevicesChanged {
 export interface IncomingAccountMessage {
   accountId: string;
   from: string;
-  message: Record<string, string>;
+  payload: Record<string, string>;
+}
+
+export interface AccountMessageStatusChanged {
+  accountId: string;
+  messageId: string;
+  peer: string;
+  state: number; // TODO: Replace state number with enum (see account_const.h)
+}
+
+export interface ContactAdded {
+  accountId: string;
+  contactId: string;
+  confirmed: boolean;
+}
+
+export interface ContactRemoved {
+  accountId: string;
+  contactId: string;
+  banned: boolean;
 }
 
 export interface ConversationReady {

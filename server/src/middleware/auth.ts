@@ -52,7 +52,7 @@ function createAuthenticationMiddleware(isAuthenticationRequired: boolean) {
       res.locals.accountId = payload.id;
       next();
     } catch (e) {
-      res.sendStatus(HttpStatusCode.Unauthorized);
+      res.status(HttpStatusCode.Unauthorized).send('Invalid access token');
     }
   };
 }

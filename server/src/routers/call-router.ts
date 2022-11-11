@@ -16,6 +16,7 @@
  * <https://www.gnu.org/licenses/>.
  */
 import { Router } from 'express';
+import { HttpStatusCode } from 'jami-web-common';
 import { Container } from 'typedi';
 
 import { Jamid } from '../jamid/jamid.js';
@@ -34,5 +35,11 @@ callRouter.get('/', (_req, res) => {
 
 callRouter.get('/:callId', (req, res) => {
   const callDetails = jamid.getCallDetails(res.locals.accountId, req.params.callId);
+
+  if (Object.keys(callDetails).length === 0) {
+    res.status(HttpStatusCode.NotFound).send('No such call found');
+    return;
+  }
+
   res.send(callDetails);
 });

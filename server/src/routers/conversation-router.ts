@@ -37,6 +37,10 @@ const jamid = Container.get(Jamid);
 // TODO: Create interface for return type in common/ when Records and interfaces are refactored
 async function createConversationResponseObject(accountId: string, accountUri: string, conversationId: string) {
   const infos = jamid.getConversationInfos(accountId, conversationId);
+  if (Object.keys(infos).length === 0) {
+    return undefined;
+  }
+
   const members = jamid.getConversationMembers(accountId, conversationId);
 
   const namedMembers = [];
@@ -94,21 +98,29 @@ conversationRouter.get(
   })
 );
 
-conversationRouter.post('/', (req: Request<ParamsDictionary, Record<string, string>, ConversationMembers>, res) => {
-  const accountId = res.locals.accountId;
+conversationRouter.post(
+  '/',
+  (req: Request<ParamsDictionary, Record<string, string> | string, ConversationMembers>, res) => {
+    const { members } = req.body;
+    if (members === undefined || members.length !== 1) {
+      res.status(HttpStatusCode.BadRequest).send('Missing members or more than one member in body');
+      return;
+    }
 
-  const { members } = req.body;
-  if (members === undefined || members.length !== 1) {
-    res.sendStatus(HttpStatusCode.BadRequest);
-    return;
+    const accountId = res.locals.accountId;
+
+    const contactId = members[0];
+    jamid.addContact(accountId, contactId);
+
+    const contactDetails = jamid.getContactDetails(accountId, contactId);
+    if (Object.keys(contactDetails).length === 0) {
+      res.status(HttpStatusCode.NotFound).send('No such member found');
+      return;
+    }
+
+    res.send(contactDetails);
   }
-
-  const contactId = members[0];
-  jamid.addContact(accountId, contactId);
-
-  const contactDetails = jamid.getContactDetails(accountId, contactId);
-  res.send(contactDetails);
-});
+);
 
 // TODO: Check if we actually need this endpoint to return messages.
 // Verify by checking what is truly needed in the client when migrating, to clean up the API.
@@ -124,13 +136,12 @@ conversationRouter.get(
     // Retrieve the URI of the current account (Account.username actually stores the URI rather than the username)
     const accountUri = jamid.getAccountDetails(accountId)['Account.username'];
 
-    const conversationIds = jamid.getConversationIds(accountId);
-    if (!conversationIds.includes(conversationId)) {
-      res.sendStatus(HttpStatusCode.NotFound);
+    const conversation = await createConversationResponseObject(accountId, accountUri, conversationId);
+    if (conversation === undefined) {
+      res.status(HttpStatusCode.NotFound).send('No such conversation found');
       return;
     }
 
-    const conversation = await createConversationResponseObject(accountId, accountUri, conversationId);
     res.send(conversation);
   })
 );
@@ -141,9 +152,9 @@ conversationRouter.get(
     const accountId = res.locals.accountId;
     const conversationId = req.params.conversationId;
 
-    const conversationIds = jamid.getConversationIds(accountId);
-    if (!conversationIds.includes(conversationId)) {
-      res.sendStatus(HttpStatusCode.NotFound);
+    const infos = jamid.getConversationInfos(accountId, conversationId);
+    if (Object.keys(infos).length === 0) {
+      res.status(HttpStatusCode.NotFound).send('No such conversation found');
       return;
     }
 
@@ -157,11 +168,20 @@ conversationRouter.post(
   (req: Request<ParamsDictionary, any, ConversationMessage>, res) => {
     const { message } = req.body;
     if (message === undefined) {
-      res.sendStatus(HttpStatusCode.BadRequest);
+      res.status(HttpStatusCode.BadRequest).send('Missing message in body');
       return;
     }
 
-    jamid.sendConversationMessage(res.locals.accountId, req.params.conversationId, message);
-    res.end();
+    const accountId = res.locals.accountId;
+    const conversationId = req.params.conversationId;
+
+    const infos = jamid.getConversationInfos(accountId, conversationId);
+    if (Object.keys(infos).length === 0) {
+      res.status(HttpStatusCode.NotFound).send('No such conversation found');
+      return;
+    }
+
+    jamid.sendConversationMessage(accountId, conversationId, message);
+    res.sendStatus(HttpStatusCode.NoContent);
   }
 );

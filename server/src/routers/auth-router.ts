@@ -42,8 +42,13 @@ authRouter.post(
   '/new-account',
   asyncHandler(async (req: Request<ParamsDictionary, string, Credentials>, res, _next) => {
     const { username, password } = req.body;
-    if (!username || !password) {
-      res.status(HttpStatusCode.BadRequest).send('Missing username or password');
+    if (username === undefined || password === undefined) {
+      res.status(HttpStatusCode.BadRequest).send('Missing username or password in body');
+      return;
+    }
+
+    if (password === '') {
+      res.status(HttpStatusCode.BadRequest).send('Password may not be empty');
       return;
     }
 
@@ -82,8 +87,8 @@ authRouter.post(
   '/login',
   asyncHandler(async (req: Request<ParamsDictionary, { accessToken: string } | string, Credentials>, res, _next) => {
     const { username, password } = req.body;
-    if (!username || !password) {
-      res.status(HttpStatusCode.BadRequest).send('Missing username or password');
+    if (username === undefined || password === undefined) {
+      res.status(HttpStatusCode.BadRequest).send('Missing username or password in body');
       return;
     }
 
@@ -99,13 +104,15 @@ authRouter.post(
     // TODO: load the password from Jami
     const hashedPassword = creds.get(username);
     if (!hashedPassword) {
-      res.status(HttpStatusCode.NotFound).send('Password not found');
+      res
+        .status(HttpStatusCode.NotFound)
+        .send('Password not found (the account does not have a password set on the server)');
       return;
     }
 
     const isPasswordVerified = await argon2.verify(hashedPassword, password);
     if (!isPasswordVerified) {
-      res.sendStatus(HttpStatusCode.Unauthorized);
+      res.status(HttpStatusCode.Unauthorized).send('Incorrect password');
       return;
     }
 

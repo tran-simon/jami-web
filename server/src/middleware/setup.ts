@@ -27,8 +27,9 @@ export async function checkAdminSetup(_req: Request, res: Response, next: NextFu
   const isSetupComplete = adminConfig.get() !== undefined;
 
   if (!isSetupComplete) {
-    res.sendStatus(HttpStatusCode.Forbidden);
+    res.status(HttpStatusCode.Forbidden).send('Setup not complete');
     return;
   }
+
   next();
 }

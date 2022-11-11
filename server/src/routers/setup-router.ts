@@ -40,19 +40,25 @@ setupRouter.get('/check', (_req, res, _next) => {
 setupRouter.post(
   '/admin/create',
   asyncHandler(async (req: Request<ParamsDictionary, string, { password?: string }>, res, _next) => {
-    const isAdminCreated = adminConfig.get() !== undefined;
-    if (isAdminCreated) {
-      res.sendStatus(HttpStatusCode.BadRequest);
+    const { password } = req.body;
+    if (password === undefined) {
+      res.status(HttpStatusCode.BadRequest).send('Missing password in body');
       return;
     }
 
-    const { password } = req.body;
-    if (!password) {
-      res.status(HttpStatusCode.BadRequest).send('Missing password');
+    if (password === '') {
+      res.status(HttpStatusCode.BadRequest).send('Password may not be empty');
+      return;
+    }
+
+    const isAdminCreated = adminConfig.get() !== undefined;
+    if (isAdminCreated) {
+      res.status(HttpStatusCode.Conflict).send('Admin already exists');
       return;
     }
 
     const hashedPassword = await argon2.hash(password, { type: argon2.argon2id });
+
     adminConfig.set(hashedPassword);
     await adminConfig.save();
 
@@ -62,7 +68,7 @@ setupRouter.post(
 
 // Every request handler after this line will be submitted to this middleware
 // in order to ensure that the admin account is set up before proceeding with
-// setup related requests.
+// setup related requests
 setupRouter.use(checkAdminSetup);
 
 setupRouter.post(
@@ -70,15 +76,16 @@ setupRouter.post(
   asyncHandler(
     async (req: Request<ParamsDictionary, { accessToken: string } | string, { password: string }>, res, _next) => {
       const { password } = req.body;
-      if (!password) {
-        res.status(HttpStatusCode.BadRequest).send('Missing password');
+      if (password === undefined) {
+        res.status(HttpStatusCode.BadRequest).send('Missing password in body');
         return;
       }
 
       const hashedPassword = adminConfig.get();
+
       const isPasswordVerified = await argon2.verify(hashedPassword, password);
       if (!isPasswordVerified) {
-        res.sendStatus(HttpStatusCode.Forbidden);
+        res.status(HttpStatusCode.Forbidden).send('Incorrect password');
         return;
       }
 

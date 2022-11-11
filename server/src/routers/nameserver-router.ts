@@ -35,13 +35,13 @@ nameserverRouter.get(
     const result = await jamid.lookupUsername(req.params.username, res.locals.accountId);
     switch (result.state) {
       case 0:
-        res.json(result);
+        res.send(result);
         break;
       case 1:
-        res.sendStatus(HttpStatusCode.BadRequest);
+        res.status(HttpStatusCode.BadRequest).send('Invalid username');
         break;
       default:
-        res.sendStatus(HttpStatusCode.NotFound);
+        res.status(HttpStatusCode.NotFound).send('No such username found');
         break;
     }
   })
@@ -53,13 +53,13 @@ nameserverRouter.get(
     const result = await jamid.lookupAddress(req.params.address, res.locals.accountId);
     switch (result.state) {
       case 0:
-        res.json(result);
+        res.send(result);
         break;
       case 1:
-        res.sendStatus(HttpStatusCode.BadRequest);
+        res.status(HttpStatusCode.BadRequest).send('Invalid address');
         break;
       default:
-        res.sendStatus(HttpStatusCode.NotFound);
+        res.status(HttpStatusCode.NotFound).send('No such address found');
         break;
     }
   })

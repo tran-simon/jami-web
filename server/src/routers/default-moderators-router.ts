@@ -51,7 +51,7 @@ defaultModeratorsRouter.get(
 
 defaultModeratorsRouter.put('/:contactId', (req, res) => {
   jamid.addDefaultModerator(res.locals.accountId, req.params.contactId);
-  res.end();
+  res.sendStatus(HttpStatusCode.NoContent);
 });
 
 defaultModeratorsRouter.delete('/:contactId', (req, res) => {
