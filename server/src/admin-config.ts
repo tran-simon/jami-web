@@ -47,6 +47,6 @@ export class AdminConfig {
   }
 
   async save() {
-    await writeFile(this.file, JSON.stringify(this.account) + '/n');
+    await writeFile(this.file, JSON.stringify(this.account) + '\n');
   }
 }
