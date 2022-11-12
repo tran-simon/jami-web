@@ -118,7 +118,7 @@ export class Ws {
       return false;
     }
     for (const accountSocket of accountSockets) {
-      accountSocket.send(message);
+      accountSocket.send(JSON.stringify(message));
     }
     return true;
   }
