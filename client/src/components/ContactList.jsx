@@ -61,7 +61,7 @@ export default function ContactList() {
   const getContactDetails = async () => {
     const controller = new AbortController();
     try {
-      const data = await axiosInstance.get(`/contacts/${currentContact.id}`, {
+      const { data } = await axiosInstance.get(`/contacts/${currentContact.id}`, {
         signal: controller.signal,
       });
       console.log('CONTACT LIST - DETAILS: ', data);

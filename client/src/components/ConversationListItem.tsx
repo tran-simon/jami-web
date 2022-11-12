@@ -117,7 +117,7 @@ export default function ConversationListItem({ conversation }: ConversationListI
   const getContactDetails = async () => {
     const controller = new AbortController();
     try {
-      const data = await axiosInstance.get(`/contacts/${userId}`, {
+      const { data } = await axiosInstance.get(`/contacts/${userId}`, {
         signal: controller.signal,
       });
       console.log('CONTACT LIST - DETAILS: ', data);

@@ -23,9 +23,7 @@ import WelcomeAnimation from './components/welcome';
 import { apiUrl } from './utils/constants';
 
 export async function checkSetupStatus(): Promise<boolean> {
-  const { data } = await axios.get('/setup/check', {
-    baseURL: apiUrl,
-  });
+  const { data } = await axios.get('/setup/check', { baseURL: apiUrl });
   return data.isSetupComplete;
 }
 

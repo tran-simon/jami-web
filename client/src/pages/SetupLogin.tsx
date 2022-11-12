@@ -25,6 +25,7 @@ import { useNavigate } from 'react-router-dom';
 
 import { checkSetupStatus } from '../App';
 import { apiUrl } from '../utils/constants';
+import { InvalidPassword } from '../utils/errors';
 
 export default function SetupLogin() {
   const [isSetupComplete, setIsSetupComplete] = useState(false);
@@ -38,49 +39,21 @@ export default function SetupLogin() {
     checkSetupStatus().then(setIsSetupComplete);
   }, []);
 
-  const adminCreation = async (password: string) => {
-    let response: Response;
-    try {
-      response = await axios.post(
-        '/setup/admin/create',
-        { password },
-        {
-          baseURL: apiUrl,
-        }
-      );
-    } catch (e) {
-      throw new Error(`Admin creation failed`);
-    }
-
-    if (response.status !== HttpStatusCode.Created) {
-      throw new Error('Admin creation failed');
-    }
+  const registerAdmin = async (password: string) => {
+    await axios.post('/setup/admin/create', { password }, { baseURL: apiUrl });
   };
 
-  const adminLogin = async (password: string) => {
-    let response: Response;
+  const loginAdmin = async (password: string) => {
     try {
-      response = await axios.post(
-        '/setup/admin/login',
-        { password },
-        {
-          baseURL: apiUrl,
-        }
-      );
-    } catch (e) {
-      throw new Error(`Admin login failed`);
+      const { data } = await axios.post('/setup/admin/login', { password }, { baseURL: apiUrl });
+      localStorage.setItem('adminAccessToken', data.accessToken);
+    } catch (e: any) {
+      if (e.response?.status === HttpStatusCode.Forbidden) {
+        throw new InvalidPassword();
+      } else {
+        throw e;
+      }
     }
-
-    if (response.status === HttpStatusCode.Forbidden) {
-      throw new Error('Invalid password');
-    }
-
-    if (response.status !== HttpStatusCode.Ok) {
-      throw new Error('Admin login failed');
-    }
-
-    const data: { accessToken: string } = await response.json();
-    localStorage.setItem('adminAccessToken', data.accessToken);
   };
 
   const isValid = isSetupComplete || (password && password === passwordRepeat);
@@ -92,9 +65,9 @@ export default function SetupLogin() {
 
     try {
       if (!isSetupComplete) {
-        await adminCreation(password);
+        await registerAdmin(password);
       }
-      await adminLogin(password);
+      await loginAdmin(password);
     } catch (e) {
       console.error(e);
       navigate('/login');

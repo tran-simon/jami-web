@@ -41,9 +41,7 @@ const idToStrengthValueCode: StrengthValueCode[] = ['too_weak', 'weak', 'medium'
 
 export async function isNameRegistered(name: string): Promise<boolean> {
   try {
-    await axios.get(`/ns/username/${name}`, {
-      baseURL: apiUrl,
-    });
+    await axios.get(`/ns/username/${name}`, { baseURL: apiUrl });
     return true;
   } catch (e: any) {
     if (e.response?.status !== HttpStatusCode.NotFound) {
@@ -63,24 +61,12 @@ export function checkPasswordStrength(password: string): PasswordCheckResult {
 }
 
 export async function registerUser(username: string, password: string): Promise<void> {
-  await axios.post(
-    '/auth/new-account',
-    { username, password },
-    {
-      baseURL: apiUrl,
-    }
-  );
+  await axios.post('/auth/new-account', { username, password }, { baseURL: apiUrl });
 }
 
 export async function loginUser(username: string, password: string): Promise<string> {
   try {
-    const { data } = await axios.post(
-      '/auth/login',
-      { username, password },
-      {
-        baseURL: apiUrl,
-      }
-    );
+    const { data } = await axios.post('/auth/login', { username, password }, { baseURL: apiUrl });
     return data.accessToken;
   } catch (e: any) {
     switch (e.response?.status) {

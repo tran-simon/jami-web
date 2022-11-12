@@ -33,18 +33,14 @@ export default function UsernameChooser({ setName, ...props }) {
   useEffect(() => {
     if (isInputValid(query)) {
       setIsLoading(true);
-      axios
-        .get(`/ns/username/${query}`, {
-          baseURL: apiUrl,
-        })
-        .then((res) => {
-          setIsLoading(false);
-          if (res.status === 200) {
-            setData(res.data);
-          } else {
-            throw res.status;
-          }
-        });
+      axios.get(`/ns/username/${query}`, { baseURL: apiUrl }).then((res) => {
+        setIsLoading(false);
+        if (res.status === 200) {
+          setData(res.data);
+        } else {
+          throw res.status;
+        }
+      });
     } else {
       setError(400);
     }
