@@ -25,9 +25,7 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { Provider } from 'react-redux';
 import { RouterProvider } from 'react-router-dom';
-import socketio from 'socket.io-client';
 
-import { SocketProvider } from './contexts/Socket';
 import { store } from './redux/store';
 import { router } from './router';
 import defaultTheme from './themes/Default';
@@ -40,8 +38,6 @@ const queryClient = new QueryClient({
   },
 });
 
-const socket = socketio();
-
 const container = document.getElementById('root');
 if (!container) {
   throw new Error('Failed to get the root element');
@@ -51,11 +47,9 @@ root.render(
   <Provider store={store}>
     <StrictMode>
       <QueryClientProvider client={queryClient}>
-        <SocketProvider socket={socket}>
-          <ThemeProvider theme={defaultTheme}>
-            <RouterProvider router={router} />
-          </ThemeProvider>
-        </SocketProvider>
+        <ThemeProvider theme={defaultTheme}>
+          <RouterProvider router={router} />
+        </ThemeProvider>
       </QueryClientProvider>
     </StrictMode>
   </Provider>

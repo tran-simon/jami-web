@@ -16,6 +16,8 @@
  * <https://www.gnu.org/licenses/>.
  */
 export enum WebSocketMessageType {
+  ConversationMessage = 'conversation-message',
+  ConversationView = 'conversation-view',
   WebRTCOffer = 'webrtc-offer',
   WebRTCAnswer = 'webrtc-answer',
   IceCandidate = 'ice-candidate',

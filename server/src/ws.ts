@@ -18,7 +18,7 @@
 import { IncomingMessage } from 'node:http';
 import { Duplex } from 'node:stream';
 
-import { WebSocketMessage, WebSocketMessageType } from 'jami-web-common';
+import { WebSocketCallbacks, WebSocketMessage, WebSocketMessageTable, WebSocketMessageType } from 'jami-web-common';
 import { jwtVerify } from 'jose';
 import log from 'loglevel';
 import { Service } from 'typedi';
@@ -30,11 +30,17 @@ import { Vault } from './vault.js';
 @Service()
 export class Ws {
   private sockets: Map<string, WebSocket[]>;
-  private callbacks: Map<WebSocketMessageType, ((message: WebSocketMessage) => void)[]>;
+  private callbacks: WebSocketCallbacks;
 
   constructor(private readonly vault: Vault) {
     this.sockets = new Map();
-    this.callbacks = new Map();
+    this.callbacks = {
+      [WebSocketMessageType.ConversationMessage]: [],
+      [WebSocketMessageType.ConversationView]: [],
+      [WebSocketMessageType.WebRTCOffer]: [],
+      [WebSocketMessageType.WebRTCAnswer]: [],
+      [WebSocketMessageType.IceCandidate]: [],
+    };
   }
 
   async build() {
@@ -49,17 +55,19 @@ export class Ws {
         this.sockets.set(accountId, [ws]);
       }
 
-      ws.on('message', (messageString: string) => {
-        const message: WebSocketMessage = JSON.parse(messageString);
+      ws.on('message', <T extends WebSocketMessageType>(messageString: string) => {
+        const message: WebSocketMessage<T> = JSON.parse(messageString);
         if (!message.type || !message.data) {
           ws.send('Incorrect format (require type and data)');
           return;
         }
-        const callbacks = this.callbacks.get(message.type);
-        if (callbacks) {
-          for (const callback of callbacks) {
-            callback(message);
-          }
+        if (!Object.values(WebSocketMessageType).includes(message.type)) {
+          log.warn(`Unhandled account message type: ${message.type}`);
+          return;
+        }
+        const callbacks = this.callbacks[message.type];
+        for (const callback of callbacks) {
+          callback(message.data);
         }
       });
 
@@ -103,22 +111,17 @@ export class Ws {
     };
   }
 
-  bind(messageType: WebSocketMessageType, callback: (message: WebSocketMessage) => void): void {
-    const messageTypeCallbacks = this.callbacks.get(messageType);
-    if (messageTypeCallbacks) {
-      messageTypeCallbacks.push(callback);
-    } else {
-      this.callbacks.set(messageType, [callback]);
-    }
+  bind<T extends WebSocketMessageType>(type: T, callback: (data: WebSocketMessageTable[T]) => void): void {
+    this.callbacks[type].push(callback);
   }
 
-  send(accountId: string, message: WebSocketMessage): boolean {
+  send<T extends WebSocketMessageType>(accountId: string, type: T, data: WebSocketMessageTable[T]): boolean {
     const accountSockets = this.sockets.get(accountId);
     if (!accountSockets) {
       return false;
     }
     for (const accountSocket of accountSockets) {
-      accountSocket.send(JSON.stringify(message));
+      accountSocket.send(JSON.stringify({ type, data }));
     }
     return true;
   }

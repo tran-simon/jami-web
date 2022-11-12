@@ -15,10 +15,22 @@
  * License along with this program.  If not, see
  * <https://www.gnu.org/licenses/>.
  */
-import { WebSocketMessageType } from '../enums/websocket-message-type';
-import { AccountTextMessage } from './account-text-message';
+import { WebSocketMessageType } from '../enums/websocket-message-type.js';
+import { AccountTextMessage } from './account-text-message.js';
+import { ConversationMessage } from './conversation-message.js';
+import { ConversationView } from './conversation-view.js';
+import { WebRTCIceCandidate } from './webrtc-ice-candidate.js';
+import { WebRTCSDP } from './webrtc-sdp.js';
 
-export interface WebSocketMessage {
-  type: WebSocketMessageType;
-  data: AccountTextMessage; // Union type for data (Ex: data: AccountTextMessage | SomethingElse)
+export interface WebSocketMessageTable {
+  [WebSocketMessageType.ConversationMessage]: ConversationMessage;
+  [WebSocketMessageType.ConversationView]: ConversationView;
+  [WebSocketMessageType.WebRTCOffer]: AccountTextMessage<WebRTCSDP>;
+  [WebSocketMessageType.WebRTCAnswer]: AccountTextMessage<WebRTCSDP>;
+  [WebSocketMessageType.IceCandidate]: AccountTextMessage<WebRTCIceCandidate>;
+}
+
+export interface WebSocketMessage<T extends WebSocketMessageType> {
+  type: T;
+  data: WebSocketMessageTable[T];
 }

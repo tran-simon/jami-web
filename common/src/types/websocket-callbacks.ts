@@ -15,8 +15,10 @@
  * License along with this program.  If not, see
  * <https://www.gnu.org/licenses/>.
  */
-export interface AccountTextMessage<T> {
-  from: string;
-  to: string;
-  message: T;
-}
+
+import { WebSocketMessageType } from '../enums/websocket-message-type.js';
+import { WebSocketMessageTable } from '../interfaces/websocket-message.js';
+
+export type WebSocketCallbacks = {
+  [key in WebSocketMessageType]: ((data: WebSocketMessageTable[key]) => void)[];
+};

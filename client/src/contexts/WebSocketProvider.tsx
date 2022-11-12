@@ -15,18 +15,16 @@
  * License along with this program.  If not, see
  * <https://www.gnu.org/licenses/>.
  */
-import { WebSocketMessage, WebSocketMessageType } from 'jami-web-common';
+import { WebSocketCallbacks, WebSocketMessage, WebSocketMessageTable, WebSocketMessageType } from 'jami-web-common';
 import { createContext, useCallback, useEffect, useRef, useState } from 'react';
 
 import { apiUrl } from '../utils/constants';
 import { WithChildren } from '../utils/utils';
 import { useAuthContext } from './AuthProvider';
 
-export type WebSocketMessageFn = (message: WebSocketMessage) => void;
-
-interface IWebSocketContext {
-  bind: (type: WebSocketMessageType, callback: WebSocketMessageFn) => void;
-  send: WebSocketMessageFn;
+export interface IWebSocketContext {
+  bind: <T extends WebSocketMessageType>(type: T, callback: (data: WebSocketMessageTable[T]) => void) => void;
+  send: <T extends WebSocketMessageType>(type: T, data: WebSocketMessageTable[T]) => void;
 }
 
 export const WebSocketContext = createContext<IWebSocketContext | undefined>(undefined);
@@ -34,71 +32,88 @@ export const WebSocketContext = createContext<IWebSocketContext | undefined>(und
 export default ({ children }: WithChildren) => {
   const [isConnected, setIsConnected] = useState(false);
   const webSocketRef = useRef<WebSocket>();
-  const callbacksRef = useRef(new Map<WebSocketMessageType, WebSocketMessageFn[]>());
+  const callbacksRef = useRef<WebSocketCallbacks>({
+    [WebSocketMessageType.ConversationMessage]: [],
+    [WebSocketMessageType.ConversationView]: [],
+    [WebSocketMessageType.WebRTCOffer]: [],
+    [WebSocketMessageType.WebRTCAnswer]: [],
+    [WebSocketMessageType.IceCandidate]: [],
+  });
 
   const { token: accessToken } = useAuthContext();
 
-  const bind = useCallback((type: WebSocketMessageType, messageCallback: WebSocketMessageFn) => {
-    const messageCallbacks = callbacksRef.current.get(type);
-    if (messageCallbacks) {
-      messageCallbacks.push(messageCallback);
-    } else {
-      callbacksRef.current.set(type, [messageCallback]);
-    }
-  }, []);
+  const context: IWebSocketContext = {
+    bind: useCallback((type, callback) => {
+      callbacksRef.current[type].push(callback);
+    }, []),
+    send: useCallback(
+      (type, data) => {
+        if (isConnected) {
+          webSocketRef.current?.send(JSON.stringify({ type, data }));
+        }
+      },
+      [isConnected]
+    ),
+  };
 
-  const send = useCallback(
-    (message: WebSocketMessage) => {
-      if (isConnected) {
-        webSocketRef.current?.send(JSON.stringify(message));
-      }
-    },
-    [isConnected]
-  );
-
-  const handleOnOpen = useCallback(() => setIsConnected(true), []);
-
-  const handleOnClose = useCallback(() => {
-    setIsConnected(false);
-    callbacksRef.current.clear();
-  }, []);
-
-  const handleOnMessage = useCallback(({ data }: MessageEvent<string>) => {
-    const message: WebSocketMessage = JSON.parse(data);
-    const messageCallbacks = callbacksRef.current.get(message.type);
-    if (messageCallbacks) {
-      for (const messageCallback of messageCallbacks) {
-        messageCallback(message);
-      }
-    } else {
-      console.warn(`Unhandled message of type ${message.type}`);
-    }
-  }, []);
-
-  const handleOnError = useCallback((event: Event) => {
-    console.error('Closing WebSocket due to an error:', event);
-    webSocketRef.current?.close();
-  }, []);
-
-  useEffect(() => {
+  const connect = useCallback(() => {
     const url = new URL(apiUrl);
     url.protocol = 'ws:';
     url.searchParams.set('accessToken', accessToken);
 
     const webSocket = new WebSocket(url);
-    webSocket.onopen = handleOnOpen;
-    webSocket.onclose = handleOnClose;
-    webSocket.onmessage = handleOnMessage;
-    webSocket.onerror = handleOnError;
+
+    webSocket.onopen = () => {
+      console.debug('WebSocket connected');
+      setIsConnected(true);
+    };
+
+    webSocket.onclose = () => {
+      console.debug('WebSocket disconnected');
+      setIsConnected(false);
+      for (const callbacks of Object.values(callbacksRef.current)) {
+        callbacks.length = 0;
+      }
+      setTimeout(connect, 1000);
+    };
+
+    webSocket.onmessage = <T extends WebSocketMessageType>({ data }: MessageEvent<string>) => {
+      console.debug('WebSocket received message', data);
+      const message: WebSocketMessage<T> = JSON.parse(data);
+      if (!message.type || !message.data) {
+        console.warn(`Incorrect format (require type and data) ${message}`);
+        return;
+      }
+      if (!Object.values(WebSocketMessageType).includes(message.type)) {
+        console.warn(`Unhandled message of type: ${message.type}`);
+        return;
+      }
+      const callbacks = callbacksRef.current[message.type];
+      for (const callback of callbacks) {
+        callback(message.data);
+      }
+    };
+
+    webSocket.onerror = (event: Event) => {
+      console.error('Closing WebSocket due to an error:', event);
+      webSocketRef.current?.close();
+    };
 
     webSocketRef.current = webSocket;
 
-    return () => webSocket.close();
-  }, [accessToken, handleOnOpen, handleOnClose, handleOnMessage, handleOnError]);
+    return () => {
+      switch (webSocket.readyState) {
+        case webSocket.CONNECTING:
+          webSocket.onopen = () => webSocket.close();
+          break;
+        case webSocket.OPEN:
+          webSocket.close();
+          break;
+      }
+    };
+  }, [accessToken]);
 
-  return isConnected ? (
-    <WebSocketContext.Provider value={{ bind, send }}>{children}</WebSocketContext.Provider>
-  ) : (
-    <>{children}</>
-  );
+  useEffect(connect, [connect]);
+
+  return <WebSocketContext.Provider value={isConnected ? context : undefined}>{children}</WebSocketContext.Provider>;
 };

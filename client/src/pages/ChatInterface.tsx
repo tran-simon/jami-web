@@ -16,7 +16,7 @@
  * <https://www.gnu.org/licenses/>.
  */
 import { Box, Divider, Stack } from '@mui/material';
-import { ConversationMember, Message } from 'jami-web-common';
+import { ConversationMember, Message, WebSocketMessageType } from 'jami-web-common';
 import { useCallback, useContext, useEffect, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
 
@@ -24,7 +24,7 @@ import { FilePreviewRemovable } from '../components/FilePreview';
 import LoadingPage from '../components/Loading';
 import MessageList from '../components/MessageList';
 import SendMessageForm from '../components/SendMessageForm';
-import { SocketContext } from '../contexts/Socket';
+import { WebSocketContext } from '../contexts/WebSocketProvider';
 import { useMessagesQuery, useSendMessageMutation } from '../services/Conversation';
 import { FileHandler } from '../utils/files';
 
@@ -33,7 +33,7 @@ type ChatInterfaceProps = {
   members: ConversationMember[];
 };
 const ChatInterface = ({ conversationId, members }: ChatInterfaceProps) => {
-  const socket = useContext(SocketContext);
+  const webSocket = useContext(WebSocketContext);
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -87,14 +87,13 @@ const ChatInterface = ({ conversationId, members }: ChatInterfaceProps) => {
   const sendMessage = useCallback((message: string) => sendMessageMutation.mutate(message), [sendMessageMutation]);
 
   useEffect(() => {
-    if (socket) {
-      socket.off('newMessage');
-      socket.on('newMessage', (data) => {
+    if (webSocket) {
+      webSocket.bind(WebSocketMessageType.ConversationMessage, ({ message }) => {
         console.log('newMessage');
-        setMessages((messages) => addMessage(messages, data));
+        setMessages((messages) => addMessage(messages, message));
       });
     }
-  }, [conversationId, socket]);
+  }, [conversationId, webSocket]);
 
   if (isLoading) {
     return <LoadingPage />;

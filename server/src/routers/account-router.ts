@@ -69,7 +69,7 @@ accountRouter.patch('/', (req, res) => {
 });
 
 // TODO: Should this endpoint be removed?
-accountRouter.post('/send-account-message', (req: Request<ParamsDictionary, any, AccountTextMessage>, res) => {
+accountRouter.post('/send-account-message', (req: Request<ParamsDictionary, any, AccountTextMessage<unknown>>, res) => {
   const { from, to, message } = req.body;
   if (from === undefined || to === undefined || message === undefined) {
     res.status(HttpStatusCode.BadRequest).send('Missing from, to, or message in body');

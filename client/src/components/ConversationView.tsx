@@ -16,13 +16,13 @@
  * <https://www.gnu.org/licenses/>.
  */
 import { Divider, Stack, Typography } from '@mui/material';
-import { Account, Conversation, ConversationMember } from 'jami-web-common';
+import { Account, Conversation, ConversationMember, WebSocketMessageType } from 'jami-web-common';
 import { useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router';
 
 import { useAuthContext } from '../contexts/AuthProvider';
-import { SocketContext } from '../contexts/Socket';
+import { WebSocketContext } from '../contexts/WebSocketProvider';
 import ChatInterface from '../pages/ChatInterface';
 import { useConversationQuery } from '../services/Conversation';
 import { translateEnumeration, TranslateEnumerationOptions } from '../utils/translations';
@@ -34,7 +34,7 @@ type ConversationViewProps = {
 };
 const ConversationView = ({ conversationId }: ConversationViewProps) => {
   const { account } = useAuthContext();
-  const socket = useContext(SocketContext);
+  const webSocket = useContext(WebSocketContext);
   const [conversation, setConversation] = useState<Conversation | undefined>();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -59,15 +59,12 @@ const ConversationView = ({ conversationId }: ConversationViewProps) => {
   }, [conversationQuery.isError]);
 
   useEffect(() => {
-    if (!conversation) return;
-    console.log(`io set conversation ${conversationId} ` + socket);
-    if (socket) {
-      socket.emit('conversation', {
-        accountId,
-        conversationId,
-      });
+    if (!conversation || !webSocket) {
+      return;
     }
-  }, [accountId, conversation, conversationId, socket]);
+    console.log(`set conversation ${conversationId} ` + webSocket);
+    webSocket.send(WebSocketMessageType.ConversationView, { accountId, conversationId });
+  }, [accountId, conversation, conversationId, webSocket]);
 
   if (isLoading) {
     return <LoadingPage />;

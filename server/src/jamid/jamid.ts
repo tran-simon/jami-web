@@ -15,7 +15,15 @@
  * License along with this program.  If not, see
  * <https://www.gnu.org/licenses/>.
  */
-import { AccountDetails, Message, VolatileDetails, WebSocketMessageType } from 'jami-web-common';
+import {
+  AccountDetails,
+  AccountTextMessage,
+  ConversationMessage,
+  Message,
+  VolatileDetails,
+  WebSocketMessage,
+  WebSocketMessageType,
+} from 'jami-web-common';
 import log from 'loglevel';
 import { filter, firstValueFrom, map, Subject } from 'rxjs';
 import { Service } from 'typedi';
@@ -369,7 +377,7 @@ export class Jamid {
 
     this.events.onIncomingAccountMessage.subscribe((signal) => {
       log.debug('Received IncomingAccountMessage:', JSON.stringify(signal));
-      const message = JSON.parse(signal.payload['application/json']);
+      const message: WebSocketMessage<any> = JSON.parse(signal.payload['application/json']);
 
       if (message === undefined) {
         log.debug('Undefined account message');
@@ -381,10 +389,15 @@ export class Jamid {
         return;
       }
 
-      message.data.from = signal.from;
-      message.data.to = signal.accountId;
+      const data: AccountTextMessage<unknown> = {
+        from: signal.from,
+        to: signal.accountId,
+        message: message.data.message,
+      };
+      message.data = data;
+
       log.info(`Sending ${JSON.stringify(message)} to ${signal.accountId}`);
-      this.ws.send(signal.accountId, message);
+      this.ws.send(signal.accountId, message.type, data);
     });
 
     this.events.onAccountMessageStatusChanged.subscribe((signal) => {
@@ -416,7 +429,11 @@ export class Jamid {
 
     this.events.onMessageReceived.subscribe((signal) => {
       log.debug('Received MessageReceived:', JSON.stringify(signal));
-      // TODO: Send message to client using WS service
+      const data: ConversationMessage = {
+        conversationId: signal.conversationId,
+        message: signal.message,
+      };
+      this.ws.send(signal.accountId, WebSocketMessageType.ConversationMessage, data);
     });
   }
 }

@@ -15,8 +15,9 @@
  * License along with this program.  If not, see
  * <https://www.gnu.org/licenses/>.
  */
-export interface AccountTextMessage<T> {
-  from: string;
-  to: string;
-  message: T;
+import { Message } from '../Conversation.js';
+
+export interface ConversationMessage {
+  conversationId: string;
+  message: Message;
 }

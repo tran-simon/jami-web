@@ -15,7 +15,7 @@
  * License along with this program.  If not, see
  * <https://www.gnu.org/licenses/>.
  */
-import { AccountTextMessage, WebSocketMessage, WebSocketMessageType } from 'jami-web-common';
+import { AccountTextMessage, WebSocketMessageType } from 'jami-web-common';
 import log from 'loglevel';
 import { Container } from 'typedi';
 
@@ -25,13 +25,12 @@ import { Ws } from '../ws.js';
 const jamid = Container.get(Jamid);
 const ws = Container.get(Ws);
 
-function sendWebRTCData(message: Partial<WebSocketMessage>) {
-  const data: AccountTextMessage = message.data;
+function sendWebRTCData<T>(data: Partial<AccountTextMessage<T>>) {
   if (!data.from || !data.to || !data.message) {
     log.warn('Incorrect format for AccountTextMessage (require from, to and message):', data);
     return;
   }
-  jamid.sendAccountTextMessage(data.from, data.to, JSON.stringify(message));
+  jamid.sendAccountTextMessage(data.from, data.to, JSON.stringify(data.message));
 }
 
 export function bindWebRTCCallbacks() {
