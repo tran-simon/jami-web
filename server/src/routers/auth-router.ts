@@ -20,27 +20,25 @@ import { Router } from 'express';
 import asyncHandler from 'express-async-handler';
 import { ParamsDictionary, Request } from 'express-serve-static-core';
 import { HttpStatusCode } from 'jami-web-common';
-import { SignJWT } from 'jose';
 import { Container } from 'typedi';
 
-import { Creds } from '../creds.js';
 import { Jamid } from '../jamid/jamid.js';
-import { Vault } from '../vault.js';
+import { Accounts } from '../storage/accounts.js';
+import { signJwt } from '../utils/jwt.js';
 
 interface Credentials {
-  username?: string;
-  password?: string;
+  username: string;
+  password: string;
 }
 
 const jamid = Container.get(Jamid);
-const creds = Container.get(Creds);
-const vault = Container.get(Vault);
+const accounts = Container.get(Accounts);
 
 export const authRouter = Router();
 
 authRouter.post(
   '/new-account',
-  asyncHandler(async (req: Request<ParamsDictionary, string, Credentials>, res, _next) => {
+  asyncHandler(async (req: Request<ParamsDictionary, string, Partial<Credentials>>, res, _next) => {
     const { username, password } = req.body;
     if (username === undefined || password === undefined) {
       res.status(HttpStatusCode.BadRequest).send('Missing username or password in body');
@@ -57,12 +55,8 @@ authRouter.post(
     // TODO: add JAMS support
     // managerUri: 'https://jams.savoirfairelinux.com',
     // managerUsername: data.username,
-    // TODO: find a way to store the password directly in Jami
-    // Maybe by using the "password" field? But as I tested, it's not
-    // returned when getting user infos.
     const accountId = await jamid.addAccount(new Map());
 
-    // TODO: understand why the password arg in this call must be empty
     const state = await jamid.registerUsername(accountId, username, '');
     if (state !== 0) {
       jamid.removeAccount(accountId);
@@ -76,8 +70,8 @@ authRouter.post(
       return;
     }
 
-    creds.set(username, hashedPassword);
-    await creds.save();
+    accounts.set(username, hashedPassword);
+    await accounts.save();
 
     res.sendStatus(HttpStatusCode.Created);
   })
@@ -85,45 +79,37 @@ authRouter.post(
 
 authRouter.post(
   '/login',
-  asyncHandler(async (req: Request<ParamsDictionary, { accessToken: string } | string, Credentials>, res, _next) => {
-    const { username, password } = req.body;
-    if (username === undefined || password === undefined) {
-      res.status(HttpStatusCode.BadRequest).send('Missing username or password in body');
-      return;
-    }
+  asyncHandler(
+    async (req: Request<ParamsDictionary, { accessToken: string } | string, Partial<Credentials>>, res, _next) => {
+      const { username, password } = req.body;
+      if (username === undefined || password === undefined) {
+        res.status(HttpStatusCode.BadRequest).send('Missing username or password in body');
+        return;
+      }
 
-    // The account may either be:
-    // 1. not found
-    // 2. found but not on this instance (but I'm not sure about this)
-    const accountId = jamid.getAccountIdFromUsername(username);
-    if (accountId === undefined) {
-      res.status(HttpStatusCode.NotFound).send('Username not found');
-      return;
-    }
+      // Check if the account is stored stored on this daemon instance
+      const accountId = jamid.getAccountIdFromUsername(username);
+      if (accountId === undefined) {
+        res.status(HttpStatusCode.NotFound).send('Username not found');
+        return;
+      }
 
-    // TODO: load the password from Jami
-    const hashedPassword = creds.get(username);
-    if (!hashedPassword) {
-      res
-        .status(HttpStatusCode.NotFound)
-        .send('Password not found (the account does not have a password set on the server)');
-      return;
-    }
+      const hashedPassword = accounts.get(username);
+      if (hashedPassword === undefined) {
+        res
+          .status(HttpStatusCode.NotFound)
+          .send('Password not found (the account does not have a password set on the server)');
+        return;
+      }
 
-    const isPasswordVerified = await argon2.verify(hashedPassword, password);
-    if (!isPasswordVerified) {
-      res.status(HttpStatusCode.Unauthorized).send('Incorrect password');
-      return;
-    }
+      const isPasswordVerified = await argon2.verify(hashedPassword, password);
+      if (!isPasswordVerified) {
+        res.status(HttpStatusCode.Unauthorized).send('Incorrect password');
+        return;
+      }
 
-    const jwt = await new SignJWT({ id: accountId })
-      .setProtectedHeader({ alg: 'EdDSA' })
-      .setIssuedAt()
-      // TODO: use valid issuer and audience
-      .setIssuer('urn:example:issuer')
-      .setAudience('urn:example:audience')
-      .setExpirationTime('2h')
-      .sign(vault.privateKey);
-    res.send({ accessToken: jwt });
-  })
+      const jwt = await signJwt(accountId);
+      res.send({ accessToken: jwt });
+    }
+  )
 );

@@ -15,10 +15,9 @@
  * License along with this program.  If not, see
  * <https://www.gnu.org/licenses/>.
  */
-import { Request, Router } from 'express';
+import { Router } from 'express';
 import asyncHandler from 'express-async-handler';
-import { ParamsDictionary } from 'express-serve-static-core';
-import { AccountDetails, AccountTextMessage, HttpStatusCode } from 'jami-web-common';
+import { AccountDetails, HttpStatusCode } from 'jami-web-common';
 import { Container } from 'typedi';
 
 import { Jamid } from '../jamid/jamid.js';
@@ -65,17 +64,5 @@ accountRouter.patch('/', (req, res) => {
   const newAccountDetails: AccountDetails = { ...currentAccountDetails, ...req.body };
   jamid.setAccountDetails(accountId, newAccountDetails);
 
-  res.sendStatus(HttpStatusCode.NoContent);
-});
-
-// TODO: Should this endpoint be removed?
-accountRouter.post('/send-account-message', (req: Request<ParamsDictionary, any, AccountTextMessage<unknown>>, res) => {
-  const { from, to, message } = req.body;
-  if (from === undefined || to === undefined || message === undefined) {
-    res.status(HttpStatusCode.BadRequest).send('Missing from, to, or message in body');
-    return;
-  }
-
-  jamid.sendAccountTextMessage(from, to, JSON.stringify(message));
   res.sendStatus(HttpStatusCode.NoContent);
 });

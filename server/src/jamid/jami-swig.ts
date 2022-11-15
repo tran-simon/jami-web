@@ -15,36 +15,66 @@
  * License along with this program.  If not, see
  * <https://www.gnu.org/licenses/>.
  */
-import { Constructable } from '../interfaces.js';
-import { itMap, itRange, itToArr, itToRecord } from './utils.js';
+import { Constructable } from '../interfaces/constructable.js';
 
-interface SwigVec<T> {
+interface SwigVect<T> {
   size(): number;
-  get(i: number): T; // TODO: | undefined;
+  get(index: number): T | undefined;
 }
 
 interface SwigMap<T, U> {
-  keys(): SwigVec<T>;
-  get(k: T): U; // TODO: | undefined;
-  set(k: T, v: U): void;
+  keys(): SwigVect<T>;
+  get(key: T): U | undefined;
+  set(key: T, value: U): void;
 }
-
-// TODO: Review these conversion functions
-const swigVecToIt = <T>(v: SwigVec<T>) => itMap(itRange(0, v.size()), (i) => v.get(i));
-const swigMapToIt = <T, U>(m: SwigMap<T, U>) => itMap(swigVecToIt(m.keys()), (k): [T, U] => [k, m.get(k)]);
 
 // export type IntVect = SwigVec<number>;
 // export type UintVect = SwigVec<number>;
 // export type FloatVect = SwigVec<number>;
-export type StringVect = SwigVec<string>;
+export type StringVect = SwigVect<string>;
 // export type IntegerMap = SwigMap<string, number>;
 export type StringMap = SwigMap<string, string>;
-export type VectMap = SwigVec<StringMap>;
+export type VectMap = SwigVect<StringMap>;
 // export type Blob = SwigVec<number>;
 
-export const stringVectToArray = (sv: StringVect) => itToArr(swigVecToIt(sv));
-export const stringMapToRecord = (sm: StringMap) => itToRecord(swigMapToIt(sm));
-export const vectMapToRecordArray = (vm: VectMap) => itToArr(itMap(swigVecToIt(vm), stringMapToRecord));
+function* swigVectToIt<T>(swigVect: SwigVect<T>) {
+  const size = swigVect.size();
+  for (let i = 0; i < size; i++) {
+    yield swigVect.get(i)!;
+  }
+}
+
+function* swigMapToIt<T, U>(swigMap: SwigMap<T, U>) {
+  const keys = swigVectToIt(swigMap.keys());
+  for (const key of keys) {
+    const value = swigMap.get(key)!;
+    yield [key, value];
+  }
+}
+
+export function stringVectToArray(stringVect: StringVect): string[] {
+  const elements = swigVectToIt(stringVect);
+  return Array.from(elements);
+}
+
+export function stringMapToRecord(stringMap: StringMap): Record<string, string> {
+  const keyValuePairs = swigMapToIt(stringMap);
+  const record: Record<string, string> = {};
+  for (const [key, value] of keyValuePairs) {
+    record[key] = value;
+  }
+  return record;
+}
+
+export function vectMapToRecordArray(vectMap: VectMap): Record<string, string>[] {
+  const stringMaps = swigVectToIt(vectMap);
+  const records = [];
+  for (const stringMap of stringMaps) {
+    const record = stringMapToRecord(stringMap);
+    records.push(record);
+  }
+  return records;
+}
 
 /**
  * Non-exhaustive list of properties for JamiSwig.

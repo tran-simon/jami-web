@@ -15,6 +15,8 @@
  * License along with this program.  If not, see
  * <https://www.gnu.org/licenses/>.
  */
+import { createRequire } from 'node:module';
+
 import {
   AccountDetails,
   AccountTextMessage,
@@ -28,7 +30,7 @@ import log from 'loglevel';
 import { filter, firstValueFrom, map, Subject } from 'rxjs';
 import { Service } from 'typedi';
 
-import { Ws } from '../ws.js';
+import { WebSocketServer } from '../websocket/websocket-server.js';
 import { JamiSignal } from './jami-signal.js';
 import {
   AccountDetailsChanged,
@@ -47,22 +49,19 @@ import {
   VolatileDetailsChanged,
 } from './jami-signal-interfaces.js';
 import { JamiSwig, StringMap, stringMapToRecord, stringVectToArray, vectMapToRecordArray } from './jami-swig.js';
-import { require } from './utils.js';
 
-// TODO: Mechanism to map account IDs to a list of WebSockets
+const require = createRequire(import.meta.url);
+
 // TODO: Convert Records to interfaces and replace them in common/ (e.g. Contact)
 
 @Service()
 export class Jamid {
-  private readonly jamiSwig: JamiSwig;
-  private readonly usernamesToAccountIds: Map<string, string>;
+  private jamiSwig: JamiSwig;
+  private usernamesToAccountIds = new Map<string, string>();
   private readonly events;
 
-  constructor(private ws: Ws) {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    this.jamiSwig = require('../../jamid.node') as JamiSwig; // TODO: we should put the path in the .env
-
-    this.usernamesToAccountIds = new Map<string, string>();
+  constructor(private webSocketServer: WebSocketServer) {
+    this.jamiSwig = require('../../jamid.node') as JamiSwig;
 
     // Setup signal handlers
     const handlers: Record<string, unknown> = {};
@@ -380,12 +379,17 @@ export class Jamid {
       const message: WebSocketMessage<any> = JSON.parse(signal.payload['application/json']);
 
       if (message === undefined) {
-        log.debug('Undefined account message');
+        log.warn('Undefined account message');
+        return;
+      }
+
+      if (message.type === undefined || message.data === undefined) {
+        log.warn('Account message is not a valid WebSocketMessage (missing type or data fields)');
         return;
       }
 
       if (!Object.values(WebSocketMessageType).includes(message.type)) {
-        log.warn(`Unhandled account message type: ${message.type}`);
+        log.warn(`Invalid WebSocket message type: ${message.type}`);
         return;
       }
 
@@ -394,10 +398,8 @@ export class Jamid {
         to: signal.accountId,
         message: message.data.message,
       };
-      message.data = data;
 
-      log.info(`Sending ${JSON.stringify(message)} to ${signal.accountId}`);
-      this.ws.send(signal.accountId, message.type, data);
+      this.webSocketServer.send(signal.accountId, message.type, data);
     });
 
     this.events.onAccountMessageStatusChanged.subscribe((signal) => {
@@ -433,7 +435,7 @@ export class Jamid {
         conversationId: signal.conversationId,
         message: signal.message,
       };
-      this.ws.send(signal.accountId, WebSocketMessageType.ConversationMessage, data);
+      this.webSocketServer.send(signal.accountId, WebSocketMessageType.ConversationMessage, data);
     });
   }
 }

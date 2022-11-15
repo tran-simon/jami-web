@@ -15,38 +15,25 @@
  * License along with this program.  If not, see
  * <https://www.gnu.org/licenses/>.
  */
-import { readFileSync } from 'node:fs';
-import { writeFile } from 'node:fs/promises';
-
+import { importPKCS8, importSPKI, KeyLike } from 'jose';
 import { Service } from 'typedi';
 
 @Service()
-export class AdminConfig {
-  private readonly file = 'admin.json';
-  private account: { admin: string };
+export class SigningKeys {
+  privateKey!: KeyLike;
+  publicKey!: KeyLike;
 
-  constructor() {
-    let buffer: Buffer;
+  async build() {
+    const privatekey = process.env.PRIVATE_KEY;
+    const publicKey = process.env.PUBLIC_KEY;
 
-    try {
-      buffer = readFileSync(this.file);
-    } catch (e) {
-      console.error(e);
-      buffer = Buffer.from('{}');
+    if (privatekey === undefined || publicKey === undefined) {
+      throw new Error('Missing private or public key environment variables. Try running "npm run genkeys"');
     }
 
-    this.account = JSON.parse(buffer.toString());
-  }
+    this.privateKey = await importPKCS8(privatekey, 'EdDSA');
+    this.publicKey = await importSPKI(publicKey, 'EdDSA');
 
-  get() {
-    return this.account.admin;
-  }
-
-  set(password: string) {
-    this.account.admin = password;
-  }
-
-  async save() {
-    await writeFile(this.file, JSON.stringify(this.account) + '\n');
+    return this;
   }
 }

@@ -15,21 +15,29 @@
  * License along with this program.  If not, see
  * <https://www.gnu.org/licenses/>.
  */
-import { NextFunction, Request, Response } from 'express';
-import { HttpStatusCode } from 'jami-web-common';
+import { jwtVerify, JWTVerifyResult, SignJWT } from 'jose';
 import { Container } from 'typedi';
 
-import { AdminAccount } from '../storage/admin-account.js';
+import { SigningKeys } from '../storage/signing-keys.js';
 
-const adminAccount = Container.get(AdminAccount);
+const jwtIssuer = 'https://jami.net/';
+const jwtAudience = 'https://jami.net/';
 
-export async function checkAdminSetup(_req: Request, res: Response, next: NextFunction) {
-  const isSetupComplete = adminAccount.get() !== undefined;
+const signingKeys = Container.get(SigningKeys);
 
-  if (!isSetupComplete) {
-    res.status(HttpStatusCode.Forbidden).send('Setup not complete');
-    return;
-  }
+export async function signJwt(accountId: string): Promise<string> {
+  return new SignJWT({ accountId })
+    .setProtectedHeader({ alg: 'EdDSA' })
+    .setIssuedAt()
+    .setIssuer(jwtIssuer)
+    .setAudience(jwtAudience)
+    .setExpirationTime('2h')
+    .sign(signingKeys.privateKey);
+}
 
-  next();
+export async function verifyJwt(token: string): Promise<JWTVerifyResult> {
+  return jwtVerify(token, signingKeys.publicKey, {
+    issuer: jwtIssuer,
+    audience: jwtAudience,
+  });
 }

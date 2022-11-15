@@ -15,34 +15,37 @@
  * License along with this program.  If not, see
  * <https://www.gnu.org/licenses/>.
  */
-import { readFile, writeFile } from 'node:fs/promises';
+import { readFileSync } from 'node:fs';
+import { writeFile } from 'node:fs/promises';
 
 import { Service } from 'typedi';
 
 @Service()
-export class Creds {
-  readonly file = 'creds.json';
-  db: Record<string, string>;
+export class AdminAccount {
+  private readonly filename = 'admin.json';
+  private account: { admin: string };
 
   constructor() {
-    this.db = {};
+    let buffer: Buffer;
+
+    try {
+      buffer = readFileSync(this.filename);
+    } catch (e) {
+      buffer = Buffer.from('{}');
+    }
+
+    this.account = JSON.parse(buffer.toString());
   }
 
-  async build() {
-    const buffer = await readFile(this.file).catch(() => Buffer.from('{}'));
-    this.db = JSON.parse(buffer.toString());
-    return this;
+  get(): string | undefined {
+    return this.account.admin;
   }
 
-  get(username: string) {
-    return this.db[username];
+  set(password: string): void {
+    this.account.admin = password;
   }
 
-  set(username: string, password: string) {
-    this.db[username] = password;
-  }
-
-  async save() {
-    await writeFile(this.file, JSON.stringify(this.db) + '\n');
+  async save(): Promise<void> {
+    await writeFile(this.filename, JSON.stringify(this.account, null, 2) + '\n');
   }
 }

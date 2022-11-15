@@ -77,17 +77,21 @@ export default ({ children }: WithChildren) => {
       setTimeout(connect, 1000);
     };
 
-    webSocket.onmessage = <T extends WebSocketMessageType>({ data }: MessageEvent<string>) => {
-      console.debug('WebSocket received message', data);
-      const message: WebSocketMessage<T> = JSON.parse(data);
+    webSocket.onmessage = <T extends WebSocketMessageType>(event: MessageEvent<string>) => {
+      const messageString = event.data;
+      console.debug('WebSocket received message', messageString);
+
+      const message: WebSocketMessage<T> = JSON.parse(messageString);
       if (!message.type || !message.data) {
-        console.warn(`Incorrect format (require type and data) ${message}`);
+        console.warn('WebSocket message is not a valid WebSocketMessage (missing type or data fields)');
         return;
       }
+
       if (!Object.values(WebSocketMessageType).includes(message.type)) {
-        console.warn(`Unhandled message of type: ${message.type}`);
+        console.warn(`Invalid WebSocket message type: ${message.type}`);
         return;
       }
+
       const callbacks = callbacksRef.current[message.type];
       for (const callback of callbacks) {
         callback(message.data);

@@ -20,21 +20,22 @@ import log from 'loglevel';
 import { Container } from 'typedi';
 
 import { Jamid } from '../jamid/jamid.js';
-import { Ws } from '../ws.js';
+import { WebSocketServer } from './websocket-server.js';
 
 const jamid = Container.get(Jamid);
-const ws = Container.get(Ws);
+const webSocketServer = Container.get(WebSocketServer);
 
 function sendWebRTCData<T>(data: Partial<AccountTextMessage<T>>) {
-  if (!data.from || !data.to || !data.message) {
-    log.warn('Incorrect format for AccountTextMessage (require from, to and message):', data);
+  if (data.from === undefined || data.to === undefined || data.message === undefined) {
+    log.warn('Message is not a valid AccountTextMessage (missing from, to, or message fields)');
     return;
   }
+
   jamid.sendAccountTextMessage(data.from, data.to, JSON.stringify(data.message));
 }
 
 export function bindWebRTCCallbacks() {
-  ws.bind(WebSocketMessageType.WebRTCOffer, sendWebRTCData);
-  ws.bind(WebSocketMessageType.WebRTCAnswer, sendWebRTCData);
-  ws.bind(WebSocketMessageType.IceCandidate, sendWebRTCData);
+  webSocketServer.bind(WebSocketMessageType.WebRTCOffer, sendWebRTCData);
+  webSocketServer.bind(WebSocketMessageType.WebRTCAnswer, sendWebRTCData);
+  webSocketServer.bind(WebSocketMessageType.IceCandidate, sendWebRTCData);
 }

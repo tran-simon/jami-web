@@ -20,20 +20,18 @@ import { Router } from 'express';
 import asyncHandler from 'express-async-handler';
 import { ParamsDictionary, Request } from 'express-serve-static-core';
 import { HttpStatusCode } from 'jami-web-common';
-import { SignJWT } from 'jose';
 import { Container } from 'typedi';
 
-import { AdminConfig } from '../admin-config.js';
 import { checkAdminSetup } from '../middleware/setup.js';
-import { Vault } from '../vault.js';
+import { AdminAccount } from '../storage/admin-account.js';
+import { signJwt } from '../utils/jwt.js';
+
+const adminAccount = Container.get(AdminAccount);
 
 export const setupRouter = Router();
 
-const vault = Container.get(Vault);
-const adminConfig = Container.get(AdminConfig);
-
 setupRouter.get('/check', (_req, res, _next) => {
-  const isSetupComplete = adminConfig.get() !== undefined;
+  const isSetupComplete = adminAccount.get() !== undefined;
   res.send({ isSetupComplete });
 });
 
@@ -51,7 +49,7 @@ setupRouter.post(
       return;
     }
 
-    const isAdminCreated = adminConfig.get() !== undefined;
+    const isAdminCreated = adminAccount.get() !== undefined;
     if (isAdminCreated) {
       res.status(HttpStatusCode.Conflict).send('Admin already exists');
       return;
@@ -59,8 +57,8 @@ setupRouter.post(
 
     const hashedPassword = await argon2.hash(password, { type: argon2.argon2id });
 
-    adminConfig.set(hashedPassword);
-    await adminConfig.save();
+    adminAccount.set(hashedPassword);
+    await adminAccount.save();
 
     res.sendStatus(HttpStatusCode.Created);
   })
@@ -68,7 +66,7 @@ setupRouter.post(
 
 // Every request handler after this line will be submitted to this middleware
 // in order to ensure that the admin account is set up before proceeding with
-// setup related requests
+// setup-related requests
 setupRouter.use(checkAdminSetup);
 
 setupRouter.post(
@@ -81,7 +79,11 @@ setupRouter.post(
         return;
       }
 
-      const hashedPassword = adminConfig.get();
+      const hashedPassword = adminAccount.get();
+      if (hashedPassword === undefined) {
+        res.status(HttpStatusCode.InternalServerError).send('Admin password not found');
+        return;
+      }
 
       const isPasswordVerified = await argon2.verify(hashedPassword, password);
       if (!isPasswordVerified) {
@@ -89,14 +91,7 @@ setupRouter.post(
         return;
       }
 
-      const jwt = await new SignJWT({ id: 'admin' })
-        .setProtectedHeader({ alg: 'EdDSA' })
-        .setIssuedAt()
-        // TODO: use valid issuer and audience
-        .setIssuer('urn:example:issuer')
-        .setAudience('urn:example:audience')
-        .setExpirationTime('2h')
-        .sign(vault.privateKey);
+      const jwt = await signJwt('admin');
       res.send({ accessToken: jwt });
     }
   )

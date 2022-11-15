@@ -22,7 +22,6 @@ import { HttpStatusCode } from 'jami-web-common';
 import log from 'loglevel';
 import { Service } from 'typedi';
 
-import { bindWebRTCCallbacks } from './handlers/webrtc-handler.js';
 import { checkAdminSetup } from './middleware/setup.js';
 import { accountRouter } from './routers/account-router.js';
 import { authRouter } from './routers/auth-router.js';
@@ -32,44 +31,43 @@ import { conversationRouter } from './routers/conversation-router.js';
 import { defaultModeratorsRouter } from './routers/default-moderators-router.js';
 import { nameserverRouter } from './routers/nameserver-router.js';
 import { setupRouter } from './routers/setup-router.js';
+import { bindWebRTCCallbacks } from './websocket/webrtc-handler.js';
 
 @Service()
 export class App {
-  async build() {
-    const app = express();
+  app = express();
 
+  constructor() {
     // Setup middleware
-    app.use(helmet());
-    app.use(cors());
-    app.use(json());
+    this.app.use(helmet());
+    this.app.use(cors());
+    this.app.use(json());
 
     // Enforce admin setup
-    app.use('/setup', setupRouter);
-    app.use(checkAdminSetup);
+    this.app.use('/setup', setupRouter);
+    this.app.use(checkAdminSetup);
 
     // Setup routing
-    app.use('/auth', authRouter);
-    app.use('/account', accountRouter);
-    app.use('/contacts', contactsRouter);
-    app.use('/default-moderators', defaultModeratorsRouter);
-    app.use('/conversations', conversationRouter);
-    app.use('/calls', callRouter);
-    app.use('/ns', nameserverRouter);
+    this.app.use('/auth', authRouter);
+    this.app.use('/account', accountRouter);
+    this.app.use('/contacts', contactsRouter);
+    this.app.use('/default-moderators', defaultModeratorsRouter);
+    this.app.use('/conversations', conversationRouter);
+    this.app.use('/calls', callRouter);
+    this.app.use('/ns', nameserverRouter);
 
     // Setup WebSocket callbacks
     bindWebRTCCallbacks();
 
     // Setup 404 error handling
-    app.use((_req, res) => {
+    this.app.use((_req, res) => {
       res.sendStatus(HttpStatusCode.NotFound);
     });
 
     // Setup internal error handling
-    app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
+    this.app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
       log.error(err);
       res.status(HttpStatusCode.InternalServerError).send(err.message);
     });
-
-    return app;
   }
 }

@@ -17,15 +17,11 @@
  */
 import { NextFunction, Request, Response } from 'express';
 import { HttpStatusCode } from 'jami-web-common';
-import { jwtVerify } from 'jose';
-import { Container } from 'typedi';
 
-import { Vault } from '../vault.js';
+import { verifyJwt } from '../utils/jwt.js';
 
 function createAuthenticationMiddleware(isAuthenticationRequired: boolean) {
   return async (req: Request, res: Response, next: NextFunction) => {
-    const publicKey = Container.get(Vault).publicKey;
-
     const authorizationHeader = req.headers.authorization;
     if (!authorizationHeader) {
       if (isAuthenticationRequired) {
@@ -45,11 +41,8 @@ function createAuthenticationMiddleware(isAuthenticationRequired: boolean) {
     }
 
     try {
-      const { payload } = await jwtVerify(token, publicKey, {
-        issuer: 'urn:example:issuer',
-        audience: 'urn:example:audience',
-      });
-      res.locals.accountId = payload.id;
+      const { payload } = await verifyJwt(token);
+      res.locals.accountId = payload.accountId;
       next();
     } catch (e) {
       res.status(HttpStatusCode.Unauthorized).send('Invalid access token');

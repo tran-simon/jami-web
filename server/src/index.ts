@@ -26,25 +26,23 @@ import log from 'loglevel';
 import { Container } from 'typedi';
 
 import { App } from './app.js';
-import { Creds } from './creds.js';
 import { Jamid } from './jamid/jamid.js';
-import { Vault } from './vault.js';
-import { Ws } from './ws.js';
+import { SigningKeys } from './storage/signing-keys.js';
+import { WebSocketServer } from './websocket/websocket-server.js';
 
 log.setLevel(process.env.NODE_ENV === 'production' ? 'error' : 'trace');
 
 const port: string | number = 5000;
 
-await Container.get(Creds).build();
-await Container.get(Vault).build();
+await Container.get(SigningKeys).build();
 const jamid = Container.get(Jamid);
-const app = await Container.get(App).build();
-const wss = await Container.get(Ws).build();
+const app = Container.get(App);
+const webSocketServer = Container.get(WebSocketServer);
 
 const server = createServer();
 
-server.on('request', app);
-server.on('upgrade', wss);
+server.on('request', app.app);
+server.on('upgrade', webSocketServer.upgrade.bind(webSocketServer));
 
 server.listen(port);
 server.on('error', onError);
