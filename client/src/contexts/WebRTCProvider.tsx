@@ -27,6 +27,8 @@ interface IWebRTCContext {
   localVideoRef: React.RefObject<HTMLVideoElement> | null;
   remoteVideoRef: React.RefObject<HTMLVideoElement> | null;
 
+  mediaDevices: Record<MediaDeviceKind, MediaDeviceInfo[]>;
+
   contactId: string;
 
   isAudioOn: boolean;
@@ -39,6 +41,11 @@ interface IWebRTCContext {
 const defaultWebRTCContext: IWebRTCContext = {
   localVideoRef: null,
   remoteVideoRef: null,
+  mediaDevices: {
+    audioinput: [],
+    audiooutput: [],
+    videoinput: [],
+  },
 
   contactId: '',
 
@@ -74,6 +81,25 @@ export default ({
   const [webRTCConnection, setWebRTCConnection] = useState<RTCPeerConnection | undefined>();
   const localStreamRef = useRef<MediaStream>();
   const webSocket = useContext(WebSocketContext);
+  const [mediaDevices, setMediaDevices] = useState<Record<MediaDeviceKind, MediaDeviceInfo[]>>(
+    defaultWebRTCContext.mediaDevices
+  );
+
+  useEffect(() => {
+    navigator.mediaDevices.enumerateDevices().then((devices) => {
+      const newMediaDevices: Record<MediaDeviceKind, MediaDeviceInfo[]> = {
+        audioinput: [],
+        audiooutput: [],
+        videoinput: [],
+      };
+
+      for (const device of devices) {
+        newMediaDevices[device.kind].push(device);
+      }
+
+      setMediaDevices(newMediaDevices);
+    });
+  }, []);
 
   useEffect(() => {
     if (!webRTCConnection) {
@@ -217,6 +243,7 @@ export default ({
       value={{
         localVideoRef,
         remoteVideoRef,
+        mediaDevices,
         contactId,
         isAudioOn,
         setAudioStatus,

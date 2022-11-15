@@ -17,7 +17,7 @@
  */
 
 import { styled } from '@mui/material/styles';
-import React, { useContext } from 'react';
+import React, { useContext, useMemo } from 'react';
 import { Trans } from 'react-i18next';
 
 import { WebRTCContext } from '../contexts/WebRTCProvider';
@@ -129,19 +129,29 @@ export const CallingScreenShareButton = (props: ExpandableButtonProps) => {
   );
 };
 
+const useMediaDeviceExpandMenuOptions = (kind: MediaDeviceKind) => {
+  const { mediaDevices } = useContext(WebRTCContext);
+
+  return useMemo(
+    () =>
+      mediaDevices[kind].map((device) => ({
+        key: device.deviceId,
+        description: device.label,
+      })),
+    [mediaDevices, kind]
+  );
+};
+
 export const CallingVolumeButton = (props: ExpandableButtonProps) => {
+  const options = useMediaDeviceExpandMenuOptions('audiooutput');
+
   return (
     <CallButton
       aria-label="volume options"
       Icon={VolumeIcon}
       expandMenuOptions={[
         {
-          options: [
-            {
-              key: '0',
-              description: <Trans i18nKey="dummy_option_string" />,
-            },
-          ],
+          options,
         },
       ]}
       {...props}
@@ -151,10 +161,16 @@ export const CallingVolumeButton = (props: ExpandableButtonProps) => {
 
 export const CallingMicButton = (props: ExpandableButtonProps) => {
   const { isAudioOn, setAudioStatus } = useContext(WebRTCContext);
+  const options = useMediaDeviceExpandMenuOptions('audioinput');
 
   return (
     <CallButton
       aria-label="microphone options"
+      expandMenuOptions={[
+        {
+          options,
+        },
+      ]}
       IconButtonComp={(props) => (
         <ToggleIconButton
           IconOn={MicroIcon}
@@ -171,9 +187,16 @@ export const CallingMicButton = (props: ExpandableButtonProps) => {
 
 export const CallingVideoCameraButton = (props: ExpandableButtonProps) => {
   const { isVideoOn, setVideoStatus } = useContext(WebRTCContext);
+  const options = useMediaDeviceExpandMenuOptions('videoinput');
+
   return (
     <CallButton
       aria-label="camera options"
+      expandMenuOptions={[
+        {
+          options,
+        },
+      ]}
       IconButtonComp={(props) => (
         <ToggleIconButton
           IconOn={VideoCameraIcon}

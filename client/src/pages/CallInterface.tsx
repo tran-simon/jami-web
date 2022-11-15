@@ -154,7 +154,7 @@ const CallInterfacePrimaryButtons = () => {
           Call
         </Button>
         <CallingMicButton />
-        <CallingEndButton hidden={false} />
+        <CallingEndButton />
         <CallingVideoCameraButton />
       </Stack>
     </Card>
@@ -229,11 +229,11 @@ const CallInterfaceSecondaryButtons = (props: Props & { gridItemRef: React.RefOb
         {initialMeasurementDone &&
           displayedButtons.map((SecondaryButton, i) => (
             <Fragment key={i}>
-              <SecondaryButton hidden={false} />
+              <SecondaryButton />
             </Fragment>
           ))}
         {(!!hiddenButtons.length || !initialMeasurementDone) && (
-          <CallingMoreVerticalButton hidden={true} onClick={() => setHiddenMenuVisible(!hiddenMenuVisible)} />
+          <CallingMoreVerticalButton isVertical onClick={() => setHiddenMenuVisible(!hiddenMenuVisible)} />
         )}
       </Stack>
 
@@ -248,7 +248,7 @@ const CallInterfaceSecondaryButtons = (props: Props & { gridItemRef: React.RefOb
             >
               {hiddenButtons.map((SecondaryButton, i) => (
                 <Fragment key={i}>
-                  <SecondaryButton hidden={true} />
+                  <SecondaryButton vertical />
                 </Fragment>
               ))}
             </Stack>

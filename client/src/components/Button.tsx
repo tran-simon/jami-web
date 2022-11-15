@@ -106,14 +106,14 @@ type ExpandMenuRadioOption = {
 };
 
 export type ExpandableButtonProps = IconButtonProps & {
-  hidden?: boolean;
+  isVertical?: boolean;
   Icon?: ComponentType<SvgIconProps>;
   expandMenuOptions?: (ExpandMenuOption | ExpandMenuRadioOption)[];
   IconButtonComp?: ComponentType<IconButtonProps>;
 };
 
 export const ExpandableButton = ({
-  hidden,
+  isVertical,
   Icon,
   expandMenuOptions = undefined,
   IconButtonComp = IconButton,
@@ -125,19 +125,19 @@ export const ExpandableButton = ({
   };
 
   return (
-    <Box>
+    <>
       {expandMenuOptions && (
         <Menu
           anchorEl={anchorEl}
           open={!!anchorEl}
           onClose={handleClose}
           anchorOrigin={{
-            vertical: !hidden ? 'top' : 'center',
-            horizontal: !hidden ? 'center' : 'left',
+            vertical: !isVertical ? 'top' : 'center',
+            horizontal: !isVertical ? 'center' : 'left',
           }}
           transformOrigin={{
-            vertical: !hidden ? 'bottom' : 'center',
-            horizontal: !hidden ? 'center' : 'right',
+            vertical: !isVertical ? 'bottom' : 'center',
+            horizontal: !isVertical ? 'center' : 'right',
           }}
         >
           {expandMenuOptions?.map((option, id) => {
@@ -168,28 +168,22 @@ export const ExpandableButton = ({
           })}
         </Menu>
       )}
-      <Box
-        position="relative"
-        display="flex"
-        justifyContent="center"
-        alignItems="center"
-        onClick={(e) => setAnchorEl(e.currentTarget)}
-      >
+      <Box position="relative" display="flex" justifyContent="center" alignItems="center">
         {expandMenuOptions && (
           <IconButton
-            {...props}
             aria-label="expand options"
-            size="small"
+            onClick={(e) => setAnchorEl(e.currentTarget)}
             sx={{
-              transform: !hidden ? 'scale(0.5)' : 'scale(0.5) rotate(-90deg)',
+              rotate: !isVertical ? '' : '-90deg',
               position: 'absolute',
-              top: !hidden ? '-50%' : 0,
-              left: hidden ? '-50%' : 0,
-              width: '100%',
-              height: '100%',
+              top: !isVertical ? '-55%' : 'auto',
+              left: !isVertical ? 'auto' : '-55%',
+              zIndex: 1,
             }}
+            className={props.className}
           >
             <ExpandLessIcon
+              fontSize="small"
               sx={{
                 backgroundColor: '#444444',
                 borderRadius: '5px',
@@ -199,7 +193,7 @@ export const ExpandableButton = ({
         )}
         <IconButtonComp {...props}>{Icon && <Icon />}</IconButtonComp>
       </Box>
-    </Box>
+    </>
   );
 };
 
