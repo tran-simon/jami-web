@@ -17,11 +17,11 @@ confirm () {
   fi
 }
 
-echo "Checking for EsLint errors and warnings..."
+echo "Checking for ESLint errors and warnings..."
 confirm "npm run lint --workspaces -- --max-warnings 0"
 
 if [ $? -eq 1 ]; then
-  echo "Checking for EsLint errors..."
+  echo "Checking for ESLint errors..."
   npm run lint --workspaces -- --quiet
 fi
 

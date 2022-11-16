@@ -15,14 +15,12 @@
  * License along with this program.  If not, see
  * <https://www.gnu.org/licenses/>.
  */
-import commonjs from '@rollup/plugin-commonjs';
-import run from '@rollup/plugin-run';
-import typescript from '@rollup/plugin-typescript';
+import { defineConfig } from 'cypress';
 
-const dev = !!process.env.ROLLUP_WATCH;
-
-export default (async () => ({
-  input: 'app.ts',
-  output: { file: 'dist/bundle.js', sourcemap: true },
-  plugins: [typescript(), commonjs(), dev && run(), !dev && (await import('rollup-plugin-terser')).terser()],
-}))();
+export default defineConfig({
+  e2e: {
+    setupNodeEvents(_on, _config) {
+      // implement node event listeners here
+    },
+  },
+});

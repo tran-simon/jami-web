@@ -1,28 +1,21 @@
 {
   "name": "jami-web",
   "version": "1.0.0",
-  "description": "Jaas Web API that handles client requests to Jami daemon",
-  "license": "ISC",
-  "author": "Larbi Gharib",
-  "type": "module",
-  "main": "app.ts",
+  "workspaces": [
+    "common",
+    "client",
+    "server"
+  ],
   "scripts": {
-    "start": "concurrently \"npm run start-old-server\" \"npm start --workspace server\" \"npm start --workspace client\"",
-    "start:prod": "concurrently \"npm run start-old-server:prod\" \"npm run start:prod --workspace server\" \"npm run start:prod --workspace client\"",
-    "start-old-server": "rollup -cw",
-    "start-old-server:prod": "env NODE_ENV=production node dist/bundle.js",
-    "build": "npm run build --workspaces; npm run build-old-server",
-    "build-old-server": "rollup -c",
-    "clean": "rm -rf dist && npm run clean --workspaces",
+    "start": "concurrently \"npm start --workspace server\" \"npm start --workspace client\"",
+    "start:prod": "concurrently \"npm run start:prod --workspace server\" \"npm run start:prod --workspace client\"",
+    "build": "npm run build --workspaces",
+    "clean": "npm run clean --workspaces",
     "clean:all": "npm run clean && find . -name 'node_modules' -type d -prune -exec rm -rf '{}' +",
-    "lint": "npm run lint-old-server; npm run lint --workspaces",
-    "lint:fix": "npm run lint-old-server:fix; npm run lint:fix --workspaces",
-    "lint-old-server": "eslint app.ts JamiDaemon.ts routes/",
-    "lint-old-server:fix": "npm run lint-old-server -- --fix",
-    "format": "npm run format-old-server; npm run format --workspaces",
-    "format:check": "npm run format-old-server:check; npm run format:check --workspaces",
-    "format-old-server": "prettier -w app.ts JamiDaemon.ts routes/",
-    "format-old-server:check": "prettier -c app.ts JamiDaemon.ts routes/",
+    "lint": "npm run lint --workspaces",
+    "lint:fix": "npm run lint:fix --workspaces",
+    "format": "npm run format --workspaces",
+    "format:check": "npm run format:check --workspaces",
     "prepare": "([ -e '.git' ] && git config core.hooksPath .hooks); npm run build --workspace common"
   },
   "lint-staged": {
@@ -34,41 +27,10 @@
       "prettier --write"
     ]
   },
-  "dependencies": {
-    "@sentry/node": "^7.13.0",
-    "@sentry/tracing": "^7.13.0",
-    "body-parser": "^1.20.0",
-    "connect-redis": "^6.1.3",
-    "cookie-parser": "^1.4.6",
-    "core-js": "^3.25.1",
-    "cors": "^2.8.5",
-    "dotenv": "^16.0.2",
-    "ejs": "^3.1.8",
-    "env": "0.0.2",
-    "express": "^4.18.1",
-    "express-session": "^1.17.3",
-    "passport": "^0.6.0",
-    "passport-local": "^1.0.0",
-    "passport-session": "^1.0.2",
-    "path": "^0.12.7",
-    "redis-url": "^1.2.1",
-    "socket.io": "^4.5.2"
-  },
   "devDependencies": {
-    "@rollup/plugin-commonjs": "^22.0.2",
-    "@rollup/plugin-run": "^2.1.0",
-    "@rollup/plugin-typescript": "^8.5.0",
-    "@svgr/webpack": "^6.3.1",
-    "@types/cookie-parser": "^1.4.3",
-    "@types/express": "^4.17.14",
-    "@types/express-session": "^1.17.5",
-    "@types/passport": "^1.0.11",
-    "@types/passport-local": "^1.0.34",
-    "@types/webpack-hot-middleware": "^2.25.6",
     "@typescript-eslint/eslint-plugin": "^5.37.0",
     "@typescript-eslint/parser": "^5.37.0",
     "concurrently": "^7.4.0",
-    "cypress": "^10.8.0",
     "eslint": "^8.23.1",
     "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-header": "^3.1.1",
@@ -76,18 +38,6 @@
     "eslint-plugin-simple-import-sort": "^8.0.0",
     "eslint-plugin-unused-imports": "^2.0.0",
     "lint-staged": "^13.0.3",
-    "llnode": "^4.0.0",
-    "prettier": "^2.7.1",
-    "raw-loader": "^4.0.2",
-    "rollup": "^2.79.1",
-    "rollup-plugin-terser": "^7.0.2",
-    "typescript": "^4.8.3",
-    "webpack-dev-middleware": "^5.3.3",
-    "webpack-hot-middleware": "^2.25.2"
-  },
-  "workspaces": [
-    "common",
-    "client",
-    "server"
-  ]
+    "prettier": "^2.7.1"
+  }
 }

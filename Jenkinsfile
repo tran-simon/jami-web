@@ -60,7 +60,7 @@ pipeline {
                 }
             }
         }
-        stage('Lint & Test') {
+        stage('Lint & test') {
             steps {
                 script {
                     docker.build("jami-web:${env.BUILD_ID}", "--target test .")

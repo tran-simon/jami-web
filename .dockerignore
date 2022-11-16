@@ -1,13 +1,16 @@
-**/.git/
+.git/
 
-**/.idea/
 **/.vscode/
+**/.idea/
 
 **/node_modules/
 **/dist/
+**/*.tsbuildinfo
+
 **/.env*
-**/tsconfig.tsbuildinfo
 
 daemon/
-**/dring.node
-**/jamid.node
+
+server/jamid.node
+server/accounts.json
+server/admin.json

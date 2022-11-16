@@ -11,9 +11,8 @@
     "isolatedModules": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
-    "skipLibCheck": true,
     "strict": true,
-    "noImplicitAny": true
+    "skipLibCheck": true
   },
   "ts-node": {
     "esm": true

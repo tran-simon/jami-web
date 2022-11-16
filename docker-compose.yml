@@ -13,7 +13,6 @@ services:
       - ./client/.env.development:/web-client/client/.env.development
       - ./server/.env:/web-client/server/.env
     ports:
-      - "3001:3001"
       - "3000:3000"
       - "5000:5000"
     stdin_open: true

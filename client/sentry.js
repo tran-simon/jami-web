@@ -35,7 +35,7 @@ export function sentrySetUp(app) {
   // TracingHandler creates a trace for every incoming request
   app.use(Sentry.Handlers.tracingHandler());
 
-  app.get('/debug-sentry', function mainHandler(req, res) {
+  app.get('/debug-sentry', function mainHandler(_req, _res) {
     throw new Error('My first Sentry error!');
   });
 
@@ -53,7 +53,7 @@ export function sentrySetUp(app) {
     })
   );
   // Optional fallthrough error handler
-  app.use(function onError(err, req, res, next) {
+  app.use(function onError(_err, _req, res, _next) {
     // The error id is attached to `res.sentry` to be returned
     // and optionally displayed to the user for support.
     res.statusCode = 500;

@@ -1,14 +1,21 @@
 {
-  "extends": "../tsconfig",
   "compilerOptions": {
-    /* Specify what JSX code is generated. */
-    "jsx": "react-jsx",
-    /* Specify a set of bundled library declaration files that describe the target runtime environment. */
+    "target": "esnext",
     "lib": ["DOM", "DOM.Iterable", "ESNext"],
-    /* Specify an output folder for all emitted files. */
-    "outDir": "dist",
-    /* Specify type package names to be included without being referenced in a source file. */
-    "types": ["@testing-library/jest-dom", "@types/jest", "node", "vite/client", "vite-plugin-svgr/client"]
+    "jsx": "react-jsx",
+    "useDefineForClassFields": true,
+    "module": "esnext",
+    "moduleResolution": "node",
+    "types": ["@testing-library/jest-dom", "@types/jest", "node", "vite/client", "vite-plugin-svgr/client"],
+    "resolveJsonModule": true,
+    "allowJs": true, // TODO: Set this to false
+    "noEmit": true,
+    "isolatedModules": true,
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": false,
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,
+    "skipLibCheck": true
   },
   "include": ["src"]
 }

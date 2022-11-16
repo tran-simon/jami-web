@@ -1,19 +1,8 @@
 node_modules/
 dist/
-tsconfig.tsbuildinfo
 
-jaas-client/package-lock.json
-jaas-client/node_modules/
-jaas-client/dist/
+*.tsbuildinfo
 
-.env*
-dring.node
-jamid.node
-
-.idea/
 .vscode/
+.idea/
 *.iml
-
-sentry.config.json
-sentry-client.config.json
-sentry-server.config.json

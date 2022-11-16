@@ -1,2 +1,6 @@
-accounts.json
-admin.json
+.env*
+
+jamid.node
+
+/accounts.json
+/admin.json
