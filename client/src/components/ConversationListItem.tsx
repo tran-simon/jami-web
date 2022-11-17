@@ -29,7 +29,7 @@ import {
 import { Conversation } from 'jami-web-common';
 import { QRCodeCanvas } from 'qrcode.react';
 import { MouseEvent, useState } from 'react';
-import { Trans } from 'react-i18next';
+import { useTranslation } from 'react-i18next';
 import Modal from 'react-modal';
 import { useNavigate, useParams } from 'react-router-dom';
 
@@ -95,6 +95,7 @@ export default function ConversationListItem({ conversation }: ConversationListI
   const pathId = conversationId || contactId;
   const isSelected = conversation.getDisplayUri() === pathId;
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const [menuAnchorEl, setMenuAnchorEl] = useState<HTMLElement | null>(null);
   const [modalDetailsIsOpen, setModalDetailsIsOpen] = useState(false);
@@ -161,9 +162,7 @@ export default function ConversationListItem({ conversation }: ConversationListI
             <ListItemIcon>
               <MessageIcon style={{ color: iconColor }} />
             </ListItemIcon>
-            <ListItemText>
-              <Trans i18nKey="conversation_message" />
-            </ListItemText>
+            <ListItemText>{t('conversation_message')}</ListItemText>
           </MenuItem>
           <MenuItem
             onClick={() => {
@@ -173,9 +172,7 @@ export default function ConversationListItem({ conversation }: ConversationListI
             <ListItemIcon>
               <AudioCallIcon style={{ color: iconColor }} />
             </ListItemIcon>
-            <ListItemText>
-              <Trans i18nKey="conversation_start_audiocall" />
-            </ListItemText>
+            <ListItemText>{t('conversation_start_audiocall')}</ListItemText>
           </MenuItem>
 
           <MenuItem
@@ -186,9 +183,7 @@ export default function ConversationListItem({ conversation }: ConversationListI
             <ListItemIcon>
               <VideoCallIcon style={{ color: iconColor }} />
             </ListItemIcon>
-            <ListItemText>
-              <Trans i18nKey="conversation_start_videocall" />
-            </ListItemText>
+            <ListItemText>{t('conversation_start_videocall')}</ListItemText>
           </MenuItem>
 
           {isSelected && (
@@ -201,9 +196,7 @@ export default function ConversationListItem({ conversation }: ConversationListI
               <ListItemIcon>
                 <CancelIcon style={{ color: iconColor }} />
               </ListItemIcon>
-              <ListItemText>
-                <Trans i18nKey="conversation_close" />
-              </ListItemText>
+              <ListItemText>{t('conversation_close')}</ListItemText>
             </MenuItem>
           )}
 
@@ -218,9 +211,7 @@ export default function ConversationListItem({ conversation }: ConversationListI
             <ListItemIcon>
               <ContactDetailsIcon style={{ color: iconColor }} />
             </ListItemIcon>
-            <ListItemText>
-              <Trans i18nKey="conversation_details" />
-            </ListItemText>
+            <ListItemText>{t('conversation_details')}</ListItemText>
           </MenuItem>
 
           <MenuItem
@@ -233,9 +224,7 @@ export default function ConversationListItem({ conversation }: ConversationListI
             <ListItemIcon>
               <BlockContactIcon style={{ color: iconColor }} />
             </ListItemIcon>
-            <ListItemText>
-              <Trans i18nKey="conversation_block_contact" />
-            </ListItemText>
+            <ListItemText>{t('conversation_block_contact')}</ListItemText>
           </MenuItem>
 
           <MenuItem
@@ -248,9 +237,7 @@ export default function ConversationListItem({ conversation }: ConversationListI
             <ListItemIcon>
               <RemoveContactIcon style={{ color: iconColor }} />
             </ListItemIcon>
-            <ListItemText>
-              <Trans i18nKey="conversation_delete_contact" />
-            </ListItemText>
+            <ListItemText>{t('conversation_delete_contact')}</ListItemText>
           </MenuItem>
         </Menu>
       </div>

@@ -17,7 +17,7 @@
  */
 import GroupAddRounded from '@mui/icons-material/GroupAddRounded';
 import { Box, Card, CardContent, Container, Fab, Typography } from '@mui/material';
-import { Trans } from 'react-i18next';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
 import { useAuthContext } from '../contexts/AuthProvider';
@@ -29,6 +29,7 @@ type AddContactPageProps = {
 };
 
 export default function AddContactPage({ contactId }: AddContactPageProps) {
+  const { t } = useTranslation();
   const { axiosInstance } = useAuthContext();
   const navigate = useNavigate();
 
@@ -52,7 +53,7 @@ export default function AddContactPage({ contactId }: AddContactPageProps) {
           <Box style={{ textAlign: 'center', marginTop: 16 }}>
             <Fab variant="extended" color="primary" onClick={handleClick}>
               <GroupAddRounded />
-              <Trans key="conversation_add_contact" />
+              {t('conversation_add_contact')}
             </Fab>
           </Box>
         </CardContent>

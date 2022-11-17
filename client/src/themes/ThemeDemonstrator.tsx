@@ -70,16 +70,10 @@ export const ThemeDemonstrator = () => {
           <Switch />
         </Stack>
         <Stack padding="5px" width="300px">
-          <UsernameInput onChange={() => {}} tooltipTitle={'Test'} status={'default'} />
-          <UsernameInput onChange={() => {}} tooltipTitle={'Test'} status={'default'} error defaultValue="Cyrille" />
-          <PasswordInput onChange={() => {}} tooltipTitle={'Test'} status={'default'} />
-          <PasswordInput
-            onChange={() => {}}
-            tooltipTitle={'Test'}
-            status={'default'}
-            error
-            defaultValue="SavoirFaireLinux"
-          />
+          <UsernameInput tooltipTitle={'Test'} />
+          <UsernameInput tooltipTitle={'Test'} error defaultValue="Cyrille" />
+          <PasswordInput tooltipTitle={'Test'} />
+          <PasswordInput tooltipTitle={'Test'} error defaultValue="SavoirFaireLinux" />
           <NickNameInput />
           <RegularInput />
         </Stack>

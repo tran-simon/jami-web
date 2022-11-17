@@ -248,7 +248,7 @@ const CallInterfaceSecondaryButtons = (props: Props & { gridItemRef: React.RefOb
             >
               {hiddenButtons.map((SecondaryButton, i) => (
                 <Fragment key={i}>
-                  <SecondaryButton vertical />
+                  <SecondaryButton isVertical />
                 </Fragment>
               ))}
             </Stack>

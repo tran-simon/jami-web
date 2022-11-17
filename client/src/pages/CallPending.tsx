@@ -17,7 +17,7 @@
  */
 
 import { Box, CircularProgress, Grid, Stack, Typography } from '@mui/material';
-import { Trans } from 'react-i18next';
+import { useTranslation } from 'react-i18next';
 
 import {
   CallingAnswerAudioButton,
@@ -114,54 +114,57 @@ export const CallPending = (props: CallPendingProps) => {
 };
 
 export const CallPendingCallerInterface = ({ caller }: CallPendingProps) => {
+  const { t } = useTranslation();
   // TODO: Remove the dummy name
   const defaultName = 'Alex Thérieur';
   return (
-    <Stack textAlign="center" spacing={2}>
+    <>
       <Typography variant="h1" color="white">
         {defaultName}
       </Typography>
       <Typography variant="h3" color="white">
-        {caller === 'calling' ? <Trans i18nKey="calling" /> : <Trans i18nKey="connecting" />}
+        {caller === 'calling' ? t('calling') : t('connecting')}
       </Typography>
-      <CallerButtons />
-    </Stack>
+
+      <Stack alignItems="center" spacing={1} width="100%">
+        <CallingEndButton size="large" />
+        <Typography variant="body2" color="white">
+          {t('end_call')}
+        </Typography>
+      </Stack>
+    </>
   );
 };
 
 export const CallPendingReceiverInterface = ({ medium }: CallPendingProps) => {
+  const { t } = useTranslation();
   // TODO: Remove the dummy name
   const defaultName = 'Alain Thérieur';
   return (
-    <Stack textAlign="center" spacing={2}>
+    <>
       <Typography variant="h1" color="white">
-        <Trans i18nKey="incoming_call" context={medium} values={{ member0: defaultName }} />
+        {t('incoming_call', {
+          context: medium,
+          member0: defaultName,
+        })}
       </Typography>
-      <ReceiverButtons />
-    </Stack>
-  );
-};
-
-const CallerButtons = () => {
-  return (
-    <Stack textAlign="center" spacing={1}>
-      <CallingEndButton size="large" />
-      <Typography variant="body2" color="white">
-        <Trans i18nKey="end_call" />
-      </Typography>
-    </Stack>
+      <Box width="50%">
+        <ReceiverButtons />
+      </Box>
+    </>
   );
 };
 
 const ReceiverButtons = () => {
+  const { t } = useTranslation();
   return (
-    <Grid container direction="row" padding={2}>
+    <Grid container spacing={2}>
       {RECEIVER_BUTTONS.map(({ ButtonComponent, translationKey }, i) => (
         <Grid item xs={4} key={i}>
-          <Stack spacing={1}>
+          <Stack alignItems="center" spacing={1}>
             <ButtonComponent color="inherit" size="large" />
-            <Typography variant="body2" color="white" textAlign="center" sx={{ opacity: 0.75 }}>
-              <Trans i18nKey={'' + translationKey} />
+            <Typography variant="body2" color="white" sx={{ opacity: 0.75 }}>
+              {t(translationKey)}
             </Typography>
           </Stack>
         </Grid>

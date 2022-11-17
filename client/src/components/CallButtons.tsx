@@ -18,7 +18,7 @@
 
 import { styled } from '@mui/material/styles';
 import React, { useContext, useMemo } from 'react';
-import { Trans } from 'react-i18next';
+import { useTranslation } from 'react-i18next';
 
 import { WebRTCContext } from '../contexts/WebRTCProvider';
 import { ExpandableButton, ExpandableButtonProps, ToggleIconButton } from './Button';
@@ -57,6 +57,7 @@ const CallButton = styled((props: ExpandableButtonProps) => {
 
 const ColoredCallButton = styled(
   ({
+    buttonColor,
     ...props
   }: ExpandableButtonProps & {
     buttonColor: ColoredCallButtonColor;
@@ -102,25 +103,26 @@ export const CallingRecordButton = (props: ExpandableButtonProps) => {
 };
 
 export const CallingScreenShareButton = (props: ExpandableButtonProps) => {
+  const { t } = useTranslation();
   return (
     <CallButton
       aria-label="screen share"
       Icon={ScreenShareArrowIcon}
       expandMenuOptions={[
         {
-          description: <Trans i18nKey="share_screen" />,
+          description: t('share_screen'),
           icon: <ScreenShareRegularIcon />,
         },
         {
-          description: <Trans i18nKey="share_window" />,
+          description: t('share_window'),
           icon: <WindowIcon />,
         },
         {
-          description: <Trans i18nKey="share_screen_area" />,
+          description: t('share_screen_area'),
           icon: <ScreenShareScreenAreaIcon />,
         },
         {
-          description: <Trans i18nKey="share_file" />,
+          description: t('share_file'),
           icon: <FileIcon />,
         },
       ]}

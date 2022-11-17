@@ -53,7 +53,7 @@ export type NameStatus = 'default' | 'success' | 'taken' | 'invalid' | 'registra
 export type PasswordStatus = StrengthValueCode | 'registration_failed';
 
 export type InputProps<StatusType extends NameStatus | PasswordStatus> = TextFieldProps & {
-  status: StatusType;
+  status?: StatusType;
   infoButtonProps?: IconButtonProps;
   success?: boolean;
   tooltipTitle: string;
@@ -63,7 +63,7 @@ export const UsernameInput = ({
   infoButtonProps,
   onChange: _onChange,
   success,
-  status,
+  status = 'default',
   tooltipTitle,
   ...props
 }: InputProps<NameStatus>) => {
@@ -142,7 +142,7 @@ export const PasswordInput = ({
   onChange: _onChange,
   success,
   tooltipTitle,
-  status,
+  status = 'default',
   ...props
 }: InputProps<PasswordStatus>) => {
   const { t } = useTranslation();

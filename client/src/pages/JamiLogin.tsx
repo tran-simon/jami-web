@@ -106,7 +106,6 @@ export default function JamiLogin(props: JamiLoginProps) {
             <UsernameInput
               onChange={handleUsername}
               tooltipTitle={t('login_form_username_tooltip')}
-              status={'default'}
               sx={{ width: theme.typography.pxToRem(inputWidth) }}
             />
           </div>
@@ -114,7 +113,6 @@ export default function JamiLogin(props: JamiLoginProps) {
             <PasswordInput
               onChange={handlePassword}
               tooltipTitle={t('login_form_password_tooltip')}
-              status={'default'}
               sx={{ width: theme.typography.pxToRem(inputWidth) }}
             />
           </div>

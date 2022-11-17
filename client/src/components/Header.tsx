@@ -17,11 +17,13 @@
  */
 import { Box, Button, Menu, MenuItem } from '@mui/material';
 import { MouseEvent, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
 import { useAuthContext } from '../contexts/AuthProvider';
 
 export default function Header() {
+  const { t } = useTranslation();
   const { logout } = useAuthContext();
 
   const navigate = useNavigate();
@@ -39,7 +41,7 @@ export default function Header() {
       <Menu id="simple-menu" anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleClose}>
         <MenuItem onClick={goToContacts}>Contacts</MenuItem>
         <MenuItem onClick={() => navigate('/settings')}>Account settings</MenuItem>
-        <MenuItem onClick={logout}>Log out</MenuItem>
+        <MenuItem onClick={logout}>{t('logout')}</MenuItem>
       </Menu>
     </Box>
   );
