@@ -19,7 +19,7 @@ import axios from 'axios';
 import { passwordStrength } from 'check-password-strength';
 import { HttpStatusCode } from 'jami-web-common';
 
-import { PasswordStrength } from '../enums/password-strength';
+import { PasswordStrength } from '../enums/passwordStrength';
 import { apiUrl } from './constants';
 import { InvalidPassword, UsernameNotFound } from './errors';
 

@@ -15,7 +15,7 @@
  * License along with this program.  If not, see
  * <https://www.gnu.org/licenses/>.
  */
-import { AccountTextMessage, WebSocketMessageType } from 'jami-web-common';
+import { WebSocketMessageTable, WebSocketMessageType } from 'jami-web-common';
 import log from 'loglevel';
 import { Container } from 'typedi';
 
@@ -25,17 +25,41 @@ import { WebSocketServer } from './websocket-server.js';
 const jamid = Container.get(Jamid);
 const webSocketServer = Container.get(WebSocketServer);
 
-function sendWebRTCData<T>(data: Partial<AccountTextMessage<T>>) {
-  if (data.from === undefined || data.to === undefined || data.message === undefined) {
-    log.warn('Message is not a valid AccountTextMessage (missing from, to, or message fields)');
+const webRTCWebSocketMessageTypes = [
+  WebSocketMessageType.IceCandidate,
+  WebSocketMessageType.WebRTCOffer,
+  WebSocketMessageType.WebRTCAnswer,
+  WebSocketMessageType.CallBegin,
+  WebSocketMessageType.CallAccept,
+  WebSocketMessageType.CallRefuse,
+  WebSocketMessageType.CallEnd,
+] as const;
+
+type WebRTCWebSocketMessageType = typeof webRTCWebSocketMessageTypes[number];
+
+function sendWebRTCData<T extends WebRTCWebSocketMessageType>(
+  type: WebRTCWebSocketMessageType,
+  data: Partial<WebSocketMessageTable[T]>
+) {
+  if (data.from === undefined || data.to === undefined) {
+    log.warn('Message is not a valid AccountTextMessage (missing from or to fields)');
     return;
   }
-
-  jamid.sendAccountTextMessage(data.from, data.to, JSON.stringify(data.message));
+  log.info('Handling WebRTC message of type:', type);
+  jamid.sendAccountTextMessage(
+    data.from,
+    data.to,
+    JSON.stringify({
+      type,
+      data,
+    })
+  );
 }
 
 export function bindWebRTCCallbacks() {
-  webSocketServer.bind(WebSocketMessageType.WebRTCOffer, sendWebRTCData);
-  webSocketServer.bind(WebSocketMessageType.WebRTCAnswer, sendWebRTCData);
-  webSocketServer.bind(WebSocketMessageType.IceCandidate, sendWebRTCData);
+  for (const messageType of webRTCWebSocketMessageTypes) {
+    webSocketServer.bind(messageType, (data) => {
+      sendWebRTCData(messageType, data);
+    });
+  }
 }

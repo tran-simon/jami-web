@@ -18,19 +18,19 @@
 import { Stack } from '@mui/material';
 import { Contact, Conversation, WebSocketMessageType } from 'jami-web-common';
 import { useContext, useEffect, useState } from 'react';
+import { Outlet } from 'react-router-dom';
 
 //import Sound from 'react-sound';
 import ConversationList from '../components/ConversationList';
-import ConversationView from '../components/ConversationView';
 import Header from '../components/Header';
 import LoadingPage from '../components/Loading';
 import NewContactForm from '../components/NewContactForm';
 import { useAuthContext } from '../contexts/AuthProvider';
 import { WebSocketContext } from '../contexts/WebSocketProvider';
+import { useUrlParams } from '../hooks/useUrlParams';
 import { setRefreshFromSlice } from '../redux/appSlice';
 import { useAppDispatch, useAppSelector } from '../redux/hooks';
-import { MessengerRouteParams } from '../router';
-import { useUrlParams } from '../utils/hooks';
+import { AddContactRouteParams } from '../router';
 import AddContactPage from './AddContactPage';
 
 const Messenger = () => {
@@ -44,8 +44,8 @@ const Messenger = () => {
   const [searchResult, setSearchResults] = useState<Conversation | undefined>(undefined);
 
   const {
-    urlParams: { conversationId, contactId },
-  } = useUrlParams<MessengerRouteParams>();
+    urlParams: { contactId },
+  } = useUrlParams<AddContactRouteParams>();
 
   const accountId = account.getId();
 
@@ -104,7 +104,9 @@ const Messenger = () => {
           </div>
         )}
       </Stack>
-      <Stack flexGrow={1}>{conversationId && <ConversationView conversationId={conversationId} />}</Stack>
+      <Stack flexGrow={1}>
+        <Outlet />
+      </Stack>
     </Stack>
   );
 };

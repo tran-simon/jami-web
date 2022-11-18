@@ -15,13 +15,14 @@
  * License along with this program.  If not, see
  * <https://www.gnu.org/licenses/>.
  */
-import { Box, Button, Card, Grid, Stack, Typography } from '@mui/material';
+import { Box, Card, Grid, Stack, Typography } from '@mui/material';
 import {
   ComponentType,
   Fragment,
   ReactNode,
   useCallback,
   useContext,
+  useEffect,
   useLayoutEffect,
   useMemo,
   useRef,
@@ -43,19 +44,21 @@ import {
   CallingVideoCameraButton,
   CallingVolumeButton,
 } from '../components/CallButtons';
-import WebRTCProvider, { WebRTCContext } from '../contexts/WebRTCProvider';
-import { CallRouteParams } from '../router';
-import { useUrlParams } from '../utils/hooks';
+import { CallContext, CallStatus } from '../contexts/CallProvider';
+import { CallPending } from './CallPending';
 
 export default () => {
-  const {
-    queryParams: { video },
-  } = useUrlParams<CallRouteParams>();
+  const { callRole, callStatus } = useContext(CallContext);
+
+  if (callStatus === CallStatus.InCall) {
+    return <CallInterface />;
+  }
   return (
-    //TODO: set contactID
-    <WebRTCProvider isVideoOn={video === 'true'} contactId={'contactIdToBeAdded'}>
-      <CallInterface />
-    </WebRTCProvider>
+    <CallPending
+      pending={callRole}
+      caller={callStatus === CallStatus.Ringing ? 'calling' : 'connecting'}
+      medium="audio"
+    />
   );
 };
 
@@ -64,8 +67,22 @@ interface Props {
 }
 
 const CallInterface = () => {
-  const { localVideoRef, remoteVideoRef, isVideoOn } = useContext(WebRTCContext);
+  const { isVideoOn, localStream, remoteStream } = useContext(CallContext);
   const gridItemRef = useRef(null);
+  const remoteVideoRef = useRef<HTMLVideoElement | null>(null);
+  const localVideoRef = useRef<HTMLVideoElement | null>(null);
+
+  useEffect(() => {
+    if (localStream && localVideoRef.current) {
+      localVideoRef.current.srcObject = localStream;
+    }
+  }, [localStream]);
+
+  useEffect(() => {
+    if (remoteStream && remoteVideoRef.current) {
+      remoteVideoRef.current.srcObject = remoteStream;
+    }
+  }, [remoteStream]);
 
   return (
     <>
@@ -73,7 +90,7 @@ const CallInterface = () => {
       <video
         ref={remoteVideoRef}
         autoPlay
-        style={{ backgroundColor: 'black', width: '100%', height: '100%', position: 'absolute' }}
+        style={{ zIndex: -1, backgroundColor: 'black', width: '100%', height: '100%', position: 'absolute' }}
       />
       <Stack
         position="absolute"
@@ -88,24 +105,23 @@ const CallInterface = () => {
         </Box>
         {/* Local video, with empty space to be moved around and stickied to walls */}
         <Box height="100%">
-          {isVideoOn && (
-            <Draggable bounds="parent" nodeRef={localVideoRef ?? undefined}>
-              <video
-                ref={localVideoRef}
-                autoPlay
-                style={{
-                  position: 'absolute',
-                  right: 0,
-                  zIndex: 2,
-                  borderRadius: '12px',
-                  minWidth: '25%',
-                  minHeight: '25%',
-                  maxWidth: '50%',
-                  maxHeight: '50%',
-                }}
-              />
-            </Draggable>
-          )}
+          <Draggable bounds="parent" nodeRef={localVideoRef ?? undefined}>
+            <video
+              ref={localVideoRef}
+              autoPlay
+              style={{
+                position: 'absolute',
+                right: 0,
+                zIndex: 2,
+                borderRadius: '12px',
+                minWidth: '25%',
+                minHeight: '25%',
+                maxWidth: '50%',
+                maxHeight: '50%',
+                visibility: isVideoOn ? 'visible' : 'hidden',
+              }}
+            />
+          </Draggable>
         </Box>
         {/* Bottom panel with calling buttons */}
         <Grid container>
@@ -138,21 +154,9 @@ const CallInterfaceInformation = () => {
 };
 
 const CallInterfacePrimaryButtons = () => {
-  const { sendWebRTCOffer } = useContext(WebRTCContext);
-
   return (
     <Card sx={{ backgroundColor: '#00000088', overflow: 'visible' }}>
       <Stack direction="row" justifyContent="center" alignItems="center">
-        <Button
-          variant="contained"
-          size="small"
-          onClick={() => {
-            sendWebRTCOffer();
-          }}
-        >
-          {/* TODO: Remove this button and make calling automatic (https://git.jami.net/savoirfairelinux/jami-web/-/issues/91)*/}
-          Call
-        </Button>
         <CallingMicButton />
         <CallingEndButton />
         <CallingVideoCameraButton />

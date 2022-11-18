@@ -27,10 +27,14 @@ export interface ConversationView {
   conversationId: string;
 }
 
-export interface WebRTCSDP {
+export interface WebRtcSdp {
   sdp: RTCSessionDescriptionInit;
 }
 
 export interface WebRTCIceCandidate {
   candidate: RTCIceCandidate;
+}
+
+export interface CallBegin {
+  conversationId: string;
 }

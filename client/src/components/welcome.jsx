@@ -20,7 +20,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { ReactComponent as JamiLogo } from '../icons/jami-logo-icon.svg';
+import { ReactComponent as JamiLogo } from '../icons/jamiLogoIcon.svg';
 
 const list = {
   hidden: { opacity: 0 },

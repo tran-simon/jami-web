@@ -21,4 +21,8 @@ export enum WebSocketMessageType {
   WebRTCOffer = 'webrtc-offer',
   WebRTCAnswer = 'webrtc-answer',
   IceCandidate = 'ice-candidate',
+  CallBegin = 'call-begin',
+  CallAccept = 'call-accept',
+  CallRefuse = 'call-refuse',
+  CallEnd = 'call-end',
 }

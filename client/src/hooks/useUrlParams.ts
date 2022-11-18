@@ -18,10 +18,10 @@
 import { useMemo } from 'react';
 import { useLocation, useParams } from 'react-router-dom';
 
-export interface RouteParams<U = Record<string, string>, Q = Record<string, string>> {
+export type RouteParams<U = Record<string, string>, Q = Record<string, string>> = {
   urlParams: U;
   queryParams: Q;
-}
+};
 
 export const useUrlParams = <T extends RouteParams>() => {
   const { search } = useLocation();

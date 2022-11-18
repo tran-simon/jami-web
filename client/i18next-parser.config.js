@@ -16,6 +16,7 @@
  * <https://www.gnu.org/licenses/>.
  */
 export default {
+  keepRemoved: true,
   locales: ['fr', 'en'],
   output: 'src/locale/$LOCALE/$NAMESPACE.json',
   input: ['src/**/*.{ts,tsx,js,jsx}'],

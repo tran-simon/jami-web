@@ -59,11 +59,11 @@ import {
 } from './SvgIcon';
 import CustomTooltip from './Tooltip';
 
-type ShapedButtonProps = IconButtonProps & {
+export type ShapedButtonProps = IconButtonProps & {
   Icon: ComponentType<SvgIconProps>;
 };
 
-const RoundButton = styled(({ Icon, ...props }: ShapedButtonProps) => (
+export const RoundButton = styled(({ Icon, ...props }: ShapedButtonProps) => (
   <IconButton {...props} disableRipple={true}>
     <Icon fontSize="inherit" />
   </IconButton>

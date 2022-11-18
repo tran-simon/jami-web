@@ -28,6 +28,7 @@ import { WithChildren } from '../utils/utils';
 interface IAuthContext {
   token: string;
   account: Account;
+  accountId: string;
   logout: () => void;
   axiosInstance: AxiosInstance;
 }
@@ -100,6 +101,7 @@ export default ({ children }: WithChildren) => {
         token,
         logout,
         account,
+        accountId: account.getId(),
         axiosInstance,
       }}
     >

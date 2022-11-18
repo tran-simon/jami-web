@@ -16,12 +16,14 @@
  * <https://www.gnu.org/licenses/>.
  */
 
-import { styled } from '@mui/material/styles';
+import { IconButton, IconButtonProps, PaletteColor } from '@mui/material';
+import { styled, Theme } from '@mui/material/styles';
 import React, { useContext, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 
-import { WebRTCContext } from '../contexts/WebRTCProvider';
-import { ExpandableButton, ExpandableButtonProps, ToggleIconButton } from './Button';
+import { CallContext } from '../contexts/CallProvider';
+import { ExpandableButton, ExpandableButtonProps, ShapedButtonProps, ToggleIconButton } from './Button';
 import {
   CallEndIcon,
   ChatBubbleIcon,
@@ -44,8 +46,6 @@ import {
   WindowIcon,
 } from './SvgIcon';
 
-type ColoredCallButtonColor = 'red' | 'green';
-
 const CallButton = styled((props: ExpandableButtonProps) => {
   return <ExpandableButton {...props} />;
 })({
@@ -57,19 +57,28 @@ const CallButton = styled((props: ExpandableButtonProps) => {
 
 const ColoredCallButton = styled(
   ({
-    buttonColor,
+    paletteColor,
+    Icon,
     ...props
-  }: ExpandableButtonProps & {
-    buttonColor: ColoredCallButtonColor;
+  }: ShapedButtonProps & {
+    paletteColor?: PaletteColor | ((theme: Theme) => PaletteColor);
   }) => {
-    return <ExpandableButton {...props} />;
+    return (
+      <IconButton {...props} disableRipple={true}>
+        <Icon fontSize="inherit" />
+      </IconButton>
+    );
   }
-)(({ buttonColor }) => {
+)(({ theme, paletteColor = theme.palette.primary }) => {
+  if (typeof paletteColor === 'function') {
+    paletteColor = paletteColor(theme);
+  }
+
   return {
-    color: 'white',
-    backgroundColor: buttonColor === 'green' ? '#183722' : '#5E070D',
+    color: paletteColor.contrastText,
+    backgroundColor: paletteColor.dark,
     '&:hover': {
-      backgroundColor: buttonColor === 'green' ? '#0B8271' : '#CC0022',
+      backgroundColor: paletteColor.main,
     },
   };
 });
@@ -79,7 +88,19 @@ export const CallingChatButton = (props: ExpandableButtonProps) => {
 };
 
 export const CallingEndButton = (props: ExpandableButtonProps) => {
-  return <ColoredCallButton buttonColor="red" aria-label="call end" Icon={CallEndIcon} {...props} />;
+  const navigate = useNavigate();
+  return (
+    <ColoredCallButton
+      paletteColor={(theme) => theme.palette.error}
+      onClick={() => {
+        // TODO: Send event to end call
+        navigate('/');
+      }}
+      aria-label="call end"
+      Icon={CallEndIcon}
+      {...props}
+    />
+  );
 };
 
 export const CallingExtensionButton = (props: ExpandableButtonProps) => {
@@ -132,7 +153,7 @@ export const CallingScreenShareButton = (props: ExpandableButtonProps) => {
 };
 
 const useMediaDeviceExpandMenuOptions = (kind: MediaDeviceKind) => {
-  const { mediaDevices } = useContext(WebRTCContext);
+  const { mediaDevices } = useContext(CallContext);
 
   return useMemo(
     () =>
@@ -162,7 +183,6 @@ export const CallingVolumeButton = (props: ExpandableButtonProps) => {
 };
 
 export const CallingMicButton = (props: ExpandableButtonProps) => {
-  const { isAudioOn, setAudioStatus } = useContext(WebRTCContext);
   const options = useMediaDeviceExpandMenuOptions('audioinput');
 
   return (
@@ -173,22 +193,26 @@ export const CallingMicButton = (props: ExpandableButtonProps) => {
           options,
         },
       ]}
-      IconButtonComp={(props) => (
-        <ToggleIconButton
-          IconOn={MicroIcon}
-          IconOff={MicroOffIcon}
-          selected={isAudioOn}
-          toggle={() => setAudioStatus(!isAudioOn)}
-          {...props}
-        />
-      )}
+      IconButtonComp={ToggleAudioCameraIconButton}
+      {...props}
+    />
+  );
+};
+
+const ToggleAudioCameraIconButton = (props: IconButtonProps) => {
+  const { isAudioOn, setAudioStatus } = useContext(CallContext);
+  return (
+    <ToggleIconButton
+      IconOn={MicroIcon}
+      IconOff={MicroOffIcon}
+      selected={isAudioOn}
+      toggle={() => setAudioStatus(!isAudioOn)}
       {...props}
     />
   );
 };
 
 export const CallingVideoCameraButton = (props: ExpandableButtonProps) => {
-  const { isVideoOn, setVideoStatus } = useContext(WebRTCContext);
   const options = useMediaDeviceExpandMenuOptions('videoinput');
 
   return (
@@ -199,29 +223,85 @@ export const CallingVideoCameraButton = (props: ExpandableButtonProps) => {
           options,
         },
       ]}
-      IconButtonComp={(props) => (
-        <ToggleIconButton
-          IconOn={VideoCameraIcon}
-          IconOff={VideoCameraOffIcon}
-          selected={isVideoOn}
-          toggle={() => setVideoStatus(!isVideoOn)}
-          {...props}
-        />
-      )}
+      IconButtonComp={ToggleVideoCameraIconButton}
+      {...props}
+    />
+  );
+};
+
+const ToggleVideoCameraIconButton = (props: IconButtonProps) => {
+  const { isVideoOn, setVideoStatus } = useContext(CallContext);
+  return (
+    <ToggleIconButton
+      IconOn={VideoCameraIcon}
+      IconOff={VideoCameraOffIcon}
+      selected={isVideoOn}
+      toggle={() => setVideoStatus(!isVideoOn)}
       {...props}
     />
   );
 };
 
 // Calling pending/receiving interface
-export const CallingAnswerAudioButton = (props: ExpandableButtonProps) => {
-  return <ColoredCallButton aria-label="answer audio" buttonColor="green" Icon={PlaceAudioCallIcon} {...props} />;
+export const CallingCancelButton = (props: IconButtonProps) => {
+  const navigate = useNavigate();
+
+  return (
+    <ColoredCallButton
+      aria-label="cancel call"
+      onClick={() => {
+        navigate(-1);
+      }}
+      Icon={CallEndIcon}
+      paletteColor={(theme) => theme.palette.error}
+      {...props}
+    />
+  );
 };
 
-export const CallingAnswerVideoButton = (props: ExpandableButtonProps) => {
-  return <ColoredCallButton aria-label="answer video" buttonColor="green" Icon={VideoCameraIcon} {...props} />;
+export const CallingAnswerAudioButton = (props: IconButtonProps) => {
+  const { acceptCall } = useContext(CallContext);
+
+  return (
+    <ColoredCallButton
+      aria-label="answer call audio"
+      onClick={() => {
+        acceptCall();
+      }}
+      Icon={PlaceAudioCallIcon}
+      paletteColor={(theme) => theme.palette.success}
+      {...props}
+    />
+  );
 };
 
-export const CallingRefuseButton = (props: ExpandableButtonProps) => {
-  return <ColoredCallButton aria-label="reject" buttonColor="red" Icon={RoundCloseIcon} {...props} />;
+export const CallingAnswerVideoButton = (props: IconButtonProps) => {
+  const { acceptCall } = useContext(CallContext);
+
+  return (
+    <ColoredCallButton
+      aria-label="answer call video"
+      onClick={() => {
+        acceptCall();
+      }}
+      paletteColor={(theme) => theme.palette.success}
+      Icon={VideoCameraIcon}
+      {...props}
+    />
+  );
+};
+
+export const CallingRefuseButton = (props: IconButtonProps) => {
+  const navigate = useNavigate();
+  return (
+    <ColoredCallButton
+      aria-label="refuse call"
+      onClick={() => {
+        navigate(-1);
+      }}
+      paletteColor={(theme) => theme.palette.error}
+      Icon={RoundCloseIcon}
+      {...props}
+    />
+  );
 };

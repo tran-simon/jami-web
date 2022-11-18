@@ -42,12 +42,14 @@ const theme = createTheme({
     },
     error: {
       main: '#CC0022',
+      dark: '#720013',
     },
     success: {
       main: '#009980',
     },
     secondary: {
       main: '#A3C2DA',
+      dark: '#06493F',
     },
   },
   InfoTooltip: {

@@ -16,13 +16,14 @@
  * <https://www.gnu.org/licenses/>.
  */
 
-import { Box, CircularProgress, Grid, Stack, Typography } from '@mui/material';
+import { Box, CircularProgress, Grid, IconButtonProps, Stack, Typography } from '@mui/material';
+import { ComponentType, ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import {
   CallingAnswerAudioButton,
   CallingAnswerVideoButton,
-  CallingEndButton,
+  CallingCancelButton,
   CallingRefuseButton,
 } from '../components/CallButtons';
 
@@ -35,21 +36,6 @@ export type CallPendingProps = {
 type PendingStatus = 'caller' | 'receiver';
 type CallerStatus = 'calling' | 'connecting';
 type CommunicationMedium = 'audio' | 'video';
-
-const RECEIVER_BUTTONS = [
-  {
-    ButtonComponent: CallingRefuseButton,
-    translationKey: 'refuse_call',
-  },
-  {
-    ButtonComponent: CallingAnswerAudioButton,
-    translationKey: 'accept_call_audio',
-  },
-  {
-    ButtonComponent: CallingAnswerVideoButton,
-    translationKey: 'accept_call_video',
-  },
-];
 
 export const CallPending = (props: CallPendingProps) => {
   return (
@@ -92,6 +78,7 @@ export const CallPending = (props: CallPendingProps) => {
           />
           <img
             // TODO: Insert incoming caller icon here
+            alt="contact profile picture"
             style={{
               position: 'absolute',
               objectFit: 'cover',
@@ -113,62 +100,93 @@ export const CallPending = (props: CallPendingProps) => {
   );
 };
 
-export const CallPendingCallerInterface = ({ caller }: CallPendingProps) => {
-  const { t } = useTranslation();
-  // TODO: Remove the dummy name
-  const defaultName = 'Alex Thérieur';
+const CallPendingDetails = ({
+  title,
+  buttons,
+}: {
+  title: ReactNode;
+  buttons: {
+    ButtonComponent: ComponentType<IconButtonProps>;
+    title: ReactNode;
+  }[];
+}) => {
   return (
     <>
       <Typography variant="h1" color="white">
-        {defaultName}
-      </Typography>
-      <Typography variant="h3" color="white">
-        {caller === 'calling' ? t('calling') : t('connecting')}
-      </Typography>
-
-      <Stack alignItems="center" spacing={1} width="100%">
-        <CallingEndButton size="large" />
-        <Typography variant="body2" color="white">
-          {t('end_call')}
-        </Typography>
-      </Stack>
-    </>
-  );
-};
-
-export const CallPendingReceiverInterface = ({ medium }: CallPendingProps) => {
-  const { t } = useTranslation();
-  // TODO: Remove the dummy name
-  const defaultName = 'Alain Thérieur';
-  return (
-    <>
-      <Typography variant="h1" color="white">
-        {t('incoming_call', {
-          context: medium,
-          member0: defaultName,
-        })}
+        {title}
       </Typography>
       <Box width="50%">
-        <ReceiverButtons />
+        <Grid container justifyContent="center">
+          {buttons.map(({ ButtonComponent, title: buttonTitle }, i) => (
+            <Grid item key={i} xs={4}>
+              <Stack direction="column" alignItems="center" spacing={1} sx={{}}>
+                <ButtonComponent color="inherit" size="large" />
+                <Typography variant="body2" color="white" sx={{ opacity: 0.75 }}>
+                  {buttonTitle}
+                </Typography>
+              </Stack>
+            </Grid>
+          ))}
+        </Grid>
       </Box>
     </>
   );
 };
 
-const ReceiverButtons = () => {
+export const CallPendingCallerInterface = ({ caller }: CallPendingProps) => {
   const { t } = useTranslation();
+
+  // TODO: Remove the dummy name
+  const defaultName = 'Alex Thérieur';
   return (
-    <Grid container spacing={2}>
-      {RECEIVER_BUTTONS.map(({ ButtonComponent, translationKey }, i) => (
-        <Grid item xs={4} key={i}>
-          <Stack alignItems="center" spacing={1}>
-            <ButtonComponent color="inherit" size="large" />
-            <Typography variant="body2" color="white" sx={{ opacity: 0.75 }}>
-              {t(translationKey)}
-            </Typography>
-          </Stack>
-        </Grid>
-      ))}
-    </Grid>
+    <CallPendingDetails
+      title={
+        caller === 'calling'
+          ? t('calling', {
+              member0: defaultName,
+            })
+          : t('connecting')
+      }
+      buttons={[
+        {
+          ButtonComponent: CallingCancelButton,
+          title: t('end_call'),
+        },
+      ]}
+    />
+  );
+};
+
+export const CallPendingReceiverInterface = ({ medium, caller }: CallPendingProps) => {
+  const { t } = useTranslation();
+
+  // TODO: Remove the dummy name
+  const defaultName = 'Alain Thérieur';
+
+  return (
+    <CallPendingDetails
+      title={
+        caller === 'connecting'
+          ? t('connecting')
+          : t('incoming_call', {
+              context: medium,
+              member0: defaultName,
+            })
+      }
+      buttons={[
+        {
+          ButtonComponent: CallingRefuseButton,
+          title: t('refuse_call'),
+        },
+        {
+          ButtonComponent: CallingAnswerAudioButton,
+          title: t('accept_call_audio'),
+        },
+        {
+          ButtonComponent: CallingAnswerVideoButton,
+          title: t('accept_call_video'),
+        },
+      ]}
+    />
   );
 };

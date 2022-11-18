@@ -19,8 +19,14 @@ import { createBrowserRouter, createRoutesFromElements, Outlet, Route } from 're
 
 import App, { appLoader } from './App';
 import ContactList from './components/ContactList';
+import ConversationView from './components/ConversationView';
 import AuthProvider from './contexts/AuthProvider';
+import CallProvider, { CallRole } from './contexts/CallProvider';
+import ConversationProvider from './contexts/ConversationProvider';
+import WebRTCProvider from './contexts/WebRTCProvider';
 import WebSocketProvider from './contexts/WebSocketProvider';
+import { RouteParams } from './hooks/useUrlParams';
+import NotificationManager from './managers/NotificationManager';
 import AccountSettings from './pages/AccountSettings';
 import CallInterface from './pages/CallInterface';
 import Messenger from './pages/Messenger';
@@ -28,10 +34,14 @@ import Setup from './pages/Setup';
 import SetupLogin from './pages/SetupLogin';
 import Welcome from './pages/Welcome';
 import { ThemeDemonstrator } from './themes/ThemeDemonstrator';
-import { RouteParams } from './utils/hooks';
 
-export type MessengerRouteParams = RouteParams<{ conversationId?: string; contactId?: string }, Record<string, never>>;
-export type CallRouteParams = RouteParams<{ conversationId: string }, { video?: 'true' }>;
+export type ConversationRouteParams = RouteParams<{ conversationId: string }, Record<string, never>>;
+export type AddContactRouteParams = RouteParams<{ contactId: string }, Record<string, never>>;
+
+/**
+ * Route parameters for the call routes.
+ */
+export type CallRouteParams = RouteParams<{ conversationId: string }, { role?: CallRole }>;
 
 export const router = createBrowserRouter(
   createRoutesFromElements(
@@ -44,17 +54,39 @@ export const router = createBrowserRouter(
         element={
           <AuthProvider>
             <WebSocketProvider>
-              <Outlet />
+              <NotificationManager>
+                <Outlet />
+              </NotificationManager>
             </WebSocketProvider>
           </AuthProvider>
         }
       >
-        <Route path="add-contact/:contactId" element={<Messenger />} />
-        <Route path="conversation/:conversationId" element={<Messenger />} />
-        <Route path="call/:conversationId" element={<CallInterface />} />
+        <Route index element={<Messenger />} />
+        <Route path="conversation" element={<Messenger />}>
+          <Route path="add-contact/:contactId" />
+          <Route
+            path=":conversationId"
+            element={
+              <ConversationProvider>
+                <Outlet />
+              </ConversationProvider>
+            }
+          >
+            <Route index element={<ConversationView />} />
+            <Route
+              path="call"
+              element={
+                <WebRTCProvider>
+                  <CallProvider>
+                    <CallInterface />
+                  </CallProvider>
+                </WebRTCProvider>
+              }
+            />
+          </Route>
+        </Route>
         <Route path="settings" element={<AccountSettings />} />
         <Route path="contacts" element={<ContactList />} />
-        <Route index element={<Messenger />} />
       </Route>
     </Route>
   )

@@ -17,14 +17,24 @@
  */
 import { WebSocketMessageType } from '../enums/websocket-message-type.js';
 import { AccountTextMessage } from './account-text-message.js';
-import { ConversationMessage, ConversationView, WebRTCIceCandidate, WebRTCSDP } from './websocket-interfaces.js';
+import {
+  CallBegin,
+  ConversationMessage,
+  ConversationView,
+  WebRTCIceCandidate,
+  WebRtcSdp,
+} from './websocket-interfaces.js';
 
 export interface WebSocketMessageTable {
   [WebSocketMessageType.ConversationMessage]: ConversationMessage;
   [WebSocketMessageType.ConversationView]: ConversationView;
-  [WebSocketMessageType.WebRTCOffer]: AccountTextMessage<WebRTCSDP>;
-  [WebSocketMessageType.WebRTCAnswer]: AccountTextMessage<WebRTCSDP>;
+  [WebSocketMessageType.WebRTCOffer]: AccountTextMessage<WebRtcSdp>;
+  [WebSocketMessageType.WebRTCAnswer]: AccountTextMessage<WebRtcSdp>;
   [WebSocketMessageType.IceCandidate]: AccountTextMessage<WebRTCIceCandidate>;
+  [WebSocketMessageType.CallBegin]: AccountTextMessage<CallBegin>;
+  [WebSocketMessageType.CallAccept]: AccountTextMessage<undefined>;
+  [WebSocketMessageType.CallRefuse]: AccountTextMessage<undefined>;
+  [WebSocketMessageType.CallEnd]: AccountTextMessage<undefined>;
 }
 
 export interface WebSocketMessage<T extends WebSocketMessageType> {

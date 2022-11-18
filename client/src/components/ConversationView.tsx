@@ -16,61 +16,19 @@
  * <https://www.gnu.org/licenses/>.
  */
 import { Divider, Stack, Typography } from '@mui/material';
-import { Account, Conversation, ConversationMember, WebSocketMessageType } from 'jami-web-common';
-import { useContext, useEffect, useMemo, useState } from 'react';
+import { Account, ConversationMember } from 'jami-web-common';
+import { useContext, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router';
 
 import { useAuthContext } from '../contexts/AuthProvider';
-import { WebSocketContext } from '../contexts/WebSocketProvider';
+import { ConversationContext } from '../contexts/ConversationProvider';
 import ChatInterface from '../pages/ChatInterface';
-import { useConversationQuery } from '../services/Conversation';
 import { translateEnumeration, TranslateEnumerationOptions } from '../utils/translations';
 import { AddParticipantButton, ShowOptionsMenuButton, StartAudioCallButton, StartVideoCallButton } from './Button';
-import LoadingPage from './Loading';
 
-type ConversationViewProps = {
-  conversationId: string;
-};
-const ConversationView = ({ conversationId }: ConversationViewProps) => {
+const ConversationView = () => {
   const { account } = useAuthContext();
-  const webSocket = useContext(WebSocketContext);
-  const [conversation, setConversation] = useState<Conversation | undefined>();
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(false);
-
-  const accountId = account.getId();
-
-  const conversationQuery = useConversationQuery(conversationId);
-
-  useEffect(() => {
-    if (conversationQuery.isSuccess) {
-      const conversation = Conversation.from(accountId, conversationQuery.data);
-      setConversation(conversation);
-    }
-  }, [accountId, conversationQuery.isSuccess, conversationQuery.data]);
-
-  useEffect(() => {
-    setIsLoading(conversationQuery.isLoading);
-  }, [conversationQuery.isLoading]);
-
-  useEffect(() => {
-    setError(conversationQuery.isError);
-  }, [conversationQuery.isError]);
-
-  useEffect(() => {
-    if (!conversation || !webSocket) {
-      return;
-    }
-    console.log(`set conversation ${conversationId} ` + webSocket);
-    webSocket.send(WebSocketMessageType.ConversationView, { accountId, conversationId });
-  }, [accountId, conversation, conversationId, webSocket]);
-
-  if (isLoading) {
-    return <LoadingPage />;
-  } else if (error || !account || !conversation) {
-    return <div>Error loading {conversationId}</div>;
-  }
+  const { conversationId, conversation } = useContext(ConversationContext);
 
   return (
     <Stack height="100%">
@@ -97,9 +55,9 @@ type ConversationHeaderProps = {
   adminTitle: string | undefined;
 };
 
-const ConversationHeader = ({ account, members, adminTitle, conversationId }: ConversationHeaderProps) => {
+const ConversationHeader = ({ account, members, adminTitle }: ConversationHeaderProps) => {
   const { t } = useTranslation();
-  const navigate = useNavigate();
+  const { beginCall } = useContext(ConversationContext);
 
   const title = useMemo(() => {
     if (adminTitle) {
@@ -124,14 +82,6 @@ const ConversationHeader = ({ account, members, adminTitle, conversationId }: Co
     return translateEnumeration<ConversationMember>(members, options);
   }, [account, members, adminTitle, t]);
 
-  const startCall = (withVideo = false) => {
-    let url = `/call/${conversationId}`;
-    if (withVideo) {
-      url += '?video=true';
-    }
-    navigate(url);
-  };
-
   return (
     <Stack direction="row" padding="16px" overflow="hidden">
       <Stack flex={1} justifyContent="center" whiteSpace="nowrap" overflow="hidden">
@@ -140,8 +90,8 @@ const ConversationHeader = ({ account, members, adminTitle, conversationId }: Co
         </Typography>
       </Stack>
       <Stack direction="row" spacing="20px">
-        <StartAudioCallButton onClick={() => startCall(false)} />
-        <StartVideoCallButton onClick={() => startCall(true)} />
+        <StartAudioCallButton onClick={() => beginCall()} />
+        <StartVideoCallButton onClick={() => beginCall()} />
         <AddParticipantButton />
         <ShowOptionsMenuButton />
       </Stack>

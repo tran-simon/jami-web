@@ -131,19 +131,13 @@ export default ({ children }: WithChildren) => {
 
   useEffect(connect, [connect]);
 
-  return (
-    <WebSocketContext.Provider
-      value={
-        isConnected
-          ? {
-              bind,
-              unbind,
-              send,
-            }
-          : undefined
+  const value: IWebSocketContext | undefined = isConnected
+    ? {
+        bind,
+        unbind,
+        send,
       }
-    >
-      {children}
-    </WebSocketContext.Provider>
-  );
+    : undefined;
+
+  return <WebSocketContext.Provider value={value}>{children}</WebSocketContext.Provider>;
 };

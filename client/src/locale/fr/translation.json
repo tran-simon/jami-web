@@ -69,10 +69,12 @@
   "message_input_placeholder_four": "Écrire à {{member0}}, {{member1}}, {{member2}}, +1 autre membre",
   "message_input_placeholder_more": "Écrire à {{member0}}, {{member1}}, {{member2}}, +{{excess}} autres membres",
   "conversation_add_contact": "Ajouter le contact",
-  "calling": "Appel en cours...",
+  "calling": "Appel vers {{member0}}",
   "connecting": "Connexion en cours...",
   "end_call": "Fin d'appel",
-  "incoming_call_medium": "",
+  "refuse_call": "Refuser",
+  "accept_call_audio": "Accepter en audio",
+  "accept_call_video": "Accepter en vidéo",
   "login_username_not_found": "Nom d'utilisateur introuvable",
   "login_invalid_password": "Mot de passe incorrect",
   "login_form_title": "Connexion",
@@ -95,6 +97,8 @@
   "setup_login_password_placeholder_creation": "Nouveau mot de passe",
   "setup_login_password_placeholder_repeat": "Répéter le mot de passe",
   "admin_creation_submit_button": "Créer un compte admin",
+  "incoming_call_audio": "Appel audio entrant de {{member0}}",
+  "incoming_call_video": "Appel vidéo entrant de {{member0}}",
   "severity_error": "Erreur",
   "severity_success": "Succès"
 }

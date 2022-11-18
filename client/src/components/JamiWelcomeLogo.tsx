@@ -18,7 +18,7 @@
 import { Stack, StackProps, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 
-import { ReactComponent as JamiLogo } from '../icons/jami-logo-icon.svg';
+import { ReactComponent as JamiLogo } from '../icons/jamiLogoIcon.svg';
 import { jamiLogoDefaultSize } from '../utils/constants';
 
 interface WelcomeLogoProps extends StackProps {
