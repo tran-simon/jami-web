@@ -20,6 +20,7 @@ import { useState } from 'react';
 import { json, LoaderFunctionArgs, Outlet, redirect } from 'react-router-dom';
 
 import WelcomeAnimation from './components/welcome';
+import { getAccessToken } from './utils/auth';
 import { apiUrl } from './utils/constants';
 
 export async function checkSetupStatus(): Promise<boolean> {
@@ -38,7 +39,7 @@ export async function appLoader({ request }: LoaderFunctionArgs) {
 }
 
 const App = () => {
-  const [displayWelcome, setDisplayWelcome] = useState<boolean>(true);
+  const [displayWelcome, setDisplayWelcome] = useState<boolean>(getAccessToken() === undefined);
 
   console.log('App render');
 

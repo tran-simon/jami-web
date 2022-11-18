@@ -17,6 +17,8 @@
  */
 import { AccountDetails, Message, VolatileDetails } from 'jami-web-common';
 
+import { Blob, StringMap } from './jami-swig.js';
+
 // These interfaces are used to hold all the parameters for signal handlers
 // These parameters' names and types can be found in daemon/bin/nodejs/callback.h
 // or in their relevant SWIG interface files (.i) in daemon/bin/nodejs
@@ -69,6 +71,14 @@ export interface AccountMessageStatusChanged {
   state: number; // TODO: Replace state number with enum (see account_const.h)
 }
 
+export interface IncomingTrustRequest {
+  accountId: string;
+  conversationId: string;
+  from: string;
+  payload: Blob;
+  received: number;
+}
+
 export interface ContactAdded {
   accountId: string;
   contactId: string;
@@ -79,6 +89,12 @@ export interface ContactRemoved {
   accountId: string;
   contactId: string;
   banned: boolean;
+}
+
+export interface ConversationRequestReceived {
+  accountId: string;
+  conversationId: string;
+  metadata: StringMap;
 }
 
 export interface ConversationReady {
@@ -96,6 +112,13 @@ export interface ConversationLoaded {
   accountId: string;
   conversationId: string;
   messages: Message[];
+}
+
+export interface ConversationMemberEvent {
+  accountId: string;
+  conversationId: string;
+  memberUri: string;
+  event: number;
 }
 
 export interface MessageReceived {

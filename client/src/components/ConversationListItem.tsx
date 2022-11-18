@@ -50,7 +50,7 @@ export default function ConversationListItem({ conversation }: ConversationListI
   const pathId = conversationId || contactId;
   const isSelected = conversation.getDisplayUri() === pathId;
   const navigate = useNavigate();
-  const [userId] = useState(conversation?.getFirstMember()?.contact.getUri());
+  const userId = conversation?.getFirstMember()?.contact.getUri();
   const uri = conversation.getId() ? `/conversation/${conversation.getId()}` : `/add-contact/${userId}`;
   return (
     <Box onContextMenu={contextMenuHandler.handleAnchorPosition}>

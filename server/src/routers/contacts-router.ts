@@ -49,6 +49,8 @@ contactsRouter.put('/:contactId', (req, res) => {
   const contactId = req.params.contactId;
 
   jamid.addContact(accountId, contactId);
+  // We need to manually send a conversation request
+  jamid.sendTrustRequest(accountId, contactId);
 
   const contactDetails = jamid.getContactDetails(accountId, contactId);
   if (Object.keys(contactDetails).length === 0) {

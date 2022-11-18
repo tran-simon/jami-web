@@ -16,8 +16,8 @@
  * <https://www.gnu.org/licenses/>.
  */
 import { Stack } from '@mui/material';
-import { Contact, Conversation } from 'jami-web-common';
-import { useEffect, useState } from 'react';
+import { Contact, Conversation, WebSocketMessageType } from 'jami-web-common';
+import { useContext, useEffect, useState } from 'react';
 
 //import Sound from 'react-sound';
 import ConversationList from '../components/ConversationList';
@@ -26,14 +26,18 @@ import Header from '../components/Header';
 import LoadingPage from '../components/Loading';
 import NewContactForm from '../components/NewContactForm';
 import { useAuthContext } from '../contexts/AuthProvider';
-import { useAppSelector } from '../redux/hooks';
+import { WebSocketContext } from '../contexts/WebSocketProvider';
+import { setRefreshFromSlice } from '../redux/appSlice';
+import { useAppDispatch, useAppSelector } from '../redux/hooks';
 import { MessengerRouteParams } from '../router';
 import { useUrlParams } from '../utils/hooks';
 import AddContactPage from './AddContactPage';
 
 const Messenger = () => {
   const { refresh } = useAppSelector((state) => state.userInfo);
+  const dispatch = useAppDispatch();
   const { account, axiosInstance } = useAuthContext();
+  const webSocket = useContext(WebSocketContext);
 
   const [conversations, setConversations] = useState<Conversation[] | undefined>(undefined);
   const [searchQuery, setSearchQuery] = useState('');
@@ -56,6 +60,16 @@ const Messenger = () => {
       });
     // return () => controller.abort()
   }, [axiosInstance, accountId, refresh]);
+
+  useEffect(() => {
+    if (!webSocket) {
+      return;
+    }
+
+    const conversationMessageListener = () => dispatch(setRefreshFromSlice());
+    webSocket.bind(WebSocketMessageType.ConversationMessage, conversationMessageListener);
+    return () => webSocket.unbind(WebSocketMessageType.ConversationMessage, conversationMessageListener);
+  }, [webSocket, dispatch]);
 
   useEffect(() => {
     if (!searchQuery) return;

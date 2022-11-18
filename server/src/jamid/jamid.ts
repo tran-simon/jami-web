@@ -38,8 +38,10 @@ import {
   ContactAdded,
   ContactRemoved,
   ConversationLoaded,
+  ConversationMemberEvent,
   ConversationReady,
   ConversationRemoved,
+  ConversationRequestReceived,
   IncomingAccountMessage,
   KnownDevicesChanged,
   MessageReceived,
@@ -118,6 +120,10 @@ export class Jamid {
     handlers.ContactRemoved = (accountId: string, contactId: string, banned: boolean) =>
       onContactRemoved.next({ accountId, contactId, banned });
 
+    const onConversationRequestReceived = new Subject<ConversationRequestReceived>();
+    handlers.ConversationRequestReceived = (accountId: string, conversationId: string, metadata: StringMap) =>
+      onConversationRequestReceived.next({ accountId, conversationId, metadata });
+
     const onConversationReady = new Subject<ConversationReady>();
     handlers.ConversationReady = (accountId: string, conversationId: string) =>
       onConversationReady.next({ accountId, conversationId });
@@ -129,6 +135,16 @@ export class Jamid {
     const onConversationLoaded = new Subject<ConversationLoaded>();
     handlers.ConversationLoaded = (id: number, accountId: string, conversationId: string, messages: Message[]) =>
       onConversationLoaded.next({ id, accountId, conversationId, messages });
+
+    const onConversationMemberEvent = new Subject<ConversationMemberEvent>();
+    handlers.ConversationMemberEvent = (
+      accountId: string,
+      conversationId: string,
+      memberUri: string,
+      event: number
+    ) => {
+      onConversationMemberEvent.next({ accountId, conversationId, memberUri, event });
+    };
 
     const onMessageReceived = new Subject<MessageReceived>();
     handlers.MessageReceived = (accountId: string, conversationId: string, message: Message) =>
@@ -147,9 +163,11 @@ export class Jamid {
       onAccountMessageStatusChanged: onAccountMessageStatusChanged.asObservable(),
       onContactAdded: onContactAdded.asObservable(),
       onContactRemoved: onContactRemoved.asObservable(),
+      onConversationRequestReceived: onConversationRequestReceived.asObservable(),
       onConversationReady: onConversationReady.asObservable(),
       onConversationRemoved: onConversationRemoved.asObservable(),
       onConversationLoaded: onConversationLoaded.asObservable(),
+      onConversationMemberEvent: onConversationMemberEvent.asObservable(),
       onMessageReceived: onMessageReceived.asObservable(),
     };
 
@@ -266,6 +284,10 @@ export class Jamid {
     this.jamiSwig.addContact(accountId, contactId);
   }
 
+  sendTrustRequest(accountId: string, contactId: string): void {
+    this.jamiSwig.sendTrustRequest(accountId, contactId, new this.jamiSwig.Blob());
+  }
+
   removeContact(accountId: string, contactId: string): void {
     this.jamiSwig.removeContact(accountId, contactId, false);
   }
@@ -358,8 +380,8 @@ export class Jamid {
         `Received VolatileDetailsChanged: {"accountId":"${accountId}",` +
           `"details":{"Account.registeredName":"${username}", ...}}`
       );
-      // Keep map of usernames to account IDs
       if (username) {
+        // Keep map of usernames to account IDs
         this.usernamesToAccountIds.set(username, accountId);
       }
     });
@@ -420,6 +442,17 @@ export class Jamid {
       log.debug('Received ContactRemoved:', JSON.stringify(signal));
     });
 
+    this.events.onConversationRequestReceived.subscribe((signal) => {
+      log.debug('Received ConversationRequestReceived:', JSON.stringify(signal));
+
+      // TODO: Prompt user to accept conversation request on client
+      // Currently, we auto-accept all incoming conversation requests. In future, we
+      // need to ask the user if they accept the conversation request or not. Part of
+      // it can be done by sending a WebSocket event.
+      // See other implementations e.g. block contact / decline request / accept request.
+      this.jamiSwig.acceptConversationRequest(signal.accountId, signal.conversationId);
+    });
+
     this.events.onConversationReady.subscribe((signal) => {
       log.debug('Received ConversationReady:', JSON.stringify(signal));
     });
@@ -435,8 +468,13 @@ export class Jamid {
       );
     });
 
+    this.events.onConversationMemberEvent.subscribe((signal) => {
+      log.debug('Received onConversationMemberEvent:', JSON.stringify(signal));
+    });
+
     this.events.onMessageReceived.subscribe((signal) => {
       log.debug('Received MessageReceived:', JSON.stringify(signal));
+
       const data: ConversationMessage = {
         conversationId: signal.conversationId,
         message: signal.message,

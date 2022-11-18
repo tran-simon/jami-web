@@ -80,9 +80,8 @@ export async function loginUser(username: string, password: string): Promise<str
   }
 }
 
-export function getAccessToken(): string {
-  const accessToken: string | null = localStorage.getItem('accessToken');
-  return accessToken ?? '';
+export function getAccessToken(): string | undefined {
+  return localStorage.getItem('accessToken') ?? undefined;
 }
 
 export function setAccessToken(accessToken: string): void {

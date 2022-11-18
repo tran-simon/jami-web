@@ -28,14 +28,14 @@ interface SwigMap<T, U> {
   set(key: T, value: U): void;
 }
 
-// export type IntVect = SwigVec<number>;
-// export type UintVect = SwigVec<number>;
-// export type FloatVect = SwigVec<number>;
+// export type IntVect = SwigVect<number>;
+// export type UintVect = SwigVect<number>;
+// export type FloatVect = SwigVect<number>;
 export type StringVect = SwigVect<string>;
 // export type IntegerMap = SwigMap<string, number>;
 export type StringMap = SwigMap<string, string>;
 export type VectMap = SwigVect<StringMap>;
-// export type Blob = SwigVec<number>;
+export type Blob = SwigVect<number>;
 
 function* swigVectToIt<T>(swigVect: SwigVect<T>) {
   const size = swigVect.size();
@@ -106,6 +106,9 @@ export interface JamiSwig {
   removeContact(accountId: string, contactId: string, ban: boolean): void;
   getContacts(accountId: string): VectMap;
   getContactDetails(accountId: string, contactId: string): StringMap;
+  sendTrustRequest(accountId: string, to: string, payload: Blob): void;
+  acceptTrustRequest(accountId: string, from: string): boolean;
+  discardTrustRequest(accountId: string, from: string): boolean;
 
   getDefaultModerators(accountId: string): StringVect;
   setDefaultModerator(accountId: string, uri: string, state: boolean): void;
@@ -113,6 +116,7 @@ export interface JamiSwig {
   getConversations(accountId: string): StringVect;
   conversationInfos(accountId: string, conversationId: string): StringMap;
   getConversationMembers(accountId: string, conversationId: string): VectMap;
+  acceptConversationRequest(accountId: string, conversationId: string): void;
 
   sendMessage(accountId: string, conversationId: string, message: string, replyTo: string, flag: number): void;
   loadConversationMessages(accountId: string, conversationId: string, fromMessage: string, n: number): number;
@@ -128,4 +132,5 @@ export interface JamiSwig {
   StringMap: Constructable<StringMap>;
   // VectMap: Constructable<VectMap>;
   // IntegerMap: Constructable<IntegerMap>;
+  Blob: Constructable<Blob>;
 }
