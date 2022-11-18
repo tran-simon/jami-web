@@ -16,7 +16,13 @@
  * <https://www.gnu.org/licenses/>.
  */
 
-import { WebSocketMessageType } from 'jami-web-common';
+import {
+  AccountTextMessage,
+  WebRTCAnswerMessage,
+  WebRTCIceCandidate,
+  WebRTCOfferMessage,
+  WebSocketMessageType,
+} from 'jami-web-common';
 import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
 
 import { WithChildren } from '../utils/utils';
@@ -178,7 +184,7 @@ export default ({
       return;
     }
 
-    webSocket.bind(WebSocketMessageType.WebRTCOffer, async (data) => {
+    const webRTCOfferListener = async (data: AccountTextMessage<WebRTCOfferMessage>) => {
       if (webRTCConnection) {
         await webRTCConnection.setRemoteDescription(new RTCSessionDescription(data.message.sdp));
         const mySdp = await webRTCConnection.createAnswer({
@@ -194,17 +200,27 @@ export default ({
           },
         });
       }
-    });
+    };
 
-    webSocket.bind(WebSocketMessageType.WebRTCAnswer, async (data) => {
+    const webRTCAnswerListener = async (data: AccountTextMessage<WebRTCAnswerMessage>) => {
       await webRTCConnection.setRemoteDescription(new RTCSessionDescription(data.message.sdp));
       console.log('get answer');
-    });
+    };
 
-    webSocket.bind(WebSocketMessageType.IceCandidate, async (data) => {
+    const iceCandidateListener = async (data: AccountTextMessage<WebRTCIceCandidate>) => {
       await webRTCConnection.addIceCandidate(new RTCIceCandidate(data.message.candidate));
       console.log('webRTCConnection : candidate add success');
-    });
+    };
+
+    webSocket.bind(WebSocketMessageType.WebRTCOffer, webRTCOfferListener);
+    webSocket.bind(WebSocketMessageType.WebRTCAnswer, webRTCAnswerListener);
+    webSocket.bind(WebSocketMessageType.IceCandidate, iceCandidateListener);
+
+    return () => {
+      webSocket.unbind(WebSocketMessageType.WebRTCOffer, webRTCOfferListener);
+      webSocket.unbind(WebSocketMessageType.WebRTCAnswer, webRTCAnswerListener);
+      webSocket.unbind(WebSocketMessageType.IceCandidate, iceCandidateListener);
+    };
   }, [account, contactId, webSocket, webRTCConnection]);
 
   const setAudioStatus = useCallback((isOn: boolean) => {

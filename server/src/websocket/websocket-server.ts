@@ -18,7 +18,14 @@
 import { IncomingMessage } from 'node:http';
 import { Duplex } from 'node:stream';
 
-import { WebSocketCallbacks, WebSocketMessage, WebSocketMessageTable, WebSocketMessageType } from 'jami-web-common';
+import {
+  buildWebSocketCallbacks,
+  WebSocketCallback,
+  WebSocketCallbacks,
+  WebSocketMessage,
+  WebSocketMessageTable,
+  WebSocketMessageType,
+} from 'jami-web-common';
 import log from 'loglevel';
 import { Service } from 'typedi';
 import { URL } from 'whatwg-url';
@@ -30,13 +37,7 @@ import { verifyJwt } from '../utils/jwt.js';
 export class WebSocketServer {
   private wss = new WebSocket.WebSocketServer({ noServer: true });
   private sockets = new Map<string, WebSocket.WebSocket[]>();
-  private callbacks: WebSocketCallbacks = {
-    [WebSocketMessageType.ConversationMessage]: [],
-    [WebSocketMessageType.ConversationView]: [],
-    [WebSocketMessageType.WebRTCOffer]: [],
-    [WebSocketMessageType.WebRTCAnswer]: [],
-    [WebSocketMessageType.IceCandidate]: [],
-  };
+  private callbacks: WebSocketCallbacks = buildWebSocketCallbacks();
 
   constructor() {
     this.wss.on('connection', (ws: WebSocket.WebSocket, _request: IncomingMessage, accountId: string) => {
@@ -108,8 +109,8 @@ export class WebSocketServer {
     }
   }
 
-  bind<T extends WebSocketMessageType>(type: T, callback: (data: WebSocketMessageTable[T]) => void): void {
-    this.callbacks[type].push(callback);
+  bind<T extends WebSocketMessageType>(type: T, callback: WebSocketCallback<T>): void {
+    this.callbacks[type].add(callback);
   }
 
   send<T extends WebSocketMessageType>(accountId: string, type: T, data: WebSocketMessageTable[T]): boolean {

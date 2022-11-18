@@ -16,7 +16,7 @@
  * <https://www.gnu.org/licenses/>.
  */
 import { Box, Divider, Stack } from '@mui/material';
-import { ConversationMember, Message, WebSocketMessageType } from 'jami-web-common';
+import { ConversationMember, ConversationMessage, Message, WebSocketMessageType } from 'jami-web-common';
 import { useCallback, useContext, useEffect, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
 
@@ -88,12 +88,17 @@ const ChatInterface = ({ conversationId, members }: ChatInterfaceProps) => {
 
   useEffect(() => {
     if (webSocket) {
-      webSocket.bind(WebSocketMessageType.ConversationMessage, ({ message }) => {
+      const conversationMessageListener = ({ message }: ConversationMessage) => {
         console.log('newMessage');
         setMessages((messages) => addMessage(messages, message));
-      });
+      };
+
+      webSocket.bind(WebSocketMessageType.ConversationMessage, conversationMessageListener);
+      return () => {
+        webSocket.unbind(WebSocketMessageType.ConversationMessage, conversationMessageListener);
+      };
     }
-  }, [conversationId, webSocket]);
+  }, [webSocket]);
 
   if (isLoading) {
     return <LoadingPage />;

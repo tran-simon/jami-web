@@ -15,16 +15,29 @@
  * License along with this program.  If not, see
  * <https://www.gnu.org/licenses/>.
  */
-import { WebSocketCallbacks, WebSocketMessage, WebSocketMessageTable, WebSocketMessageType } from 'jami-web-common';
+import {
+  buildWebSocketCallbacks,
+  WebSocketCallbacks,
+  WebSocketMessage,
+  WebSocketMessageTable,
+  WebSocketMessageType,
+} from 'jami-web-common';
 import { createContext, useCallback, useEffect, useRef, useState } from 'react';
 
 import { apiUrl } from '../utils/constants';
 import { WithChildren } from '../utils/utils';
 import { useAuthContext } from './AuthProvider';
 
+type BindFunction = <T extends WebSocketMessageType>(
+  type: T,
+  callback: (data: WebSocketMessageTable[T]) => void
+) => void;
+type SendFunction = <T extends WebSocketMessageType>(type: T, data: WebSocketMessageTable[T]) => void;
+
 export interface IWebSocketContext {
-  bind: <T extends WebSocketMessageType>(type: T, callback: (data: WebSocketMessageTable[T]) => void) => void;
-  send: <T extends WebSocketMessageType>(type: T, data: WebSocketMessageTable[T]) => void;
+  bind: BindFunction;
+  unbind: BindFunction;
+  send: SendFunction;
 }
 
 export const WebSocketContext = createContext<IWebSocketContext | undefined>(undefined);
@@ -32,29 +45,28 @@ export const WebSocketContext = createContext<IWebSocketContext | undefined>(und
 export default ({ children }: WithChildren) => {
   const [isConnected, setIsConnected] = useState(false);
   const webSocketRef = useRef<WebSocket>();
-  const callbacksRef = useRef<WebSocketCallbacks>({
-    [WebSocketMessageType.ConversationMessage]: [],
-    [WebSocketMessageType.ConversationView]: [],
-    [WebSocketMessageType.WebRTCOffer]: [],
-    [WebSocketMessageType.WebRTCAnswer]: [],
-    [WebSocketMessageType.IceCandidate]: [],
-  });
+  const callbacksRef = useRef<WebSocketCallbacks>(buildWebSocketCallbacks());
 
   const { token: accessToken } = useAuthContext();
 
-  const context: IWebSocketContext = {
-    bind: useCallback((type, callback) => {
-      callbacksRef.current[type].push(callback);
-    }, []),
-    send: useCallback(
-      (type, data) => {
-        if (isConnected) {
-          webSocketRef.current?.send(JSON.stringify({ type, data }));
-        }
-      },
-      [isConnected]
-    ),
-  };
+  const bind: BindFunction = useCallback((type, callback) => {
+    const callbacks = callbacksRef.current[type];
+    callbacks.add(callback);
+  }, []);
+
+  const unbind: BindFunction = useCallback((type, callback) => {
+    const callbacks = callbacksRef.current[type];
+    callbacks.delete(callback);
+  }, []);
+
+  const send: SendFunction = useCallback(
+    (type, data) => {
+      if (isConnected) {
+        webSocketRef.current?.send(JSON.stringify({ type, data }));
+      }
+    },
+    [isConnected]
+  );
 
   const connect = useCallback(() => {
     const url = new URL(apiUrl);
@@ -72,7 +84,7 @@ export default ({ children }: WithChildren) => {
       console.debug('WebSocket disconnected');
       setIsConnected(false);
       for (const callbacks of Object.values(callbacksRef.current)) {
-        callbacks.length = 0;
+        callbacks.clear();
       }
       setTimeout(connect, 1000);
     };
@@ -119,5 +131,19 @@ export default ({ children }: WithChildren) => {
 
   useEffect(connect, [connect]);
 
-  return <WebSocketContext.Provider value={isConnected ? context : undefined}>{children}</WebSocketContext.Provider>;
+  return (
+    <WebSocketContext.Provider
+      value={
+        isConnected
+          ? {
+              bind,
+              unbind,
+              send,
+            }
+          : undefined
+      }
+    >
+      {children}
+    </WebSocketContext.Provider>
+  );
 };
