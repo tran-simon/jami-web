@@ -16,23 +16,14 @@
  * <https://www.gnu.org/licenses/>.
  */
 import { GppMaybe, Warning } from '@mui/icons-material';
-import {
-  IconButtonProps,
-  List,
-  ListItem,
-  ListItemIcon,
-  Stack,
-  TextField,
-  TextFieldProps,
-  Typography,
-} from '@mui/material';
+import { IconButtonProps, Stack, TextField, TextFieldProps } from '@mui/material';
 import { styled } from '@mui/material/styles';
-import { ChangeEvent, ReactElement, useCallback, useEffect, useState } from 'react';
+import { ChangeEvent, ReactElement, useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { StrengthValueCode } from '../utils/auth';
 import { InfoButton, ToggleVisibilityButton } from './Button';
-import RulesDialog from './RulesDialog';
+import { DialogContentList, InfosDialog, useDialogHandler } from './Dialog';
 import { CheckedIcon, LockIcon, PenIcon, PersonIcon, RoundSaltireIcon } from './SvgIcon';
 
 const iconsHeight = '16px';
@@ -71,7 +62,7 @@ export const UsernameInput = ({
   const [isSelected, setIsSelected] = useState(false);
   const [input, setInput] = useState(props.defaultValue);
   const [startAdornment, setStartAdornment] = useState<ReactElement | undefined>();
-  const [isDialogOpened, setIsDialogOpened] = useState<boolean>(false);
+  const dialogHandler = useDialogHandler();
 
   const onChange = useCallback(
     (event: ChangeEvent<HTMLInputElement>) => {
@@ -105,13 +96,7 @@ export const UsernameInput = ({
 
   return (
     <>
-      <RulesDialog
-        openDialog={isDialogOpened}
-        title={t('username_rules_dialog_title')}
-        closeDialog={() => setIsDialogOpened(false)}
-      >
-        <UsernameRules />
-      </RulesDialog>
+      <InfosDialog {...dialogHandler.props} title={t('username_rules_dialog_title')} content={<UsernameRules />} />
       <TextField
         color={inputColor(props.error, success)}
         label={t('username_input_label')}
@@ -128,7 +113,7 @@ export const UsernameInput = ({
         InputProps={{
           startAdornment,
           endAdornment: (
-            <InfoButton tooltipTitle={tooltipTitle} {...infoButtonProps} onClick={() => setIsDialogOpened(true)} />
+            <InfoButton tooltipTitle={tooltipTitle} {...infoButtonProps} onClick={dialogHandler.openDialog} />
           ),
           ...props.InputProps,
         }}
@@ -150,7 +135,7 @@ export const PasswordInput = ({
   const [isSelected, setIsSelected] = useState(false);
   const [input, setInput] = useState(props.defaultValue);
   const [startAdornment, setStartAdornment] = useState<ReactElement | undefined>();
-  const [isDialogOpened, setIsDialogOpened] = useState<boolean>(false);
+  const dialogHandler = useDialogHandler();
 
   const toggleShowPassword = () => {
     setShowPassword((showPassword) => !showPassword);
@@ -189,13 +174,7 @@ export const PasswordInput = ({
 
   return (
     <>
-      <RulesDialog
-        openDialog={isDialogOpened}
-        title={t('password_rules_dialog_title')}
-        closeDialog={() => setIsDialogOpened(false)}
-      >
-        <PasswordRules />
-      </RulesDialog>
+      <InfosDialog {...dialogHandler.props} title={t('password_rules_dialog_title')} content={<PasswordRules />} />
       <TextField
         color={inputColor(props.error, success)}
         label={t('password_input_label')}
@@ -212,7 +191,7 @@ export const PasswordInput = ({
           startAdornment,
           endAdornment: (
             <Stack direction="row" spacing="14px" alignItems="center">
-              <InfoButton tooltipTitle={tooltipTitle} {...infoButtonProps} onClick={() => setIsDialogOpened(true)} />
+              <InfoButton tooltipTitle={tooltipTitle} {...infoButtonProps} onClick={dialogHandler.openDialog} />
               <ToggleVisibilityButton visible={showPassword} onClick={toggleShowPassword} />
             </Stack>
           ),
@@ -300,72 +279,56 @@ function inputColor(
 
 const PasswordRules = () => {
   const { t } = useTranslation();
-
-  return (
-    <List>
-      <ListItem>
-        <ListItemIcon>
-          <GppMaybe />
-        </ListItemIcon>
-        <Typography variant="body1">{t('password_rule_one')}</Typography>
-      </ListItem>
-      <ListItem>
-        <ListItemIcon>
-          <GppMaybe />
-        </ListItemIcon>
-        <Typography variant="body1">{t('password_rule_two')}</Typography>
-      </ListItem>
-      <ListItem>
-        <ListItemIcon>
-          <GppMaybe />
-        </ListItemIcon>
-        <Typography variant="body1">{t('password_rule_three')}</Typography>
-      </ListItem>
-      <ListItem>
-        <ListItemIcon>
-          <GppMaybe />
-        </ListItemIcon>
-        <Typography variant="body1">{t('password_rule_four')}</Typography>
-      </ListItem>
-      <ListItem>
-        <ListItemIcon>
-          <GppMaybe />
-        </ListItemIcon>
-        <Typography variant="body1">{t('password_rule_five')}</Typography>
-      </ListItem>
-    </List>
+  const items = useMemo(
+    () => [
+      {
+        Icon: GppMaybe,
+        value: t('password_rule_one'),
+      },
+      {
+        Icon: GppMaybe,
+        value: t('password_rule_two'),
+      },
+      {
+        Icon: GppMaybe,
+        value: t('password_rule_three'),
+      },
+      {
+        Icon: GppMaybe,
+        value: t('password_rule_four'),
+      },
+      {
+        Icon: GppMaybe,
+        value: t('password_rule_five'),
+      },
+    ],
+    [t]
   );
+  return <DialogContentList items={items} />;
 };
 
 const UsernameRules = () => {
   const { t } = useTranslation();
-
-  return (
-    <List>
-      <ListItem>
-        <ListItemIcon>
-          <Warning />
-        </ListItemIcon>
-        <Typography variant="body1">{t('username_rule_one')}</Typography>
-      </ListItem>
-      <ListItem>
-        <ListItemIcon>
-          <Warning />
-        </ListItemIcon>
-        <Typography variant="body1">{t('username_rule_two')}</Typography>
-      </ListItem>
-      <ListItem>
-        <ListItemIcon>
-          <Warning />
-        </ListItemIcon>
-        <Typography variant="body1">{t('username_rule_three')}</Typography>
-      </ListItem>
-      <ListItem>
-        <ListItemIcon>
-          <Warning />
-        </ListItemIcon>
-        <Typography variant="body1">{t('username_rule_four')}</Typography>
-      </ListItem>
-    </List>
+  const items = useMemo(
+    () => [
+      {
+        Icon: Warning,
+        value: t('username_rule_one'),
+      },
+      {
+        Icon: Warning,
+        value: t('username_rule_two'),
+      },
+      {
+        Icon: Warning,
+        value: t('username_rule_three'),
+      },
+      {
+        Icon: Warning,
+        value: t('username_rule_four'),
+      },
+    ],
+    [t]
   );
+  return <DialogContentList items={items} />;
 };

@@ -15,18 +15,7 @@
  * License along with this program.  If not, see
  * <https://www.gnu.org/licenses/>.
  */
-import {
-  Box,
-  Chip,
-  Divider,
-  List,
-  ListItemButton,
-  ListItemText,
-  Stack,
-  Theme,
-  Tooltip,
-  Typography,
-} from '@mui/material';
+import { Box, Chip, Divider, Stack, Tooltip, Typography } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { Dayjs } from 'dayjs';
 import { Account, Contact, Message } from 'jami-web-common';
@@ -36,6 +25,7 @@ import { useTranslation } from 'react-i18next';
 import dayjs from '../dayjsInitializer';
 import { EmojiButton, MoreButton, ReplyMessageButton } from './Button';
 import ConversationAvatar from './ConversationAvatar';
+import PopoverList, { PopoverListItemData } from './PopoverList';
 import {
   ArrowLeftCurved,
   ArrowLeftDown,
@@ -408,21 +398,21 @@ interface MessageTooltipProps {
 const MessageTooltip = styled(({ className, position, children }: MessageTooltipProps) => {
   const [open, setOpen] = useState(false);
   const emojis = ['😎', '😄', '😍']; // Should be last three used emojis
-  const additionalOptions = [
+  const additionalOptions: PopoverListItemData[] = [
     {
       Icon: TwoSheetsIcon,
-      text: 'Copy',
-      action: () => {},
+      label: 'Copy',
+      onClick: () => {},
     },
     {
       Icon: OppositeArrowsIcon,
-      text: 'Transfer',
-      action: () => {},
+      label: 'Transfer',
+      onClick: () => {},
     },
     {
       Icon: TrashBinIcon,
-      text: 'Delete message',
-      action: () => {},
+      label: 'Delete message',
+      onClick: () => {},
     },
   ];
 
@@ -449,10 +439,10 @@ const MessageTooltip = styled(({ className, position, children }: MessageTooltip
       onClose={onClose}
       title={
         <Stack>
-          {/* Whole tooltip's content */}
           <Stack // Main options
             direction="row"
             spacing="16px"
+            padding="16px"
           >
             {emojis.map((emoji) => (
               <EmojiButton key={emoji} emoji={emoji} />
@@ -460,43 +450,10 @@ const MessageTooltip = styled(({ className, position, children }: MessageTooltip
             <ReplyMessageButton />
             <MoreButton onClick={toggleMoreMenu} />
           </Stack>
-          {open && ( // Additional menu options
+          {open && (
             <>
-              <Divider sx={{ paddingTop: '16px' }} />
-              <List sx={{ padding: 0, paddingTop: '8px', marginBottom: '-8px' }}>
-                {additionalOptions.map((option) => (
-                  <ListItemButton
-                    key={option.text}
-                    sx={{
-                      padding: '8px',
-                    }}
-                  >
-                    <Stack // Could not find proper way to set spacing between ListItemIcon and ListItemText
-                      direction="row"
-                      spacing="16px"
-                    >
-                      <option.Icon
-                        sx={{
-                          height: '16px',
-                          margin: 0,
-                          color: (theme: Theme) => theme?.palette?.primary?.dark,
-                        }}
-                      />
-                      <ListItemText
-                        primary={option.text}
-                        primaryTypographyProps={{
-                          fontSize: '12px',
-                          lineHeight: '16px',
-                        }}
-                        sx={{
-                          height: '16px',
-                          margin: 0,
-                        }}
-                      />
-                    </Stack>
-                  </ListItemButton>
-                ))}
-              </List>
+              <Divider sx={{ marginX: '16px' }} />
+              <PopoverList items={additionalOptions} />
             </>
           )}
         </Stack>
@@ -511,11 +468,12 @@ const MessageTooltip = styled(({ className, position, children }: MessageTooltip
   const smallRadius = '5px';
   return {
     backgroundColor: 'white',
-    padding: '16px',
+    padding: '0px',
     boxShadow: '3px 3px 7px #00000029',
     borderRadius: largeRadius,
     borderStartStartRadius: position === 'start' ? smallRadius : largeRadius,
     borderStartEndRadius: position === 'end' ? smallRadius : largeRadius,
+    overflow: 'hidden',
   };
 });
 
