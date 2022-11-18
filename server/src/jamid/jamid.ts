@@ -320,8 +320,14 @@ export class Jamid {
     );
   }
 
-  sendConversationMessage(accountId: string, conversationId: string, message: string, replyTo?: string): void {
-    this.jamiSwig.sendMessage(accountId, conversationId, message, replyTo || '');
+  sendConversationMessage(
+    accountId: string,
+    conversationId: string,
+    message: string,
+    replyTo?: string,
+    flag?: number
+  ): void {
+    this.jamiSwig.sendMessage(accountId, conversationId, message, replyTo ?? '', flag ?? 0);
   }
 
   getCallIds(accountId: string): string[] {
