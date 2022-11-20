@@ -50,7 +50,6 @@ server.on('listening', onListening);
 
 process.once('SIGTERM', shutdown);
 process.once('SIGINT', shutdown);
-process.once('SIGUSR2', shutdown);
 
 function onError(error: NodeJS.ErrnoException) {
   if (error.syscall !== 'listen') {

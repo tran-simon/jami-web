@@ -5,18 +5,15 @@
   "main": "dist/index.js",
   "module": "dist/index.js",
   "types": "dist/index.d.ts",
-  "files": [
-    "dist/index.js"
-  ],
   "scripts": {
     "build": "tsc --build",
-    "clean": "rm -rf dist tsconfig.tsbuildinfo",
+    "clean": "rm -rf dist *.tsbuildinfo",
     "lint": "eslint src",
     "lint:fix": "npm run lint -- --fix",
     "format": "prettier --write src",
     "format:check": "prettier --check src"
   },
-  "dependencies": {
-    "typescript": "^4.8.4"
+  "devDependencies": {
+    "typescript": "~4.8.4"
   }
 }

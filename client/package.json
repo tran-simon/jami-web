@@ -4,10 +4,10 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "start": "vite",
+    "start": "tsc-watch --build ../common --onSuccess \"vite\"",
     "start:prod": "vite preview",
-    "build": "tsc && vite build",
-    "clean": "rm -rf dist",
+    "build": "tsc --build && vite build",
+    "clean": "rm -rf dist *.tsbuildinfo",
     "test": "jest src",
     "test:cypress": "cypress open",
     "lint": "eslint .",
@@ -48,7 +48,6 @@
     "filesize": "^10.0.5",
     "framer-motion": "^7.3.5",
     "i18next": "^21.9.2",
-    "jami-web-common": "file:../common",
     "mime": "^3.0.0",
     "qrcode.react": "^3.1.0",
     "react": "^18.2.0",
@@ -64,6 +63,7 @@
   },
   "devDependencies": {
     "@types/jest": "^28.1.8",
+    "@types/node": "^18.11.9",
     "@types/react": "^18.0.17",
     "@types/react-dom": "^18.0.6",
     "@types/react-modal": "^3.13.1",
@@ -73,8 +73,9 @@
     "eslint-plugin-react-hooks": "^4.6.0",
     "i18next-parser": "^6.5.0",
     "sass": "^1.54.5",
-    "typescript": "^4.7.4",
-    "vite": "^3.1.8",
+    "tsc-watch": "^5.0.3",
+    "typescript": "~4.8.4",
+    "vite": "^3.2.3",
     "vite-plugin-svgr": "^2.2.2"
   }
 }

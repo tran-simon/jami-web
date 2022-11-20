@@ -1,10 +1,12 @@
 {
   "compilerOptions": {
+    "composite": true,
     "target": "esnext",
     "module": "esnext",
     "rootDir": "src",
     "moduleResolution": "node",
     "declaration": true,
+    "declarationMap": true,
     "outDir": "dist",
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
