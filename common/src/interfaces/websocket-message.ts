@@ -17,10 +17,7 @@
  */
 import { WebSocketMessageType } from '../enums/websocket-message-type.js';
 import { AccountTextMessage } from './account-text-message.js';
-import { ConversationMessage } from './conversation-message.js';
-import { ConversationView } from './conversation-view.js';
-import { WebRTCIceCandidate } from './webrtc-ice-candidate.js';
-import { WebRTCSDP } from './webrtc-sdp.js';
+import { ConversationMessage, ConversationView, WebRTCIceCandidate, WebRTCSDP } from './websocket-interfaces.js';
 
 export interface WebSocketMessageTable {
   [WebSocketMessageType.ConversationMessage]: ConversationMessage;

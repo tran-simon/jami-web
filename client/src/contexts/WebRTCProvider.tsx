@@ -16,13 +16,7 @@
  * <https://www.gnu.org/licenses/>.
  */
 
-import {
-  AccountTextMessage,
-  WebRTCAnswerMessage,
-  WebRTCIceCandidate,
-  WebRTCOfferMessage,
-  WebSocketMessageType,
-} from 'jami-web-common';
+import { AccountTextMessage, WebRTCIceCandidate, WebRTCSDP, WebSocketMessageType } from 'jami-web-common';
 import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
 
 import { WithChildren } from '../utils/utils';
@@ -184,7 +178,7 @@ export default ({
       return;
     }
 
-    const webRTCOfferListener = async (data: AccountTextMessage<WebRTCOfferMessage>) => {
+    const webRTCOfferListener = async (data: AccountTextMessage<WebRTCSDP>) => {
       if (webRTCConnection) {
         await webRTCConnection.setRemoteDescription(new RTCSessionDescription(data.message.sdp));
         const mySdp = await webRTCConnection.createAnswer({
@@ -202,7 +196,7 @@ export default ({
       }
     };
 
-    const webRTCAnswerListener = async (data: AccountTextMessage<WebRTCAnswerMessage>) => {
+    const webRTCAnswerListener = async (data: AccountTextMessage<WebRTCSDP>) => {
       await webRTCConnection.setRemoteDescription(new RTCSessionDescription(data.message.sdp));
       console.log('get answer');
     };

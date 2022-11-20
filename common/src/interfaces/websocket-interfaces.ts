@@ -15,6 +15,22 @@
  * License along with this program.  If not, see
  * <https://www.gnu.org/licenses/>.
  */
+import { Message } from '../Conversation.js';
+
+export interface ConversationMessage {
+  conversationId: string;
+  message: Message;
+}
+
+export interface ConversationView {
+  accountId: string;
+  conversationId: string;
+}
+
+export interface WebRTCSDP {
+  sdp: RTCSessionDescriptionInit;
+}
+
 export interface WebRTCIceCandidate {
   candidate: RTCIceCandidate;
 }

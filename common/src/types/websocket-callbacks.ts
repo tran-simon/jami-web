@@ -20,6 +20,7 @@ import { WebSocketMessageType } from '../enums/websocket-message-type.js';
 import { WebSocketMessageTable } from '../interfaces/websocket-message.js';
 
 export type WebSocketCallback<T extends WebSocketMessageType> = (data: WebSocketMessageTable[T]) => void;
+
 export type WebSocketCallbacks = {
   [key in WebSocketMessageType]: Set<WebSocketCallback<key>>;
 };
