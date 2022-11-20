@@ -42,6 +42,9 @@ export interface AccountDetails {
   'Account.presenceSubscribeSupported': string;
   'Account.presenceStatus': string;
   'Account.presenceNote': string;
+  'Account.archivePassword': string;
+  'Account.managerUri': string;
+  'Account.managerUsername': string;
 
   'Account.hostname': string;
   'Account.username': string;

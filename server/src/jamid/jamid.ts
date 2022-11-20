@@ -200,12 +200,12 @@ export class Jamid {
     this.jamiSwig.setAccountDetails(accountId, accountDetailsStringMap);
   }
 
-  async addAccount(details: Map<string, string | number | boolean>): Promise<string> {
-    const detailsStringMap: StringMap = new this.jamiSwig.StringMap();
+  async addAccount(accountDetails: Partial<AccountDetails>): Promise<RegistrationStateChanged> {
+    accountDetails['Account.type'] = 'RING';
 
-    detailsStringMap.set('Account.type', 'RING');
-    for (const [key, value] of details.entries()) {
-      detailsStringMap.set('Account.' + key, value.toString());
+    const detailsStringMap: StringMap = new this.jamiSwig.StringMap();
+    for (const [key, value] of Object.entries(accountDetails)) {
+      detailsStringMap.set(key, value.toString());
     }
 
     const accountId = this.jamiSwig.addAccount(detailsStringMap);
@@ -214,8 +214,7 @@ export class Jamid {
         filter((value) => value.accountId === accountId),
         // TODO: is it the only state?
         // TODO: Replace with string enum in common/
-        filter((value) => value.state === 'REGISTERED'),
-        map((value) => value.accountId)
+        filter((value) => value.state === 'REGISTERED' || value.state === 'ERROR_GENERIC')
       )
     );
   }

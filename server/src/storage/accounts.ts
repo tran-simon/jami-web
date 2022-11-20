@@ -20,10 +20,15 @@ import { writeFile } from 'node:fs/promises';
 
 import { Service } from 'typedi';
 
+interface AccountsFormat {
+  local: Record<string, string>;
+  jams: Record<string, string>;
+}
+
 @Service()
 export class Accounts {
   private readonly filename = 'accounts.json';
-  private accounts: Record<string, string>;
+  private accounts: AccountsFormat;
 
   constructor() {
     let buffer: Buffer;
@@ -31,18 +36,18 @@ export class Accounts {
     try {
       buffer = readFileSync(this.filename);
     } catch (e) {
-      buffer = Buffer.from('{}');
+      buffer = Buffer.from('{"local":{}},"jams":{}}}');
     }
 
     this.accounts = JSON.parse(buffer.toString());
   }
 
-  get(username: string): string | undefined {
-    return this.accounts[username];
+  get(username: string, isJams = false): string | undefined {
+    return this.accounts[isJams ? 'jams' : 'local'][username];
   }
 
-  set(username: string, password: string): void {
-    this.accounts[username] = password;
+  set(username: string, password: string, isJams = false): void {
+    this.accounts[isJams ? 'jams' : 'local'][username] = password;
   }
 
   async save(): Promise<void> {
