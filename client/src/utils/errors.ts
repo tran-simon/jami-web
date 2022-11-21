@@ -18,3 +18,5 @@
 export class UsernameNotFound extends Error {}
 
 export class InvalidPassword extends Error {}
+
+export class InvalidCredentials extends Error {}

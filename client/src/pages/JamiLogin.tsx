@@ -15,7 +15,17 @@
  * License along with this program.  If not, see
  * <https://www.gnu.org/licenses/>.
  */
-import { Box, Button, Stack, Typography, useMediaQuery } from '@mui/material';
+import {
+  Box,
+  Button,
+  FormControl,
+  FormControlLabel,
+  Radio,
+  RadioGroup,
+  Stack,
+  Typography,
+  useMediaQuery,
+} from '@mui/material';
 import { Theme, useTheme } from '@mui/material/styles';
 import { ChangeEvent, FormEvent, MouseEvent, ReactNode, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -39,6 +49,7 @@ export default function JamiLogin(props: JamiLoginProps) {
 
   const [username, setUsername] = useState<string>('');
   const [password, setPassword] = useState<string>('');
+  const [isJams, setIsJams] = useState<boolean>(false);
   const [isLoggingInUser, setIsLoggingInUser] = useState<boolean>(false);
   const [errorAlertContent, setErrorAlertContent] = useState<ReactNode>(undefined);
 
@@ -48,6 +59,10 @@ export default function JamiLogin(props: JamiLoginProps) {
 
   const handlePassword = (event: ChangeEvent<HTMLInputElement>) => {
     setPassword(event.target.value);
+  };
+
+  const handleIsJams = (event: ChangeEvent<HTMLInputElement>) => {
+    setIsJams(event.target.value === 'true');
   };
 
   const register = (event: MouseEvent<HTMLAnchorElement>) => {
@@ -61,7 +76,7 @@ export default function JamiLogin(props: JamiLoginProps) {
       setIsLoggingInUser(true);
 
       try {
-        const accessToken = await loginUser(username, password);
+        const accessToken = await loginUser(username, password, isJams);
         setAccessToken(accessToken);
         navigate('/conversation', { replace: true });
       } catch (e) {
@@ -115,6 +130,20 @@ export default function JamiLogin(props: JamiLoginProps) {
               tooltipTitle={t('login_form_password_tooltip')}
               sx={{ width: theme.typography.pxToRem(inputWidth) }}
             />
+          </div>
+          <div>
+            <FormControl
+              sx={{
+                width: theme.typography.pxToRem(inputWidth),
+                alignItems: 'center',
+                justifyContent: 'space-between',
+              }}
+            >
+              <RadioGroup row onChange={handleIsJams} value={isJams}>
+                <FormControlLabel value="false" control={<Radio />} label={t('jami')} />
+                <FormControlLabel value="true" control={<Radio />} label={t('jams')} />
+              </RadioGroup>
+            </FormControl>
           </div>
 
           <Button

@@ -15,7 +15,17 @@
  * License along with this program.  If not, see
  * <https://www.gnu.org/licenses/>.
  */
-import { Box, Button, Stack, Typography, useMediaQuery } from '@mui/material';
+import {
+  Box,
+  Button,
+  FormControl,
+  FormControlLabel,
+  Radio,
+  RadioGroup,
+  Stack,
+  Typography,
+  useMediaQuery,
+} from '@mui/material';
 import { Theme, useTheme } from '@mui/material/styles';
 import { ChangeEvent, FormEvent, MouseEvent, ReactNode, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -26,7 +36,7 @@ import { NameStatus, PasswordInput, PasswordStatus, UsernameInput } from '../com
 import ProcessingRequest from '../components/ProcessingRequest';
 import { checkPasswordStrength, isNameRegistered, loginUser, registerUser, setAccessToken } from '../utils/auth';
 import { inputWidth, jamiUsernamePattern } from '../utils/constants';
-import { InvalidPassword, UsernameNotFound } from '../utils/errors';
+import { InvalidCredentials, InvalidPassword, UsernameNotFound } from '../utils/errors';
 
 type JamiRegistrationProps = {
   login: () => void;
@@ -41,6 +51,7 @@ export default function JamiRegistration(props: JamiRegistrationProps) {
 
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [isJams, setIsJams] = useState(false);
 
   const [usernameStatus, setUsernameStatus] = useState<NameStatus>('default');
   const [passwordStatus, setPasswordStatus] = useState<PasswordStatus>('default');
@@ -71,7 +82,7 @@ export default function JamiRegistration(props: JamiRegistrationProps) {
 
   const firstUserLogin = async () => {
     try {
-      const accessToken = await loginUser(username, password);
+      const accessToken = await loginUser(username, password, isJams);
       setAccessToken(accessToken);
       navigate('/conversation', { replace: true });
     } catch (e) {
@@ -87,9 +98,22 @@ export default function JamiRegistration(props: JamiRegistrationProps) {
   };
 
   const createAccount = async () => {
-    await registerUser(username, password);
-    setSuccessAlertContent(t('registration_success'));
-    await firstUserLogin();
+    try {
+      await registerUser(username, password, isJams);
+      setSuccessAlertContent(t('registration_success'));
+      await firstUserLogin();
+    } catch (e) {
+      setIsCreatingUser(false);
+      if (e instanceof UsernameNotFound) {
+        setErrorAlertContent(t('login_username_not_found'));
+      } else if (e instanceof InvalidPassword) {
+        setErrorAlertContent(t('login_invalid_password'));
+      } else if (e instanceof InvalidCredentials) {
+        setErrorAlertContent(t('login_invalid_credentials'));
+      } else {
+        throw e;
+      }
+    }
   };
 
   const handleUsername = async (event: ChangeEvent<HTMLInputElement>) => {
@@ -113,6 +137,10 @@ export default function JamiRegistration(props: JamiRegistrationProps) {
     } else {
       setPasswordStatus('default');
     }
+  };
+
+  const handleIsJams = (event: ChangeEvent<HTMLInputElement>) => {
+    setIsJams(event.target.value === 'true');
   };
 
   const login = (event: MouseEvent<HTMLAnchorElement>) => {
@@ -191,6 +219,20 @@ export default function JamiRegistration(props: JamiRegistrationProps) {
               sx={{ width: theme.typography.pxToRem(inputWidth) }}
               tooltipTitle={t('registration_form_password_tooltip')}
             />
+          </div>
+          <div>
+            <FormControl
+              sx={{
+                width: theme.typography.pxToRem(inputWidth),
+                alignItems: 'center',
+                justifyContent: 'space-between',
+              }}
+            >
+              <RadioGroup row onChange={handleIsJams} value={isJams}>
+                <FormControlLabel value="false" control={<Radio />} label={t('jami')} />
+                <FormControlLabel value="true" control={<Radio />} label={t('jams')} />
+              </RadioGroup>
+            </FormControl>
           </div>
 
           <Button

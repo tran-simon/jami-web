@@ -21,7 +21,7 @@ import { HttpStatusCode } from 'jami-web-common';
 
 import { PasswordStrength } from '../enums/passwordStrength';
 import { apiUrl } from './constants';
-import { InvalidPassword, UsernameNotFound } from './errors';
+import { InvalidCredentials, InvalidPassword, UsernameNotFound } from './errors';
 
 interface PasswordStrengthResult {
   id: number;
@@ -36,6 +36,7 @@ export interface PasswordCheckResult {
 }
 
 export type StrengthValueCode = 'default' | 'too_weak' | 'weak' | 'medium' | 'strong';
+export type LoginMethod = 'Jami' | 'JAMS';
 
 const idToStrengthValueCode: StrengthValueCode[] = ['too_weak', 'weak', 'medium', 'strong'];
 
@@ -60,13 +61,21 @@ export function checkPasswordStrength(password: string): PasswordCheckResult {
   };
 }
 
-export async function registerUser(username: string, password: string): Promise<void> {
-  await axios.post('/auth/new-account', { username, password }, { baseURL: apiUrl });
+export async function registerUser(username: string, password: string, isJams: boolean): Promise<void> {
+  try {
+    await axios.post('/auth/new-account', { username, password, isJams }, { baseURL: apiUrl });
+  } catch (e: any) {
+    if (e.response?.status === HttpStatusCode.Unauthorized) {
+      throw new InvalidCredentials();
+    } else {
+      throw e;
+    }
+  }
 }
 
-export async function loginUser(username: string, password: string): Promise<string> {
+export async function loginUser(username: string, password: string, isJams: boolean): Promise<string> {
   try {
-    const { data } = await axios.post('/auth/login', { username, password }, { baseURL: apiUrl });
+    const { data } = await axios.post('/auth/login', { username, password, isJams }, { baseURL: apiUrl });
     return data.accessToken;
   } catch (e: any) {
     switch (e.response?.status) {

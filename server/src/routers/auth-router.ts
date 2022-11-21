@@ -29,7 +29,7 @@ import { signJwt } from '../utils/jwt.js';
 interface Credentials {
   username: string;
   password: string;
-  isJams?: boolean;
+  isJams: boolean;
 }
 
 const jamid = Container.get(Jamid);
