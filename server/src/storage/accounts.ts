@@ -36,7 +36,7 @@ export class Accounts {
     try {
       buffer = readFileSync(this.filename);
     } catch (e) {
-      buffer = Buffer.from('{"local":{}},"jams":{}}}');
+      buffer = Buffer.from('{"local":{},"jams":{}}');
     }
 
     this.accounts = JSON.parse(buffer.toString());

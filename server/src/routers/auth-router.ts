@@ -59,7 +59,10 @@ authRouter.post(
 
     const hashedPassword = await argon2.hash(password, { type: argon2.argon2id });
 
-    const accountDetails: Partial<AccountDetails> = { 'Account.archivePassword': password };
+    const accountDetails: Partial<AccountDetails> = {
+      // TODO: enable encrypted archives
+      // 'Account.archivePassword': password
+    };
     if (isJams) {
       accountDetails['Account.managerUri'] = 'https://jams.savoirfairelinux.com/';
       accountDetails['Account.managerUsername'] = username;
