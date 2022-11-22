@@ -19,15 +19,15 @@
 import './index.scss';
 import './i18n';
 
-import { ThemeProvider } from '@mui/material/styles';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { Provider } from 'react-redux';
 import { RouterProvider } from 'react-router-dom';
 
+import CustomThemeProvider from './contexts/CustomThemeProvider';
 import { store } from './redux/store';
 import { router } from './router';
-import defaultTheme from './themes/Default';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -44,13 +44,12 @@ if (!container) {
 const root = createRoot(container);
 root.render(
   <Provider store={store}>
-    {/* TODO: Put back StrictMode (https://git.jami.net/savoirfairelinux/jami-web/-/issues/170) */}
-    {/*<StrictMode>*/}
-    <QueryClientProvider client={queryClient}>
-      <ThemeProvider theme={defaultTheme}>
-        <RouterProvider router={router} />
-      </ThemeProvider>
-    </QueryClientProvider>
-    {/*</StrictMode>*/}
+    <StrictMode>
+      <QueryClientProvider client={queryClient}>
+        <CustomThemeProvider>
+          <RouterProvider router={router} />
+        </CustomThemeProvider>
+      </QueryClientProvider>
+    </StrictMode>
   </Provider>
 );

@@ -36,11 +36,12 @@ export default function Header() {
   return (
     <Box>
       <Button aria-controls="simple-menu" aria-haspopup="true" onClick={handleClick}>
-        Menu
+        {t('Menu')}
       </Button>
       <Menu id="simple-menu" anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleClose}>
         <MenuItem onClick={goToContacts}>Contacts</MenuItem>
-        <MenuItem onClick={() => navigate('/settings')}>Account settings</MenuItem>
+        <MenuItem onClick={() => navigate('/settings-account')}>{t('settings_account')}</MenuItem>
+        <MenuItem onClick={() => navigate('/settings-general')}>{t('settings_general')}</MenuItem>
         <MenuItem onClick={logout}>{t('logout')}</MenuItem>
       </Menu>
     </Box>

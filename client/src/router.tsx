@@ -29,6 +29,7 @@ import { RouteParams } from './hooks/useUrlParams';
 import NotificationManager from './managers/NotificationManager';
 import AccountSettings from './pages/AccountSettings';
 import CallInterface from './pages/CallInterface';
+import GeneralSettings from './pages/GeneralSettings';
 import Messenger from './pages/Messenger';
 import Setup from './pages/Setup';
 import SetupLogin from './pages/SetupLogin';
@@ -85,7 +86,8 @@ export const router = createBrowserRouter(
             />
           </Route>
         </Route>
-        <Route path="settings" element={<AccountSettings />} />
+        <Route path="settings-account" element={<AccountSettings />} />
+        <Route path="settings-general" element={<GeneralSettings />} />
         <Route path="contacts" element={<ContactList />} />
       </Route>
     </Route>

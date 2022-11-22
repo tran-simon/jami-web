@@ -73,7 +73,7 @@ export default function JamiRegistration(props: JamiRegistrationProps) {
     try {
       const accessToken = await loginUser(username, password);
       setAccessToken(accessToken);
-      navigate('/settings', { replace: true });
+      navigate('/conversation', { replace: true });
     } catch (e) {
       setIsCreatingUser(false);
       if (e instanceof UsernameNotFound) {

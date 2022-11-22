@@ -15,7 +15,7 @@
  * License along with this program.  If not, see
  * <https://www.gnu.org/licenses/>.
  */
-import { Button, Stack, Switch, ThemeProvider, Typography } from '@mui/material';
+import { Button, Stack, Switch, Typography } from '@mui/material';
 
 import {
   BackButton,
@@ -28,11 +28,11 @@ import {
   UploadPictureButton,
 } from '../components/Button';
 import { NickNameInput, PasswordInput, RegularInput, UsernameInput } from '../components/Input';
-import defaultTheme from './Default';
+import CustomThemeProvider from '../contexts/CustomThemeProvider';
 
 export const ThemeDemonstrator = () => {
   return (
-    <ThemeProvider theme={defaultTheme}>
+    <CustomThemeProvider>
       <Stack spacing="5px">
         <Stack>
           <Typography variant="h1">Exemple de titre H1</Typography>
@@ -78,6 +78,6 @@ export const ThemeDemonstrator = () => {
           <RegularInput />
         </Stack>
       </Stack>
-    </ThemeProvider>
+    </CustomThemeProvider>
   );
 };

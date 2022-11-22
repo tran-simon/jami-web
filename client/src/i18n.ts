@@ -15,11 +15,35 @@
  * License along with this program.  If not, see
  * <https://www.gnu.org/licenses/>.
  */
-import i18n from 'i18next';
+import i18n, { Resource, ResourceLanguage } from 'i18next';
 import { initReactI18next } from 'react-i18next';
 
 import translationEn from './locale/en/translation.json';
 import translationFr from './locale/fr/translation.json';
+
+interface LanguageInfo {
+  tag: string;
+  fullName: string;
+  translation: ResourceLanguage;
+}
+
+export const availableLanguages: LanguageInfo[] = [
+  {
+    tag: 'fr',
+    fullName: 'Français',
+    translation: translationFr,
+  },
+  {
+    tag: 'en',
+    fullName: 'English',
+    translation: translationEn,
+  },
+];
+
+const resources = availableLanguages.reduce((resources: Resource, { tag, translation }) => {
+  resources[tag] = { translation };
+  return resources;
+}, {});
 
 i18n.use(initReactI18next).init({
   debug: import.meta.env.DEV,
@@ -27,14 +51,7 @@ i18n.use(initReactI18next).init({
   interpolation: {
     escapeValue: false,
   },
-  resources: {
-    en: {
-      translation: translationEn,
-    },
-    fr: {
-      translation: translationFr,
-    },
-  },
+  resources,
 });
 
 export default i18n;

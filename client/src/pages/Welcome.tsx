@@ -43,7 +43,7 @@ export default function Welcome() {
   const accessToken = getAccessToken();
 
   if (accessToken) {
-    return <Navigate to="/settings" replace />;
+    return <Navigate to="/conversation" replace />;
   }
   return (
     <Box

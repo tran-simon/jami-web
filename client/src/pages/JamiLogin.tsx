@@ -63,7 +63,7 @@ export default function JamiLogin(props: JamiLoginProps) {
       try {
         const accessToken = await loginUser(username, password);
         setAccessToken(accessToken);
-        navigate('/settings', { replace: true });
+        navigate('/conversation', { replace: true });
       } catch (e) {
         setIsLoggingInUser(false);
         if (e instanceof UsernameNotFound) {
