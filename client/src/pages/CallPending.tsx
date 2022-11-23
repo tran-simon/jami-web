@@ -17,7 +17,7 @@
  */
 
 import { Box, CircularProgress, Grid, IconButtonProps, Stack, Typography } from '@mui/material';
-import { ComponentType, ReactNode } from 'react';
+import { ComponentType, ReactNode, useContext, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import {
@@ -26,6 +26,7 @@ import {
   CallingCancelButton,
   CallingRefuseButton,
 } from '../components/CallButtons';
+import { ConversationContext } from '../contexts/ConversationProvider';
 
 export type CallPendingProps = {
   pending: PendingStatus;
@@ -136,15 +137,15 @@ const CallPendingDetails = ({
 
 export const CallPendingCallerInterface = ({ caller }: CallPendingProps) => {
   const { t } = useTranslation();
+  const { conversation } = useContext(ConversationContext);
+  const memberName = useMemo(() => conversation.getFirstMember().contact.getRegisteredName(), [conversation]);
 
-  // TODO: Remove the dummy name
-  const defaultName = 'Alex Thérieur';
   return (
     <CallPendingDetails
       title={
         caller === 'calling'
           ? t('calling', {
-              member0: defaultName,
+              member0: memberName,
             })
           : t('connecting')
       }
@@ -160,9 +161,8 @@ export const CallPendingCallerInterface = ({ caller }: CallPendingProps) => {
 
 export const CallPendingReceiverInterface = ({ medium, caller }: CallPendingProps) => {
   const { t } = useTranslation();
-
-  // TODO: Remove the dummy name
-  const defaultName = 'Alain Thérieur';
+  const { conversation } = useContext(ConversationContext);
+  const memberName = useMemo(() => conversation.getFirstMember().contact.getRegisteredName(), [conversation]);
 
   return (
     <CallPendingDetails
@@ -171,7 +171,7 @@ export const CallPendingReceiverInterface = ({ medium, caller }: CallPendingProp
           ? t('connecting')
           : t('incoming_call', {
               context: medium,
-              member0: defaultName,
+              member0: memberName,
             })
       }
       buttons={[
