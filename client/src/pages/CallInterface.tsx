@@ -50,16 +50,17 @@ import { CallPending } from './CallPending';
 export default () => {
   const { callRole, callStatus } = useContext(CallContext);
 
-  if (callStatus === CallStatus.InCall) {
-    return <CallInterface />;
+  if (callStatus !== CallStatus.InCall) {
+    return (
+      <CallPending
+        pending={callRole}
+        caller={callStatus === CallStatus.Ringing ? 'calling' : 'connecting'}
+        medium="audio"
+      />
+    );
   }
-  return (
-    <CallPending
-      pending={callRole}
-      caller={callStatus === CallStatus.Ringing ? 'calling' : 'connecting'}
-      medium="audio"
-    />
-  );
+
+  return <CallInterface />;
 };
 
 interface Props {
@@ -86,25 +87,15 @@ const CallInterface = () => {
 
   return (
     <>
-      {/* Guest video, takes the whole screen */}
       <video
         ref={remoteVideoRef}
         autoPlay
-        style={{ zIndex: -1, backgroundColor: 'black', width: '100%', height: '100%', position: 'absolute' }}
+        style={{ zIndex: -1, backgroundColor: 'black', position: 'absolute', height: '100%', width: '100%' }}
       />
-      <Stack
-        position="absolute"
-        direction="column"
-        spacing={1}
-        margin={2}
-        sx={{ left: 0, right: 0, top: 0, bottom: 0 }}
-      >
-        {/* Top panel with guest information */}
-        <Box>
-          <CallInterfaceInformation />
-        </Box>
-        {/* Local video, with empty space to be moved around and stickied to walls */}
-        <Box height="100%">
+      <Box flexGrow={1} margin={2} display="flex" flexDirection="column">
+        {/* Guest video, takes the whole screen */}
+        <CallInterfaceInformation />
+        <Box flexGrow={1} marginY={2} position="relative">
           <Draggable bounds="parent" nodeRef={localVideoRef ?? undefined}>
             <video
               ref={localVideoRef}
@@ -112,18 +103,14 @@ const CallInterface = () => {
               style={{
                 position: 'absolute',
                 right: 0,
-                zIndex: 2,
                 borderRadius: '12px',
-                minWidth: '25%',
-                minHeight: '25%',
-                maxWidth: '50%',
                 maxHeight: '50%',
+                maxWidth: '50%',
                 visibility: isVideoOn ? 'visible' : 'hidden',
               }}
             />
           </Draggable>
         </Box>
-        {/* Bottom panel with calling buttons */}
         <Grid container>
           <Grid item xs />
           <Grid item sx={{ display: 'flex', justifyContent: 'center' }}>
@@ -135,7 +122,7 @@ const CallInterface = () => {
             <CallInterfaceSecondaryButtons gridItemRef={gridItemRef} />
           </Grid>
         </Grid>
-      </Stack>
+      </Box>
     </>
   );
 };

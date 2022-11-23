@@ -15,7 +15,7 @@
  * License along with this program.  If not, see
  * <https://www.gnu.org/licenses/>.
  */
-import { Stack } from '@mui/material';
+import { Box, Stack } from '@mui/material';
 import { Contact, Conversation, WebSocketMessageType } from 'jami-web-common';
 import { useContext, useEffect, useState } from 'react';
 import { Outlet } from 'react-router-dom';
@@ -91,7 +91,7 @@ const Messenger = () => {
   }, [accountId, searchQuery, axiosInstance]);
 
   return (
-    <Stack direction="row" height="100vh" width="100vw">
+    <Box display="flex" height="100%">
       <Stack flexGrow={0} flexShrink={0} overflow="auto">
         <Header />
         <NewContactForm onChange={setSearchQuery} />
@@ -104,10 +104,10 @@ const Messenger = () => {
           </div>
         )}
       </Stack>
-      <Stack flexGrow={1}>
+      <Box flexGrow={1} display="flex" position="relative">
         <Outlet />
-      </Stack>
-    </Stack>
+      </Box>
+    </Box>
   );
 };
 

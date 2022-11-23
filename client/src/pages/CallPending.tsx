@@ -45,6 +45,7 @@ export const CallPending = (props: CallPendingProps) => {
       alignItems="center"
       height="100%"
       spacing={4}
+      flexGrow={1}
       sx={{
         backgroundColor: 'black',
       }}

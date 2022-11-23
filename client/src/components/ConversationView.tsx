@@ -31,7 +31,7 @@ const ConversationView = () => {
   const { conversationId, conversation } = useContext(ConversationContext);
 
   return (
-    <Stack height="100%">
+    <Stack flexGrow={1} height="100%">
       <ConversationHeader
         account={account}
         members={conversation.getMembers()}
