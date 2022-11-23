@@ -87,10 +87,12 @@ interface Props {
 }
 
 const CallInterface = () => {
-  const { isVideoOn, localStream, remoteStream } = useContext(CallContext);
+  const { isVideoOn, localStream, remoteStream, callStartTime } = useContext(CallContext);
   const gridItemRef = useRef(null);
   const remoteVideoRef = useRef<HTMLVideoElement | null>(null);
   const localVideoRef = useRef<HTMLVideoElement | null>(null);
+
+  const [elapsedTime, setElapsedTime] = useState<number>();
 
   useEffect(() => {
     if (localStream && localVideoRef.current) {
@@ -104,6 +106,15 @@ const CallInterface = () => {
     }
   }, [remoteStream]);
 
+  useEffect(() => {
+    if (callStartTime) {
+      const interval = setInterval(() => {
+        setElapsedTime((new Date().getTime() - callStartTime.getTime()) / 1000);
+      }, 1000);
+      return () => clearInterval(interval);
+    }
+  }, [callStartTime]);
+
   return (
     <Box display="flex" flexGrow={1}>
       <video
@@ -113,7 +124,7 @@ const CallInterface = () => {
       />
       <Box flexGrow={1} margin={2} display="flex" flexDirection="column">
         {/* Guest video, takes the whole screen */}
-        <CallInterfaceInformation />
+        <CallInterfaceInformation elapsedTime={elapsedTime} />
         <Box flexGrow={1} marginY={2} position="relative">
           <Draggable bounds="parent" nodeRef={localVideoRef ?? undefined}>
             <video
@@ -146,14 +157,37 @@ const CallInterface = () => {
   );
 };
 
-const CallInterfaceInformation = () => {
+const formatElapsedSeconds = (elapsedSeconds: number): string => {
+  const seconds = Math.floor(elapsedSeconds % 60);
+  elapsedSeconds = Math.floor(elapsedSeconds / 60);
+  const minutes = elapsedSeconds % 60;
+  elapsedSeconds = Math.floor(elapsedSeconds / 60);
+  const hours = elapsedSeconds % 24;
+
+  const times: string[] = [];
+  if (hours > 0) {
+    times.push(hours.toString().padStart(2, '0'));
+  }
+  times.push(minutes.toString().padStart(2, '0'));
+  times.push(seconds.toString().padStart(2, '0'));
+
+  return times.join(':');
+};
+
+interface CallInterfaceInformationProps {
+  elapsedTime?: number;
+}
+
+const CallInterfaceInformation = ({ elapsedTime = 0 }: CallInterfaceInformationProps) => {
+  const elapsedTimerString = formatElapsedSeconds(elapsedTime);
+
   return (
     <Stack direction="row" justifyContent="space-between" alignItems="center">
       <Typography color="white" component="p">
         Alain Thérieur
       </Typography>
       <Typography color="white" component="p">
-        01:23
+        {elapsedTimerString}
       </Typography>
     </Stack>
   );

@@ -51,6 +51,7 @@ export interface ICallContext {
   setIsFullscreen: SetState<boolean>;
   callRole: CallRole;
   callStatus: CallStatus;
+  callStartTime: Date | undefined;
 
   acceptCall: () => void;
 }
@@ -75,6 +76,7 @@ const defaultCallContext: ICallContext = {
   setIsFullscreen: () => {},
   callRole: 'caller',
   callStatus: CallStatus.Default,
+  callStartTime: undefined,
 
   acceptCall: () => {},
 };
@@ -100,6 +102,7 @@ export default ({ children }: WithChildren) => {
   const [isChatShown, setIsChatShown] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [callStatus, setCallStatus] = useState(routeState?.callStatus);
+  const [callStartTime, setCallStartTime] = useState<Date | undefined>(undefined);
 
   // TODO: This logic will have to change to support multiple people in a call. Could we move this logic to the server?
   //       The client could make a single request with the conversationId, and the server would be tasked with sending
@@ -214,6 +217,7 @@ export default ({ children }: WithChildren) => {
     if (callStatus === CallStatus.Connecting && isConnected) {
       console.info('Changing call status to InCall');
       setCallStatus(CallStatus.InCall);
+      setCallStartTime(new Date());
     }
   }, [isConnected, callStatus]);
 
@@ -283,6 +287,7 @@ export default ({ children }: WithChildren) => {
         setIsFullscreen,
         callRole,
         callStatus,
+        callStartTime,
         acceptCall,
       }}
     >
