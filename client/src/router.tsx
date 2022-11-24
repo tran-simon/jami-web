@@ -21,7 +21,7 @@ import App, { appLoader } from './App';
 import ContactList from './components/ContactList';
 import ConversationView from './components/ConversationView';
 import AuthProvider from './contexts/AuthProvider';
-import CallProvider, { CallRole } from './contexts/CallProvider';
+import CallProvider, { CallRole, CallStatus } from './contexts/CallProvider';
 import ConversationProvider from './contexts/ConversationProvider';
 import WebRTCProvider from './contexts/WebRTCProvider';
 import WebSocketProvider from './contexts/WebSocketProvider';
@@ -42,7 +42,14 @@ export type AddContactRouteParams = RouteParams<{ contactId: string }, Record<st
 /**
  * Route parameters for the call routes.
  */
-export type CallRouteParams = RouteParams<{ conversationId: string }, { role?: CallRole }>;
+export type CallRouteParams = RouteParams<
+  { conversationId?: string },
+  { role?: CallRole },
+  {
+    isVideoOn?: boolean;
+    callStatus: CallStatus;
+  }
+>;
 
 export const router = createBrowserRouter(
   createRoutesFromElements(
@@ -64,7 +71,8 @@ export const router = createBrowserRouter(
       >
         <Route index element={<Messenger />} />
         <Route path="conversation" element={<Messenger />}>
-          <Route path="add-contact/:contactId" />
+          {/* TODO: Remove this route (https://git.jami.net/savoirfairelinux/jami-web/-/issues/171) */}
+          <Route path="add-contact" element={<div></div>} />
           <Route
             path=":conversationId"
             element={

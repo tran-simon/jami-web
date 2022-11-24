@@ -30,6 +30,7 @@ import { WebSocketContext } from './WebSocketProvider';
 export type CallRole = 'caller' | 'receiver';
 
 export enum CallStatus {
+  Default = 1,
   Ringing,
   Connecting,
   InCall,
@@ -66,7 +67,7 @@ const defaultCallContext: ICallContext = {
   isVideoOn: false,
   setVideoStatus: () => {},
   callRole: 'caller',
-  callStatus: CallStatus.Ringing,
+  callStatus: CallStatus.Default,
 
   acceptCall: () => {},
 };
@@ -76,11 +77,12 @@ export const CallContext = createContext<ICallContext>(defaultCallContext);
 export default ({ children }: WithChildren) => {
   const {
     queryParams: { role: callRole },
+    state: routeState,
   } = useUrlParams<CallRouteParams>();
-  const { account } = useAuthContext();
+  const { accountId } = useAuthContext();
   const webSocket = useContext(WebSocketContext);
   const { webRTCConnection, remoteStreams, sendWebRTCOffer, isConnected } = useContext(WebRTCContext);
-  const { conversation } = useContext(ConversationContext);
+  const { conversation, conversationId } = useContext(ConversationContext);
 
   const [mediaDevices, setMediaDevices] = useState<Record<MediaDeviceKind, MediaDeviceInfo[]>>(
     defaultCallContext.mediaDevices
@@ -89,7 +91,7 @@ export default ({ children }: WithChildren) => {
 
   const [isAudioOn, setIsAudioOn] = useState(false);
   const [isVideoOn, setIsVideoOn] = useState(false);
-  const [callStatus, setCallStatus] = useState(CallStatus.Ringing);
+  const [callStatus, setCallStatus] = useState(routeState?.callStatus);
 
   // TODO: This logic will have to change to support multiple people in a call
   const contactUri = useMemo(() => conversation.getFirstMember().contact.getUri(), [conversation]);
@@ -142,35 +144,25 @@ export default ({ children }: WithChildren) => {
     }
   }, [localStream, webRTCConnection]);
 
-  const setAudioStatus = useCallback(
-    (isOn: boolean) => {
-      if (!localStream) {
-        return;
-      }
+  useEffect(() => {
+    if (!webSocket) {
+      return;
+    }
 
-      for (const track of localStream.getAudioTracks()) {
-        track.enabled = isOn;
-      }
+    if (callRole === 'caller' && callStatus === CallStatus.Default) {
+      const callBegin = {
+        from: accountId,
+        to: contactUri,
+        message: {
+          conversationId: conversationId,
+        },
+      };
 
-      setIsAudioOn(isOn);
-    },
-    [localStream]
-  );
-
-  const setVideoStatus = useCallback(
-    (isOn: boolean) => {
-      if (!localStream) {
-        return;
-      }
-
-      for (const track of localStream.getVideoTracks()) {
-        track.enabled = isOn;
-      }
-
-      setIsVideoOn(isOn);
-    },
-    [localStream]
-  );
+      console.info('Sending CallBegin', callBegin);
+      webSocket.send(WebSocketMessageType.CallBegin, callBegin);
+      setCallStatus(CallStatus.Ringing);
+    }
+  }, [webSocket, callRole, callStatus, contactUri, accountId, conversationId]);
 
   useEffect(() => {
     if (!webSocket || !webRTCConnection) {
@@ -213,7 +205,7 @@ export default ({ children }: WithChildren) => {
     }
 
     const callAccept = {
-      from: account.getId(),
+      from: accountId,
       to: contactUri,
       message: undefined,
     };
@@ -221,10 +213,40 @@ export default ({ children }: WithChildren) => {
     console.info('Sending CallAccept', callAccept);
     webSocket.send(WebSocketMessageType.CallAccept, callAccept);
     setCallStatus(CallStatus.Connecting);
-  }, [webSocket, account, contactUri]);
+  }, [webSocket, accountId, contactUri]);
 
-  if (!callRole) {
-    console.error('Call role not defined. Redirecting...');
+  const setAudioStatus = useCallback(
+    (isOn: boolean) => {
+      if (!localStream) {
+        return;
+      }
+
+      for (const track of localStream.getAudioTracks()) {
+        track.enabled = isOn;
+      }
+
+      setIsAudioOn(isOn);
+    },
+    [localStream]
+  );
+
+  const setVideoStatus = useCallback(
+    (isOn: boolean) => {
+      if (!localStream) {
+        return;
+      }
+
+      for (const track of localStream.getVideoTracks()) {
+        track.enabled = isOn;
+      }
+
+      setIsVideoOn(isOn);
+    },
+    [localStream]
+  );
+
+  if (!callRole || !callStatus) {
+    console.error('Invalid route. Redirecting...');
     return <Navigate to={'/'} />;
   }
 

@@ -23,6 +23,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
 
 import { useAuthContext } from '../contexts/AuthProvider';
+import useStartCall from '../hooks/useStartCall';
 import { setRefreshFromSlice } from '../redux/appSlice';
 import { useAppDispatch } from '../redux/hooks';
 import ContextMenu, { ContextMenuHandler, useContextMenuHandler } from './ContextMenu';
@@ -51,7 +52,12 @@ export default function ConversationListItem({ conversation }: ConversationListI
   const isSelected = conversation.getDisplayUri() === pathId;
   const navigate = useNavigate();
   const userId = conversation?.getFirstMember()?.contact.getUri();
-  const uri = conversation.getId() ? `/conversation/${conversation.getId()}` : `/conversation/add-contact/${userId}`;
+
+  // TODO: Improve this component. conversationId should never be undefined.
+  //  (https://git.jami.net/savoirfairelinux/jami-web/-/issues/171)
+  const uri = conversation.getId()
+    ? `/conversation/${conversation.getId()}`
+    : `/conversation/add-contact?newContactId=${userId}`;
   return (
     <Box onContextMenu={contextMenuHandler.handleAnchorPosition}>
       <ConversationMenu
@@ -90,6 +96,8 @@ const ConversationMenu = ({ userId, conversation, uri, isSelected, contextMenuPr
 
   const navigate = useNavigate();
 
+  const startCall = useStartCall();
+
   const getContactDetails = useCallback(async () => {
     const controller = new AbortController();
     try {
@@ -101,6 +109,8 @@ const ConversationMenu = ({ userId, conversation, uri, isSelected, contextMenuPr
       console.log('ERROR GET CONTACT DETAILS: ', e);
     }
   }, [axiosInstance, userId]);
+
+  const conversationId = conversation.getId();
 
   const menuOptions: PopoverListItemData[] = useMemo(
     () => [
@@ -115,14 +125,20 @@ const ConversationMenu = ({ userId, conversation, uri, isSelected, contextMenuPr
         label: t('conversation_start_audiocall'),
         Icon: AudioCallIcon,
         onClick: () => {
-          navigate(`/account/call/${conversation.getId()}`);
+          if (conversationId) {
+            startCall(conversationId);
+          }
         },
       },
       {
         label: t('conversation_start_videocall'),
         Icon: VideoCallIcon,
         onClick: () => {
-          navigate(`call/${conversation.getId()}?video=true`);
+          if (conversationId) {
+            startCall(conversationId, {
+              isVideoOn: true,
+            });
+          }
         },
       },
       ...(isSelected
@@ -160,7 +176,6 @@ const ConversationMenu = ({ userId, conversation, uri, isSelected, contextMenuPr
       },
     ],
     [
-      conversation,
       navigate,
       uri,
       isSelected,
@@ -169,6 +184,8 @@ const ConversationMenu = ({ userId, conversation, uri, isSelected, contextMenuPr
       blockContactDialogHandler,
       removeContactDialogHandler,
       t,
+      startCall,
+      conversationId,
     ]
   );
 

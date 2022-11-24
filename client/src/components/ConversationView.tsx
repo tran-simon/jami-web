@@ -22,6 +22,7 @@ import { useTranslation } from 'react-i18next';
 
 import { useAuthContext } from '../contexts/AuthProvider';
 import { ConversationContext } from '../contexts/ConversationProvider';
+import useStartCall from '../hooks/useStartCall';
 import ChatInterface from '../pages/ChatInterface';
 import { translateEnumeration, TranslateEnumerationOptions } from '../utils/translations';
 import { AddParticipantButton, ShowOptionsMenuButton, StartAudioCallButton, StartVideoCallButton } from './Button';
@@ -57,7 +58,7 @@ type ConversationHeaderProps = {
 
 const ConversationHeader = ({ account, members, adminTitle }: ConversationHeaderProps) => {
   const { t } = useTranslation();
-  const { beginCall } = useContext(ConversationContext);
+  const { conversationId } = useContext(ConversationContext);
 
   const title = useMemo(() => {
     if (adminTitle) {
@@ -82,6 +83,8 @@ const ConversationHeader = ({ account, members, adminTitle }: ConversationHeader
     return translateEnumeration<ConversationMember>(members, options);
   }, [account, members, adminTitle, t]);
 
+  const startCall = useStartCall();
+
   return (
     <Stack direction="row" padding="16px" overflow="hidden">
       <Stack flex={1} justifyContent="center" whiteSpace="nowrap" overflow="hidden">
@@ -90,8 +93,14 @@ const ConversationHeader = ({ account, members, adminTitle }: ConversationHeader
         </Typography>
       </Stack>
       <Stack direction="row" spacing="20px">
-        <StartAudioCallButton onClick={() => beginCall()} />
-        <StartVideoCallButton onClick={() => beginCall()} />
+        <StartAudioCallButton onClick={() => startCall(conversationId)} />
+        <StartVideoCallButton
+          onClick={() =>
+            startCall(conversationId, {
+              isVideoOn: true,
+            })
+          }
+        />
         <AddParticipantButton />
         <ShowOptionsMenuButton />
       </Stack>

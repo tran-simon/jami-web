@@ -16,8 +16,7 @@
  * <https://www.gnu.org/licenses/>.
  */
 import { Conversation, WebSocketMessageType } from 'jami-web-common';
-import { createContext, useCallback, useContext, useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { createContext, useContext, useEffect, useState } from 'react';
 
 import LoadingPage from '../components/Loading';
 import { useUrlParams } from '../hooks/useUrlParams';
@@ -30,8 +29,6 @@ import { WebSocketContext } from './WebSocketProvider';
 interface IConversationProvider {
   conversationId: string;
   conversation: Conversation;
-
-  beginCall: () => void;
 }
 
 export const ConversationContext = createContext<IConversationProvider>(undefined!);
@@ -40,14 +37,13 @@ export default ({ children }: WithChildren) => {
   const {
     urlParams: { conversationId },
   } = useUrlParams<ConversationRouteParams>();
-  const { account, accountId } = useAuthContext();
+  const { accountId } = useAuthContext();
   const webSocket = useContext(WebSocketContext);
   const [isLoading, setIsLoading] = useState(false);
   const [isError, setIsError] = useState(false);
   const [conversation, setConversation] = useState<Conversation | undefined>();
-  const navigate = useNavigate();
 
-  const conversationQuery = useConversationQuery(conversationId);
+  const conversationQuery = useConversationQuery(conversationId!);
 
   useEffect(() => {
     if (conversationQuery.isSuccess) {
@@ -64,30 +60,8 @@ export default ({ children }: WithChildren) => {
     setIsError(conversationQuery.isError);
   }, [conversationQuery.isError]);
 
-  const beginCall = useCallback(() => {
-    if (!webSocket || !conversation) {
-      throw new Error('Could not begin call');
-    }
-
-    // TODO: Could we move this logic to the server? The client could make a single request with the conversationId, and the server is tasked with sending all the individual requests to the members of the conversation
-    for (const member of conversation.getMembers()) {
-      const callBegin = {
-        from: account.getId(),
-        to: member.contact.getUri(),
-        message: {
-          conversationId,
-        },
-      };
-
-      console.info('Sending CallBegin', callBegin);
-      webSocket.send(WebSocketMessageType.CallBegin, callBegin);
-    }
-
-    navigate(`/conversation/${conversationId}/call?role=caller`);
-  }, [conversationId, webSocket, conversation, account, navigate]);
-
   useEffect(() => {
-    if (!conversation || !webSocket) {
+    if (!conversation || !conversationId || !webSocket) {
       return;
     }
     webSocket.send(WebSocketMessageType.ConversationView, { accountId, conversationId });
@@ -105,7 +79,6 @@ export default ({ children }: WithChildren) => {
       value={{
         conversationId,
         conversation,
-        beginCall,
       }}
     >
       {children}
