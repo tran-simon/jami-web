@@ -15,25 +15,24 @@
  * License along with this program.  If not, see
  * <https://www.gnu.org/licenses/>.
  */
-import { useMemo } from 'react';
-import { useLocation, useParams } from 'react-router-dom';
+import { useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 
-export type RouteParams<UrlParams = Record<string, string>, QueryParams = Record<string, string>, State = any> = {
-  urlParams: UrlParams;
-  queryParams: QueryParams;
-  state?: State;
-};
+import { CallStatus } from '../contexts/CallProvider';
+import { CallRouteParams } from '../router';
 
-export const useUrlParams = <T extends RouteParams>() => {
-  const { search, state } = useLocation();
-  const urlParams = useParams() as T['urlParams'];
+export const useStartCall = () => {
+  const navigate = useNavigate();
 
-  return useMemo(() => {
-    const queryParams = Object.fromEntries(new URLSearchParams(search)) as T['queryParams'];
-    return {
-      queryParams,
-      urlParams,
-      state: state as T['state'],
-    };
-  }, [search, urlParams, state]);
+  return useCallback(
+    (conversationId: string, state?: Partial<CallRouteParams['state']>) => {
+      navigate(`/conversation/${conversationId}/call?role=caller`, {
+        state: {
+          callStatus: CallStatus.Default,
+          ...state,
+        },
+      });
+    },
+    [navigate]
+  );
 };

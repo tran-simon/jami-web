@@ -29,6 +29,7 @@ import { WebSocketContext } from './WebSocketProvider';
 export type CallRole = 'caller' | 'receiver';
 
 export enum CallStatus {
+  Default,
   Ringing,
   Connecting,
   InCall,
@@ -65,7 +66,7 @@ const defaultCallContext: ICallContext = {
   isVideoOn: false,
   setVideoStatus: () => {},
   callRole: 'caller',
-  callStatus: CallStatus.Ringing,
+  callStatus: CallStatus.Default,
 
   acceptCall: () => {},
 };
@@ -75,6 +76,7 @@ export const CallContext = createContext<ICallContext>(defaultCallContext);
 export default ({ children }: WithChildren) => {
   const {
     queryParams: { role: callRole },
+    state: routeState,
   } = useUrlParams<CallRouteParams>();
   const webSocket = useContext(WebSocketContext);
   const { webRtcConnection, remoteStreams, sendWebRtcOffer, isConnected } = useContext(WebRtcContext);
@@ -87,9 +89,11 @@ export default ({ children }: WithChildren) => {
 
   const [isAudioOn, setIsAudioOn] = useState(false);
   const [isVideoOn, setIsVideoOn] = useState(false);
-  const [callStatus, setCallStatus] = useState(CallStatus.Ringing);
+  const [callStatus, setCallStatus] = useState(routeState?.callStatus);
 
-  // TODO: This logic will have to change to support multiple people in a call
+  // TODO: This logic will have to change to support multiple people in a call. Could we move this logic to the server?
+  //       The client could make a single request with the conversationId, and the server would be tasked with sending
+  //       all the individual requests to the members of the conversation.
   const contactUri = useMemo(() => conversation.getFirstMember().contact.getUri(), [conversation]);
 
   useEffect(() => {
@@ -140,35 +144,22 @@ export default ({ children }: WithChildren) => {
     }
   }, [localStream, webRtcConnection]);
 
-  const setAudioStatus = useCallback(
-    (isOn: boolean) => {
-      if (!localStream) {
-        return;
-      }
+  useEffect(() => {
+    if (!webSocket) {
+      return;
+    }
 
-      for (const track of localStream.getAudioTracks()) {
-        track.enabled = isOn;
-      }
+    if (callRole === 'caller' && callStatus === CallStatus.Default) {
+      const callBegin: CallAction = {
+        contactId: contactUri,
+        conversationId,
+      };
 
-      setIsAudioOn(isOn);
-    },
-    [localStream]
-  );
-
-  const setVideoStatus = useCallback(
-    (isOn: boolean) => {
-      if (!localStream) {
-        return;
-      }
-
-      for (const track of localStream.getVideoTracks()) {
-        track.enabled = isOn;
-      }
-
-      setIsVideoOn(isOn);
-    },
-    [localStream]
-  );
+      console.info('Sending CallBegin', callBegin);
+      webSocket.send(WebSocketMessageType.CallBegin, callBegin);
+      setCallStatus(CallStatus.Ringing);
+    }
+  }, [webSocket, callRole, callStatus, contactUri, conversationId]);
 
   useEffect(() => {
     if (!webSocket || !webRtcConnection) {
@@ -220,8 +211,38 @@ export default ({ children }: WithChildren) => {
     setCallStatus(CallStatus.Connecting);
   }, [webSocket, contactUri, conversationId]);
 
-  if (!callRole) {
-    console.error('Call role not defined. Redirecting...');
+  const setAudioStatus = useCallback(
+    (isOn: boolean) => {
+      if (!localStream) {
+        return;
+      }
+
+      for (const track of localStream.getAudioTracks()) {
+        track.enabled = isOn;
+      }
+
+      setIsAudioOn(isOn);
+    },
+    [localStream]
+  );
+
+  const setVideoStatus = useCallback(
+    (isOn: boolean) => {
+      if (!localStream) {
+        return;
+      }
+
+      for (const track of localStream.getVideoTracks()) {
+        track.enabled = isOn;
+      }
+
+      setIsVideoOn(isOn);
+    },
+    [localStream]
+  );
+
+  if (!callRole || callStatus === undefined) {
+    console.error('Invalid route. Redirecting...');
     return <Navigate to={'/'} />;
   }
 

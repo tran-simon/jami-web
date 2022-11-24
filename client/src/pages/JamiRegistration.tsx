@@ -126,7 +126,7 @@ export default function JamiRegistration(props: JamiRegistrationProps) {
 
     if (canCreate) {
       setIsCreatingUser(true);
-      createAccount();
+      await createAccount();
     } else {
       if (usernameError || username.length === 0) {
         setUsernameStatus('registration_failed');

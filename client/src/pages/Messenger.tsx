@@ -43,9 +43,11 @@ const Messenger = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResult, setSearchResults] = useState<Conversation | undefined>(undefined);
 
-  const {
-    urlParams: { contactId },
-  } = useUrlParams<AddContactRouteParams>();
+  const { urlParams } = useUrlParams<AddContactRouteParams>();
+
+  // TODO: Rework the contact adding logic so that adding a contact does not make the current conversationId undefined.
+  //       The newContactId should not come from the route, but from a state.
+  const newContactId = urlParams?.contactId;
 
   const accountId = account.getId();
 
@@ -101,7 +103,7 @@ const Messenger = () => {
       <Stack flexGrow={0} flexShrink={0} overflow="auto">
         <Header />
         <NewContactForm onChange={setSearchQuery} />
-        {contactId && <AddContactPage contactId={contactId} />}
+        {newContactId && <AddContactPage contactId={newContactId} />}
         {conversations ? (
           <ConversationList search={searchResult} conversations={conversations} accountId={accountId} />
         ) : (

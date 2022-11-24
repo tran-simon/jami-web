@@ -20,6 +20,7 @@ import { useContext, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { useAuthContext } from '../contexts/AuthProvider';
+import { CallStatus } from '../contexts/CallProvider';
 import { WebSocketContext } from '../contexts/WebSocketProvider';
 import { WithChildren } from '../utils/utils';
 
@@ -38,7 +39,11 @@ export default ({ children }: WithChildren) => {
 
     const callBeginListener = (data: CallAction) => {
       console.info('Received event on CallBegin', data);
-      navigate(`/conversation/${data.conversationId}/call?role=receiver`);
+      navigate(`/conversation/${data.conversationId}/call?role=receiver`, {
+        state: {
+          callStatus: CallStatus.Ringing,
+        },
+      });
     };
 
     webSocket.bind(WebSocketMessageType.CallBegin, callBeginListener);

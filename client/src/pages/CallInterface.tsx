@@ -54,7 +54,7 @@ export default () => {
     return (
       <CallPending
         pending={callRole}
-        caller={callStatus === CallStatus.Ringing ? 'calling' : 'connecting'}
+        caller={callStatus === CallStatus.Connecting ? 'connecting' : 'calling'}
         medium="audio"
       />
     );
