@@ -16,17 +16,23 @@
  * <https://www.gnu.org/licenses/>.
  */
 import { useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
 
 import { CallStatus } from '../contexts/CallProvider';
-import { CallRouteParams } from '../router';
+import { callRouteDescriptor, CallRouteState } from '../router';
+import { useRouteNavigate } from './routingHooks';
 
 const useStartCall = () => {
-  const navigate = useNavigate();
+  const navigate = useRouteNavigate();
 
   return useCallback(
-    (conversationId: string, state?: Partial<CallRouteParams['state']>) => {
-      navigate(`/conversation/${conversationId}/call?role=caller`, {
+    (conversationId: string, state?: Partial<CallRouteState>) => {
+      navigate(callRouteDescriptor, {
+        urlParams: {
+          conversationId,
+        },
+        queryParams: {
+          role: 'caller',
+        },
         state: {
           callStatus: CallStatus.Default,
           ...state,

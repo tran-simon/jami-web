@@ -19,8 +19,8 @@ import { AccountTextMessage, WebSocketMessageType } from 'jami-web-common';
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { Navigate } from 'react-router-dom';
 
-import { useUrlParams } from '../hooks/useUrlParams';
-import { CallRouteParams } from '../router';
+import { useRouteParams } from '../hooks/routingHooks';
+import { callRouteDescriptor } from '../router';
 import { WithChildren } from '../utils/utils';
 import { useAuthContext } from './AuthProvider';
 import { ConversationContext } from './ConversationProvider';
@@ -78,7 +78,7 @@ export default ({ children }: WithChildren) => {
   const {
     queryParams: { role: callRole },
     state: routeState,
-  } = useUrlParams<CallRouteParams>();
+  } = useRouteParams(callRouteDescriptor);
   const { accountId } = useAuthContext();
   const webSocket = useContext(WebSocketContext);
   const { webRTCConnection, remoteStreams, sendWebRTCOffer, isConnected } = useContext(WebRTCContext);

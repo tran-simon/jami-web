@@ -18,11 +18,12 @@
 import GroupAddRounded from '@mui/icons-material/GroupAddRounded';
 import { Box, Card, CardContent, Container, Fab, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
 
 import { useAuthContext } from '../contexts/AuthProvider';
+import { useRouteNavigate } from '../hooks/routingHooks';
 import { setRefreshFromSlice } from '../redux/appSlice';
 import { useAppDispatch } from '../redux/hooks';
+import { conversationRouteDescriptor } from '../router';
 
 type AddContactPageProps = {
   contactId: string;
@@ -31,7 +32,7 @@ type AddContactPageProps = {
 export default function AddContactPage({ contactId }: AddContactPageProps) {
   const { t } = useTranslation();
   const { axiosInstance } = useAuthContext();
-  const navigate = useNavigate();
+  const navigate = useRouteNavigate();
 
   const dispatch = useAppDispatch();
 
@@ -40,7 +41,11 @@ export default function AddContactPage({ contactId }: AddContactPageProps) {
     dispatch(setRefreshFromSlice());
 
     if (data.conversationId) {
-      navigate(`/conversation/${data.conversationId}`);
+      navigate(conversationRouteDescriptor, {
+        urlParams: {
+          conversationId: data.conversationId,
+        },
+      });
     }
   };
 

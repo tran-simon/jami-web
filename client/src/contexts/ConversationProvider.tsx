@@ -19,8 +19,8 @@ import { Conversation, WebSocketMessageType } from 'jami-web-common';
 import { createContext, useContext, useEffect, useState } from 'react';
 
 import LoadingPage from '../components/Loading';
-import { useUrlParams } from '../hooks/useUrlParams';
-import { ConversationRouteParams } from '../router';
+import { useRouteParams } from '../hooks/routingHooks';
+import { conversationRouteDescriptor } from '../router';
 import { useConversationQuery } from '../services/Conversation';
 import { WithChildren } from '../utils/utils';
 import { useAuthContext } from './AuthProvider';
@@ -36,14 +36,14 @@ export const ConversationContext = createContext<IConversationProvider>(undefine
 export default ({ children }: WithChildren) => {
   const {
     urlParams: { conversationId },
-  } = useUrlParams<ConversationRouteParams>();
+  } = useRouteParams(conversationRouteDescriptor);
   const { accountId } = useAuthContext();
   const webSocket = useContext(WebSocketContext);
   const [isLoading, setIsLoading] = useState(false);
   const [isError, setIsError] = useState(false);
   const [conversation, setConversation] = useState<Conversation | undefined>();
 
-  const conversationQuery = useConversationQuery(conversationId!);
+  const conversationQuery = useConversationQuery(conversationId!); // TODO
 
   useEffect(() => {
     if (conversationQuery.isSuccess) {

@@ -18,20 +18,21 @@
 import { Box, Button, Menu, MenuItem } from '@mui/material';
 import { MouseEvent, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
 
 import { useAuthContext } from '../contexts/AuthProvider';
+import { useRouteNavigate } from '../hooks/routingHooks';
+import { contactsRouteDescriptor } from '../router';
 
 export default function Header() {
   const { t } = useTranslation();
   const { logout } = useAuthContext();
 
-  const navigate = useNavigate();
+  const navigate = useRouteNavigate();
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
   const handleClick = (event: MouseEvent<HTMLButtonElement>) => setAnchorEl(event.currentTarget);
   const handleClose = () => setAnchorEl(null);
 
-  const goToContacts = () => navigate(`/contacts`);
+  const goToContacts = () => navigate(contactsRouteDescriptor, {});
 
   return (
     <Box>

@@ -22,3 +22,16 @@ export type WithChildren = {
 };
 
 export type SetState<T> = Dispatch<SetStateAction<T>>;
+
+/**
+ * Makes the prop of a type optional if the prop is of type undefined
+ *
+ * https://stackoverflow.com/a/67630189/6592293
+ */
+export type UndefinedToOptional<T> = {
+  [K in keyof T]-?: (x: undefined extends T[K] ? { [P in K]?: T[K] } : { [P in K]: T[K] }) => void;
+}[keyof T] extends (x: infer I) => void
+  ? I extends infer U
+    ? { [K in keyof U]: U[K] }
+    : never
+  : never;

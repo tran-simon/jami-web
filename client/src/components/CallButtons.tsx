@@ -20,9 +20,9 @@ import { IconButton, IconButtonProps, PaletteColor } from '@mui/material';
 import { styled, Theme } from '@mui/material/styles';
 import React, { useContext, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
 
 import { CallContext } from '../contexts/CallProvider';
+import { useRouteNavigate } from '../hooks/routingHooks';
 import { ExpandableButton, ExpandableButtonProps, ShapedButtonProps, ToggleIconButton } from './Button';
 import {
   CallEndIcon,
@@ -88,7 +88,7 @@ export const CallingChatButton = (props: ExpandableButtonProps) => {
 };
 
 export const CallingEndButton = (props: ExpandableButtonProps) => {
-  const navigate = useNavigate();
+  const navigate = useRouteNavigate();
   return (
     <ColoredCallButton
       paletteColor={(theme) => theme.palette.error}
@@ -244,7 +244,7 @@ const ToggleVideoCameraIconButton = (props: IconButtonProps) => {
 
 // Calling pending/receiving interface
 export const CallingCancelButton = (props: IconButtonProps) => {
-  const navigate = useNavigate();
+  const navigate = useRouteNavigate();
 
   return (
     <ColoredCallButton
@@ -292,7 +292,7 @@ export const CallingAnswerVideoButton = (props: IconButtonProps) => {
 };
 
 export const CallingRefuseButton = (props: IconButtonProps) => {
-  const navigate = useNavigate();
+  const navigate = useRouteNavigate();
   return (
     <ColoredCallButton
       aria-label="refuse call"

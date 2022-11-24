@@ -19,11 +19,13 @@ import { Box, Button, Stack, Typography, useMediaQuery } from '@mui/material';
 import { Theme, useTheme } from '@mui/material/styles';
 import { ChangeEvent, FormEvent, MouseEvent, ReactNode, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Form, useNavigate } from 'react-router-dom';
+import { Form } from 'react-router-dom';
 
 import { AlertSnackbar } from '../components/AlertSnackbar';
 import { NameStatus, PasswordInput, PasswordStatus, UsernameInput } from '../components/Input';
 import ProcessingRequest from '../components/ProcessingRequest';
+import { useRouteNavigate } from '../hooks/routingHooks';
+import { conversationRouteDescriptor } from '../router';
 import { checkPasswordStrength, isNameRegistered, loginUser, registerUser, setAccessToken } from '../utils/auth';
 import { inputWidth, jamiUsernamePattern } from '../utils/constants';
 import { InvalidPassword, UsernameNotFound } from '../utils/errors';
@@ -34,7 +36,7 @@ type JamiRegistrationProps = {
 
 export default function JamiRegistration(props: JamiRegistrationProps) {
   const theme: Theme = useTheme();
-  const navigate = useNavigate();
+  const navigate = useRouteNavigate();
   const { t } = useTranslation();
 
   const [isCreatingUser, setIsCreatingUser] = useState(false);
@@ -73,7 +75,12 @@ export default function JamiRegistration(props: JamiRegistrationProps) {
     try {
       const accessToken = await loginUser(username, password);
       setAccessToken(accessToken);
-      navigate('/conversation', { replace: true });
+      navigate(conversationRouteDescriptor, {
+        urlParams: {
+          conversationId: undefined,
+        },
+        replace: true,
+      });
     } catch (e) {
       setIsCreatingUser(false);
       if (e instanceof UsernameNotFound) {

@@ -19,11 +19,13 @@ import { Box, Button, Stack, Typography, useMediaQuery } from '@mui/material';
 import { Theme, useTheme } from '@mui/material/styles';
 import { ChangeEvent, FormEvent, MouseEvent, ReactNode, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Form, useNavigate } from 'react-router-dom';
+import { Form } from 'react-router-dom';
 
 import { AlertSnackbar } from '../components/AlertSnackbar';
 import { PasswordInput, UsernameInput } from '../components/Input';
 import ProcessingRequest from '../components/ProcessingRequest';
+import { useRouteNavigate } from '../hooks/routingHooks';
+import { conversationRouteDescriptor } from '../router';
 import { loginUser, setAccessToken } from '../utils/auth';
 import { inputWidth } from '../utils/constants';
 import { InvalidPassword, UsernameNotFound } from '../utils/errors';
@@ -34,7 +36,7 @@ type JamiLoginProps = {
 
 export default function JamiLogin(props: JamiLoginProps) {
   const theme: Theme = useTheme();
-  const navigate = useNavigate();
+  const navigate = useRouteNavigate();
   const { t } = useTranslation();
 
   const [username, setUsername] = useState<string>('');
@@ -63,7 +65,12 @@ export default function JamiLogin(props: JamiLoginProps) {
       try {
         const accessToken = await loginUser(username, password);
         setAccessToken(accessToken);
-        navigate('/conversation', { replace: true });
+        navigate(conversationRouteDescriptor, {
+          urlParams: {
+            conversationId: undefined,
+          },
+          replace: true,
+        });
       } catch (e) {
         setIsLoggingInUser(false);
         if (e instanceof UsernameNotFound) {

@@ -17,11 +17,12 @@
  */
 import { AccountTextMessage, CallBegin, WebSocketMessageType } from 'jami-web-common';
 import { useContext, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 
 import { useAuthContext } from '../contexts/AuthProvider';
 import { CallStatus } from '../contexts/CallProvider';
 import { WebSocketContext } from '../contexts/WebSocketProvider';
+import { useRouteNavigate } from '../hooks/routingHooks';
+import { callRouteDescriptor } from '../router';
 import { WithChildren } from '../utils/utils';
 
 /**
@@ -29,7 +30,7 @@ import { WithChildren } from '../utils/utils';
  */
 export default ({ children }: WithChildren) => {
   const webSocket = useContext(WebSocketContext);
-  const navigate = useNavigate();
+  const navigate = useRouteNavigate();
   const { axiosInstance } = useAuthContext();
 
   useEffect(() => {
@@ -39,7 +40,13 @@ export default ({ children }: WithChildren) => {
 
     const callBeginListener = (data: AccountTextMessage<CallBegin>) => {
       console.info('Received event on CallBegin', data);
-      navigate(`/conversation/${data.message.conversationId}/call?role=receiver`, {
+      navigate(callRouteDescriptor, {
+        urlParams: {
+          conversationId: data.message.conversationId,
+        },
+        queryParams: {
+          role: 'receiver',
+        },
         state: {
           callStatus: CallStatus.Ringing,
         },

@@ -18,13 +18,13 @@
 import { Card, CardActionArea, CardContent, CircularProgress, Typography } from '@mui/material';
 import { Conversation } from 'jami-web-common/dist/Conversation';
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router';
 
 import { useAuthContext } from '../contexts/AuthProvider';
+import { useRouteNavigate } from '../hooks/routingHooks';
 
 export default function ConversationsOverviewCard() {
   const { axiosInstance, account } = useAuthContext();
-  const navigate = useNavigate();
+  const navigate = useRouteNavigate();
 
   const [conversationCount, setConversationCount] = useState<number | undefined>();
 

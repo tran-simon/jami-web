@@ -20,9 +20,10 @@ import { Conversation } from 'jami-web-common';
 import { QRCodeCanvas } from 'qrcode.react';
 import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 
 import { useAuthContext } from '../contexts/AuthProvider';
+import { useRouteNavigate } from '../hooks/routingHooks';
 import useStartCall from '../hooks/useStartCall';
 import { setRefreshFromSlice } from '../redux/appSlice';
 import { useAppDispatch } from '../redux/hooks';
@@ -50,11 +51,11 @@ export default function ConversationListItem({ conversation }: ConversationListI
 
   const pathId = conversationId || contactId;
   const isSelected = conversation.getDisplayUri() === pathId;
-  const navigate = useNavigate();
+  const navigate = useRouteNavigate();
   const userId = conversation?.getFirstMember()?.contact.getUri();
 
   // TODO: Improve this component. conversationId should never be undefined.
-  //  (https://git.jami.net/savoirfairelinux/jami-web/-/issues/171)
+  //  Use `useRouteNavigate` properly (https://git.jami.net/savoirfairelinux/jami-web/-/issues/171)
   const uri = conversation.getId()
     ? `/conversation/${conversation.getId()}`
     : `/conversation/add-contact?newContactId=${userId}`;
@@ -94,7 +95,7 @@ const ConversationMenu = ({ userId, conversation, uri, isSelected, contextMenuPr
   const blockContactDialogHandler = useDialogHandler();
   const removeContactDialogHandler = useDialogHandler();
 
-  const navigate = useNavigate();
+  const navigate = useRouteNavigate();
 
   const startCall = useStartCall();
 

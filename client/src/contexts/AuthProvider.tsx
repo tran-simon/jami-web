@@ -19,9 +19,9 @@ import axios, { AxiosInstance } from 'axios';
 import { Account } from 'jami-web-common/dist/Account';
 import { HttpStatusCode } from 'jami-web-common/dist/enums/http-status-code';
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 
 import ProcessingRequest from '../components/ProcessingRequest';
+import { useRouteNavigate } from '../hooks/routingHooks';
 import { apiUrl } from '../utils/constants';
 import { WithChildren } from '../utils/utils';
 
@@ -38,7 +38,7 @@ const AuthContext = createContext<IAuthContext | undefined>(undefined);
 export default ({ children }: WithChildren) => {
   const [token, setToken] = useState<string | undefined>();
   const [account, setAccount] = useState<Account | undefined>();
-  const navigate = useNavigate();
+  const navigate = useRouteNavigate();
 
   const logout = useCallback(() => {
     localStorage.removeItem('accessToken');

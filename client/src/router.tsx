@@ -25,7 +25,7 @@ import CallProvider, { CallRole, CallStatus } from './contexts/CallProvider';
 import ConversationProvider from './contexts/ConversationProvider';
 import WebRTCProvider from './contexts/WebRTCProvider';
 import WebSocketProvider from './contexts/WebSocketProvider';
-import { RouteParams } from './hooks/useUrlParams';
+import { RouteDescriptor } from './hooks/routingHooks';
 import NotificationManager from './managers/NotificationManager';
 import AccountSettings from './pages/AccountSettings';
 import CallInterface from './pages/CallInterface';
@@ -35,21 +35,6 @@ import Setup from './pages/Setup';
 import SetupLogin from './pages/SetupLogin';
 import Welcome from './pages/Welcome';
 import { ThemeDemonstrator } from './themes/ThemeDemonstrator';
-
-export type ConversationRouteParams = RouteParams<{ conversationId: string }, Record<string, never>>;
-export type AddContactRouteParams = RouteParams<{ contactId: string }, Record<string, never>>;
-
-/**
- * Route parameters for the call routes.
- */
-export type CallRouteParams = RouteParams<
-  { conversationId?: string },
-  { role?: CallRole },
-  {
-    isVideoOn?: boolean;
-    callStatus: CallStatus;
-  }
->;
 
 export const router = createBrowserRouter(
   createRoutesFromElements(
@@ -101,3 +86,21 @@ export const router = createBrowserRouter(
     </Route>
   )
 );
+
+export const conversationRouteDescriptor = new RouteDescriptor<
+  { conversationId?: string },
+  | {
+      newContactId?: string;
+    }
+  | undefined
+>('/conversation/:conversationId');
+
+export type CallRouteState = {
+  isVideoOn?: boolean;
+  callStatus: CallStatus;
+};
+export const callRouteDescriptor = new RouteDescriptor<{ conversationId: string }, { role?: CallRole }, CallRouteState>(
+  '/conversation/:conversationId/call'
+);
+
+export const contactsRouteDescriptor = new RouteDescriptor('/contacts');

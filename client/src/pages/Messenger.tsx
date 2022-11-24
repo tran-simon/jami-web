@@ -27,10 +27,10 @@ import LoadingPage from '../components/Loading';
 import NewContactForm from '../components/NewContactForm';
 import { useAuthContext } from '../contexts/AuthProvider';
 import { WebSocketContext } from '../contexts/WebSocketProvider';
-import { useUrlParams } from '../hooks/useUrlParams';
+import { useRouteParams } from '../hooks/routingHooks';
 import { setRefreshFromSlice } from '../redux/appSlice';
 import { useAppDispatch, useAppSelector } from '../redux/hooks';
-import { AddContactRouteParams } from '../router';
+import { conversationRouteDescriptor } from '../router';
 import AddContactPage from './AddContactPage';
 
 const Messenger = () => {
@@ -43,9 +43,9 @@ const Messenger = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResult, setSearchResults] = useState<Conversation | undefined>(undefined);
 
-  const { urlParams } = useUrlParams<AddContactRouteParams>();
+  const { queryParams } = useRouteParams(conversationRouteDescriptor);
 
-  const newContactId = urlParams?.contactId; // TODO: Rework this logic (https://git.jami.net/savoirfairelinux/jami-web/-/issues/171)
+  const newContactId = queryParams?.newContactId; // TODO: Rework this logic (https://git.jami.net/savoirfairelinux/jami-web/-/issues/171)
 
   const accountId = account.getId();
 
