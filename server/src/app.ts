@@ -31,7 +31,7 @@ import { conversationRouter } from './routers/conversation-router.js';
 import { defaultModeratorsRouter } from './routers/default-moderators-router.js';
 import { nameserverRouter } from './routers/nameserver-router.js';
 import { setupRouter } from './routers/setup-router.js';
-import { bindWebRTCCallbacks } from './websocket/webrtc-handler.js';
+import { bindWebRtcCallbacks } from './websocket/webrtc-handler.js';
 
 @Service()
 export class App {
@@ -57,7 +57,7 @@ export class App {
     this.app.use('/ns', nameserverRouter);
 
     // Setup WebSocket callbacks
-    bindWebRTCCallbacks();
+    bindWebRtcCallbacks();
 
     // Setup 404 error handling
     this.app.use((_req, res) => {

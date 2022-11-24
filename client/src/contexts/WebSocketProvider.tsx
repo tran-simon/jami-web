@@ -15,18 +15,26 @@
  * License along with this program.  If not, see
  * <https://www.gnu.org/licenses/>.
  */
-import {
-  buildWebSocketCallbacks,
-  WebSocketCallbacks,
-  WebSocketMessage,
-  WebSocketMessageTable,
-  WebSocketMessageType,
-} from 'jami-web-common';
+import { WebSocketMessage, WebSocketMessageTable, WebSocketMessageType } from 'jami-web-common';
 import { createContext, useCallback, useEffect, useRef, useState } from 'react';
 
 import { apiUrl } from '../utils/constants';
 import { WithChildren } from '../utils/utils';
 import { useAuthContext } from './AuthProvider';
+
+type WebSocketCallback<T extends WebSocketMessageType> = (data: WebSocketMessageTable[T]) => void;
+
+type WebSocketCallbacks = {
+  [key in WebSocketMessageType]: Set<WebSocketCallback<key>>;
+};
+
+const buildWebSocketCallbacks = (): WebSocketCallbacks => {
+  const webSocketCallback = {} as WebSocketCallbacks;
+  for (const messageType of Object.values(WebSocketMessageType)) {
+    webSocketCallback[messageType] = new Set<WebSocketCallback<typeof messageType>>();
+  }
+  return webSocketCallback;
+};
 
 type BindFunction = <T extends WebSocketMessageType>(
   type: T,

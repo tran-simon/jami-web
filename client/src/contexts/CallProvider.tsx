@@ -15,16 +15,15 @@
  * License along with this program.  If not, see
  * <https://www.gnu.org/licenses/>.
  */
-import { AccountTextMessage, WebSocketMessageType } from 'jami-web-common';
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { CallAction, WebSocketMessageType } from 'jami-web-common';
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { Navigate } from 'react-router-dom';
 
 import { useUrlParams } from '../hooks/useUrlParams';
 import { CallRouteParams } from '../router';
 import { WithChildren } from '../utils/utils';
-import { useAuthContext } from './AuthProvider';
 import { ConversationContext } from './ConversationProvider';
-import { WebRTCContext } from './WebRTCProvider';
+import { WebRtcContext } from './WebRtcProvider';
 import { WebSocketContext } from './WebSocketProvider';
 
 export type CallRole = 'caller' | 'receiver';
@@ -77,10 +76,9 @@ export default ({ children }: WithChildren) => {
   const {
     queryParams: { role: callRole },
   } = useUrlParams<CallRouteParams>();
-  const { account } = useAuthContext();
   const webSocket = useContext(WebSocketContext);
-  const { webRTCConnection, remoteStreams, sendWebRTCOffer, isConnected } = useContext(WebRTCContext);
-  const { conversation } = useContext(ConversationContext);
+  const { webRtcConnection, remoteStreams, sendWebRtcOffer, isConnected } = useContext(WebRtcContext);
+  const { conversationId, conversation } = useContext(ConversationContext);
 
   const [mediaDevices, setMediaDevices] = useState<Record<MediaDeviceKind, MediaDeviceInfo[]>>(
     defaultCallContext.mediaDevices
@@ -135,12 +133,12 @@ export default ({ children }: WithChildren) => {
   }, [setLocalStream]);
 
   useEffect(() => {
-    if (localStream && webRTCConnection) {
+    if (localStream && webRtcConnection) {
       for (const track of localStream.getTracks()) {
-        webRTCConnection.addTrack(track, localStream);
+        webRtcConnection.addTrack(track, localStream);
       }
     }
-  }, [localStream, webRTCConnection]);
+  }, [localStream, webRtcConnection]);
 
   const setAudioStatus = useCallback(
     (isOn: boolean) => {
@@ -173,22 +171,22 @@ export default ({ children }: WithChildren) => {
   );
 
   useEffect(() => {
-    if (!webSocket || !webRTCConnection) {
+    if (!webSocket || !webRtcConnection) {
       return;
     }
 
     if (callRole === 'caller' && callStatus === CallStatus.Ringing) {
-      const callAcceptListener = (data: AccountTextMessage<undefined>) => {
-        console.info('Received event on CallAccept', data);
+      const callAcceptListener = (_data: CallAction) => {
+        console.info('Received event on CallAccept');
         setCallStatus(CallStatus.Connecting);
 
-        webRTCConnection
+        webRtcConnection
           .createOffer({
             offerToReceiveAudio: true,
             offerToReceiveVideo: true,
           })
-          .then((offerSDP) => {
-            sendWebRTCOffer(offerSDP);
+          .then((sdp) => {
+            sendWebRtcOffer(sdp);
           });
       };
 
@@ -198,7 +196,7 @@ export default ({ children }: WithChildren) => {
         webSocket.unbind(WebSocketMessageType.CallAccept, callAcceptListener);
       };
     }
-  }, [callRole, webSocket, webRTCConnection, sendWebRTCOffer, callStatus]);
+  }, [callRole, webSocket, webRtcConnection, sendWebRtcOffer, callStatus]);
 
   useEffect(() => {
     if (callStatus === CallStatus.Connecting && isConnected) {
@@ -212,16 +210,15 @@ export default ({ children }: WithChildren) => {
       throw new Error('Could not accept call');
     }
 
-    const callAccept = {
-      from: account.getId(),
-      to: contactUri,
-      message: undefined,
+    const callAccept: CallAction = {
+      contactId: contactUri,
+      conversationId,
     };
 
     console.info('Sending CallAccept', callAccept);
     webSocket.send(WebSocketMessageType.CallAccept, callAccept);
     setCallStatus(CallStatus.Connecting);
-  }, [webSocket, account, contactUri]);
+  }, [webSocket, contactUri, conversationId]);
 
   if (!callRole) {
     console.error('Call role not defined. Redirecting...');

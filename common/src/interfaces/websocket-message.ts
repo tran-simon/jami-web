@@ -16,25 +16,24 @@
  * <https://www.gnu.org/licenses/>.
  */
 import { WebSocketMessageType } from '../enums/websocket-message-type.js';
-import { AccountTextMessage } from './account-text-message.js';
 import {
-  CallBegin,
+  CallAction,
   ConversationMessage,
   ConversationView,
-  WebRTCIceCandidate,
+  WebRtcIceCandidate,
   WebRtcSdp,
 } from './websocket-interfaces.js';
 
 export interface WebSocketMessageTable {
   [WebSocketMessageType.ConversationMessage]: ConversationMessage;
   [WebSocketMessageType.ConversationView]: ConversationView;
-  [WebSocketMessageType.WebRTCOffer]: AccountTextMessage<WebRtcSdp>;
-  [WebSocketMessageType.WebRTCAnswer]: AccountTextMessage<WebRtcSdp>;
-  [WebSocketMessageType.IceCandidate]: AccountTextMessage<WebRTCIceCandidate>;
-  [WebSocketMessageType.CallBegin]: AccountTextMessage<CallBegin>;
-  [WebSocketMessageType.CallAccept]: AccountTextMessage<undefined>;
-  [WebSocketMessageType.CallRefuse]: AccountTextMessage<undefined>;
-  [WebSocketMessageType.CallEnd]: AccountTextMessage<undefined>;
+  [WebSocketMessageType.CallBegin]: CallAction;
+  [WebSocketMessageType.CallAccept]: CallAction;
+  [WebSocketMessageType.CallRefuse]: CallAction;
+  [WebSocketMessageType.CallEnd]: CallAction;
+  [WebSocketMessageType.WebRtcOffer]: WebRtcSdp;
+  [WebSocketMessageType.WebRtcAnswer]: WebRtcSdp;
+  [WebSocketMessageType.WebRtcIceCandidate]: WebRtcIceCandidate;
 }
 
 export interface WebSocketMessage<T extends WebSocketMessageType> {

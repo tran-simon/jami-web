@@ -17,24 +17,27 @@
  */
 import { Message } from '../Conversation.js';
 
+export interface ContactMessage {
+  contactId: string;
+}
+
 export interface ConversationMessage {
   conversationId: string;
   message: Message;
 }
 
 export interface ConversationView {
-  accountId: string;
   conversationId: string;
 }
 
-export interface WebRtcSdp {
+export interface CallAction extends ContactMessage {
+  conversationId: string;
+}
+
+export interface WebRtcSdp extends ContactMessage {
   sdp: RTCSessionDescriptionInit;
 }
 
-export interface WebRTCIceCandidate {
+export interface WebRtcIceCandidate extends ContactMessage {
   candidate: RTCIceCandidate;
-}
-
-export interface CallBegin {
-  conversationId: string;
 }

@@ -19,7 +19,6 @@ import { createRequire } from 'node:module';
 
 import {
   AccountDetails,
-  AccountTextMessage,
   ConversationMessage,
   Message,
   VolatileDetails,
@@ -227,10 +226,10 @@ export class Jamid {
     return stringVectToArray(this.jamiSwig.getAccountList());
   }
 
-  sendAccountTextMessage(from: string, to: string, message: string): void {
+  sendAccountTextMessage(accountId: string, contactId: string, message: string): void {
     const messageStringMap: StringMap = new this.jamiSwig.StringMap();
     messageStringMap.set('application/json', message);
-    this.jamiSwig.sendAccountTextMessage(from, to, messageStringMap);
+    this.jamiSwig.sendAccountTextMessage(accountId, contactId, messageStringMap);
   }
 
   // TODO: Add interface for returned type
@@ -379,6 +378,7 @@ export class Jamid {
         `Received VolatileDetailsChanged: {"accountId":"${accountId}",` +
           `"details":{"Account.registeredName":"${username}", ...}}`
       );
+
       if (username) {
         // Keep map of usernames to account IDs
         this.usernamesToAccountIds.set(username, accountId);
@@ -401,9 +401,10 @@ export class Jamid {
       log.debug(`Received KnownDevicesChanged: {"accountId":"${accountId}", ...}`);
     });
 
-    this.events.onIncomingAccountMessage.subscribe((signal) => {
+    this.events.onIncomingAccountMessage.subscribe(<T extends WebSocketMessageType>(signal: IncomingAccountMessage) => {
       log.debug('Received IncomingAccountMessage:', JSON.stringify(signal));
-      const message: WebSocketMessage<any> = JSON.parse(signal.payload['application/json']);
+
+      const message: WebSocketMessage<T> = JSON.parse(signal.payload['application/json']);
 
       if (message === undefined) {
         log.warn('Undefined account message');
@@ -420,13 +421,7 @@ export class Jamid {
         return;
       }
 
-      const data: AccountTextMessage<unknown> = {
-        from: signal.from,
-        to: signal.accountId,
-        message: message.data.message,
-      };
-
-      this.webSocketServer.send(signal.accountId, message.type, data);
+      this.webSocketServer.send(signal.accountId, message.type, message.data);
     });
 
     this.events.onAccountMessageStatusChanged.subscribe((signal) => {

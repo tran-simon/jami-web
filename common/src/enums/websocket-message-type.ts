@@ -18,11 +18,11 @@
 export enum WebSocketMessageType {
   ConversationMessage = 'conversation-message',
   ConversationView = 'conversation-view',
-  WebRTCOffer = 'webrtc-offer',
-  WebRTCAnswer = 'webrtc-answer',
-  IceCandidate = 'ice-candidate',
   CallBegin = 'call-begin',
   CallAccept = 'call-accept',
   CallRefuse = 'call-refuse',
   CallEnd = 'call-end',
+  WebRtcOffer = 'webrtc-offer',
+  WebRtcAnswer = 'webrtc-answer',
+  WebRtcIceCandidate = 'webrtc-ice-candidate',
 }

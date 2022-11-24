@@ -16,7 +16,7 @@
  * <https://www.gnu.org/licenses/>.
  */
 import { Box, Stack } from '@mui/material';
-import { Contact, Conversation, WebSocketMessageType } from 'jami-web-common';
+import { Contact, Conversation, ConversationMessage, WebSocketMessageType } from 'jami-web-common';
 import { useContext, useEffect, useState } from 'react';
 import { Outlet } from 'react-router-dom';
 
@@ -66,9 +66,15 @@ const Messenger = () => {
       return;
     }
 
-    const conversationMessageListener = () => dispatch(setRefreshFromSlice());
+    const conversationMessageListener = (_data: ConversationMessage) => {
+      dispatch(setRefreshFromSlice());
+    };
+
     webSocket.bind(WebSocketMessageType.ConversationMessage, conversationMessageListener);
-    return () => webSocket.unbind(WebSocketMessageType.ConversationMessage, conversationMessageListener);
+
+    return () => {
+      webSocket.unbind(WebSocketMessageType.ConversationMessage, conversationMessageListener);
+    };
   }, [webSocket, dispatch]);
 
   useEffect(() => {

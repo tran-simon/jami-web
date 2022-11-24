@@ -23,7 +23,7 @@ import ConversationView from './components/ConversationView';
 import AuthProvider from './contexts/AuthProvider';
 import CallProvider, { CallRole } from './contexts/CallProvider';
 import ConversationProvider from './contexts/ConversationProvider';
-import WebRTCProvider from './contexts/WebRTCProvider';
+import WebRtcProvider from './contexts/WebRtcProvider';
 import WebSocketProvider from './contexts/WebSocketProvider';
 import { RouteParams } from './hooks/useUrlParams';
 import NotificationManager from './managers/NotificationManager';
@@ -77,11 +77,11 @@ export const router = createBrowserRouter(
             <Route
               path="call"
               element={
-                <WebRTCProvider>
+                <WebRtcProvider>
                   <CallProvider>
                     <CallInterface />
                   </CallProvider>
-                </WebRTCProvider>
+                </WebRtcProvider>
               }
             />
           </Route>

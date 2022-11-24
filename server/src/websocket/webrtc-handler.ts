@@ -15,51 +15,39 @@
  * License along with this program.  If not, see
  * <https://www.gnu.org/licenses/>.
  */
-import { WebSocketMessageTable, WebSocketMessageType } from 'jami-web-common';
+import { ContactMessage, WebSocketMessageType } from 'jami-web-common';
 import log from 'loglevel';
 import { Container } from 'typedi';
 
 import { Jamid } from '../jamid/jamid.js';
 import { WebSocketServer } from './websocket-server.js';
 
-const jamid = Container.get(Jamid);
-const webSocketServer = Container.get(WebSocketServer);
-
-const webRTCWebSocketMessageTypes = [
-  WebSocketMessageType.IceCandidate,
-  WebSocketMessageType.WebRTCOffer,
-  WebSocketMessageType.WebRTCAnswer,
+const webRtcWebSocketMessageTypes = [
   WebSocketMessageType.CallBegin,
   WebSocketMessageType.CallAccept,
   WebSocketMessageType.CallRefuse,
   WebSocketMessageType.CallEnd,
+  WebSocketMessageType.WebRtcOffer,
+  WebSocketMessageType.WebRtcAnswer,
+  WebSocketMessageType.WebRtcIceCandidate,
 ] as const;
 
-type WebRTCWebSocketMessageType = typeof webRTCWebSocketMessageTypes[number];
+const jamid = Container.get(Jamid);
+const webSocketServer = Container.get(WebSocketServer);
 
-function sendWebRTCData<T extends WebRTCWebSocketMessageType>(
-  type: WebRTCWebSocketMessageType,
-  data: Partial<WebSocketMessageTable[T]>
-) {
-  if (data.from === undefined || data.to === undefined) {
-    log.warn('Message is not a valid AccountTextMessage (missing from or to fields)');
-    return;
-  }
-  log.info('Handling WebRTC message of type:', type);
-  jamid.sendAccountTextMessage(
-    data.from,
-    data.to,
-    JSON.stringify({
-      type,
-      data,
-    })
-  );
-}
-
-export function bindWebRTCCallbacks() {
-  for (const messageType of webRTCWebSocketMessageTypes) {
-    webSocketServer.bind(messageType, (data) => {
-      sendWebRTCData(messageType, data);
+export function bindWebRtcCallbacks() {
+  for (const messageType of webRtcWebSocketMessageTypes) {
+    webSocketServer.bind(messageType, (accountId, data) => {
+      sendWebRtcData(messageType, accountId, data);
     });
   }
+}
+
+function sendWebRtcData(type: WebSocketMessageType, accountId: string, data: Partial<ContactMessage>) {
+  if (data.contactId === undefined) {
+    log.warn('Message is not a valid ContactMessage (missing contactId field)');
+    return;
+  }
+
+  jamid.sendAccountTextMessage(accountId, data.contactId, JSON.stringify({ type, data }));
 }

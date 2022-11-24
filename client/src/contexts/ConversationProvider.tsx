@@ -15,7 +15,7 @@
  * License along with this program.  If not, see
  * <https://www.gnu.org/licenses/>.
  */
-import { Conversation, WebSocketMessageType } from 'jami-web-common';
+import { CallAction, Conversation, ConversationView, WebSocketMessageType } from 'jami-web-common';
 import { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -40,7 +40,7 @@ export default ({ children }: WithChildren) => {
   const {
     urlParams: { conversationId },
   } = useUrlParams<ConversationRouteParams>();
-  const { account, accountId } = useAuthContext();
+  const { accountId } = useAuthContext();
   const webSocket = useContext(WebSocketContext);
   const [isLoading, setIsLoading] = useState(false);
   const [isError, setIsError] = useState(false);
@@ -69,14 +69,12 @@ export default ({ children }: WithChildren) => {
       throw new Error('Could not begin call');
     }
 
-    // TODO: Could we move this logic to the server? The client could make a single request with the conversationId, and the server is tasked with sending all the individual requests to the members of the conversation
+    // TODO: Could we move this logic to the server? The client could make a single request with the conversationId,
+    // and the server is tasked with sending all the individual requests to the members of the conversation
     for (const member of conversation.getMembers()) {
-      const callBegin = {
-        from: account.getId(),
-        to: member.contact.getUri(),
-        message: {
-          conversationId,
-        },
+      const callBegin: CallAction = {
+        contactId: member.contact.getUri(),
+        conversationId,
       };
 
       console.info('Sending CallBegin', callBegin);
@@ -84,13 +82,18 @@ export default ({ children }: WithChildren) => {
     }
 
     navigate(`/conversation/${conversationId}/call?role=caller`);
-  }, [conversationId, webSocket, conversation, account, navigate]);
+  }, [conversationId, webSocket, conversation, navigate]);
 
   useEffect(() => {
     if (!conversation || !webSocket) {
       return;
     }
-    webSocket.send(WebSocketMessageType.ConversationView, { accountId, conversationId });
+
+    const conversationView: ConversationView = {
+      conversationId,
+    };
+
+    webSocket.send(WebSocketMessageType.ConversationView, conversationView);
   }, [accountId, conversation, conversationId, webSocket]);
 
   if (isLoading) {

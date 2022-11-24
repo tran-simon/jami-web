@@ -18,14 +18,7 @@
 import { IncomingMessage } from 'node:http';
 import { Duplex } from 'node:stream';
 
-import {
-  buildWebSocketCallbacks,
-  WebSocketCallback,
-  WebSocketCallbacks,
-  WebSocketMessage,
-  WebSocketMessageTable,
-  WebSocketMessageType,
-} from 'jami-web-common';
+import { WebSocketMessage, WebSocketMessageTable, WebSocketMessageType } from 'jami-web-common';
 import log from 'loglevel';
 import { Service } from 'typedi';
 import { URL } from 'whatwg-url';
@@ -33,13 +26,24 @@ import * as WebSocket from 'ws';
 
 import { verifyJwt } from '../utils/jwt.js';
 
+type WebSocketCallback<T extends WebSocketMessageType> = (accountId: string, data: WebSocketMessageTable[T]) => void;
+
+type WebSocketCallbacks = {
+  [key in WebSocketMessageType]: Set<WebSocketCallback<key>>;
+};
+
 @Service()
 export class WebSocketServer {
   private wss = new WebSocket.WebSocketServer({ noServer: true });
   private sockets = new Map<string, WebSocket.WebSocket[]>();
-  private callbacks: WebSocketCallbacks = buildWebSocketCallbacks();
+  private callbacks: WebSocketCallbacks;
 
   constructor() {
+    this.callbacks = {} as WebSocketCallbacks;
+    for (const messageType of Object.values(WebSocketMessageType)) {
+      this.callbacks[messageType] = new Set<WebSocketCallback<typeof messageType>>();
+    }
+
     this.wss.on('connection', (ws: WebSocket.WebSocket, _request: IncomingMessage, accountId: string) => {
       log.info('New connection for account', accountId);
       const accountSockets = this.sockets.get(accountId);
@@ -63,7 +67,7 @@ export class WebSocketServer {
 
         const callbacks = this.callbacks[message.type];
         for (const callback of callbacks) {
-          callback(message.data);
+          callback(accountId, message.data);
         }
       });
 

@@ -21,8 +21,6 @@ export * from './Contact.js';
 export * from './Conversation.js';
 export * from './enums/http-status-code.js';
 export * from './enums/websocket-message-type.js';
-export * from './interfaces/account-text-message.js';
 export * from './interfaces/websocket-interfaces.js';
 export * from './interfaces/websocket-message.js';
-export * from './types/websocket-callbacks.js';
 export * from './util.js';

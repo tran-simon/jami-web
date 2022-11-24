@@ -88,12 +88,13 @@ const ChatInterface = ({ conversationId, members }: ChatInterfaceProps) => {
 
   useEffect(() => {
     if (webSocket) {
-      const conversationMessageListener = ({ message }: ConversationMessage) => {
+      const conversationMessageListener = (data: ConversationMessage) => {
         console.log('newMessage');
-        setMessages((messages) => addMessage(messages, message));
+        setMessages((messages) => addMessage(messages, data.message));
       };
 
       webSocket.bind(WebSocketMessageType.ConversationMessage, conversationMessageListener);
+
       return () => {
         webSocket.unbind(WebSocketMessageType.ConversationMessage, conversationMessageListener);
       };
