@@ -17,7 +17,7 @@
  */
 import { CallAction, WebSocketMessageType } from 'jami-web-common';
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useNavigate } from 'react-router-dom';
 
 import { useUrlParams } from '../hooks/useUrlParams';
 import { CallRouteParams } from '../router';
@@ -54,6 +54,7 @@ export interface ICallContext {
   callStartTime: Date | undefined;
 
   acceptCall: () => void;
+  endCall: () => void;
 }
 
 const defaultCallContext: ICallContext = {
@@ -79,6 +80,7 @@ const defaultCallContext: ICallContext = {
   callStartTime: undefined,
 
   acceptCall: () => {},
+  endCall: () => {},
 };
 
 export const CallContext = createContext<ICallContext>(defaultCallContext);
@@ -91,6 +93,7 @@ export default ({ children }: WithChildren) => {
   const webSocket = useContext(WebSocketContext);
   const { webRtcConnection, remoteStreams, sendWebRtcOffer, isConnected } = useContext(WebRtcContext);
   const { conversationId, conversation } = useContext(ConversationContext);
+  const navigate = useNavigate();
 
   const [mediaDevices, setMediaDevices] = useState<Record<MediaDeviceKind, MediaDeviceInfo[]>>(
     defaultCallContext.mediaDevices
@@ -194,8 +197,8 @@ export default ({ children }: WithChildren) => {
     }
 
     if (callRole === 'caller' && callStatus === CallStatus.Ringing) {
-      const callAcceptListener = (_data: CallAction) => {
-        console.info('Received event on CallAccept');
+      const callAcceptListener = (data: CallAction) => {
+        console.info('Received event on CallAccept', data);
         setCallStatus(CallStatus.Connecting);
 
         webRtcConnection
@@ -215,6 +218,32 @@ export default ({ children }: WithChildren) => {
       };
     }
   }, [callRole, webSocket, webRtcConnection, sendWebRtcOffer, callStatus]);
+
+  const quitCall = useCallback(() => {
+    if (!webRtcConnection) {
+      throw new Error('Could not quit call: webRtcConnection is not defined');
+    }
+
+    webRtcConnection.close();
+    navigate(`/conversation/${conversationId}`);
+  }, [webRtcConnection, navigate, conversationId]);
+
+  useEffect(() => {
+    if (!webSocket) {
+      return;
+    }
+
+    const callEndListener = (data: CallAction) => {
+      console.info('Received event on CallEnd', data);
+      quitCall();
+      // TODO: write in chat that the call ended
+    };
+
+    webSocket.bind(WebSocketMessageType.CallEnd, callEndListener);
+    return () => {
+      webSocket.unbind(WebSocketMessageType.CallEnd, callEndListener);
+    };
+  }, [webSocket, navigate, conversationId, quitCall]);
 
   useEffect(() => {
     if (callStatus === CallStatus.Connecting && isConnected) {
@@ -238,6 +267,22 @@ export default ({ children }: WithChildren) => {
     webSocket.send(WebSocketMessageType.CallAccept, callAccept);
     setCallStatus(CallStatus.Connecting);
   }, [webSocket, contactUri, conversationId]);
+
+  const endCall = useCallback(() => {
+    if (!webSocket) {
+      throw new Error('Could not end call');
+    }
+
+    const callEnd: CallAction = {
+      contactId: contactUri,
+      conversationId,
+    };
+
+    console.info('Sending CallEnd', callEnd);
+    webSocket.send(WebSocketMessageType.CallEnd, callEnd);
+    quitCall();
+    // TODO: write in chat that the call ended
+  }, [webSocket, contactUri, conversationId, quitCall]);
 
   const setAudioStatus = useCallback(
     (isOn: boolean) => {
@@ -292,6 +337,7 @@ export default ({ children }: WithChildren) => {
         callStatus,
         callStartTime,
         acceptCall,
+        endCall,
       }}
     >
       {children}

@@ -18,9 +18,8 @@
 
 import { IconButton, IconButtonProps, PaletteColor } from '@mui/material';
 import { styled, Theme } from '@mui/material/styles';
-import React, { useContext, useMemo } from 'react';
+import { useContext, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
 
 import { CallContext } from '../contexts/CallProvider';
 import { ExpandableButton, ExpandableButtonProps, ShapedButtonProps, ToggleIconButton } from './Button';
@@ -98,13 +97,12 @@ export const CallingChatButton = (props: ExpandableButtonProps) => {
 };
 
 export const CallingEndButton = (props: ExpandableButtonProps) => {
-  const navigate = useNavigate();
+  const { endCall } = useContext(CallContext);
   return (
     <ColoredCallButton
       paletteColor={(theme) => theme.palette.error}
       onClick={() => {
-        // TODO: Send event to end call
-        navigate('/');
+        endCall();
       }}
       aria-label="call end"
       Icon={CallEndIcon}
@@ -264,13 +262,13 @@ const ToggleVideoCameraIconButton = (props: IconButtonProps) => {
 
 // Calling pending/receiving interface
 export const CallingCancelButton = (props: IconButtonProps) => {
-  const navigate = useNavigate();
+  const { endCall } = useContext(CallContext);
 
   return (
     <ColoredCallButton
       aria-label="cancel call"
       onClick={() => {
-        navigate(-1);
+        endCall();
       }}
       Icon={CallEndIcon}
       paletteColor={(theme) => theme.palette.error}
@@ -312,12 +310,12 @@ export const CallingAnswerVideoButton = (props: IconButtonProps) => {
 };
 
 export const CallingRefuseButton = (props: IconButtonProps) => {
-  const navigate = useNavigate();
+  const { endCall } = useContext(CallContext);
   return (
     <ColoredCallButton
       aria-label="refuse call"
       onClick={() => {
-        navigate(-1);
+        endCall();
       }}
       paletteColor={(theme) => theme.palette.error}
       Icon={RoundCloseIcon}
