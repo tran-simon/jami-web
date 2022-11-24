@@ -20,6 +20,7 @@ import { WebRtcIceCandidate, WebRtcSdp, WebSocketMessageType } from 'jami-web-co
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 
 import { WithChildren } from '../utils/utils';
+import { useAuthContext } from './AuthProvider';
 import { ConversationContext } from './ConversationProvider';
 import { WebSocketContext } from './WebSocketProvider';
 
@@ -42,6 +43,7 @@ const defaultWebRtcContext: IWebRtcContext = {
 export const WebRtcContext = createContext<IWebRtcContext>(defaultWebRtcContext);
 
 export default ({ children }: WithChildren) => {
+  const { account } = useAuthContext();
   const webSocket = useContext(WebSocketContext);
   const { conversation } = useContext(ConversationContext);
   const [webRtcConnection, setWebRtcConnection] = useState<RTCPeerConnection | undefined>();
@@ -52,12 +54,26 @@ export default ({ children }: WithChildren) => {
   const contactUri = useMemo(() => conversation.getFirstMember().contact.getUri(), [conversation]);
 
   useEffect(() => {
-    if (!webRtcConnection) {
-      // TODO: Use SFL iceServers
-      const iceConfig = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
-      setWebRtcConnection(new RTCPeerConnection(iceConfig));
+    if (!webRtcConnection && account) {
+      const iceServers: RTCIceServer[] = [];
+
+      if (account.getDetails()['TURN.enable'] === 'true') {
+        iceServers.push({
+          urls: 'turn:' + account.getDetails()['TURN.server'],
+          username: account.getDetails()['TURN.username'],
+          credential: account.getDetails()['TURN.password'],
+        });
+      }
+
+      if (account.getDetails()['STUN.enable'] === 'true') {
+        iceServers.push({
+          urls: 'stun:' + account.getDetails()['STUN.server'],
+        });
+      }
+
+      setWebRtcConnection(new RTCPeerConnection({ iceServers: iceServers }));
     }
-  }, [webRtcConnection]);
+  }, [account, webRtcConnection]);
 
   const sendWebRtcOffer = useCallback(
     async (sdp: RTCSessionDescriptionInit) => {
