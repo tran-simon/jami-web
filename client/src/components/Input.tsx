@@ -113,7 +113,12 @@ export const UsernameInput = ({
         InputProps={{
           startAdornment,
           endAdornment: (
-            <InfoButton tooltipTitle={tooltipTitle} {...infoButtonProps} onClick={dialogHandler.openDialog} />
+            <InfoButton
+              tabIndex={-1}
+              tooltipTitle={tooltipTitle}
+              {...infoButtonProps}
+              onClick={dialogHandler.openDialog}
+            />
           ),
           ...props.InputProps,
         }}
