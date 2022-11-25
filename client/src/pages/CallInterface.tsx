@@ -44,11 +44,12 @@ import {
   CallingVideoCameraButton,
   CallingVolumeButton,
 } from '../components/CallButtons';
+import CallChatDrawer from '../components/CallChatDrawer';
 import { CallContext, CallStatus } from '../contexts/CallProvider';
 import { CallPending } from './CallPending';
 
 export default () => {
-  const { callRole, callStatus } = useContext(CallContext);
+  const { callRole, callStatus, isChatShown } = useContext(CallContext);
 
   if (callStatus !== CallStatus.InCall) {
     return (
@@ -60,7 +61,12 @@ export default () => {
     );
   }
 
-  return <CallInterface />;
+  return (
+    <Box flexGrow={1} display="flex">
+      <CallInterface />
+      {isChatShown && <CallChatDrawer />}
+    </Box>
+  );
 };
 
 interface Props {
@@ -86,7 +92,7 @@ const CallInterface = () => {
   }, [remoteStream]);
 
   return (
-    <>
+    <Box display="flex" flexGrow={1}>
       <video
         ref={remoteVideoRef}
         autoPlay
@@ -123,7 +129,7 @@ const CallInterface = () => {
           </Grid>
         </Grid>
       </Box>
-    </>
+    </Box>
   );
 };
 

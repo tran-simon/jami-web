@@ -16,7 +16,7 @@
  * <https://www.gnu.org/licenses/>.
  */
 import { Divider, Stack, Typography } from '@mui/material';
-import { Account, ConversationMember } from 'jami-web-common';
+import { ConversationMember } from 'jami-web-common';
 import { useContext, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -28,37 +28,27 @@ import { translateEnumeration, TranslateEnumerationOptions } from '../utils/tran
 import { AddParticipantButton, ShowOptionsMenuButton, StartAudioCallButton, StartVideoCallButton } from './Button';
 
 const ConversationView = () => {
-  const { account } = useAuthContext();
-  const { conversationId, conversation } = useContext(ConversationContext);
-
   return (
     <Stack flexGrow={1} height="100%">
-      <ConversationHeader
-        account={account}
-        members={conversation.getMembers()}
-        adminTitle={conversation.infos.title as string}
-        conversationId={conversationId}
-      />
+      <ConversationHeader />
       <Divider
         sx={{
           borderTop: '1px solid #E5E5E5',
         }}
       />
-      <ChatInterface conversationId={conversationId} members={conversation.getMembers()} />
+      <ChatInterface />
     </Stack>
   );
 };
 
-type ConversationHeaderProps = {
-  account: Account;
-  conversationId: string;
-  members: ConversationMember[];
-  adminTitle: string | undefined;
-};
-
-const ConversationHeader = ({ account, members, adminTitle }: ConversationHeaderProps) => {
+const ConversationHeader = () => {
+  const { account } = useAuthContext();
+  const { conversation } = useContext(ConversationContext);
   const { t } = useTranslation();
   const { conversationId } = useContext(ConversationContext);
+
+  const members = conversation.getMembers();
+  const adminTitle = conversation.infos.title as string;
 
   const title = useMemo(() => {
     if (adminTitle) {

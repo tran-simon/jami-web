@@ -16,7 +16,7 @@
  * <https://www.gnu.org/licenses/>.
  */
 import { Box, Divider, Stack } from '@mui/material';
-import { ConversationMember, ConversationMessage, Message, WebSocketMessageType } from 'jami-web-common';
+import { ConversationMessage, Message, WebSocketMessageType } from 'jami-web-common';
 import { useCallback, useContext, useEffect, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
 
@@ -24,16 +24,14 @@ import { FilePreviewRemovable } from '../components/FilePreview';
 import LoadingPage from '../components/Loading';
 import MessageList from '../components/MessageList';
 import SendMessageForm from '../components/SendMessageForm';
+import { ConversationContext } from '../contexts/ConversationProvider';
 import { WebSocketContext } from '../contexts/WebSocketProvider';
 import { useMessagesQuery, useSendMessageMutation } from '../services/Conversation';
 import { FileHandler } from '../utils/files';
 
-type ChatInterfaceProps = {
-  conversationId: string;
-  members: ConversationMember[];
-};
-const ChatInterface = ({ conversationId, members }: ChatInterfaceProps) => {
+const ChatInterface = () => {
   const webSocket = useContext(WebSocketContext);
+  const { conversationId, conversation } = useContext(ConversationContext);
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -106,6 +104,8 @@ const ChatInterface = ({ conversationId, members }: ChatInterfaceProps) => {
   } else if (error) {
     return <div>Error loading {conversationId}</div>;
   }
+
+  const members = conversation.getMembers();
 
   return (
     <Stack flex={1} overflow="hidden" {...getRootProps()} paddingBottom="16px">

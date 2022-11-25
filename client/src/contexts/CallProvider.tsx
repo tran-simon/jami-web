@@ -21,7 +21,7 @@ import { Navigate } from 'react-router-dom';
 
 import { useUrlParams } from '../hooks/useUrlParams';
 import { CallRouteParams } from '../router';
-import { WithChildren } from '../utils/utils';
+import { SetState, WithChildren } from '../utils/utils';
 import { ConversationContext } from './ConversationProvider';
 import { WebRtcContext } from './WebRtcProvider';
 import { WebSocketContext } from './WebSocketProvider';
@@ -45,6 +45,8 @@ export interface ICallContext {
   setAudioStatus: (isOn: boolean) => void;
   isVideoOn: boolean;
   setVideoStatus: (isOn: boolean) => void;
+  isChatShown: boolean;
+  setIsChatShown: SetState<boolean>;
   callRole: CallRole;
   callStatus: CallStatus;
 
@@ -65,6 +67,8 @@ const defaultCallContext: ICallContext = {
   setAudioStatus: () => {},
   isVideoOn: false,
   setVideoStatus: () => {},
+  isChatShown: false,
+  setIsChatShown: () => {},
   callRole: 'caller',
   callStatus: CallStatus.Default,
 
@@ -89,6 +93,7 @@ export default ({ children }: WithChildren) => {
 
   const [isAudioOn, setIsAudioOn] = useState(false);
   const [isVideoOn, setIsVideoOn] = useState(false);
+  const [isChatShown, setIsChatShown] = useState(false);
   const [callStatus, setCallStatus] = useState(routeState?.callStatus);
 
   // TODO: This logic will have to change to support multiple people in a call. Could we move this logic to the server?
@@ -256,6 +261,8 @@ export default ({ children }: WithChildren) => {
         setAudioStatus,
         isVideoOn,
         setVideoStatus,
+        isChatShown,
+        setIsChatShown,
         callRole,
         callStatus,
         acceptCall,

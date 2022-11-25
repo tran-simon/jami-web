@@ -84,7 +84,17 @@ const ColoredCallButton = styled(
 });
 
 export const CallingChatButton = (props: ExpandableButtonProps) => {
-  return <CallButton aria-label="chat" Icon={ChatBubbleIcon} {...props} />;
+  const { setIsChatShown } = useContext(CallContext);
+  return (
+    <CallButton
+      aria-label="chat"
+      Icon={ChatBubbleIcon}
+      onClick={() => {
+        setIsChatShown((v) => !v);
+      }}
+      {...props}
+    />
+  );
 };
 
 export const CallingEndButton = (props: ExpandableButtonProps) => {
