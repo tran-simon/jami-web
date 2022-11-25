@@ -118,7 +118,17 @@ export const CallingExtensionButton = (props: ExpandableButtonProps) => {
 };
 
 export const CallingFullScreenButton = (props: ExpandableButtonProps) => {
-  return <CallButton aria-label="full screen" Icon={FullScreenIcon} {...props} />;
+  const { setIsFullscreen } = useContext(CallContext);
+  return (
+    <CallButton
+      aria-label="full screen"
+      Icon={FullScreenIcon}
+      onClick={() => {
+        setIsFullscreen((v) => !v);
+      }}
+      {...props}
+    />
+  );
 };
 
 export const CallingGroupButton = (props: ExpandableButtonProps) => {

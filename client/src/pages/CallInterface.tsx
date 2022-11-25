@@ -49,7 +49,20 @@ import { CallContext, CallStatus } from '../contexts/CallProvider';
 import { CallPending } from './CallPending';
 
 export default () => {
-  const { callRole, callStatus, isChatShown } = useContext(CallContext);
+  const { callRole, callStatus, isChatShown, isFullscreen } = useContext(CallContext);
+  const callInterfaceRef = useRef<HTMLDivElement>();
+
+  useEffect(() => {
+    if (!callInterfaceRef.current) {
+      return;
+    }
+
+    if (isFullscreen && document.fullscreenElement === null) {
+      callInterfaceRef.current.requestFullscreen();
+    } else if (!isFullscreen && document.fullscreenEnabled !== null) {
+      document.exitFullscreen();
+    }
+  }, [isFullscreen]);
 
   if (callStatus !== CallStatus.InCall) {
     return (
@@ -62,7 +75,7 @@ export default () => {
   }
 
   return (
-    <Box flexGrow={1} display="flex">
+    <Box ref={callInterfaceRef} flexGrow={1} display="flex">
       <CallInterface />
       {isChatShown && <CallChatDrawer />}
     </Box>

@@ -47,6 +47,8 @@ export interface ICallContext {
   setVideoStatus: (isOn: boolean) => void;
   isChatShown: boolean;
   setIsChatShown: SetState<boolean>;
+  isFullscreen: boolean;
+  setIsFullscreen: SetState<boolean>;
   callRole: CallRole;
   callStatus: CallStatus;
 
@@ -69,6 +71,8 @@ const defaultCallContext: ICallContext = {
   setVideoStatus: () => {},
   isChatShown: false,
   setIsChatShown: () => {},
+  isFullscreen: false,
+  setIsFullscreen: () => {},
   callRole: 'caller',
   callStatus: CallStatus.Default,
 
@@ -94,6 +98,7 @@ export default ({ children }: WithChildren) => {
   const [isAudioOn, setIsAudioOn] = useState(false);
   const [isVideoOn, setIsVideoOn] = useState(false);
   const [isChatShown, setIsChatShown] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
   const [callStatus, setCallStatus] = useState(routeState?.callStatus);
 
   // TODO: This logic will have to change to support multiple people in a call. Could we move this logic to the server?
@@ -165,6 +170,17 @@ export default ({ children }: WithChildren) => {
       setCallStatus(CallStatus.Ringing);
     }
   }, [webSocket, callRole, callStatus, contactUri, conversationId]);
+
+  useEffect(() => {
+    const onFullscreenChange = () => {
+      setIsFullscreen(document.fullscreenElement !== null);
+    };
+
+    document.addEventListener('fullscreenchange', onFullscreenChange);
+    return () => {
+      document.removeEventListener('fullscreenchange', onFullscreenChange);
+    };
+  }, []);
 
   useEffect(() => {
     if (!webSocket || !webRtcConnection) {
@@ -263,6 +279,8 @@ export default ({ children }: WithChildren) => {
         setVideoStatus,
         isChatShown,
         setIsChatShown,
+        isFullscreen,
+        setIsFullscreen,
         callRole,
         callStatus,
         acceptCall,
