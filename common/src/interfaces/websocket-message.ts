@@ -18,6 +18,7 @@
 import { WebSocketMessageType } from '../enums/websocket-message-type.js';
 import {
   CallAction,
+  CallBegin,
   ConversationMessage,
   ConversationView,
   WebRtcIceCandidate,
@@ -27,9 +28,8 @@ import {
 export interface WebSocketMessageTable {
   [WebSocketMessageType.ConversationMessage]: ConversationMessage;
   [WebSocketMessageType.ConversationView]: ConversationView;
-  [WebSocketMessageType.CallBegin]: CallAction;
+  [WebSocketMessageType.CallBegin]: CallBegin;
   [WebSocketMessageType.CallAccept]: CallAction;
-  [WebSocketMessageType.CallRefuse]: CallAction;
   [WebSocketMessageType.CallEnd]: CallAction;
   [WebSocketMessageType.WebRtcOffer]: WebRtcSdp;
   [WebSocketMessageType.WebRtcAnswer]: WebRtcSdp;

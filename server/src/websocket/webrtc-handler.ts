@@ -25,7 +25,6 @@ import { WebSocketServer } from './websocket-server.js';
 const webRtcWebSocketMessageTypes = [
   WebSocketMessageType.CallBegin,
   WebSocketMessageType.CallAccept,
-  WebSocketMessageType.CallRefuse,
   WebSocketMessageType.CallEnd,
   WebSocketMessageType.WebRtcOffer,
   WebSocketMessageType.WebRtcAnswer,

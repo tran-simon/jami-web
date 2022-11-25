@@ -20,7 +20,6 @@ export enum WebSocketMessageType {
   ConversationView = 'conversation-view',
   CallBegin = 'call-begin',
   CallAccept = 'call-accept',
-  CallRefuse = 'call-refuse',
   CallEnd = 'call-end',
   WebRtcOffer = 'webrtc-offer',
   WebRtcAnswer = 'webrtc-answer',

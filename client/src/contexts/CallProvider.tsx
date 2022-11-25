@@ -15,12 +15,13 @@
  * License along with this program.  If not, see
  * <https://www.gnu.org/licenses/>.
  */
-import { CallAction, WebSocketMessageType } from 'jami-web-common';
+import { CallAction, CallBegin, WebSocketMessageType } from 'jami-web-common';
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
 
 import { useUrlParams } from '../hooks/useUrlParams';
 import { CallRouteParams } from '../router';
+import { callTimeoutMs } from '../utils/constants';
 import { SetState, WithChildren } from '../utils/utils';
 import { ConversationContext } from './ConversationProvider';
 import { WebRtcContext } from './WebRtcProvider';
@@ -53,7 +54,7 @@ export interface ICallContext {
   callStatus: CallStatus;
   callStartTime: Date | undefined;
 
-  acceptCall: () => void;
+  acceptCall: (withVideoOn: boolean) => void;
   endCall: () => void;
 }
 
@@ -79,7 +80,7 @@ const defaultCallContext: ICallContext = {
   callStatus: CallStatus.Default,
   callStartTime: undefined,
 
-  acceptCall: () => {},
+  acceptCall: (_: boolean) => {},
   endCall: () => {},
 };
 
@@ -163,22 +164,54 @@ export default ({ children }: WithChildren) => {
     }
   }, [localStream, webRtcConnection]);
 
+  const setAudioStatus = useCallback(
+    (isOn: boolean) => {
+      if (!localStream) {
+        return;
+      }
+
+      for (const track of localStream.getAudioTracks()) {
+        track.enabled = isOn;
+      }
+
+      setIsAudioOn(isOn);
+    },
+    [localStream]
+  );
+
+  const setVideoStatus = useCallback(
+    (isOn: boolean) => {
+      if (!localStream) {
+        return;
+      }
+
+      for (const track of localStream.getVideoTracks()) {
+        track.enabled = isOn;
+      }
+
+      setIsVideoOn(isOn);
+    },
+    [localStream]
+  );
+
   useEffect(() => {
     if (!webSocket) {
       return;
     }
 
     if (callRole === 'caller' && callStatus === CallStatus.Default) {
-      const callBegin: CallAction = {
+      const callBegin: CallBegin = {
         contactId: contactUri,
         conversationId,
+        withVideoOn: routeState?.isVideoOn ?? false,
       };
 
       console.info('Sending CallBegin', callBegin);
       webSocket.send(WebSocketMessageType.CallBegin, callBegin);
       setCallStatus(CallStatus.Ringing);
+      setIsVideoOn(routeState?.isVideoOn ?? false);
     }
-  }, [webSocket, callRole, callStatus, contactUri, conversationId]);
+  }, [webSocket, callRole, callStatus, contactUri, conversationId, routeState]);
 
   useEffect(() => {
     const onFullscreenChange = () => {
@@ -224,9 +257,16 @@ export default ({ children }: WithChildren) => {
       throw new Error('Could not quit call: webRtcConnection is not defined');
     }
 
+    const localTracks = localStream?.getTracks();
+    if (localTracks) {
+      for (const track of localTracks) {
+        track.stop();
+      }
+    }
+
     webRtcConnection.close();
     navigate(`/conversation/${conversationId}`);
-  }, [webRtcConnection, navigate, conversationId]);
+  }, [webRtcConnection, localStream, navigate, conversationId]);
 
   useEffect(() => {
     if (!webSocket) {
@@ -249,24 +289,29 @@ export default ({ children }: WithChildren) => {
     if (callStatus === CallStatus.Connecting && isConnected) {
       console.info('Changing call status to InCall');
       setCallStatus(CallStatus.InCall);
+      setVideoStatus(isVideoOn);
       setCallStartTime(new Date());
     }
-  }, [isConnected, callStatus]);
+  }, [isConnected, callStatus, setVideoStatus, isVideoOn]);
 
-  const acceptCall = useCallback(() => {
-    if (!webSocket) {
-      throw new Error('Could not accept call');
-    }
+  const acceptCall = useCallback(
+    (withVideoOn: boolean) => {
+      if (!webSocket) {
+        throw new Error('Could not accept call');
+      }
 
-    const callAccept: CallAction = {
-      contactId: contactUri,
-      conversationId,
-    };
+      const callAccept: CallAction = {
+        contactId: contactUri,
+        conversationId,
+      };
 
-    console.info('Sending CallAccept', callAccept);
-    webSocket.send(WebSocketMessageType.CallAccept, callAccept);
-    setCallStatus(CallStatus.Connecting);
-  }, [webSocket, contactUri, conversationId]);
+      console.info('Sending CallAccept', callAccept);
+      webSocket.send(WebSocketMessageType.CallAccept, callAccept);
+      setIsVideoOn(withVideoOn);
+      setCallStatus(CallStatus.Connecting);
+    },
+    [webSocket, contactUri, conversationId]
+  );
 
   const endCall = useCallback(() => {
     if (!webSocket) {
@@ -284,35 +329,18 @@ export default ({ children }: WithChildren) => {
     // TODO: write in chat that the call ended
   }, [webSocket, contactUri, conversationId, quitCall]);
 
-  const setAudioStatus = useCallback(
-    (isOn: boolean) => {
-      if (!localStream) {
-        return;
+  useEffect(() => {
+    const checkStatusTimeout = () => {
+      if (callStatus !== CallStatus.InCall) {
+        endCall();
       }
+    };
+    const timeoutId = setTimeout(checkStatusTimeout, callTimeoutMs);
 
-      for (const track of localStream.getAudioTracks()) {
-        track.enabled = isOn;
-      }
-
-      setIsAudioOn(isOn);
-    },
-    [localStream]
-  );
-
-  const setVideoStatus = useCallback(
-    (isOn: boolean) => {
-      if (!localStream) {
-        return;
-      }
-
-      for (const track of localStream.getVideoTracks()) {
-        track.enabled = isOn;
-      }
-
-      setIsVideoOn(isOn);
-    },
-    [localStream]
-  );
+    return () => {
+      clearTimeout(timeoutId);
+    };
+  }, [callStatus, endCall]);
 
   if (!callRole || callStatus === undefined) {
     console.error('Invalid route. Redirecting...');

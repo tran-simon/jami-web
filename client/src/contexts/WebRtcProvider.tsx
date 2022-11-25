@@ -175,20 +175,20 @@ export default ({ children }: WithChildren) => {
       setRemoteStreams(event.streams);
     };
 
-    const connectionStateChangeEventListener = () => {
+    const iceConnectionStateChangeEventListener = () => {
       setIsConnected(
-        webRtcConnection.iceConnectionState === 'completed' || webRtcConnection.iceConnectionState === 'connected'
+        webRtcConnection.iceConnectionState === 'connected' || webRtcConnection.iceConnectionState === 'completed'
       );
     };
 
     webRtcConnection.addEventListener('icecandidate', iceCandidateEventListener);
     webRtcConnection.addEventListener('track', trackEventListener);
-    webRtcConnection.addEventListener('iceconnectionstatechange', connectionStateChangeEventListener);
+    webRtcConnection.addEventListener('iceconnectionstatechange', iceConnectionStateChangeEventListener);
 
     return () => {
       webRtcConnection.removeEventListener('icecandidate', iceCandidateEventListener);
       webRtcConnection.removeEventListener('track', trackEventListener);
-      webRtcConnection.removeEventListener('iceconnectionstatechange', connectionStateChangeEventListener);
+      webRtcConnection.removeEventListener('iceconnectionstatechange', iceConnectionStateChangeEventListener);
     };
   }, [webRtcConnection, webSocket, contactUri]);
 

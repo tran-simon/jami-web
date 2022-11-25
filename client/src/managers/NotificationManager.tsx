@@ -15,7 +15,7 @@
  * License along with this program.  If not, see
  * <https://www.gnu.org/licenses/>.
  */
-import { CallAction, WebSocketMessageType } from 'jami-web-common';
+import { CallBegin, WebSocketMessageType } from 'jami-web-common';
 import { useContext, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -37,11 +37,12 @@ export default ({ children }: WithChildren) => {
       return;
     }
 
-    const callBeginListener = (data: CallAction) => {
+    const callBeginListener = (data: CallBegin) => {
       console.info('Received event on CallBegin', data);
       navigate(`/conversation/${data.conversationId}/call?role=receiver`, {
         state: {
           callStatus: CallStatus.Ringing,
+          isVideoOn: data.withVideoOn,
         },
       });
     };

@@ -34,6 +34,10 @@ export interface CallAction extends ContactMessage {
   conversationId: string;
 }
 
+export interface CallBegin extends CallAction {
+  withVideoOn: boolean;
+}
+
 export interface WebRtcSdp extends ContactMessage {
   sdp: RTCSessionDescriptionInit;
 }

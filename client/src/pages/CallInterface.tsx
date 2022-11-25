@@ -29,6 +29,7 @@ import {
   useState,
 } from 'react';
 import Draggable from 'react-draggable';
+import { useLocation } from 'react-router-dom';
 
 import { ExpandableButtonProps } from '../components/Button';
 import {
@@ -51,6 +52,7 @@ import { CallPending } from './CallPending';
 export default () => {
   const { callRole, callStatus, isChatShown, isFullscreen } = useContext(CallContext);
   const callInterfaceRef = useRef<HTMLDivElement>();
+  const { state } = useLocation();
 
   useEffect(() => {
     if (!callInterfaceRef.current) {
@@ -69,7 +71,7 @@ export default () => {
       <CallPending
         pending={callRole}
         caller={callStatus === CallStatus.Connecting ? 'connecting' : 'calling'}
-        medium="audio"
+        medium={state?.isVideoOn ? 'video' : 'audio'}
       />
     );
   }

@@ -21,6 +21,8 @@ export const inputWidth = 260;
 
 export const jamiLogoDefaultSize = '512px';
 
+export const callTimeoutMs = 60_000;
+
 const apiUrl: string = import.meta.env.VITE_API_URL;
 
 if (!apiUrl) {

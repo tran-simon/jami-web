@@ -284,7 +284,7 @@ export const CallingAnswerAudioButton = (props: IconButtonProps) => {
     <ColoredCallButton
       aria-label="answer call audio"
       onClick={() => {
-        acceptCall();
+        acceptCall(false);
       }}
       Icon={PlaceAudioCallIcon}
       paletteColor={(theme) => theme.palette.success}
@@ -300,7 +300,7 @@ export const CallingAnswerVideoButton = (props: IconButtonProps) => {
     <ColoredCallButton
       aria-label="answer call video"
       onClick={() => {
-        acceptCall();
+        acceptCall(true);
       }}
       paletteColor={(theme) => theme.palette.success}
       Icon={VideoCameraIcon}
