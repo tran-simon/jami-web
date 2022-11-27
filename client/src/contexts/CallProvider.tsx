@@ -228,6 +228,11 @@ export default ({ children }: WithChildren) => {
     if (callRole === 'caller' && callStatus === CallStatus.Ringing) {
       const callAcceptListener = (data: CallAction) => {
         console.info('Received event on CallAccept', data);
+        if (data.conversationId !== conversationId) {
+          console.warn('Wrong incoming conversationId, ignoring action');
+          return;
+        }
+
         setCallStatus(CallStatus.Connecting);
 
         webRtcConnection
@@ -246,7 +251,7 @@ export default ({ children }: WithChildren) => {
         webSocket.unbind(WebSocketMessageType.CallAccept, callAcceptListener);
       };
     }
-  }, [callRole, webSocket, webRtcConnection, sendWebRtcOffer, callStatus]);
+  }, [callRole, webSocket, webRtcConnection, sendWebRtcOffer, callStatus, conversationId]);
 
   const quitCall = useCallback(() => {
     if (!webRtcConnection) {
@@ -271,6 +276,11 @@ export default ({ children }: WithChildren) => {
 
     const callEndListener = (data: CallAction) => {
       console.info('Received event on CallEnd', data);
+      if (data.conversationId !== conversationId) {
+        console.warn('Wrong incoming conversationId, ignoring action');
+        return;
+      }
+
       quitCall();
       // TODO: write in chat that the call ended
     };

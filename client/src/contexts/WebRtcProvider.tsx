@@ -45,7 +45,7 @@ export const WebRtcContext = createContext<IWebRtcContext>(defaultWebRtcContext)
 export default ({ children }: WithChildren) => {
   const { account } = useAuthContext();
   const webSocket = useContext(WebSocketContext);
-  const { conversation } = useContext(ConversationContext);
+  const { conversation, conversationId } = useContext(ConversationContext);
   const [webRtcConnection, setWebRtcConnection] = useState<RTCPeerConnection | undefined>();
   const [remoteStreams, setRemoteStreams] = useState<readonly MediaStream[]>();
   const [isConnected, setIsConnected] = useState(false);
@@ -83,6 +83,7 @@ export default ({ children }: WithChildren) => {
 
       const webRtcOffer: WebRtcSdp = {
         contactId: contactUri,
+        conversationId: conversationId,
         sdp,
       };
 
@@ -90,7 +91,7 @@ export default ({ children }: WithChildren) => {
       console.info('Sending WebRtcOffer', webRtcOffer);
       webSocket.send(WebSocketMessageType.WebRtcOffer, webRtcOffer);
     },
-    [webRtcConnection, webSocket, contactUri]
+    [webRtcConnection, webSocket, conversationId, contactUri]
   );
 
   const sendWebRtcAnswer = useCallback(
@@ -101,13 +102,14 @@ export default ({ children }: WithChildren) => {
 
       const webRtcAnswer: WebRtcSdp = {
         contactId: contactUri,
+        conversationId: conversationId,
         sdp,
       };
 
       console.info('Sending WebRtcAnswer', webRtcAnswer);
       webSocket.send(WebSocketMessageType.WebRtcAnswer, webRtcAnswer);
     },
-    [contactUri, webRtcConnection, webSocket]
+    [contactUri, conversationId, webRtcConnection, webSocket]
   );
 
   useEffect(() => {
@@ -117,6 +119,11 @@ export default ({ children }: WithChildren) => {
 
     const webRtcOfferListener = async (data: WebRtcSdp) => {
       console.info('Received event on WebRtcOffer', data);
+      if (data.conversationId !== conversationId) {
+        console.warn('Wrong incoming conversationId, ignoring action');
+        return;
+      }
+
       await webRtcConnection.setRemoteDescription(new RTCSessionDescription(data.sdp));
 
       const sdp = await webRtcConnection.createAnswer({
@@ -129,11 +136,21 @@ export default ({ children }: WithChildren) => {
 
     const webRtcAnswerListener = async (data: WebRtcSdp) => {
       console.info('Received event on WebRtcAnswer', data);
+      if (data.conversationId !== conversationId) {
+        console.warn('Wrong incoming conversationId, ignoring action');
+        return;
+      }
+
       await webRtcConnection.setRemoteDescription(new RTCSessionDescription(data.sdp));
     };
 
     const webRtcIceCandidateListener = async (data: WebRtcIceCandidate) => {
       console.info('Received event on WebRtcIceCandidate', data);
+      if (data.conversationId !== conversationId) {
+        console.warn('Wrong incoming conversationId, ignoring action');
+        return;
+      }
+
       await webRtcConnection.addIceCandidate(data.candidate);
     };
 
@@ -146,7 +163,7 @@ export default ({ children }: WithChildren) => {
       webSocket.unbind(WebSocketMessageType.WebRtcAnswer, webRtcAnswerListener);
       webSocket.unbind(WebSocketMessageType.WebRtcIceCandidate, webRtcIceCandidateListener);
     };
-  }, [webSocket, webRtcConnection, sendWebRtcAnswer]);
+  }, [webSocket, webRtcConnection, sendWebRtcAnswer, conversationId]);
 
   useEffect(() => {
     if (!webRtcConnection || !webSocket) {
@@ -162,6 +179,7 @@ export default ({ children }: WithChildren) => {
       if (event.candidate) {
         const webRtcIceCandidate: WebRtcIceCandidate = {
           contactId: contactUri,
+          conversationId: conversationId,
           candidate: event.candidate,
         };
 
@@ -190,7 +208,7 @@ export default ({ children }: WithChildren) => {
       webRtcConnection.removeEventListener('track', trackEventListener);
       webRtcConnection.removeEventListener('iceconnectionstatechange', iceConnectionStateChangeEventListener);
     };
-  }, [webRtcConnection, webSocket, contactUri]);
+  }, [webRtcConnection, webSocket, contactUri, conversationId]);
 
   return (
     <WebRtcContext.Provider

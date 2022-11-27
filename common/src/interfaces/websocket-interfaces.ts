@@ -38,10 +38,10 @@ export interface CallBegin extends CallAction {
   withVideoOn: boolean;
 }
 
-export interface WebRtcSdp extends ContactMessage {
+export interface WebRtcSdp extends CallAction {
   sdp: RTCSessionDescriptionInit;
 }
 
-export interface WebRtcIceCandidate extends ContactMessage {
+export interface WebRtcIceCandidate extends CallAction {
   candidate: RTCIceCandidate;
 }
