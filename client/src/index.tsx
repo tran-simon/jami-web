@@ -20,6 +20,7 @@ import './index.scss';
 import './i18n';
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { Provider } from 'react-redux';
 import { RouterProvider } from 'react-router-dom';
@@ -43,13 +44,12 @@ if (!container) {
 const root = createRoot(container);
 root.render(
   <Provider store={store}>
-    {/* TODO: Put back StrictMode (https://git.jami.net/savoirfairelinux/jami-web/-/issues/170) */}
-    {/*<StrictMode>*/}
-    <QueryClientProvider client={queryClient}>
-      <CustomThemeProvider>
-        <RouterProvider router={router} />
-      </CustomThemeProvider>
-    </QueryClientProvider>
-    {/*</StrictMode>*/}
+    <StrictMode>
+      <QueryClientProvider client={queryClient}>
+        <CustomThemeProvider>
+          <RouterProvider router={router} />
+        </CustomThemeProvider>
+      </QueryClientProvider>
+    </StrictMode>
   </Provider>
 );

@@ -54,6 +54,7 @@ export default ({ children }: WithChildren) => {
   const [isConnected, setIsConnected] = useState(false);
   const webSocketRef = useRef<WebSocket>();
   const callbacksRef = useRef<WebSocketCallbacks>(buildWebSocketCallbacks());
+  const reconnectionTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
 
   const { token: accessToken } = useAuthContext();
 
@@ -83,19 +84,23 @@ export default ({ children }: WithChildren) => {
 
     const webSocket = new WebSocket(url);
 
-    webSocket.onopen = () => {
-      console.debug('WebSocket connected');
-      setIsConnected(true);
-    };
-
-    webSocket.onclose = () => {
+    const close = (reconnect = false) => {
       console.debug('WebSocket disconnected');
       setIsConnected(false);
       for (const callbacks of Object.values(callbacksRef.current)) {
         callbacks.clear();
       }
-      setTimeout(connect, 1000);
+      if (reconnect) {
+        reconnectionTimeoutRef.current = setTimeout(connect, 2000);
+      }
     };
+
+    webSocket.onopen = () => {
+      console.debug('WebSocket connected');
+      setIsConnected(true);
+    };
+
+    webSocket.onclose = () => close(true);
 
     webSocket.onmessage = <T extends WebSocketMessageType>(event: MessageEvent<string>) => {
       const messageString = event.data;
@@ -119,13 +124,21 @@ export default ({ children }: WithChildren) => {
     };
 
     webSocket.onerror = (event: Event) => {
-      console.error('Closing WebSocket due to an error:', event);
-      webSocketRef.current?.close();
+      console.error('WebSocket errored', event);
     };
 
     webSocketRef.current = webSocket;
 
     return () => {
+      // Cancel any previous reconnection attempt
+      if (reconnectionTimeoutRef.current !== undefined) {
+        clearTimeout(reconnectionTimeoutRef.current);
+        reconnectionTimeoutRef.current = undefined;
+      }
+
+      // Setup a closure without reconnection
+      webSocket.onclose = () => close();
+
       switch (webSocket.readyState) {
         case webSocket.CONNECTING:
           webSocket.onopen = () => webSocket.close();
