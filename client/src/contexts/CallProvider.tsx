@@ -110,27 +110,30 @@ export default ({ children }: WithChildren) => {
   const contactUri = useMemo(() => conversation.getFirstMember().contact.getUri(), [conversation]);
 
   useEffect(() => {
-    // TODO: Wait until status is `InCall` before getting devices
-    navigator.mediaDevices.enumerateDevices().then((devices) => {
-      const newMediaDevices: Record<MediaDeviceKind, MediaDeviceInfo[]> = {
-        audioinput: [],
-        audiooutput: [],
-        videoinput: [],
-      };
+    if (!isConnected) {
+      return;
+    }
 
-      for (const device of devices) {
-        newMediaDevices[device.kind].push(device);
-      }
-
-      setMediaDevices(newMediaDevices);
-    });
-  }, []);
-
-  useEffect(() => {
-    // TODO: Only ask media permission once the call has been accepted
     try {
-      // TODO: When toggling mute on/off, the camera flickers
-      // https://git.jami.net/savoirfairelinux/jami-web/-/issues/90
+      // TODO: Wait until status is `InCall` before getting devices
+      navigator.mediaDevices.enumerateDevices().then((devices) => {
+        const newMediaDevices: Record<MediaDeviceKind, MediaDeviceInfo[]> = {
+          audioinput: [],
+          audiooutput: [],
+          videoinput: [],
+        };
+
+        for (const device of devices) {
+          newMediaDevices[device.kind].push(device);
+        }
+
+        setMediaDevices(newMediaDevices);
+      });
+    } catch (e) {
+      console.error('Could not get media devices:', e);
+    }
+
+    try {
       navigator.mediaDevices
         .getUserMedia({
           audio: true, // TODO: Set both to false by default
@@ -147,7 +150,7 @@ export default ({ children }: WithChildren) => {
       // TODO: Better handle user denial
       console.error('Could not get media devices:', e);
     }
-  }, [setLocalStream]);
+  }, [isConnected]);
 
   useEffect(() => {
     if (localStream && webRtcConnection) {

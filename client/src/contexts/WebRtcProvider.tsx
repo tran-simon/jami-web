@@ -86,9 +86,9 @@ export default ({ children }: WithChildren) => {
         sdp,
       };
 
+      await webRtcConnection.setLocalDescription(new RTCSessionDescription(sdp));
       console.info('Sending WebRtcOffer', webRtcOffer);
       webSocket.send(WebSocketMessageType.WebRtcOffer, webRtcOffer);
-      await webRtcConnection.setLocalDescription(new RTCSessionDescription(sdp));
     },
     [webRtcConnection, webSocket, contactUri]
   );
@@ -123,15 +123,13 @@ export default ({ children }: WithChildren) => {
         offerToReceiveAudio: true,
         offerToReceiveVideo: true,
       });
-      sendWebRtcAnswer(sdp);
       await webRtcConnection.setLocalDescription(new RTCSessionDescription(sdp));
-      setIsConnected(true);
+      sendWebRtcAnswer(sdp);
     };
 
     const webRtcAnswerListener = async (data: WebRtcSdp) => {
       console.info('Received event on WebRtcAnswer', data);
       await webRtcConnection.setRemoteDescription(new RTCSessionDescription(data.sdp));
-      setIsConnected(true);
     };
 
     const webRtcIceCandidateListener = async (data: WebRtcIceCandidate) => {
@@ -177,12 +175,20 @@ export default ({ children }: WithChildren) => {
       setRemoteStreams(event.streams);
     };
 
+    const connectionStateChangeEventListener = () => {
+      setIsConnected(
+        webRtcConnection.iceConnectionState === 'completed' || webRtcConnection.iceConnectionState === 'connected'
+      );
+    };
+
     webRtcConnection.addEventListener('icecandidate', iceCandidateEventListener);
     webRtcConnection.addEventListener('track', trackEventListener);
+    webRtcConnection.addEventListener('iceconnectionstatechange', connectionStateChangeEventListener);
 
     return () => {
       webRtcConnection.removeEventListener('icecandidate', iceCandidateEventListener);
       webRtcConnection.removeEventListener('track', trackEventListener);
+      webRtcConnection.removeEventListener('iceconnectionstatechange', connectionStateChangeEventListener);
     };
   }, [webRtcConnection, webSocket, contactUri]);
 
