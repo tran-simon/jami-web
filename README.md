@@ -1,95 +1,193 @@
-# Jami-web
+# Jami Web
 
-Jami-web is a web server that starts a Dameon on NodeJS express server and serve a React web client.
+The web version of Jami.
 
-The first milestone is to allow user with LDAP credentials to connect to the account using JAMS service and start chatting with their contacts using instant messaging.
+The repo is structured as 4 subprojects:
 
-Next step will be to implement a video protocol such as WebRTC to allow audio and video calls from the users browser to another Jami contact allowing cross-platform communications.
+- `client`: the web front-end made with React
+- `server`: the back-end server made with Express.js, which starts a daemon instance
+- `common`: the common code used by both `client` and `server`
+- `daemon`: a submodule containing the Jami daemon
 
-# Main dependencies
+## Prerequisites
 
-- Jami Daemon with NodeJS bindings (https://review.jami.net/admin/repos/jami-daemon),
-- NodeJS v16+
-- Swig 4.1.0
+- Linux
+- [Node.js 16](https://nodejs.org/en/)
+- [npm](https://www.npmjs.com/)
+- [SWIG 4.1.0:](https://www.swig.org/)
 
-# How to start the server
+  - Build from source with the following instructions: <https://swig.org/svn.html>
 
-After building the Jami daemon you can use the following command to start the node js server using the LD_LIBRARY_PATH
+    > Note: you will need have Bison installed. On Ubuntu, this can be installed using `sudo apt install bison`.
 
-`LD_LIBRARY_PATH="${PWD}/daemon/src/.libs"`
+    ```sh
+    git clone https://github.com/swig/swig.git
+    cd swig
+    ./autogen.sh
+    ./configure
+    make
+    sudo make install
+    ```
 
-To build the dring.node Javascript interface to talk to the daemon api go to the daemon repo and use ./configure --with-nodejs then execute make -j4 to build the daemon
+## Setup
 
-Create a symbolic link to `jamid.node` inside `server/`:
+### Build the Jami daemon with Node.js bindings
 
-```sh
-cd server
-ln -s ../daemon/bin/nodejs/build/Release/jamid.node jamid.node
+1. Install the required dependencies: <https://docs.jami.net/build/dependencies.html>
+
+   > Note: for Ubuntu, the minimally needed dependencies are:
+
+   ```
+   sudo apt install git build-essential cmake automake autoconf autopoint libtool pkg-config libdbus-1-dev libva-dev libvdpau-dev libasound2-dev libpulse-dev libudev-dev libexpat1-dev ssnasm yasm yasm nasm
+   ```
+
+2. Compile the dependencies:
+
+   ```sh
+   cd daemon/contrib
+   mkdir native
+   cd native
+   ../bootstrap
+   make -j$(nproc)
+   ```
+
+3. Install `node-gyp` to build the daemon with Node.js bindings:
+
+   ```
+   npm install -g node-gyp
+   ```
+
+4. Compile the daemon with Node.js bindings:
+
+   ```sh
+   cd ../..
+   ./autogen.sh
+   ./configure --with-nodejs
+   make -j$(nproc)
+   ```
+
+5. Create a symlink to `jamid.node` in `server`:
+
+   ```sh
+   cd ../server
+   ln -s ../daemon/bin/nodejs/build/Release/jamid.node jamid.node
+   cd ..
+   ```
+
+### Install npm dependencies and set up Git hooks
+
+```
+npm install
 ```
 
-Then, start the servers:
+This will install the relevant dependencies for all subprojects and configure Git hooks.
+
+## Usage
+
+### Run with hot-reload for development
+
+Start both the client and server:
 
 ```sh
-# Install the package dependencies
-npm install
-
-# Start the client and backend servers
 LD_LIBRARY_PATH="${PWD}/daemon/src/.libs" npm start
 ```
 
-You may also start the servers individually:
+You can also start the client and server individually:
 
-```bash
+```sh
 npm start --workspace client
-npm start --workspace server
+LD_LIBRARY_PATH="${PWD}/daemon/src/.libs" npm start --workspace server
 ```
 
-# How to build for production
+Open <http://localhost:3000> in your browser to view the app.
 
-```bash
-# Build the client app and the server. The resulting files are available in `client/dist` and `server/dist` respectively
+### Build for production
+
+```
 npm run build
-
-# Preview the production build locally
-npm run start:prod
 ```
 
-# Docker
+### Preview the production build
 
-You may run the web server in a Docker container. This will automatically build the daemon and do the necessary linking.
-
-## 1. Build the daemon
-
-```bash
-cd daemon
-docker build --build-arg config_args="--with-nodejs" -t jami-daemon .
-cd ..
+```sh
+LD_LIBRARY_PATH="${PWD}/daemon/src/.libs" npm run start:prod
 ```
 
-## 2. Build and run the web server and client
+### Lint files
 
-```bash
-docker build --target development --tag jami-web .
-docker run -it \
-  -p 3001:3001 \
-  -p 3000:3000 \
-  -p 5000:5000 \
-  --volume ${PWD}/client/src:/web-client/client/src \
-  --volume ${PWD}/server/src:/web-client/server/src \
-  --volume ${PWD}/client/.env.development:/web-client/client/.env.development \
-  --volume ${PWD}/server/.env:/web-client/server/.env \
-  jami-web
+```
+npm run lint
 ```
 
-## Using [docker-compose](docker run -p 3000:3000 -it jami-project)
+Lint and fix files:
 
-This will use a [Docker Volume](https://docs.docker.com/storage/volumes/) to enable auto-refresh when you change a file.
-
-```bash
-# First build the daemon if necessary
-docker-compose build jami-daemon
-
-# Then build the project and start the container
-docker-compose build
-docker-compose up
 ```
+npm run lint:fix
+```
+
+### Format files
+
+```
+npm run format
+```
+
+### Clean build output
+
+```
+npm run clean
+```
+
+## Using a Docker container for development
+
+You may instead wish to use a Docker container for development.
+
+This allows you to avoid having to install all the dependencies needed to build the daemon on your computer. The container is meant for development: it uses bind mounts to mount the source code from your computer into the container, so that the container rebuilds the project whenever changes are made locally.
+
+### With Docker Compose
+
+1. Build the Docker image for the daemon:
+
+   ```
+   docker-compose build jami-daemon
+   ```
+
+2. Build the Docker image for Jami web:
+
+   ```
+   docker-compose build
+   ```
+
+3. Run the Docker container:
+
+   ```
+   docker-compose up
+   ```
+
+### Without Docker Compose
+
+1. Build the Docker image for the daemon:
+
+   ```sh
+   cd daemon
+   docker build --build-arg config_args="--with-nodejs" -t jami-daemon .
+   cd ..
+   ```
+
+2. Build the Docker image for Jami web:
+
+   ```sh
+   docker build --target development --t jami-web .
+   ```
+
+3. Run the Docker container:
+
+   ```
+   docker run -it \
+       -p 3000:3000 \
+       -p 5000:5000 \
+       --volume ${PWD}/client/src:/web-client/client/src \
+       --volume ${PWD}/server/src:/web-client/server/src \
+       --volume ${PWD}/client/.env.development:/web-client/client/.env.development \
+       --volume ${PWD}/server/.env:/web-client/server/.env \
+       jami-web
+   ```

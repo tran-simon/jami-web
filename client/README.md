@@ -1,66 +1,81 @@
-# jami-web client
+# Client
 
-This is the client for jami-web
+## Setup
 
-## Available Scripts
+```
+npm install
+```
 
-In the project directory, you can run:
+## Usage
 
-### `npm start`
+### Run with hot-reload for development
 
-Runs the app in the development mode.<br />
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+```
+npm start
+```
 
-The page will reload if you make edits.<br />
-You will also see any lint errors in the console.
+Open <http://localhost:3000> in your browser to view the app.
 
-### `npm test`
+### Build for production
 
-Run all tests.<br />
+```
+npm run build
+```
 
-### `npm run build`
+### Preview the production build
 
-Builds the app for production to the `build` folder.<br />
-It correctly bundles React in production mode and optimizes the build for the best performance.
+```
+npm run start:prod
+```
 
-Your app is ready to be deployed!
+### Run tests
 
-See the section about [deployment](https://vitejs.dev/guide/static-deploy.html) for more information.
+Run Jest tests:
 
-### `npm run start:prod`
+```
+npm test
+```
 
-Preview the production build locally.
+Run Cypress tests:
 
-### `npm run clean`
+```
+npm run test:cypress
+```
 
-Clean build files
+### Lint files
 
-### `npm run lint`
+```
+npm run lint
+```
 
-Verify that no lint errors are present. Use `npm run lint:fix` to fix some errors.
+Lint and fix files:
 
-### `npm run format`
+```
+npm run lint:fix
+```
 
-Format all files with prettier. Use `npm run format:check` to verify that all files are formatted without changing any.
+### Format files
 
-## `npm run extract-translations`
+```
+npm run format
+```
 
-Update the translation files.
+### Clean build output
 
-The translations are handled by [i18next](https://www.i18next.com/)
+```
+npm run clean
+```
 
-## Sentry
+### Update the translation files
 
-- uncomment the line `// import config from "./sentry-server.config.json" assert { type: "json" };` in `./sentry.js`
+```
+npm run extract-translations
+```
 
-- uncomment the line `// import config from "../sentry-client.config.json"` and the init config`Sentry.init(...` in `./client/index.js`
+The translations are handled by [i18next](https://www.i18next.com/).
 
-- uncomment the lines `// import { sentrySetUp } from './sentry.js'` and `sentrySetUp(app)` in `./app.ts`
+### Sentry
 
-- add `sentry-client.config.json` file in `client` and `sentry-server.config.json` (ask them to an admin) in your project root
-
-## Learn More
-
-You can learn more in the [Vite documentation](https://vitejs.dev/guide/).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
+- Uncomment the line `// import config from "./sentry-server.config.json" assert { type: "json" };` in `sentry.js`
+- Uncomment the line `// import config from "../sentry-client.config.json"` and the init config `Sentry.init(...` in `index.ts`
+- Add `sentry-client.config.json` file in `client` and `sentry-server.config.json` (ask them to an admin)
