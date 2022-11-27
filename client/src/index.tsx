@@ -20,7 +20,6 @@ import './index.scss';
 import './i18n';
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { Provider } from 'react-redux';
 import { RouterProvider } from 'react-router-dom';
@@ -44,12 +43,13 @@ if (!container) {
 const root = createRoot(container);
 root.render(
   <Provider store={store}>
-    <StrictMode>
-      <QueryClientProvider client={queryClient}>
-        <CustomThemeProvider>
-          <RouterProvider router={router} />
-        </CustomThemeProvider>
-      </QueryClientProvider>
-    </StrictMode>
+    {/* TODO: Put back StrictMode once issues with calling are fixed */}
+    {/* <StrictMode> */}
+    <QueryClientProvider client={queryClient}>
+      <CustomThemeProvider>
+        <RouterProvider router={router} />
+      </CustomThemeProvider>
+    </QueryClientProvider>
+    {/* </StrictMode> */}
   </Provider>
 );

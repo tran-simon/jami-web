@@ -114,10 +114,6 @@ export default ({ children }: WithChildren) => {
   const contactUri = useMemo(() => conversation.getFirstMember().contact.getUri(), [conversation]);
 
   useEffect(() => {
-    if (!isConnected) {
-      return;
-    }
-
     try {
       // TODO: Wait until status is `InCall` before getting devices
       navigator.mediaDevices.enumerateDevices().then((devices) => {
@@ -154,7 +150,7 @@ export default ({ children }: WithChildren) => {
       // TODO: Better handle user denial
       console.error('Could not get media devices:', e);
     }
-  }, [isConnected]);
+  }, []);
 
   useEffect(() => {
     if (localStream && webRtcConnection) {
