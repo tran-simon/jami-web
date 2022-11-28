@@ -18,14 +18,17 @@
 import { Box, ListItem, ListItemAvatar, ListItemText } from '@mui/material';
 import { Conversation } from 'jami-web-common';
 import { QRCodeCanvas } from 'qrcode.react';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useContext, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 import { useAuthContext } from '../contexts/AuthProvider';
+import { MessengerContext } from '../contexts/MessengerProvider';
 import { useStartCall } from '../hooks/useStartCall';
+import { useUrlParams } from '../hooks/useUrlParams';
 import { setRefreshFromSlice } from '../redux/appSlice';
 import { useAppDispatch } from '../redux/hooks';
+import { ConversationRouteParams } from '../router';
 import ContextMenu, { ContextMenuHandler, useContextMenuHandler } from './ContextMenu';
 import ConversationAvatar from './ConversationAvatar';
 import { ConfirmationDialog, DialogContentList, InfosDialog, useDialogHandler } from './Dialog';
@@ -45,29 +48,37 @@ type ConversationListItemProps = {
 };
 
 export default function ConversationListItem({ conversation }: ConversationListItemProps) {
-  const { conversationId, contactId } = useParams();
+  const {
+    urlParams: { conversationId },
+  } = useUrlParams<ConversationRouteParams>();
   const contextMenuHandler = useContextMenuHandler();
+  const { newContactId, setNewContactId } = useContext(MessengerContext);
 
-  const pathId = conversationId || contactId;
+  const pathId = conversationId || newContactId;
   const isSelected = conversation.getDisplayUri() === pathId;
+
   const navigate = useNavigate();
   const userId = conversation?.getFirstMember()?.contact.getUri();
 
-  // TODO: Improve this component. conversationId should never be undefined.
-  //       (https://git.jami.net/savoirfairelinux/jami-web/-/issues/171)
-  const uri = conversation.getId()
-    ? `/conversation/${conversation.getId()}`
-    : `/conversation/add-contact?newContactId=${userId}`;
+  const onClick = useCallback(() => {
+    const newConversationId = conversation.getId();
+    if (newConversationId) {
+      navigate(`/conversation/${newConversationId}`);
+    } else {
+      setNewContactId(userId);
+    }
+  }, [navigate, conversation, userId, setNewContactId]);
+
   return (
     <Box onContextMenu={contextMenuHandler.handleAnchorPosition}>
       <ConversationMenu
         userId={userId}
         conversation={conversation}
-        uri={uri}
+        onMessageClick={onClick}
         isSelected={isSelected}
         contextMenuProps={contextMenuHandler.props}
       />
-      <ListItem button alignItems="flex-start" selected={isSelected} onClick={() => navigate(uri)}>
+      <ListItem button alignItems="flex-start" selected={isSelected} onClick={onClick}>
         <ListItemAvatar>
           <ConversationAvatar displayName={conversation.getDisplayNameNoFallback()} />
         </ListItemAvatar>
@@ -80,12 +91,18 @@ export default function ConversationListItem({ conversation }: ConversationListI
 interface ConversationMenuProps {
   userId: string;
   conversation: Conversation;
-  uri: string;
+  onMessageClick: () => void;
   isSelected: boolean;
   contextMenuProps: ContextMenuHandler['props'];
 }
 
-const ConversationMenu = ({ userId, conversation, uri, isSelected, contextMenuProps }: ConversationMenuProps) => {
+const ConversationMenu = ({
+  userId,
+  conversation,
+  onMessageClick,
+  isSelected,
+  contextMenuProps,
+}: ConversationMenuProps) => {
   const { t } = useTranslation();
   const { axiosInstance } = useAuthContext();
   const [isSwarm] = useState(true);
@@ -117,9 +134,7 @@ const ConversationMenu = ({ userId, conversation, uri, isSelected, contextMenuPr
       {
         label: t('conversation_message'),
         Icon: MessageIcon,
-        onClick: () => {
-          navigate(uri);
-        },
+        onClick: onMessageClick,
       },
       {
         label: t('conversation_start_audiocall'),
@@ -177,7 +192,7 @@ const ConversationMenu = ({ userId, conversation, uri, isSelected, contextMenuPr
     ],
     [
       navigate,
-      uri,
+      onMessageClick,
       isSelected,
       getContactDetails,
       detailsDialogHandler,
@@ -302,7 +317,7 @@ const RemoveContactDialog = ({ userId, open, onClose }: RemoveContactDialogProps
   const remove = async () => {
     const controller = new AbortController();
     try {
-      await axiosInstance.delete(`/contacts/${userId}/remove`, {
+      await axiosInstance.delete(`/contacts/${userId}`, {
         signal: controller.signal,
       });
       dispatch(setRefreshFromSlice());

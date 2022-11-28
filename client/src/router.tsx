@@ -23,6 +23,7 @@ import ConversationView from './components/ConversationView';
 import AuthProvider from './contexts/AuthProvider';
 import CallProvider, { CallRole, CallStatus } from './contexts/CallProvider';
 import ConversationProvider from './contexts/ConversationProvider';
+import MessengerProvider from './contexts/MessengerProvider';
 import WebRtcProvider from './contexts/WebRtcProvider';
 import WebSocketProvider from './contexts/WebSocketProvider';
 import { RouteParams } from './hooks/useUrlParams';
@@ -36,9 +37,7 @@ import SetupLogin from './pages/SetupLogin';
 import Welcome from './pages/Welcome';
 import { ThemeDemonstrator } from './themes/ThemeDemonstrator';
 
-export type ConversationRouteParams = RouteParams<{ conversationId: string }, Record<string, never>>;
-
-export type AddContactRouteParams = RouteParams<{ contactId: string }, Record<string, never>>;
+export type ConversationRouteParams = RouteParams<{ conversationId?: string }, Record<string, never>>;
 
 export type CallRouteParams = RouteParams<
   { conversationId?: string },
@@ -67,18 +66,23 @@ export const router = createBrowserRouter(
           </AuthProvider>
         }
       >
-        <Route index element={<Messenger />} />
-        <Route path="conversation" element={<Messenger />}>
-          {/* TODO: Remove this route. Adding a contact should not change the route, we should instead use an internal
-                    state in the Messenger component
-           */}
-          <Route path="add-contact" element={<div></div>} />
+        <Route
+          element={
+            <MessengerProvider>
+              <Outlet />
+            </MessengerProvider>
+          }
+        >
+          <Route index element={<Messenger />} />
+          <Route path="conversation" element={<Messenger />} />
           <Route
-            path=":conversationId"
+            path="conversation/:conversationId"
             element={
-              <ConversationProvider>
-                <Outlet />
-              </ConversationProvider>
+              <Messenger>
+                <ConversationProvider>
+                  <Outlet />
+                </ConversationProvider>
+              </Messenger>
             }
           >
             <Route index element={<ConversationView />} />

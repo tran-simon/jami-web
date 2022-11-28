@@ -20,17 +20,17 @@ import List from '@mui/material/List';
 import ListSubheader from '@mui/material/ListSubheader';
 import Typography from '@mui/material/Typography';
 import { Conversation } from 'jami-web-common';
-import { useEffect } from 'react';
+import { useContext, useEffect } from 'react';
 
+import { MessengerContext } from '../contexts/MessengerProvider';
 import { useAppSelector } from '../redux/hooks';
 import ConversationListItem from './ConversationListItem';
 
 type ConversationListProps = {
-  accountId: string;
   conversations: Conversation[];
-  search?: Conversation;
 };
-export default function ConversationList(props: ConversationListProps) {
+export default function ConversationList({ conversations }: ConversationListProps) {
+  const { searchResult } = useContext(MessengerContext);
   const { refresh } = useAppSelector((state) => state.userInfo);
 
   useEffect(() => {
@@ -40,17 +40,17 @@ export default function ConversationList(props: ConversationListProps) {
   return (
     <div className="rooms-list">
       <List>
-        {props.search instanceof Conversation && (
+        {searchResult && (
           <div>
             <ListSubheader>Public directory</ListSubheader>
-            <ConversationListItem conversation={props.search} />
+            <ConversationListItem conversation={searchResult} />
             <ListSubheader>Conversations</ListSubheader>
           </div>
         )}
-        {props.conversations.map((conversation) => (
+        {conversations.map((conversation) => (
           <ConversationListItem key={conversation.getId()} conversation={conversation} />
         ))}
-        {props.conversations.length === 0 && (
+        {conversations.length === 0 && (
           <div className="list-placeholder">
             <GroupIcon color="disabled" fontSize="large" />
             <Typography className="subtitle" variant="subtitle2">

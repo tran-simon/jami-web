@@ -16,96 +16,27 @@
  * <https://www.gnu.org/licenses/>.
  */
 import { Box, Stack } from '@mui/material';
-import { Contact, Conversation, ConversationMessage, WebSocketMessageType } from 'jami-web-common';
-import { useContext, useEffect, useState } from 'react';
-import { Outlet } from 'react-router-dom';
+import { ReactNode, useContext } from 'react';
 
 //import Sound from 'react-sound';
 import ConversationList from '../components/ConversationList';
 import Header from '../components/Header';
 import LoadingPage from '../components/Loading';
 import NewContactForm from '../components/NewContactForm';
-import { useAuthContext } from '../contexts/AuthProvider';
-import { WebSocketContext } from '../contexts/WebSocketProvider';
-import { useUrlParams } from '../hooks/useUrlParams';
-import { setRefreshFromSlice } from '../redux/appSlice';
-import { useAppDispatch, useAppSelector } from '../redux/hooks';
-import { AddContactRouteParams } from '../router';
+import { MessengerContext } from '../contexts/MessengerProvider';
 import AddContactPage from './AddContactPage';
 
-const Messenger = () => {
-  const { refresh } = useAppSelector((state) => state.userInfo);
-  const dispatch = useAppDispatch();
-  const { account, axiosInstance } = useAuthContext();
-  const webSocket = useContext(WebSocketContext);
-
-  const [conversations, setConversations] = useState<Conversation[] | undefined>(undefined);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [searchResult, setSearchResults] = useState<Conversation | undefined>(undefined);
-
-  const { urlParams } = useUrlParams<AddContactRouteParams>();
-
-  // TODO: Rework the contact adding logic so that adding a contact does not make the current conversationId undefined.
-  //       The newContactId should not come from the route, but from a state.
-  const newContactId = urlParams?.contactId;
-
-  const accountId = account.getId();
-
-  useEffect(() => {
-    const controller = new AbortController();
-    axiosInstance
-      .get<Conversation[]>('/conversations', {
-        signal: controller.signal,
-      })
-      .then(({ data }) => {
-        setConversations(Object.values(data).map((c) => Conversation.from(accountId, c)));
-      });
-    // return () => controller.abort()
-  }, [axiosInstance, accountId, refresh]);
-
-  useEffect(() => {
-    if (!webSocket) {
-      return;
-    }
-
-    const conversationMessageListener = (_data: ConversationMessage) => {
-      dispatch(setRefreshFromSlice());
-    };
-
-    webSocket.bind(WebSocketMessageType.ConversationMessage, conversationMessageListener);
-
-    return () => {
-      webSocket.unbind(WebSocketMessageType.ConversationMessage, conversationMessageListener);
-    };
-  }, [webSocket, dispatch]);
-
-  useEffect(() => {
-    if (!searchQuery) return;
-    const controller = new AbortController();
-    // TODO: Type properly https://git.jami.net/savoirfairelinux/jami-web/-/issues/92
-    axiosInstance
-      .get<{ state: number; address: string; username: string }>(`/ns/username/${searchQuery}`, {
-        signal: controller.signal,
-      })
-      .then(({ data }) => {
-        const contact = new Contact(data.address);
-        contact.setRegisteredName(data.username);
-        setSearchResults(contact ? Conversation.fromSingleContact(accountId, contact) : undefined);
-      })
-      .catch(() => {
-        setSearchResults(undefined);
-      });
-    // return () => controller.abort() // crash on React18
-  }, [accountId, searchQuery, axiosInstance]);
+const Messenger = ({ children }: { children?: ReactNode }) => {
+  const { newContactId, conversations } = useContext(MessengerContext);
 
   return (
     <Box display="flex" height="100%">
       <Stack flexGrow={0} flexShrink={0} overflow="auto">
         <Header />
-        <NewContactForm onChange={setSearchQuery} />
+        <NewContactForm />
         {newContactId && <AddContactPage contactId={newContactId} />}
         {conversations ? (
-          <ConversationList search={searchResult} conversations={conversations} accountId={accountId} />
+          <ConversationList conversations={conversations} />
         ) : (
           <div className="rooms-list">
             <LoadingPage />
@@ -113,7 +44,7 @@ const Messenger = () => {
         )}
       </Stack>
       <Box flexGrow={1} display="flex" position="relative">
-        <Outlet />
+        {children}
       </Box>
     </Box>
   );

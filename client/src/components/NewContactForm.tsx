@@ -17,28 +17,21 @@
  */
 import { SearchRounded } from '@mui/icons-material';
 import { InputAdornment, InputBase } from '@mui/material';
-import { ChangeEvent, FormEvent, useState } from 'react';
+import { ChangeEvent, useContext, useState } from 'react';
 
-type NewContactFormProps = {
-  onChange?: (v: string) => void;
-  onSubmit?: (v: string) => void;
-};
+import { MessengerContext } from '../contexts/MessengerProvider';
 
-export default function NewContactForm(props: NewContactFormProps) {
+export default function NewContactForm() {
+  const { setSearchQuery } = useContext(MessengerContext);
   const [value, setValue] = useState('');
 
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
     setValue(event.target.value);
-    if (props.onChange) props.onChange(event.target.value);
-  };
-
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    if (value && props.onSubmit) props.onSubmit(value);
+    setSearchQuery(event.target.value);
   };
 
   return (
-    <form className="main-search" onSubmit={handleSubmit} noValidate autoComplete="off">
+    <form className="main-search" noValidate autoComplete="off">
       <InputBase
         className="main-search-input"
         type="search"
