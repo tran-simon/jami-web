@@ -47,6 +47,7 @@ import {
 } from '../components/CallButtons';
 import CallChatDrawer from '../components/CallChatDrawer';
 import { CallContext, CallStatus } from '../contexts/CallProvider';
+import { ConversationContext } from '../contexts/ConversationProvider';
 import { CallPending } from './CallPending';
 
 export default () => {
@@ -181,12 +182,14 @@ interface CallInterfaceInformationProps {
 }
 
 const CallInterfaceInformation = ({ elapsedTime = 0 }: CallInterfaceInformationProps) => {
+  const { conversation } = useContext(ConversationContext);
+  const memberName = useMemo(() => conversation.getFirstMember().contact.getRegisteredName(), [conversation]);
   const elapsedTimerString = formatElapsedSeconds(elapsedTime);
 
   return (
     <Stack direction="row" justifyContent="space-between" alignItems="center">
       <Typography color="white" component="p">
-        Alain Thérieur
+        {memberName}
       </Typography>
       <Typography color="white" component="p">
         {elapsedTimerString}

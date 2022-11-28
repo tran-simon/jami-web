@@ -26,6 +26,7 @@ import {
   CallingCancelButton,
   CallingRefuseButton,
 } from '../components/CallButtons';
+import ConversationAvatar from '../components/ConversationAvatar';
 import { ConversationContext } from '../contexts/ConversationProvider';
 
 export type CallPendingProps = {
@@ -39,6 +40,8 @@ type CallerStatus = 'calling' | 'connecting';
 type CommunicationMedium = 'audio' | 'video';
 
 export const CallPending = (props: CallPendingProps) => {
+  const { conversation } = useContext(ConversationContext);
+
   return (
     <Stack
       direction="column"
@@ -78,17 +81,12 @@ export const CallPending = (props: CallPendingProps) => {
               zIndex: 1,
             }}
           />
-          <img
-            // TODO: Insert incoming caller icon here
+          <ConversationAvatar
             alt="contact profile picture"
+            displayName={conversation.getDisplayNameNoFallback()}
             style={{
-              position: 'absolute',
-              objectFit: 'cover',
               width: '100%',
               height: '100%',
-              maxWidth: '100%',
-              borderRadius: '50%',
-              aspectRatio: '1',
             }}
           />
         </Box>
