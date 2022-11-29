@@ -19,13 +19,14 @@ import { CallAction, CallBegin, WebSocketMessageType } from 'jami-web-common';
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
 
+import LoadingPage from '../components/Loading';
 import { useUrlParams } from '../hooks/useUrlParams';
 import { CallRouteParams } from '../router';
 import { callTimeoutMs } from '../utils/constants';
 import { SetState, WithChildren } from '../utils/utils';
 import { ConversationContext } from './ConversationProvider';
 import { WebRtcContext } from './WebRtcProvider';
-import { WebSocketContext } from './WebSocketProvider';
+import { IWebSocketContext, WebSocketContext } from './WebSocketProvider';
 
 export type CallRole = 'caller' | 'receiver';
 
@@ -87,12 +88,33 @@ const defaultCallContext: ICallContext = {
 export const CallContext = createContext<ICallContext>(defaultCallContext);
 
 export default ({ children }: WithChildren) => {
+  const webSocket = useContext(WebSocketContext);
+  const { webRtcConnection } = useContext(WebRtcContext);
+
+  if (!webSocket || !webRtcConnection) {
+    return <LoadingPage />;
+  }
+
+  return (
+    <CallProvider webSocket={webSocket} webRtcConnection={webRtcConnection}>
+      {children}
+    </CallProvider>
+  );
+};
+
+const CallProvider = ({
+  children,
+  webSocket,
+  webRtcConnection,
+}: WithChildren & {
+  webSocket: IWebSocketContext;
+  webRtcConnection: RTCPeerConnection;
+}) => {
   const {
     queryParams: { role: callRole },
     state: routeState,
   } = useUrlParams<CallRouteParams>();
-  const webSocket = useContext(WebSocketContext);
-  const { webRtcConnection, remoteStreams, sendWebRtcOffer, isConnected } = useContext(WebRtcContext);
+  const { remoteStreams, sendWebRtcOffer, isConnected } = useContext(WebRtcContext);
   const { conversationId, conversation } = useContext(ConversationContext);
   const navigate = useNavigate();
 
@@ -153,7 +175,7 @@ export default ({ children }: WithChildren) => {
   }, []);
 
   useEffect(() => {
-    if (localStream && webRtcConnection) {
+    if (localStream) {
       for (const track of localStream.getTracks()) {
         webRtcConnection.addTrack(track, localStream);
       }
@@ -191,10 +213,6 @@ export default ({ children }: WithChildren) => {
   );
 
   useEffect(() => {
-    if (!webSocket) {
-      return;
-    }
-
     if (callRole === 'caller' && callStatus === CallStatus.Default) {
       const callBegin: CallBegin = {
         contactId: contactUri,
@@ -221,10 +239,6 @@ export default ({ children }: WithChildren) => {
   }, []);
 
   useEffect(() => {
-    if (!webSocket || !webRtcConnection) {
-      return;
-    }
-
     if (callRole === 'caller' && callStatus === CallStatus.Ringing) {
       const callAcceptListener = (data: CallAction) => {
         console.info('Received event on CallAccept', data);
@@ -254,10 +268,6 @@ export default ({ children }: WithChildren) => {
   }, [callRole, webSocket, webRtcConnection, sendWebRtcOffer, callStatus, conversationId]);
 
   const quitCall = useCallback(() => {
-    if (!webRtcConnection) {
-      throw new Error('Could not quit call: webRtcConnection is not defined');
-    }
-
     const localTracks = localStream?.getTracks();
     if (localTracks) {
       for (const track of localTracks) {
@@ -270,10 +280,6 @@ export default ({ children }: WithChildren) => {
   }, [webRtcConnection, localStream, navigate, conversationId]);
 
   useEffect(() => {
-    if (!webSocket) {
-      return;
-    }
-
     const callEndListener = (data: CallAction) => {
       console.info('Received event on CallEnd', data);
       if (data.conversationId !== conversationId) {
@@ -302,10 +308,6 @@ export default ({ children }: WithChildren) => {
 
   const acceptCall = useCallback(
     (withVideoOn: boolean) => {
-      if (!webSocket) {
-        throw new Error('Could not accept call');
-      }
-
       const callAccept: CallAction = {
         contactId: contactUri,
         conversationId,
@@ -320,10 +322,6 @@ export default ({ children }: WithChildren) => {
   );
 
   const endCall = useCallback(() => {
-    if (!webSocket) {
-      throw new Error('Could not end call');
-    }
-
     const callEnd: CallAction = {
       contactId: contactUri,
       conversationId,

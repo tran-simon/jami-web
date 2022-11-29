@@ -19,10 +19,11 @@
 import { WebRtcIceCandidate, WebRtcSdp, WebSocketMessageType } from 'jami-web-common';
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 
+import LoadingPage from '../components/Loading';
 import { WithChildren } from '../utils/utils';
 import { useAuthContext } from './AuthProvider';
 import { ConversationContext } from './ConversationProvider';
-import { WebSocketContext } from './WebSocketProvider';
+import { IWebSocketContext, WebSocketContext } from './WebSocketProvider';
 
 interface IWebRtcContext {
   isConnected: boolean;
@@ -44,14 +45,8 @@ export const WebRtcContext = createContext<IWebRtcContext>(defaultWebRtcContext)
 
 export default ({ children }: WithChildren) => {
   const { account } = useAuthContext();
-  const webSocket = useContext(WebSocketContext);
-  const { conversation, conversationId } = useContext(ConversationContext);
   const [webRtcConnection, setWebRtcConnection] = useState<RTCPeerConnection | undefined>();
-  const [remoteStreams, setRemoteStreams] = useState<readonly MediaStream[]>();
-  const [isConnected, setIsConnected] = useState(false);
-
-  // TODO: This logic will have to change to support multiple people in a call
-  const contactUri = useMemo(() => conversation.getFirstMember().contact.getUri(), [conversation]);
+  const webSocket = useContext(WebSocketContext);
 
   useEffect(() => {
     if (!webRtcConnection && account) {
@@ -75,12 +70,34 @@ export default ({ children }: WithChildren) => {
     }
   }, [account, webRtcConnection]);
 
+  if (!webRtcConnection || !webSocket) {
+    return <LoadingPage />;
+  }
+
+  return (
+    <WebRtcProvider webRtcConnection={webRtcConnection} webSocket={webSocket}>
+      {children}
+    </WebRtcProvider>
+  );
+};
+
+const WebRtcProvider = ({
+  children,
+  webRtcConnection,
+  webSocket,
+}: WithChildren & {
+  webRtcConnection: RTCPeerConnection;
+  webSocket: IWebSocketContext;
+}) => {
+  const { conversation, conversationId } = useContext(ConversationContext);
+  const [remoteStreams, setRemoteStreams] = useState<readonly MediaStream[]>();
+  const [isConnected, setIsConnected] = useState(false);
+
+  // TODO: This logic will have to change to support multiple people in a call
+  const contactUri = useMemo(() => conversation.getFirstMember().contact.getUri(), [conversation]);
+
   const sendWebRtcOffer = useCallback(
     async (sdp: RTCSessionDescriptionInit) => {
-      if (!webRtcConnection || !webSocket) {
-        throw new Error('Could not send WebRTC offer');
-      }
-
       const webRtcOffer: WebRtcSdp = {
         contactId: contactUri,
         conversationId: conversationId,
@@ -96,10 +113,6 @@ export default ({ children }: WithChildren) => {
 
   const sendWebRtcAnswer = useCallback(
     (sdp: RTCSessionDescriptionInit) => {
-      if (!webRtcConnection || !webSocket) {
-        throw new Error('Could not send WebRTC answer');
-      }
-
       const webRtcAnswer: WebRtcSdp = {
         contactId: contactUri,
         conversationId: conversationId,
@@ -109,14 +122,12 @@ export default ({ children }: WithChildren) => {
       console.info('Sending WebRtcAnswer', webRtcAnswer);
       webSocket.send(WebSocketMessageType.WebRtcAnswer, webRtcAnswer);
     },
-    [contactUri, conversationId, webRtcConnection, webSocket]
+    [contactUri, conversationId, webSocket]
   );
 
-  useEffect(() => {
-    if (!webSocket || !webRtcConnection) {
-      return;
-    }
+  /* WebSocket Listeners */
 
+  useEffect(() => {
     const webRtcOfferListener = async (data: WebRtcSdp) => {
       console.info('Received event on WebRtcOffer', data);
       if (data.conversationId !== conversationId) {
@@ -143,9 +154,17 @@ export default ({ children }: WithChildren) => {
 
       await webRtcConnection.setRemoteDescription(new RTCSessionDescription(data.sdp));
     };
+    webSocket.bind(WebSocketMessageType.WebRtcOffer, webRtcOfferListener);
+    webSocket.bind(WebSocketMessageType.WebRtcAnswer, webRtcAnswerListener);
 
+    return () => {
+      webSocket.unbind(WebSocketMessageType.WebRtcOffer, webRtcOfferListener);
+      webSocket.unbind(WebSocketMessageType.WebRtcAnswer, webRtcAnswerListener);
+    };
+  }, [webSocket, webRtcConnection, sendWebRtcAnswer, conversationId]);
+
+  useEffect(() => {
     const webRtcIceCandidateListener = async (data: WebRtcIceCandidate) => {
-      console.info('Received event on WebRtcIceCandidate', data);
       if (data.conversationId !== conversationId) {
         console.warn('Wrong incoming conversationId, ignoring action');
         return;
@@ -154,28 +173,17 @@ export default ({ children }: WithChildren) => {
       await webRtcConnection.addIceCandidate(data.candidate);
     };
 
-    webSocket.bind(WebSocketMessageType.WebRtcOffer, webRtcOfferListener);
-    webSocket.bind(WebSocketMessageType.WebRtcAnswer, webRtcAnswerListener);
     webSocket.bind(WebSocketMessageType.WebRtcIceCandidate, webRtcIceCandidateListener);
 
     return () => {
-      webSocket.unbind(WebSocketMessageType.WebRtcOffer, webRtcOfferListener);
-      webSocket.unbind(WebSocketMessageType.WebRtcAnswer, webRtcAnswerListener);
       webSocket.unbind(WebSocketMessageType.WebRtcIceCandidate, webRtcIceCandidateListener);
     };
-  }, [webSocket, webRtcConnection, sendWebRtcAnswer, conversationId]);
+  }, [webRtcConnection, webSocket, conversationId]);
+
+  /* WebRTC Listeners */
 
   useEffect(() => {
-    if (!webRtcConnection || !webSocket) {
-      return;
-    }
-
     const iceCandidateEventListener = (event: RTCPeerConnectionIceEvent) => {
-      console.info('Received WebRTC event on icecandidate', event);
-      if (!contactUri) {
-        throw new Error('Could not handle WebRTC event on icecandidate: contactUri is not defined');
-      }
-
       if (event.candidate) {
         const webRtcIceCandidate: WebRtcIceCandidate = {
           contactId: contactUri,
@@ -183,32 +191,38 @@ export default ({ children }: WithChildren) => {
           candidate: event.candidate,
         };
 
-        console.info('Sending WebRtcIceCandidate', webRtcIceCandidate);
         webSocket.send(WebSocketMessageType.WebRtcIceCandidate, webRtcIceCandidate);
       }
     };
 
+    webRtcConnection.addEventListener('icecandidate', iceCandidateEventListener);
+
+    return () => {
+      webRtcConnection.removeEventListener('icecandidate', iceCandidateEventListener);
+    };
+  }, [webRtcConnection, webSocket, contactUri, conversationId]);
+
+  useEffect(() => {
     const trackEventListener = (event: RTCTrackEvent) => {
       console.info('Received WebRTC event on track', event);
       setRemoteStreams(event.streams);
     };
 
-    const iceConnectionStateChangeEventListener = () => {
+    const iceConnectionStateChangeEventListener = (event: Event) => {
+      console.info(`Received WebRTC event on iceconnectionstatechange: ${webRtcConnection.iceConnectionState}`, event);
       setIsConnected(
         webRtcConnection.iceConnectionState === 'connected' || webRtcConnection.iceConnectionState === 'completed'
       );
     };
 
-    webRtcConnection.addEventListener('icecandidate', iceCandidateEventListener);
     webRtcConnection.addEventListener('track', trackEventListener);
     webRtcConnection.addEventListener('iceconnectionstatechange', iceConnectionStateChangeEventListener);
 
     return () => {
-      webRtcConnection.removeEventListener('icecandidate', iceCandidateEventListener);
       webRtcConnection.removeEventListener('track', trackEventListener);
       webRtcConnection.removeEventListener('iceconnectionstatechange', iceConnectionStateChangeEventListener);
     };
-  }, [webRtcConnection, webSocket, contactUri, conversationId]);
+  }, [webRtcConnection]);
 
   return (
     <WebRtcContext.Provider
