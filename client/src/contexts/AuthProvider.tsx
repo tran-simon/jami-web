@@ -64,8 +64,9 @@ export default ({ children }: WithChildren) => {
           case HttpStatusCode.Unauthorized:
             logout();
             break;
+          default:
+            throw e;
         }
-        throw e;
       }
     );
 
