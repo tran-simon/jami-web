@@ -18,11 +18,10 @@
 
 import { IconButton, IconButtonProps, PaletteColor } from '@mui/material';
 import { styled, Theme } from '@mui/material/styles';
-import { useContext, useMemo } from 'react';
+import { ChangeEvent, useContext, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { CallContext, CallStatus } from '../contexts/CallProvider';
-import { WebRtcContext } from '../contexts/WebRtcProvider';
 import {
   ExpandableButton,
   ExpandableButtonProps,
@@ -178,7 +177,7 @@ export const CallingScreenShareButton = (props: ExpandableButtonProps) => {
 };
 
 const useMediaDeviceExpandMenuOptions = (kind: MediaDeviceKind): ExpandMenuRadioOption[] | undefined => {
-  const { mediaDevices } = useContext(WebRtcContext);
+  const { currentMediaDeviceIds, mediaDevices } = useContext(CallContext);
 
   const options = useMemo(
     () =>
@@ -189,13 +188,38 @@ const useMediaDeviceExpandMenuOptions = (kind: MediaDeviceKind): ExpandMenuRadio
     [mediaDevices, kind]
   );
 
-  return options.length > 0 ? [{ options }] : undefined;
+  const currentDevice = currentMediaDeviceIds[kind];
+
+  if (options.length === 0) {
+    return undefined;
+  }
+  return [
+    {
+      options,
+      value: currentDevice.id ?? '',
+      onChange: (e: ChangeEvent<HTMLInputElement>) => {
+        currentDevice.setId(e.target.value);
+      },
+    },
+  ];
 };
 
 export const CallingVolumeButton = (props: ExpandableButtonProps) => {
   const options = useMediaDeviceExpandMenuOptions('audiooutput');
+  const { remoteVideoRef } = useContext(CallContext);
 
-  return <CallButton aria-label="volume options" Icon={VolumeIcon} expandMenuOptions={options} {...props} />;
+  // Audio out options are only available on chrome and other browsers that support `setSinkId`
+  // https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/setSinkId#browser_compatibility
+  const hasSetSinkId = remoteVideoRef.current?.setSinkId != null;
+
+  return (
+    <CallButton
+      aria-label="volume options"
+      Icon={VolumeIcon}
+      expandMenuOptions={hasSetSinkId ? options : undefined}
+      {...props}
+    />
+  );
 };
 
 export const CallingMicButton = (props: ExpandableButtonProps) => {

@@ -17,7 +17,7 @@
  */
 
 import { Box, CircularProgress, Grid, IconButtonProps, Stack, Typography } from '@mui/material';
-import { ComponentType, ReactNode, useContext, useEffect, useMemo, useRef } from 'react';
+import { ComponentType, ReactNode, useContext, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 
@@ -35,14 +35,13 @@ import { WebRtcContext } from '../contexts/WebRtcProvider';
 export const CallPending = () => {
   const { localStream } = useContext(WebRtcContext);
   const { conversation } = useContext(ConversationContext);
-  const { callRole } = useContext(CallContext);
-  const localVideoRef = useRef<HTMLVideoElement | null>(null);
+  const { callRole, localVideoRef } = useContext(CallContext);
 
   useEffect(() => {
     if (localStream && localVideoRef.current) {
       localVideoRef.current.srcObject = localStream;
     }
-  }, [localStream]);
+  }, [localStream, localVideoRef]);
 
   return (
     <Stack

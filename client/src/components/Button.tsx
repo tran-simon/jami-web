@@ -19,6 +19,7 @@ import { QuestionMark, RadioButtonChecked, RadioButtonUnchecked } from '@mui/ico
 import {
   Box,
   ClickAwayListener,
+  FormControlLabel,
   IconButton,
   IconButtonProps,
   ListItemIcon,
@@ -28,6 +29,7 @@ import {
   Popper,
   Radio,
   RadioGroup,
+  RadioGroupProps,
   SvgIconProps,
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
@@ -97,12 +99,11 @@ type ExpandMenuOption = {
   icon?: ReactNode;
 };
 
-export type ExpandMenuRadioOption = {
+export type ExpandMenuRadioOption = RadioGroupProps & {
   options: {
     key: string;
     description: ReactNode;
   }[];
-  defaultSelectedOption?: string;
 };
 
 export type ExpandableButtonProps = IconButtonProps & {
@@ -142,19 +143,21 @@ export const ExpandableButton = ({
         >
           {expandMenuOptions?.map((option, id) => {
             if ('options' in option) {
-              const { options, defaultSelectedOption } = option;
+              const { options, ...radioGroupProps } = option;
               return (
-                <RadioGroup key={id} defaultValue={defaultSelectedOption}>
-                  {options.map(({ description, key }) => {
-                    return (
-                      <MenuItem key={key}>
-                        <ListItemIcon>
-                          <Radio value={key} />
-                        </ListItemIcon>
-                        <ListItemText>{description}</ListItemText>
-                      </MenuItem>
-                    );
-                  })}
+                <RadioGroup key={id} {...radioGroupProps}>
+                  {options.map(({ description, key }, i) => (
+                    <MenuItem key={i}>
+                      <FormControlLabel
+                        value={key}
+                        control={<Radio value={key} />}
+                        label={<ListItemText>{description}</ListItemText>}
+                        sx={{
+                          width: '100%',
+                        }}
+                      />
+                    </MenuItem>
+                  ))}
                 </RadioGroup>
               );
             }

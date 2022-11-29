@@ -25,7 +25,7 @@ import { WebSocketContext } from '../contexts/WebSocketProvider';
 import { WithChildren } from '../utils/utils';
 
 /**
- * Binds notification listeners to the WebSocket from a WebSocketContext
+ * Binds notification listeners to the WebSocket from a WebSocketContext.
  */
 export default ({ children }: WithChildren) => {
   const webSocket = useContext(WebSocketContext);

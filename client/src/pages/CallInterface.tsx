@@ -20,6 +20,7 @@ import {
   ComponentType,
   Fragment,
   ReactNode,
+  RefObject,
   useCallback,
   useContext,
   useEffect,
@@ -84,16 +85,21 @@ interface Props {
 
 const CallInterface = () => {
   const { localStream, remoteStreams } = useContext(WebRtcContext);
-  const { isVideoOn } = useContext(CallContext);
-  const gridItemRef = useRef(null);
-  const remoteVideoRef = useRef<HTMLVideoElement | null>(null);
-  const localVideoRef = useRef<HTMLVideoElement | null>(null);
+  const {
+    isVideoOn,
+    currentMediaDeviceIds: {
+      audiooutput: { id: audioOutDeviceId },
+    },
+    localVideoRef,
+    remoteVideoRef,
+  } = useContext(CallContext);
+  const gridItemRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     if (localStream && localVideoRef.current) {
       localVideoRef.current.srcObject = localStream;
     }
-  }, [localStream]);
+  }, [localStream, localVideoRef]);
 
   useEffect(() => {
     // TODO: For now, `remoteStream` is the first remote stream in the array.
@@ -102,7 +108,19 @@ const CallInterface = () => {
     if (remoteStream && remoteVideoRef.current) {
       remoteVideoRef.current.srcObject = remoteStream;
     }
-  }, [remoteStreams]);
+  }, [remoteStreams, remoteVideoRef]);
+
+  useEffect(() => {
+    if (!audioOutDeviceId) {
+      return;
+    }
+
+    if (remoteVideoRef.current?.setSinkId) {
+      // This only work on chrome and other browsers that support `setSinkId`
+      // https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/setSinkId#browser_compatibility
+      remoteVideoRef.current.setSinkId(audioOutDeviceId);
+    }
+  }, [audioOutDeviceId, remoteVideoRef]);
 
   return (
     <Box display="flex" flexGrow={1}>
@@ -215,7 +233,7 @@ const SECONDARY_BUTTONS = [
   CallingFullScreenButton,
 ];
 
-const CallInterfaceSecondaryButtons = (props: Props & { gridItemRef: React.RefObject<HTMLElement> }) => {
+const CallInterfaceSecondaryButtons = (props: Props & { gridItemRef: RefObject<HTMLElement> }) => {
   const stackRef = useRef<HTMLElement>(null);
 
   const [initialMeasurementDone, setInitialMeasurementDone] = useState(false);

@@ -16,7 +16,7 @@
  * <https://www.gnu.org/licenses/>.
  */
 import { CallAction, CallBegin, WebSocketMessageType } from 'jami-web-common';
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { createContext, MutableRefObject, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
 
 import LoadingPage from '../components/Loading';
@@ -26,7 +26,7 @@ import { CallRouteParams } from '../router';
 import { callTimeoutMs } from '../utils/constants';
 import { SetState, WithChildren } from '../utils/utils';
 import { ConversationContext } from './ConversationProvider';
-import { WebRtcContext } from './WebRtcProvider';
+import { MediaDevicesInfo, MediaInputKind, WebRtcContext } from './WebRtcProvider';
 import { IWebSocketContext, WebSocketContext } from './WebSocketProvider';
 
 export type CallRole = 'caller' | 'receiver';
@@ -40,7 +40,30 @@ export enum CallStatus {
   PermissionsDenied,
 }
 
+type MediaDeviceIdState = {
+  id: string | undefined;
+  setId: (id: string | undefined) => void | Promise<void>;
+};
+type CurrentMediaDeviceIds = Record<MediaDeviceKind, MediaDeviceIdState>;
+
+/**
+ * HTMLVideoElement with the `sinkId` and `setSinkId` optional properties.
+ *
+ * These properties are defined only on supported browsers
+ * https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/setSinkId#browser_compatibility
+ */
+interface VideoElementWithSinkId extends HTMLVideoElement {
+  sinkId?: string;
+  setSinkId?: (deviceId: string) => void;
+}
+
 export interface ICallContext {
+  mediaDevices: MediaDevicesInfo;
+  currentMediaDeviceIds: CurrentMediaDeviceIds;
+
+  localVideoRef: MutableRefObject<VideoElementWithSinkId | null>;
+  remoteVideoRef: MutableRefObject<VideoElementWithSinkId | null>;
+
   isAudioOn: boolean;
   setIsAudioOn: SetState<boolean>;
   isVideoOn: boolean;
@@ -58,6 +81,29 @@ export interface ICallContext {
 }
 
 const defaultCallContext: ICallContext = {
+  mediaDevices: {
+    audioinput: [],
+    audiooutput: [],
+    videoinput: [],
+  },
+  currentMediaDeviceIds: {
+    audioinput: {
+      id: undefined,
+      setId: async () => {},
+    },
+    audiooutput: {
+      id: undefined,
+      setId: async () => {},
+    },
+    videoinput: {
+      id: undefined,
+      setId: async () => {},
+    },
+  },
+
+  localVideoRef: { current: null },
+  remoteVideoRef: { current: null },
+
   isAudioOn: false,
   setIsAudioOn: () => {},
   isVideoOn: false,
@@ -93,9 +139,18 @@ const CallProvider = ({
   webSocket: IWebSocketContext;
 }) => {
   const { state: routeState } = useUrlParams<CallRouteParams>();
-  const { localStream, sendWebRtcOffer, iceConnectionState, closeConnection, getUserMedia } = useContext(WebRtcContext);
+  const { localStream, sendWebRtcOffer, iceConnectionState, closeConnection, getMediaDevices, updateLocalStream } =
+    useContext(WebRtcContext);
   const { conversationId, conversation } = useContext(ConversationContext);
   const navigate = useNavigate();
+
+  const localVideoRef = useRef<HTMLVideoElement | null>(null);
+  const remoteVideoRef = useRef<HTMLVideoElement | null>(null);
+
+  const [mediaDevices, setMediaDevices] = useState(defaultCallContext.mediaDevices);
+  const [audioInputDeviceId, setAudioInputDeviceId] = useState<string>();
+  const [audioOutputDeviceId, setAudioOutputDeviceId] = useState<string>();
+  const [videoDeviceId, setVideoDeviceId] = useState<string>();
 
   const [isAudioOn, setIsAudioOn] = useState(false);
   const [isVideoOn, setIsVideoOn] = useState(false);
@@ -111,9 +166,40 @@ const CallProvider = ({
   const contactUri = useMemo(() => conversation.getFirstMember().contact.getUri(), [conversation]);
 
   useEffect(() => {
+    if (callStatus !== CallStatus.InCall) {
+      return;
+    }
+
+    const updateMediaDevices = async () => {
+      try {
+        const newMediaDevices = await getMediaDevices();
+
+        if (newMediaDevices.audiooutput.length !== 0 && !audioOutputDeviceId) {
+          setAudioOutputDeviceId(newMediaDevices.audiooutput[0].deviceId);
+        }
+
+        setMediaDevices(newMediaDevices);
+      } catch (e) {
+        console.error('Could not update media devices:', e);
+      }
+    };
+
+    navigator.mediaDevices.addEventListener('devicechange', updateMediaDevices);
+    updateMediaDevices();
+
+    return () => {
+      navigator.mediaDevices.removeEventListener('devicechange', updateMediaDevices);
+    };
+  }, [callStatus, getMediaDevices, audioOutputDeviceId]);
+
+  useEffect(() => {
     if (localStream) {
       for (const track of localStream.getAudioTracks()) {
         track.enabled = isAudioOn;
+        const deviceId = track.getSettings().deviceId;
+        if (deviceId) {
+          setAudioInputDeviceId(deviceId);
+        }
       }
     }
   }, [isAudioOn, localStream]);
@@ -122,6 +208,10 @@ const CallProvider = ({
     if (localStream) {
       for (const track of localStream.getVideoTracks()) {
         track.enabled = isVideoOn;
+        const deviceId = track.getSettings().deviceId;
+        if (deviceId) {
+          setVideoDeviceId(deviceId);
+        }
       }
     }
   }, [isVideoOn, localStream]);
@@ -139,17 +229,18 @@ const CallProvider = ({
 
   useEffect(() => {
     if (callRole === 'caller' && callStatus === CallStatus.Default) {
+      const withVideoOn = routeState?.isVideoOn ?? false;
       setCallStatus(CallStatus.Loading);
-      getUserMedia()
+      updateLocalStream()
         .then(() => {
           const callBegin: CallBegin = {
             contactId: contactUri,
             conversationId,
-            withVideoOn: routeState?.isVideoOn ?? false,
+            withVideoOn,
           };
 
           setCallStatus(CallStatus.Ringing);
-          setIsVideoOn(routeState?.isVideoOn ?? false);
+          setIsVideoOn(withVideoOn);
           console.info('Sending CallBegin', callBegin);
           webSocket.send(WebSocketMessageType.CallBegin, callBegin);
         })
@@ -158,12 +249,12 @@ const CallProvider = ({
           setCallStatus(CallStatus.PermissionsDenied);
         });
     }
-  }, [webSocket, getUserMedia, callRole, callStatus, contactUri, conversationId, routeState]);
+  }, [webSocket, updateLocalStream, callRole, callStatus, contactUri, conversationId, routeState]);
 
   const acceptCall = useCallback(
     (withVideoOn: boolean) => {
       setCallStatus(CallStatus.Loading);
-      getUserMedia()
+      updateLocalStream()
         .then(() => {
           const callAccept: CallAction = {
             contactId: contactUri,
@@ -180,7 +271,7 @@ const CallProvider = ({
           setCallStatus(CallStatus.PermissionsDenied);
         });
     },
-    [webSocket, getUserMedia, contactUri, conversationId]
+    [webSocket, updateLocalStream, contactUri, conversationId]
   );
 
   useEffect(() => {
@@ -268,6 +359,34 @@ const CallProvider = ({
     };
   }, [callStatus, endCall]);
 
+  const currentMediaDeviceIds: CurrentMediaDeviceIds = useMemo(() => {
+    const createSetIdForDeviceKind = (mediaInputKind: MediaInputKind) => async (id: string | undefined) => {
+      const mediaDeviceIds = {
+        audio: audioInputDeviceId,
+        video: videoDeviceId,
+      };
+
+      mediaDeviceIds[mediaInputKind] = id;
+
+      await updateLocalStream(mediaDeviceIds);
+    };
+
+    return {
+      audioinput: {
+        id: audioInputDeviceId,
+        setId: createSetIdForDeviceKind('audio'),
+      },
+      audiooutput: {
+        id: audioOutputDeviceId,
+        setId: setAudioOutputDeviceId,
+      },
+      videoinput: {
+        id: videoDeviceId,
+        setId: createSetIdForDeviceKind('video'),
+      },
+    };
+  }, [updateLocalStream, audioInputDeviceId, audioOutputDeviceId, videoDeviceId]);
+
   useEffect(() => {
     navigate('.', {
       replace: true,
@@ -283,6 +402,10 @@ const CallProvider = ({
   return (
     <CallContext.Provider
       value={{
+        mediaDevices,
+        currentMediaDeviceIds,
+        localVideoRef,
+        remoteVideoRef,
         isAudioOn,
         setIsAudioOn,
         isVideoOn,

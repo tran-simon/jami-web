@@ -25,13 +25,17 @@ import { useAuthContext } from './AuthProvider';
 import { ConversationContext } from './ConversationProvider';
 import { IWebSocketContext, WebSocketContext } from './WebSocketProvider';
 
+export type MediaDevicesInfo = Record<MediaDeviceKind, MediaDeviceInfo[]>;
+export type MediaInputKind = 'audio' | 'video';
+export type MediaInputIds = Record<MediaInputKind, string | false | undefined>;
+
 interface IWebRtcContext {
   iceConnectionState: RTCIceConnectionState | undefined;
 
-  mediaDevices: Record<MediaDeviceKind, MediaDeviceInfo[]>;
   localStream: MediaStream | undefined;
   remoteStreams: readonly MediaStream[] | undefined;
-  getUserMedia: () => Promise<void>;
+  getMediaDevices: () => Promise<MediaDevicesInfo>;
+  updateLocalStream: (mediaDeviceIds?: MediaInputIds) => Promise<void>;
 
   sendWebRtcOffer: () => Promise<void>;
   closeConnection: () => void;
@@ -39,15 +43,11 @@ interface IWebRtcContext {
 
 const defaultWebRtcContext: IWebRtcContext = {
   iceConnectionState: undefined,
-  mediaDevices: {
-    audioinput: [],
-    audiooutput: [],
-    videoinput: [],
-  },
   localStream: undefined,
   remoteStreams: undefined,
-  getUserMedia: async () => {},
-  sendWebRtcOffer: async () => {},
+  getMediaDevices: async () => Promise.reject(),
+  updateLocalStream: async () => Promise.reject(),
+  sendWebRtcOffer: async () => Promise.reject(),
   closeConnection: () => {},
 };
 
@@ -103,9 +103,9 @@ const WebRtcProvider = ({
   const [localStream, setLocalStream] = useState<MediaStream>();
   const [remoteStreams, setRemoteStreams] = useState<readonly MediaStream[]>();
   const [iceConnectionState, setIceConnectionState] = useState<RTCIceConnectionState | undefined>();
-  const [mediaDevices, setMediaDevices] = useState<Record<MediaDeviceKind, MediaDeviceInfo[]>>(
-    defaultWebRtcContext.mediaDevices
-  );
+
+  const [audioRtcRtpSenders, setAudioRtcRtpSenders] = useState<RTCRtpSender[]>();
+  const [videoRtcRtpSenders, setVideoRtcRtpSenders] = useState<RTCRtpSender[]>();
 
   // TODO: The ICE candidate queue is used to cache candidates that were received before `setRemoteDescription` was
   //       called. This is currently necessary, because the jami-daemon is unreliable as a WebRTC signaling channel,
@@ -120,73 +120,107 @@ const WebRtcProvider = ({
   // TODO: This logic will have to change to support multiple people in a call
   const contactUri = useMemo(() => conversation.getFirstMember().contact.getUri(), [conversation]);
 
-  const getMediaDevices = useCallback(async () => {
+  const getMediaDevices = useCallback(async (): Promise<MediaDevicesInfo> => {
     try {
       const devices = await navigator.mediaDevices.enumerateDevices();
-      const newMediaDevices: Record<MediaDeviceKind, MediaDeviceInfo[]> = {
-        audioinput: [],
-        audiooutput: [],
-        videoinput: [],
+
+      // TODO: On Firefox, some devices can sometime be duplicated (2 devices can share the same deviceId). Using a map
+      //       and then converting it to an array makes it so that there is no duplicate. If we find a way to prevent
+      //       Firefox from listing 2 devices with the same deviceId, we can remove this logic.
+      const newMediaDevices: Record<MediaDeviceKind, Record<string, MediaDeviceInfo>> = {
+        audioinput: {},
+        audiooutput: {},
+        videoinput: {},
       };
 
       for (const device of devices) {
-        newMediaDevices[device.kind].push(device);
+        newMediaDevices[device.kind][device.deviceId] = device;
       }
 
-      return newMediaDevices;
+      return {
+        audioinput: Object.values(newMediaDevices.audioinput),
+        audiooutput: Object.values(newMediaDevices.audiooutput),
+        videoinput: Object.values(newMediaDevices.videoinput),
+      };
     } catch (e) {
       throw new Error('Could not get media devices', { cause: e });
     }
   }, []);
 
-  useEffect(() => {
-    if (iceConnectionState !== 'connected' && iceConnectionState !== 'completed') {
-      return;
-    }
+  const updateLocalStream = useCallback(
+    async (mediaDeviceIds?: MediaInputIds) => {
+      const devices = await getMediaDevices();
 
-    const updateMediaDevices = async () => {
+      let audioConstraint: MediaTrackConstraints | boolean = devices.audioinput.length !== 0;
+      let videoConstraint: MediaTrackConstraints | boolean = devices.videoinput.length !== 0;
+
+      if (!audioConstraint && !videoConstraint) {
+        return;
+      }
+
+      if (mediaDeviceIds?.audio !== undefined) {
+        audioConstraint = mediaDeviceIds.audio !== false ? { deviceId: mediaDeviceIds.audio } : false;
+      }
+      if (mediaDeviceIds?.video !== undefined) {
+        videoConstraint = mediaDeviceIds.video !== false ? { deviceId: mediaDeviceIds.video } : false;
+      }
+
       try {
-        const newMediaDevices = await getMediaDevices();
-        setMediaDevices(newMediaDevices);
+        const stream = await navigator.mediaDevices.getUserMedia({
+          audio: audioConstraint,
+          video: videoConstraint,
+        });
+
+        for (const track of stream.getTracks()) {
+          track.enabled = false;
+        }
+
+        setLocalStream(stream);
       } catch (e) {
-        console.error('Could not update media devices:', e);
+        throw new Error('Could not get media devices', { cause: e });
       }
-    };
+    },
+    [getMediaDevices]
+  );
 
-    navigator.mediaDevices.addEventListener('devicechange', updateMediaDevices);
-    updateMediaDevices();
-
-    return () => {
-      navigator.mediaDevices.removeEventListener('devicechange', updateMediaDevices);
-    };
-  }, [getMediaDevices, iceConnectionState]);
-
-  const getUserMedia = useCallback(async () => {
-    const devices = await getMediaDevices();
-
-    const shouldGetAudio = devices.audioinput.length !== 0;
-    const shouldGetVideo = devices.videoinput.length !== 0;
-
-    if (!shouldGetAudio && !shouldGetVideo) {
+  useEffect(() => {
+    if (!localStream || !webRtcConnection) {
       return;
     }
 
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        audio: shouldGetAudio,
-        video: shouldGetVideo,
-      });
-
-      for (const track of stream.getTracks()) {
-        track.enabled = false;
-        webRtcConnection.addTrack(track, stream);
+    const updateTracks = async (kind: 'audio' | 'video') => {
+      const senders = kind === 'audio' ? audioRtcRtpSenders : videoRtcRtpSenders;
+      const tracks = kind === 'audio' ? localStream.getAudioTracks() : localStream.getVideoTracks();
+      if (senders) {
+        const promises: Promise<void>[] = [];
+        for (let i = 0; i < senders.length; i++) {
+          // TODO: There is a bug where calling multiple times `addTrack` when changing an input device doesn't work.
+          //       Calling `addTrack` doesn't trigger the `track` event listener for the other user.
+          //       This workaround makes it possible to replace a track, but it could be improved by figuring out the
+          //       proper way of changing a track.
+          promises.push(
+            senders[i].replaceTrack(tracks[i]).catch((e) => {
+              console.error('Error replacing track:', e);
+            })
+          );
+        }
+        return Promise.all(promises);
       }
 
-      setLocalStream(stream);
-    } catch (e) {
-      throw new Error('Could not get media devices', { cause: e });
-    }
-  }, [webRtcConnection, getMediaDevices]);
+      // TODO: Currently, we do not support adding new devices. To enable this feature, we would need to implement
+      //       the "Perfect negotiation" pattern to renegotiate after `addTrack`.
+      //       https://blog.mozilla.org/webrtc/perfect-negotiation-in-webrtc/
+      const newSenders = tracks.map((track) => webRtcConnection.addTrack(track, localStream));
+      if (kind === 'audio') {
+        setAudioRtcRtpSenders(newSenders);
+      } else {
+        setVideoRtcRtpSenders(newSenders);
+      }
+    };
+
+    updateTracks('audio');
+    updateTracks('video');
+  }, [localStream, webRtcConnection, audioRtcRtpSenders, videoRtcRtpSenders]);
 
   const sendWebRtcOffer = useCallback(async () => {
     const sdp = await webRtcConnection.createOffer({
@@ -229,7 +263,11 @@ const WebRtcProvider = ({
       console.info('WebRTC remote description has been set. Ready to receive ICE candidates');
       setIsReadyForIceCandidates(true);
       if (iceCandidateQueue.length !== 0) {
-        console.warn('Adding queued ICE candidates...', iceCandidateQueue);
+        console.warn(
+          'Found queued ICE candidates that were added before `setRemoteDescription` was called. ' +
+            'Adding queued ICE candidates...',
+          iceCandidateQueue
+        );
 
         await Promise.all(iceCandidateQueue.map((iceCandidate) => webRtcConnection.addIceCandidate(iceCandidate)));
       }
@@ -281,10 +319,6 @@ const WebRtcProvider = ({
       if (isReadyForIceCandidates) {
         await webRtcConnection.addIceCandidate(data.candidate);
       } else {
-        console.warn(
-          "Received event on WebRtcIceCandidate before 'setRemoteDescription' was called. Pushing to ICE candidates queue...",
-          data
-        );
         setIceCandidateQueue((v) => {
           v.push(data.candidate);
           return v;
@@ -355,10 +389,10 @@ const WebRtcProvider = ({
     <WebRtcContext.Provider
       value={{
         iceConnectionState,
-        mediaDevices,
         localStream,
         remoteStreams,
-        getUserMedia,
+        getMediaDevices,
+        updateLocalStream,
         sendWebRtcOffer,
         closeConnection,
       }}
