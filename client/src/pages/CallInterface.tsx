@@ -122,6 +122,7 @@ const CallInterface = () => {
             <video
               ref={localVideoRef}
               autoPlay
+              muted
               style={{
                 position: 'absolute',
                 right: 0,
