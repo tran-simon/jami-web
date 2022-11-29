@@ -16,7 +16,7 @@
  * <https://www.gnu.org/licenses/>.
  */
 import { WebSocketMessage, WebSocketMessageTable, WebSocketMessageType } from 'jami-web-common';
-import { createContext, useCallback, useEffect, useRef, useState } from 'react';
+import { createContext, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { apiUrl } from '../utils/constants';
 import { WithChildren } from '../utils/utils';
@@ -152,13 +152,14 @@ export default ({ children }: WithChildren) => {
 
   useEffect(connect, [connect]);
 
-  const value: IWebSocketContext | undefined = isConnected
-    ? {
-        bind,
-        unbind,
-        send,
-      }
-    : undefined;
+  const value: IWebSocketContext = useMemo(
+    () => ({
+      bind,
+      unbind,
+      send,
+    }),
+    [bind, unbind, send]
+  );
 
-  return <WebSocketContext.Provider value={value}>{children}</WebSocketContext.Provider>;
+  return <WebSocketContext.Provider value={isConnected ? value : undefined}>{children}</WebSocketContext.Provider>;
 };
