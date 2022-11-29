@@ -335,8 +335,8 @@ const CallProvider = ({
   }, [webSocket, contactUri, conversationId, quitCall]);
 
   useEffect(() => {
-    if (iceConnectionState === 'disconnected') {
-      console.info('ICE connection disconnected');
+    if (iceConnectionState === 'disconnected' || iceConnectionState === 'failed') {
+      console.info('ICE connection disconnected or failed, ending call');
       endCall();
     }
   }, [iceConnectionState, callStatus, setVideoStatus, isVideoOn, endCall]);

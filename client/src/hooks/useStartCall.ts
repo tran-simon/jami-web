@@ -18,18 +18,18 @@
 import { useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import { CallRole, CallStatus } from '../contexts/CallProvider';
+import { CallStatus } from '../contexts/CallProvider';
 import { CallRouteParams } from '../router';
 
 export const useStartCall = () => {
   const navigate = useNavigate();
 
   return useCallback(
-    (conversationId: string, role: CallRole = 'caller', state?: Partial<CallRouteParams['state']>) => {
+    (conversationId: string, state?: Partial<CallRouteParams['state']>) => {
       navigate(`/conversation/${conversationId}/call`, {
         state: {
           callStatus: CallStatus.Default,
-          role,
+          role: 'caller',
           ...state,
         },
       });

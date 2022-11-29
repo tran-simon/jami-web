@@ -141,7 +141,7 @@ const ConversationMenu = ({
         Icon: AudioCallIcon,
         onClick: () => {
           if (conversationId) {
-            startCall(conversationId, 'caller');
+            startCall(conversationId);
           }
         },
       },
@@ -150,7 +150,7 @@ const ConversationMenu = ({
         Icon: VideoCallIcon,
         onClick: () => {
           if (conversationId) {
-            startCall(conversationId, 'caller', {
+            startCall(conversationId, {
               isVideoOn: true,
             });
           }
