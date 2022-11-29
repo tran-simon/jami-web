@@ -28,17 +28,27 @@ import { IWebSocketContext, WebSocketContext } from './WebSocketProvider';
 interface IWebRtcContext {
   iceConnectionState: RTCIceConnectionState | undefined;
 
+  mediaDevices: Record<MediaDeviceKind, MediaDeviceInfo[]>;
+  localStream: MediaStream | undefined;
   remoteStreams: readonly MediaStream[] | undefined;
-  webRtcConnection: RTCPeerConnection | undefined;
+  getUserMedia: () => Promise<void>;
 
-  sendWebRtcOffer: (sdp: RTCSessionDescriptionInit) => Promise<void>;
+  sendWebRtcOffer: () => Promise<void>;
+  closeConnection: () => void;
 }
 
 const defaultWebRtcContext: IWebRtcContext = {
   iceConnectionState: undefined,
+  mediaDevices: {
+    audioinput: [],
+    audiooutput: [],
+    videoinput: [],
+  },
+  localStream: undefined,
   remoteStreams: undefined,
-  webRtcConnection: undefined,
+  getUserMedia: async () => {},
   sendWebRtcOffer: async () => {},
+  closeConnection: () => {},
 };
 
 export const WebRtcContext = createContext<IWebRtcContext>(defaultWebRtcContext);
@@ -66,7 +76,7 @@ export default ({ children }: WithChildren) => {
         });
       }
 
-      setWebRtcConnection(new RTCPeerConnection({ iceServers: iceServers }));
+      setWebRtcConnection(new RTCPeerConnection({ iceServers }));
     }
   }, [account, webRtcConnection]);
 
@@ -90,40 +100,117 @@ const WebRtcProvider = ({
   webSocket: IWebSocketContext;
 }) => {
   const { conversation, conversationId } = useContext(ConversationContext);
+  const [localStream, setLocalStream] = useState<MediaStream>();
   const [remoteStreams, setRemoteStreams] = useState<readonly MediaStream[]>();
   const [iceConnectionState, setIceConnectionState] = useState<RTCIceConnectionState | undefined>();
+  const [mediaDevices, setMediaDevices] = useState<Record<MediaDeviceKind, MediaDeviceInfo[]>>(
+    defaultWebRtcContext.mediaDevices
+  );
 
   // TODO: This logic will have to change to support multiple people in a call
   const contactUri = useMemo(() => conversation.getFirstMember().contact.getUri(), [conversation]);
 
-  const sendWebRtcOffer = useCallback(
-    async (sdp: RTCSessionDescriptionInit) => {
-      const webRtcOffer: WebRtcSdp = {
-        contactId: contactUri,
-        conversationId: conversationId,
-        sdp,
+  const getMediaDevices = useCallback(async () => {
+    try {
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      const newMediaDevices: Record<MediaDeviceKind, MediaDeviceInfo[]> = {
+        audioinput: [],
+        audiooutput: [],
+        videoinput: [],
       };
 
-      await webRtcConnection.setLocalDescription(new RTCSessionDescription(sdp));
-      console.info('Sending WebRtcOffer', webRtcOffer);
-      webSocket.send(WebSocketMessageType.WebRtcOffer, webRtcOffer);
-    },
-    [webRtcConnection, webSocket, conversationId, contactUri]
-  );
+      for (const device of devices) {
+        newMediaDevices[device.kind].push(device);
+      }
 
-  const sendWebRtcAnswer = useCallback(
-    (sdp: RTCSessionDescriptionInit) => {
-      const webRtcAnswer: WebRtcSdp = {
-        contactId: contactUri,
-        conversationId: conversationId,
-        sdp,
-      };
+      return newMediaDevices;
+    } catch (e) {
+      throw new Error('Could not get media devices', { cause: e });
+    }
+  }, []);
 
-      console.info('Sending WebRtcAnswer', webRtcAnswer);
-      webSocket.send(WebSocketMessageType.WebRtcAnswer, webRtcAnswer);
-    },
-    [contactUri, conversationId, webSocket]
-  );
+  useEffect(() => {
+    if (iceConnectionState !== 'connected' && iceConnectionState !== 'completed') {
+      return;
+    }
+
+    const updateMediaDevices = async () => {
+      try {
+        const newMediaDevices = await getMediaDevices();
+        setMediaDevices(newMediaDevices);
+      } catch (e) {
+        console.error('Could not update media devices:', e);
+      }
+    };
+
+    navigator.mediaDevices.addEventListener('devicechange', updateMediaDevices);
+    updateMediaDevices();
+
+    return () => {
+      navigator.mediaDevices.removeEventListener('devicechange', updateMediaDevices);
+    };
+  }, [getMediaDevices, iceConnectionState]);
+
+  const getUserMedia = useCallback(async () => {
+    const devices = await getMediaDevices();
+
+    const shouldGetAudio = devices.audioinput.length !== 0;
+    const shouldGetVideo = devices.videoinput.length !== 0;
+
+    if (!shouldGetAudio && !shouldGetVideo) {
+      return;
+    }
+
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: shouldGetAudio,
+        video: shouldGetVideo,
+      });
+
+      for (const track of stream.getTracks()) {
+        track.enabled = false;
+        webRtcConnection.addTrack(track, stream);
+      }
+
+      setLocalStream(stream);
+    } catch (e) {
+      throw new Error('Could not get media devices', { cause: e });
+    }
+  }, [webRtcConnection, getMediaDevices]);
+
+  const sendWebRtcOffer = useCallback(async () => {
+    const sdp = await webRtcConnection.createOffer({
+      offerToReceiveAudio: true,
+      offerToReceiveVideo: true,
+    });
+
+    const webRtcOffer: WebRtcSdp = {
+      contactId: contactUri,
+      conversationId: conversationId,
+      sdp,
+    };
+
+    await webRtcConnection.setLocalDescription(new RTCSessionDescription(sdp));
+    console.info('Sending WebRtcOffer', webRtcOffer);
+    webSocket.send(WebSocketMessageType.WebRtcOffer, webRtcOffer);
+  }, [webRtcConnection, webSocket, conversationId, contactUri]);
+
+  const sendWebRtcAnswer = useCallback(async () => {
+    const sdp = await webRtcConnection.createAnswer({
+      offerToReceiveAudio: true,
+      offerToReceiveVideo: true,
+    });
+
+    const webRtcAnswer: WebRtcSdp = {
+      contactId: contactUri,
+      conversationId: conversationId,
+      sdp,
+    };
+
+    await webRtcConnection.setLocalDescription(new RTCSessionDescription(sdp));
+    console.info('Sending WebRtcAnswer', webRtcAnswer);
+    webSocket.send(WebSocketMessageType.WebRtcAnswer, webRtcAnswer);
+  }, [contactUri, conversationId, webRtcConnection, webSocket]);
 
   /* WebSocket Listeners */
 
@@ -136,13 +223,7 @@ const WebRtcProvider = ({
       }
 
       await webRtcConnection.setRemoteDescription(new RTCSessionDescription(data.sdp));
-
-      const sdp = await webRtcConnection.createAnswer({
-        offerToReceiveAudio: true,
-        offerToReceiveVideo: true,
-      });
-      await webRtcConnection.setLocalDescription(new RTCSessionDescription(sdp));
-      sendWebRtcAnswer(sdp);
+      await sendWebRtcAnswer();
     };
 
     const webRtcAnswerListener = async (data: WebRtcSdp) => {
@@ -154,6 +235,7 @@ const WebRtcProvider = ({
 
       await webRtcConnection.setRemoteDescription(new RTCSessionDescription(data.sdp));
     };
+
     webSocket.bind(WebSocketMessageType.WebRtcOffer, webRtcOfferListener);
     webSocket.bind(WebSocketMessageType.WebRtcAnswer, webRtcAnswerListener);
 
@@ -194,7 +276,6 @@ const WebRtcProvider = ({
         webSocket.send(WebSocketMessageType.WebRtcIceCandidate, webRtcIceCandidate);
       }
     };
-
     webRtcConnection.addEventListener('icecandidate', iceCandidateEventListener);
 
     return () => {
@@ -208,8 +289,8 @@ const WebRtcProvider = ({
       setRemoteStreams(event.streams);
     };
 
-    const iceConnectionStateChangeEventListener = () => {
-      console.info('ICE connection state changed:', webRtcConnection.iceConnectionState);
+    const iceConnectionStateChangeEventListener = (event: Event) => {
+      console.info(`Received WebRTC event on iceconnectionstatechange: ${webRtcConnection.iceConnectionState}`, event);
       setIceConnectionState(webRtcConnection.iceConnectionState);
     };
 
@@ -222,13 +303,27 @@ const WebRtcProvider = ({
     };
   }, [webRtcConnection]);
 
+  const closeConnection = useCallback(() => {
+    const localTracks = localStream?.getTracks();
+    if (localTracks) {
+      for (const track of localTracks) {
+        track.stop();
+      }
+    }
+
+    webRtcConnection.close();
+  }, [webRtcConnection, localStream]);
+
   return (
     <WebRtcContext.Provider
       value={{
         iceConnectionState,
+        mediaDevices,
+        localStream,
         remoteStreams,
-        webRtcConnection,
+        getUserMedia,
         sendWebRtcOffer,
+        closeConnection,
       }}
     >
       {children}

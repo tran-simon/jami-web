@@ -43,9 +43,8 @@ const ConversationView = () => {
 
 const ConversationHeader = () => {
   const { account } = useAuthContext();
-  const { conversation } = useContext(ConversationContext);
+  const { conversation, conversationId } = useContext(ConversationContext);
   const { t } = useTranslation();
-  const { conversationId } = useContext(ConversationContext);
 
   const members = conversation.getMembers();
   const adminTitle = conversation.infos.title as string;

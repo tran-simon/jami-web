@@ -22,7 +22,14 @@ import { useContext, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { CallContext } from '../contexts/CallProvider';
-import { ExpandableButton, ExpandableButtonProps, ShapedButtonProps, ToggleIconButton } from './Button';
+import { WebRtcContext } from '../contexts/WebRtcProvider';
+import {
+  ExpandableButton,
+  ExpandableButtonProps,
+  ExpandMenuRadioOption,
+  ShapedButtonProps,
+  ToggleIconButton,
+} from './Button';
 import {
   CallEndIcon,
   ChatBubbleIcon,
@@ -170,10 +177,10 @@ export const CallingScreenShareButton = (props: ExpandableButtonProps) => {
   );
 };
 
-const useMediaDeviceExpandMenuOptions = (kind: MediaDeviceKind) => {
-  const { mediaDevices } = useContext(CallContext);
+const useMediaDeviceExpandMenuOptions = (kind: MediaDeviceKind): ExpandMenuRadioOption[] | undefined => {
+  const { mediaDevices } = useContext(WebRtcContext);
 
-  return useMemo(
+  const options = useMemo(
     () =>
       mediaDevices[kind].map((device) => ({
         key: device.deviceId,
@@ -181,23 +188,14 @@ const useMediaDeviceExpandMenuOptions = (kind: MediaDeviceKind) => {
       })),
     [mediaDevices, kind]
   );
+
+  return options.length > 0 ? [{ options }] : undefined;
 };
 
 export const CallingVolumeButton = (props: ExpandableButtonProps) => {
   const options = useMediaDeviceExpandMenuOptions('audiooutput');
 
-  return (
-    <CallButton
-      aria-label="volume options"
-      Icon={VolumeIcon}
-      expandMenuOptions={[
-        {
-          options,
-        },
-      ]}
-      {...props}
-    />
-  );
+  return <CallButton aria-label="volume options" Icon={VolumeIcon} expandMenuOptions={options} {...props} />;
 };
 
 export const CallingMicButton = (props: ExpandableButtonProps) => {
@@ -206,11 +204,7 @@ export const CallingMicButton = (props: ExpandableButtonProps) => {
   return (
     <CallButton
       aria-label="microphone options"
-      expandMenuOptions={[
-        {
-          options,
-        },
-      ]}
+      expandMenuOptions={options}
       IconButtonComp={ToggleAudioCameraIconButton}
       {...props}
     />
@@ -218,13 +212,13 @@ export const CallingMicButton = (props: ExpandableButtonProps) => {
 };
 
 const ToggleAudioCameraIconButton = (props: IconButtonProps) => {
-  const { isAudioOn, setAudioStatus } = useContext(CallContext);
+  const { isAudioOn, setIsAudioOn } = useContext(CallContext);
   return (
     <ToggleIconButton
       IconOn={MicroIcon}
       IconOff={MicroOffIcon}
       selected={isAudioOn}
-      toggle={() => setAudioStatus(!isAudioOn)}
+      toggle={() => setIsAudioOn((v) => !v)}
       {...props}
     />
   );
@@ -236,11 +230,7 @@ export const CallingVideoCameraButton = (props: ExpandableButtonProps) => {
   return (
     <CallButton
       aria-label="camera options"
-      expandMenuOptions={[
-        {
-          options,
-        },
-      ]}
+      expandMenuOptions={options}
       IconButtonComp={ToggleVideoCameraIconButton}
       {...props}
     />
@@ -248,13 +238,13 @@ export const CallingVideoCameraButton = (props: ExpandableButtonProps) => {
 };
 
 const ToggleVideoCameraIconButton = (props: IconButtonProps) => {
-  const { isVideoOn, setVideoStatus } = useContext(CallContext);
+  const { isVideoOn, setIsVideoOn } = useContext(CallContext);
   return (
     <ToggleIconButton
       IconOn={VideoCameraIcon}
       IconOff={VideoCameraOffIcon}
       selected={isVideoOn}
-      toggle={() => setVideoStatus(!isVideoOn)}
+      toggle={() => setIsVideoOn((v) => !v)}
       {...props}
     />
   );

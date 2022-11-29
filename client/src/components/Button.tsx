@@ -97,7 +97,7 @@ type ExpandMenuOption = {
   icon?: ReactNode;
 };
 
-type ExpandMenuRadioOption = {
+export type ExpandMenuRadioOption = {
   options: {
     key: string;
     description: ReactNode;

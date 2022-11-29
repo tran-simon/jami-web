@@ -21,6 +21,7 @@ import { Navigate, useNavigate } from 'react-router-dom';
 
 import LoadingPage from '../components/Loading';
 import { useUrlParams } from '../hooks/useUrlParams';
+import CallPermissionDenied from '../pages/CallPermissionDenied';
 import { CallRouteParams } from '../router';
 import { callTimeoutMs } from '../utils/constants';
 import { SetState, WithChildren } from '../utils/utils';
@@ -32,21 +33,18 @@ export type CallRole = 'caller' | 'receiver';
 
 export enum CallStatus {
   Default,
+  Loading,
   Ringing,
   Connecting,
   InCall,
+  PermissionsDenied,
 }
 
 export interface ICallContext {
-  mediaDevices: Record<MediaDeviceKind, MediaDeviceInfo[]>;
-
-  localStream: MediaStream | undefined;
-  remoteStream: MediaStream | undefined; // TODO: should be an array of participants. find a way to map MediaStream id to contactid https://stackoverflow.com/a/68663155/6592293
-
   isAudioOn: boolean;
-  setAudioStatus: (isOn: boolean) => void;
+  setIsAudioOn: SetState<boolean>;
   isVideoOn: boolean;
-  setVideoStatus: (isOn: boolean) => void;
+  setIsVideoOn: SetState<boolean>;
   isChatShown: boolean;
   setIsChatShown: SetState<boolean>;
   isFullscreen: boolean;
@@ -60,19 +58,10 @@ export interface ICallContext {
 }
 
 const defaultCallContext: ICallContext = {
-  mediaDevices: {
-    audioinput: [],
-    audiooutput: [],
-    videoinput: [],
-  },
-
-  localStream: undefined,
-  remoteStream: undefined,
-
   isAudioOn: false,
-  setAudioStatus: () => {},
+  setIsAudioOn: () => {},
   isVideoOn: false,
-  setVideoStatus: () => {},
+  setIsVideoOn: () => {},
   isChatShown: false,
   setIsChatShown: () => {},
   isFullscreen: false,
@@ -89,36 +78,24 @@ export const CallContext = createContext<ICallContext>(defaultCallContext);
 
 export default ({ children }: WithChildren) => {
   const webSocket = useContext(WebSocketContext);
-  const { webRtcConnection } = useContext(WebRtcContext);
 
-  if (!webSocket || !webRtcConnection) {
+  if (!webSocket) {
     return <LoadingPage />;
   }
 
-  return (
-    <CallProvider webSocket={webSocket} webRtcConnection={webRtcConnection}>
-      {children}
-    </CallProvider>
-  );
+  return <CallProvider webSocket={webSocket}>{children}</CallProvider>;
 };
 
 const CallProvider = ({
   children,
   webSocket,
-  webRtcConnection,
 }: WithChildren & {
   webSocket: IWebSocketContext;
-  webRtcConnection: RTCPeerConnection;
 }) => {
   const { state: routeState } = useUrlParams<CallRouteParams>();
-  const { remoteStreams, sendWebRtcOffer, iceConnectionState } = useContext(WebRtcContext);
+  const { localStream, sendWebRtcOffer, iceConnectionState, closeConnection, getUserMedia } = useContext(WebRtcContext);
   const { conversationId, conversation } = useContext(ConversationContext);
   const navigate = useNavigate();
-
-  const [mediaDevices, setMediaDevices] = useState<Record<MediaDeviceKind, MediaDeviceInfo[]>>(
-    defaultCallContext.mediaDevices
-  );
-  const [localStream, setLocalStream] = useState<MediaStream>();
 
   const [isAudioOn, setIsAudioOn] = useState(false);
   const [isVideoOn, setIsVideoOn] = useState(false);
@@ -134,96 +111,20 @@ const CallProvider = ({
   const contactUri = useMemo(() => conversation.getFirstMember().contact.getUri(), [conversation]);
 
   useEffect(() => {
-    try {
-      // TODO: Wait until status is `InCall` before getting devices
-      navigator.mediaDevices.enumerateDevices().then((devices) => {
-        const newMediaDevices: Record<MediaDeviceKind, MediaDeviceInfo[]> = {
-          audioinput: [],
-          audiooutput: [],
-          videoinput: [],
-        };
-
-        for (const device of devices) {
-          newMediaDevices[device.kind].push(device);
-        }
-
-        setMediaDevices(newMediaDevices);
-      });
-    } catch (e) {
-      console.error('Could not get media devices:', e);
+    if (localStream) {
+      for (const track of localStream.getAudioTracks()) {
+        track.enabled = isAudioOn;
+      }
     }
-
-    try {
-      navigator.mediaDevices
-        .getUserMedia({
-          audio: true, // TODO: Set both to false by default
-          video: true,
-        })
-        .then((stream) => {
-          for (const track of stream.getTracks()) {
-            // TODO: Set default from isVideoOn and isMicOn values
-            track.enabled = false;
-          }
-          setLocalStream(stream);
-        });
-    } catch (e) {
-      // TODO: Better handle user denial
-      console.error('Could not get media devices:', e);
-    }
-  }, []);
+  }, [isAudioOn, localStream]);
 
   useEffect(() => {
     if (localStream) {
-      for (const track of localStream.getTracks()) {
-        webRtcConnection.addTrack(track, localStream);
-      }
-    }
-  }, [localStream, webRtcConnection]);
-
-  const setAudioStatus = useCallback(
-    (isOn: boolean) => {
-      if (!localStream) {
-        return;
-      }
-
-      for (const track of localStream.getAudioTracks()) {
-        track.enabled = isOn;
-      }
-
-      setIsAudioOn(isOn);
-    },
-    [localStream]
-  );
-
-  const setVideoStatus = useCallback(
-    (isOn: boolean) => {
-      if (!localStream) {
-        return;
-      }
-
       for (const track of localStream.getVideoTracks()) {
-        track.enabled = isOn;
+        track.enabled = isVideoOn;
       }
-
-      setIsVideoOn(isOn);
-    },
-    [localStream]
-  );
-
-  useEffect(() => {
-    if (callRole === 'caller' && callStatus === CallStatus.Default) {
-      const callBegin: CallBegin = {
-        contactId: contactUri,
-        conversationId,
-        withVideoOn: routeState?.isVideoOn ?? false,
-      };
-
-      console.info('Sending CallBegin', callBegin);
-      webSocket.send(WebSocketMessageType.CallBegin, callBegin);
-      setCallStatus(CallStatus.Ringing);
-      setIsVideoOn(routeState?.isVideoOn ?? false);
     }
-  }, [webSocket, callRole, callStatus, contactUri, conversationId, routeState]);
+  }, [isVideoOn, localStream]);
 
   useEffect(() => {
     const onFullscreenChange = () => {
@@ -237,6 +138,53 @@ const CallProvider = ({
   }, []);
 
   useEffect(() => {
+    if (callRole === 'caller' && callStatus === CallStatus.Default) {
+      setCallStatus(CallStatus.Loading);
+      getUserMedia()
+        .then(() => {
+          const callBegin: CallBegin = {
+            contactId: contactUri,
+            conversationId,
+            withVideoOn: routeState?.isVideoOn ?? false,
+          };
+
+          setCallStatus(CallStatus.Ringing);
+          setIsVideoOn(routeState?.isVideoOn ?? false);
+          console.info('Sending CallBegin', callBegin);
+          webSocket.send(WebSocketMessageType.CallBegin, callBegin);
+        })
+        .catch((e) => {
+          console.error(e);
+          setCallStatus(CallStatus.PermissionsDenied);
+        });
+    }
+  }, [webSocket, getUserMedia, callRole, callStatus, contactUri, conversationId, routeState]);
+
+  const acceptCall = useCallback(
+    (withVideoOn: boolean) => {
+      setCallStatus(CallStatus.Loading);
+
+      getUserMedia()
+        .then(() => {
+          const callAccept: CallAction = {
+            contactId: contactUri,
+            conversationId,
+          };
+
+          setIsVideoOn(withVideoOn);
+          setCallStatus(CallStatus.Connecting);
+          console.info('Sending CallAccept', callAccept);
+          webSocket.send(WebSocketMessageType.CallAccept, callAccept);
+        })
+        .catch((e) => {
+          console.error(e);
+          setCallStatus(CallStatus.PermissionsDenied);
+        });
+    },
+    [webSocket, getUserMedia, contactUri, conversationId]
+  );
+
+  useEffect(() => {
     if (callRole === 'caller' && callStatus === CallStatus.Ringing) {
       const callAcceptListener = (data: CallAction) => {
         console.info('Received event on CallAccept', data);
@@ -247,14 +195,7 @@ const CallProvider = ({
 
         setCallStatus(CallStatus.Connecting);
 
-        webRtcConnection
-          .createOffer({
-            offerToReceiveAudio: true,
-            offerToReceiveVideo: true,
-          })
-          .then((sdp) => {
-            sendWebRtcOffer(sdp);
-          });
+        sendWebRtcOffer();
       };
 
       webSocket.bind(WebSocketMessageType.CallAccept, callAcceptListener);
@@ -263,19 +204,20 @@ const CallProvider = ({
         webSocket.unbind(WebSocketMessageType.CallAccept, callAcceptListener);
       };
     }
-  }, [callRole, webSocket, webRtcConnection, sendWebRtcOffer, callStatus, conversationId]);
+  }, [callRole, webSocket, sendWebRtcOffer, callStatus, conversationId]);
 
-  const quitCall = useCallback(() => {
-    const localTracks = localStream?.getTracks();
-    if (localTracks) {
-      for (const track of localTracks) {
-        track.stop();
-      }
-    }
+  const endCall = useCallback(() => {
+    const callEnd: CallAction = {
+      contactId: contactUri,
+      conversationId,
+    };
 
-    webRtcConnection.close();
+    console.info('Sending CallEnd', callEnd);
+    closeConnection();
+    webSocket.send(WebSocketMessageType.CallEnd, callEnd);
     navigate(`/conversation/${conversationId}`);
-  }, [webRtcConnection, localStream, navigate, conversationId]);
+    // TODO: write in chat that the call ended
+  }, [webSocket, contactUri, conversationId, closeConnection, navigate]);
 
   useEffect(() => {
     const callEndListener = (data: CallAction) => {
@@ -285,7 +227,8 @@ const CallProvider = ({
         return;
       }
 
-      quitCall();
+      closeConnection();
+      navigate(`/conversation/${conversationId}`);
       // TODO: write in chat that the call ended
     };
 
@@ -293,7 +236,7 @@ const CallProvider = ({
     return () => {
       webSocket.unbind(WebSocketMessageType.CallEnd, callEndListener);
     };
-  }, [webSocket, navigate, conversationId, quitCall]);
+  }, [webSocket, navigate, conversationId, closeConnection]);
 
   useEffect(() => {
     if (
@@ -302,44 +245,16 @@ const CallProvider = ({
     ) {
       console.info('Changing call status to InCall');
       setCallStatus(CallStatus.InCall);
-      setVideoStatus(isVideoOn);
       setCallStartTime(new Date());
     }
-  }, [iceConnectionState, callStatus, setVideoStatus, isVideoOn]);
-
-  const acceptCall = useCallback(
-    (withVideoOn: boolean) => {
-      const callAccept: CallAction = {
-        contactId: contactUri,
-        conversationId,
-      };
-
-      console.info('Sending CallAccept', callAccept);
-      webSocket.send(WebSocketMessageType.CallAccept, callAccept);
-      setIsVideoOn(withVideoOn);
-      setCallStatus(CallStatus.Connecting);
-    },
-    [webSocket, contactUri, conversationId]
-  );
-
-  const endCall = useCallback(() => {
-    const callEnd: CallAction = {
-      contactId: contactUri,
-      conversationId,
-    };
-
-    console.info('Sending CallEnd', callEnd);
-    webSocket.send(WebSocketMessageType.CallEnd, callEnd);
-    quitCall();
-    // TODO: write in chat that the call ended
-  }, [webSocket, contactUri, conversationId, quitCall]);
+  }, [iceConnectionState, callStatus]);
 
   useEffect(() => {
     if (iceConnectionState === 'disconnected' || iceConnectionState === 'failed') {
       console.info('ICE connection disconnected or failed, ending call');
       endCall();
     }
-  }, [iceConnectionState, callStatus, setVideoStatus, isVideoOn, endCall]);
+  }, [iceConnectionState, callStatus, isVideoOn, endCall]);
 
   useEffect(() => {
     const checkStatusTimeout = () => {
@@ -369,13 +284,10 @@ const CallProvider = ({
   return (
     <CallContext.Provider
       value={{
-        mediaDevices,
-        localStream,
-        remoteStream: remoteStreams?.at(-1),
         isAudioOn,
-        setAudioStatus,
+        setIsAudioOn,
         isVideoOn,
-        setVideoStatus,
+        setIsVideoOn,
         isChatShown,
         setIsChatShown,
         isFullscreen,
@@ -387,7 +299,7 @@ const CallProvider = ({
         endCall,
       }}
     >
-      {children}
+      {callStatus === CallStatus.PermissionsDenied ? <CallPermissionDenied /> : children}
     </CallContext.Provider>
   );
 };

@@ -19,6 +19,7 @@
 import { Box, CircularProgress, Grid, IconButtonProps, Stack, Typography } from '@mui/material';
 import { ComponentType, ReactNode, useContext, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useLocation } from 'react-router-dom';
 
 import {
   CallingAnswerAudioButton,
@@ -27,21 +28,12 @@ import {
   CallingRefuseButton,
 } from '../components/CallButtons';
 import ConversationAvatar from '../components/ConversationAvatar';
+import { CallContext, CallStatus } from '../contexts/CallProvider';
 import { ConversationContext } from '../contexts/ConversationProvider';
 
-export type CallPendingProps = {
-  pending: PendingStatus;
-  caller?: CallerStatus;
-  medium?: CommunicationMedium;
-};
-
-type PendingStatus = 'caller' | 'receiver';
-type CallerStatus = 'calling' | 'connecting';
-type CommunicationMedium = 'audio' | 'video';
-
-export const CallPending = (props: CallPendingProps) => {
+export const CallPending = () => {
   const { conversation } = useContext(ConversationContext);
-
+  const { callRole } = useContext(CallContext);
   return (
     <Stack
       direction="column"
@@ -91,11 +83,7 @@ export const CallPending = (props: CallPendingProps) => {
           />
         </Box>
       </Box>
-      {props.pending === 'caller' ? (
-        <CallPendingCallerInterface {...props} />
-      ) : (
-        <CallPendingReceiverInterface {...props} />
-      )}
+      {callRole === 'caller' ? <CallPendingCallerInterface /> : <CallPendingReceiverInterface />}
     </Stack>
   );
 };
@@ -133,20 +121,28 @@ const CallPendingDetails = ({
   );
 };
 
-export const CallPendingCallerInterface = ({ caller }: CallPendingProps) => {
+export const CallPendingCallerInterface = () => {
+  const { callStatus } = useContext(CallContext);
   const { t } = useTranslation();
   const { conversation } = useContext(ConversationContext);
   const memberName = useMemo(() => conversation.getFirstMember().contact.getRegisteredName(), [conversation]);
 
+  let title = t('loading');
+
+  switch (callStatus) {
+    case CallStatus.Ringing:
+      title = t('calling', {
+        member0: memberName,
+      });
+      break;
+    case CallStatus.Connecting:
+      title = t('connecting');
+      break;
+  }
+
   return (
     <CallPendingDetails
-      title={
-        caller === 'calling'
-          ? t('calling', {
-              member0: memberName,
-            })
-          : t('connecting')
-      }
+      title={title}
       buttons={[
         {
           ButtonComponent: CallingCancelButton,
@@ -157,21 +153,31 @@ export const CallPendingCallerInterface = ({ caller }: CallPendingProps) => {
   );
 };
 
-export const CallPendingReceiverInterface = ({ medium, caller }: CallPendingProps) => {
+export const CallPendingReceiverInterface = () => {
+  const { state } = useLocation();
+  const { callStatus } = useContext(CallContext);
+
   const { t } = useTranslation();
   const { conversation } = useContext(ConversationContext);
   const memberName = useMemo(() => conversation.getFirstMember().contact.getRegisteredName(), [conversation]);
 
+  let title = t('loading');
+
+  switch (callStatus) {
+    case CallStatus.Ringing:
+      title = t('incoming_call', {
+        context: state?.isVideoOn ? 'video' : 'audio',
+        member0: memberName,
+      });
+      break;
+    case CallStatus.Connecting:
+      title = t('connecting');
+      break;
+  }
+
   return (
     <CallPendingDetails
-      title={
-        caller === 'connecting'
-          ? t('connecting')
-          : t('incoming_call', {
-              context: medium,
-              member0: memberName,
-            })
-      }
+      title={title}
       buttons={[
         {
           ButtonComponent: CallingRefuseButton,

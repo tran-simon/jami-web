@@ -29,7 +29,6 @@ import {
   useState,
 } from 'react';
 import Draggable from 'react-draggable';
-import { useLocation } from 'react-router-dom';
 
 import { ExpandableButtonProps } from '../components/Button';
 import {
@@ -48,12 +47,12 @@ import {
 import CallChatDrawer from '../components/CallChatDrawer';
 import { CallContext, CallStatus } from '../contexts/CallProvider';
 import { ConversationContext } from '../contexts/ConversationProvider';
+import { WebRtcContext } from '../contexts/WebRtcProvider';
 import { CallPending } from './CallPending';
 
 export default () => {
-  const { callRole, callStatus, isChatShown, isFullscreen } = useContext(CallContext);
+  const { callStatus, isChatShown, isFullscreen } = useContext(CallContext);
   const callInterfaceRef = useRef<HTMLDivElement>();
-  const { state } = useLocation();
 
   useEffect(() => {
     if (!callInterfaceRef.current) {
@@ -68,13 +67,7 @@ export default () => {
   }, [isFullscreen]);
 
   if (callStatus !== CallStatus.InCall) {
-    return (
-      <CallPending
-        pending={callRole}
-        caller={callStatus === CallStatus.Connecting ? 'connecting' : 'calling'}
-        medium={state?.isVideoOn ? 'video' : 'audio'}
-      />
-    );
+    return <CallPending />;
   }
 
   return (
@@ -90,7 +83,8 @@ interface Props {
 }
 
 const CallInterface = () => {
-  const { isVideoOn, localStream, remoteStream } = useContext(CallContext);
+  const { localStream, remoteStreams } = useContext(WebRtcContext);
+  const { isVideoOn } = useContext(CallContext);
   const gridItemRef = useRef(null);
   const remoteVideoRef = useRef<HTMLVideoElement | null>(null);
   const localVideoRef = useRef<HTMLVideoElement | null>(null);
@@ -102,10 +96,13 @@ const CallInterface = () => {
   }, [localStream]);
 
   useEffect(() => {
+    // TODO: For now, `remoteStream` is the first remote stream in the array.
+    //       There should only be one in the array, but we should make sure this is right.
+    const remoteStream = remoteStreams?.at(0);
     if (remoteStream && remoteVideoRef.current) {
       remoteVideoRef.current.srcObject = remoteStream;
     }
-  }, [remoteStream]);
+  }, [remoteStreams]);
 
   return (
     <Box display="flex" flexGrow={1}>
