@@ -90,12 +90,10 @@ interface Props {
 }
 
 const CallInterface = () => {
-  const { isVideoOn, localStream, remoteStream, callStartTime } = useContext(CallContext);
+  const { isVideoOn, localStream, remoteStream } = useContext(CallContext);
   const gridItemRef = useRef(null);
   const remoteVideoRef = useRef<HTMLVideoElement | null>(null);
   const localVideoRef = useRef<HTMLVideoElement | null>(null);
-
-  const [elapsedTime, setElapsedTime] = useState<number>();
 
   useEffect(() => {
     if (localStream && localVideoRef.current) {
@@ -109,15 +107,6 @@ const CallInterface = () => {
     }
   }, [remoteStream]);
 
-  useEffect(() => {
-    if (callStartTime) {
-      const interval = setInterval(() => {
-        setElapsedTime((new Date().getTime() - callStartTime.getTime()) / 1000);
-      }, 1000);
-      return () => clearInterval(interval);
-    }
-  }, [callStartTime]);
-
   return (
     <Box display="flex" flexGrow={1}>
       <video
@@ -127,7 +116,7 @@ const CallInterface = () => {
       />
       <Box flexGrow={1} margin={2} display="flex" flexDirection="column">
         {/* Guest video, takes the whole screen */}
-        <CallInterfaceInformation elapsedTime={elapsedTime} />
+        <CallInterfaceInformation />
         <Box flexGrow={1} marginY={2} position="relative">
           <Draggable bounds="parent" nodeRef={localVideoRef ?? undefined}>
             <video
@@ -177,13 +166,21 @@ const formatElapsedSeconds = (elapsedSeconds: number): string => {
   return times.join(':');
 };
 
-interface CallInterfaceInformationProps {
-  elapsedTime?: number;
-}
-
-const CallInterfaceInformation = ({ elapsedTime = 0 }: CallInterfaceInformationProps) => {
+const CallInterfaceInformation = () => {
+  const { callStartTime } = useContext(CallContext);
   const { conversation } = useContext(ConversationContext);
+  const [elapsedTime, setElapsedTime] = useState<number>(0);
   const memberName = useMemo(() => conversation.getFirstMember().contact.getRegisteredName(), [conversation]);
+
+  useEffect(() => {
+    if (callStartTime) {
+      const interval = setInterval(() => {
+        setElapsedTime((new Date().getTime() - callStartTime.getTime()) / 1000);
+      }, 1000);
+      return () => clearInterval(interval);
+    }
+  }, [callStartTime]);
+
   const elapsedTimerString = formatElapsedSeconds(elapsedTime);
 
   return (
