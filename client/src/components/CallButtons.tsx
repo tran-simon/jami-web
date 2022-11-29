@@ -268,10 +268,11 @@ export const CallingCancelButton = (props: IconButtonProps) => {
 };
 
 export const CallingAnswerAudioButton = (props: IconButtonProps) => {
-  const { acceptCall } = useContext(CallContext);
+  const { acceptCall, isAnswerButtonDisabled } = useContext(CallContext);
 
   return (
     <ColoredCallButton
+      disabled={isAnswerButtonDisabled}
       aria-label="answer call audio"
       onClick={() => {
         acceptCall(false);
@@ -284,10 +285,10 @@ export const CallingAnswerAudioButton = (props: IconButtonProps) => {
 };
 
 export const CallingAnswerVideoButton = (props: IconButtonProps) => {
-  const { acceptCall } = useContext(CallContext);
-
+  const { acceptCall, isAnswerButtonDisabled } = useContext(CallContext);
   return (
     <ColoredCallButton
+      disabled={isAnswerButtonDisabled}
       aria-label="answer call video"
       onClick={() => {
         acceptCall(true);

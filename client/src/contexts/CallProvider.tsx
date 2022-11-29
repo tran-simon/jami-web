@@ -52,6 +52,7 @@ export interface ICallContext {
   callRole: CallRole;
   callStatus: CallStatus;
   callStartTime: Date | undefined;
+  isAnswerButtonDisabled: boolean;
 
   acceptCall: (withVideoOn: boolean) => void;
   endCall: () => void;
@@ -69,6 +70,7 @@ const defaultCallContext: ICallContext = {
   callRole: 'caller',
   callStatus: CallStatus.Default,
   callStartTime: undefined,
+  isAnswerButtonDisabled: false,
 
   acceptCall: (_: boolean) => {},
   endCall: () => {},
@@ -104,6 +106,7 @@ const CallProvider = ({
   const [callStatus, setCallStatus] = useState(routeState?.callStatus);
   const [callRole] = useState(routeState?.role);
   const [callStartTime, setCallStartTime] = useState<Date | undefined>(undefined);
+  const [isAnswerButtonDisabled, setIsAnswerButtonDisabled] = useState(false);
 
   // TODO: This logic will have to change to support multiple people in a call. Could we move this logic to the server?
   //       The client could make a single request with the conversationId, and the server would be tasked with sending
@@ -163,7 +166,7 @@ const CallProvider = ({
   const acceptCall = useCallback(
     (withVideoOn: boolean) => {
       setCallStatus(CallStatus.Loading);
-
+      setIsAnswerButtonDisabled(true);
       getUserMedia()
         .then(() => {
           const callAccept: CallAction = {
@@ -295,6 +298,7 @@ const CallProvider = ({
         callRole,
         callStatus,
         callStartTime,
+        isAnswerButtonDisabled,
         acceptCall,
         endCall,
       }}
