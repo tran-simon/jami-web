@@ -107,6 +107,16 @@ const WebRtcProvider = ({
     defaultWebRtcContext.mediaDevices
   );
 
+  // TODO: The ICE candidate queue is used to cache candidates that were received before `setRemoteDescription` was
+  //       called. This is currently necessary, because the jami-daemon is unreliable as a WebRTC signaling channel,
+  //       because messages can be received with a delay or out of order. This queue is a temporary workaround that
+  //       should be replaced if there is a better way to send messages with the daemon.
+  //       Relevant links:
+  //       - https://github.com/w3c/webrtc-pc/issues/2519#issuecomment-622055440
+  //       - https://stackoverflow.com/questions/57256828/how-to-fix-invalidstateerror-cannot-add-ice-candidate-when-there-is-no-remote-s
+  const [isReadyForIceCandidates, setIsReadyForIceCandidates] = useState(false);
+  const [iceCandidateQueue, setIceCandidateQueue] = useState<RTCIceCandidate[]>([]);
+
   // TODO: This logic will have to change to support multiple people in a call
   const contactUri = useMemo(() => conversation.getFirstMember().contact.getUri(), [conversation]);
 
@@ -215,6 +225,16 @@ const WebRtcProvider = ({
   /* WebSocket Listeners */
 
   useEffect(() => {
+    const addQueuedIceCandidates = async () => {
+      console.info('WebRTC remote description has been set. Ready to receive ICE candidates');
+      setIsReadyForIceCandidates(true);
+      if (iceCandidateQueue.length !== 0) {
+        console.warn('Adding queued ICE candidates...', iceCandidateQueue);
+
+        await Promise.all(iceCandidateQueue.map((iceCandidate) => webRtcConnection.addIceCandidate(iceCandidate)));
+      }
+    };
+
     const webRtcOfferListener = async (data: WebRtcSdp) => {
       console.info('Received event on WebRtcOffer', data);
       if (data.conversationId !== conversationId) {
@@ -224,6 +244,7 @@ const WebRtcProvider = ({
 
       await webRtcConnection.setRemoteDescription(new RTCSessionDescription(data.sdp));
       await sendWebRtcAnswer();
+      await addQueuedIceCandidates();
     };
 
     const webRtcAnswerListener = async (data: WebRtcSdp) => {
@@ -234,6 +255,7 @@ const WebRtcProvider = ({
       }
 
       await webRtcConnection.setRemoteDescription(new RTCSessionDescription(data.sdp));
+      await addQueuedIceCandidates();
     };
 
     webSocket.bind(WebSocketMessageType.WebRtcOffer, webRtcOfferListener);
@@ -243,7 +265,7 @@ const WebRtcProvider = ({
       webSocket.unbind(WebSocketMessageType.WebRtcOffer, webRtcOfferListener);
       webSocket.unbind(WebSocketMessageType.WebRtcAnswer, webRtcAnswerListener);
     };
-  }, [webSocket, webRtcConnection, sendWebRtcAnswer, conversationId]);
+  }, [webSocket, webRtcConnection, sendWebRtcAnswer, conversationId, iceCandidateQueue]);
 
   useEffect(() => {
     const webRtcIceCandidateListener = async (data: WebRtcIceCandidate) => {
@@ -252,7 +274,22 @@ const WebRtcProvider = ({
         return;
       }
 
-      await webRtcConnection.addIceCandidate(data.candidate);
+      if (!data.candidate) {
+        return;
+      }
+
+      if (isReadyForIceCandidates) {
+        await webRtcConnection.addIceCandidate(data.candidate);
+      } else {
+        console.warn(
+          "Received event on WebRtcIceCandidate before 'setRemoteDescription' was called. Pushing to ICE candidates queue...",
+          data
+        );
+        setIceCandidateQueue((v) => {
+          v.push(data.candidate);
+          return v;
+        });
+      }
     };
 
     webSocket.bind(WebSocketMessageType.WebRtcIceCandidate, webRtcIceCandidateListener);
@@ -260,7 +297,7 @@ const WebRtcProvider = ({
     return () => {
       webSocket.unbind(WebSocketMessageType.WebRtcIceCandidate, webRtcIceCandidateListener);
     };
-  }, [webRtcConnection, webSocket, conversationId]);
+  }, [webRtcConnection, webSocket, conversationId, isReadyForIceCandidates]);
 
   /* WebRTC Listeners */
 
