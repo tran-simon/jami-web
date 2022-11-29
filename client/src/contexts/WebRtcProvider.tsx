@@ -26,7 +26,7 @@ import { ConversationContext } from './ConversationProvider';
 import { IWebSocketContext, WebSocketContext } from './WebSocketProvider';
 
 interface IWebRtcContext {
-  isConnected: boolean;
+  iceConnectionState: RTCIceConnectionState | undefined;
 
   remoteStreams: readonly MediaStream[] | undefined;
   webRtcConnection: RTCPeerConnection | undefined;
@@ -35,7 +35,7 @@ interface IWebRtcContext {
 }
 
 const defaultWebRtcContext: IWebRtcContext = {
-  isConnected: false,
+  iceConnectionState: undefined,
   remoteStreams: undefined,
   webRtcConnection: undefined,
   sendWebRtcOffer: async () => {},
@@ -91,7 +91,7 @@ const WebRtcProvider = ({
 }) => {
   const { conversation, conversationId } = useContext(ConversationContext);
   const [remoteStreams, setRemoteStreams] = useState<readonly MediaStream[]>();
-  const [isConnected, setIsConnected] = useState(false);
+  const [iceConnectionState, setIceConnectionState] = useState<RTCIceConnectionState | undefined>();
 
   // TODO: This logic will have to change to support multiple people in a call
   const contactUri = useMemo(() => conversation.getFirstMember().contact.getUri(), [conversation]);
@@ -208,11 +208,9 @@ const WebRtcProvider = ({
       setRemoteStreams(event.streams);
     };
 
-    const iceConnectionStateChangeEventListener = (event: Event) => {
-      console.info(`Received WebRTC event on iceconnectionstatechange: ${webRtcConnection.iceConnectionState}`, event);
-      setIsConnected(
-        webRtcConnection.iceConnectionState === 'connected' || webRtcConnection.iceConnectionState === 'completed'
-      );
+    const iceConnectionStateChangeEventListener = () => {
+      console.info('ICE connection state changed:', webRtcConnection.iceConnectionState);
+      setIceConnectionState(webRtcConnection.iceConnectionState);
     };
 
     webRtcConnection.addEventListener('track', trackEventListener);
@@ -227,7 +225,7 @@ const WebRtcProvider = ({
   return (
     <WebRtcContext.Provider
       value={{
-        isConnected,
+        iceConnectionState,
         remoteStreams,
         webRtcConnection,
         sendWebRtcOffer,

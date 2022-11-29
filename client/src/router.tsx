@@ -41,8 +41,9 @@ export type ConversationRouteParams = RouteParams<{ conversationId?: string }, R
 
 export type CallRouteParams = RouteParams<
   { conversationId?: string },
-  { role?: CallRole },
+  Record<string, never>,
   {
+    role: CallRole;
     isVideoOn?: boolean;
     callStatus: CallStatus;
   }

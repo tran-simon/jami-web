@@ -39,8 +39,9 @@ export default ({ children }: WithChildren) => {
 
     const callBeginListener = (data: CallBegin) => {
       console.info('Received event on CallBegin', data);
-      navigate(`/conversation/${data.conversationId}/call?role=receiver`, {
+      navigate(`/conversation/${data.conversationId}/call`, {
         state: {
+          role: 'receiver',
           callStatus: CallStatus.Ringing,
           isVideoOn: data.withVideoOn,
         },

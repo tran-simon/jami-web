@@ -83,10 +83,10 @@ const ConversationHeader = () => {
         </Typography>
       </Stack>
       <Stack direction="row" spacing="20px">
-        <StartAudioCallButton onClick={() => startCall(conversationId)} />
+        <StartAudioCallButton onClick={() => startCall(conversationId, 'caller')} />
         <StartVideoCallButton
           onClick={() =>
-            startCall(conversationId, {
+            startCall(conversationId, 'caller', {
               isVideoOn: true,
             })
           }

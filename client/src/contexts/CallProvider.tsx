@@ -110,11 +110,8 @@ const CallProvider = ({
   webSocket: IWebSocketContext;
   webRtcConnection: RTCPeerConnection;
 }) => {
-  const {
-    queryParams: { role: callRole },
-    state: routeState,
-  } = useUrlParams<CallRouteParams>();
-  const { remoteStreams, sendWebRtcOffer, isConnected } = useContext(WebRtcContext);
+  const { state: routeState } = useUrlParams<CallRouteParams>();
+  const { remoteStreams, sendWebRtcOffer, iceConnectionState } = useContext(WebRtcContext);
   const { conversationId, conversation } = useContext(ConversationContext);
   const navigate = useNavigate();
 
@@ -128,6 +125,7 @@ const CallProvider = ({
   const [isChatShown, setIsChatShown] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [callStatus, setCallStatus] = useState(routeState?.callStatus);
+  const [callRole] = useState(routeState?.role);
   const [callStartTime, setCallStartTime] = useState<Date | undefined>(undefined);
 
   // TODO: This logic will have to change to support multiple people in a call. Could we move this logic to the server?
@@ -298,13 +296,16 @@ const CallProvider = ({
   }, [webSocket, navigate, conversationId, quitCall]);
 
   useEffect(() => {
-    if (callStatus === CallStatus.Connecting && isConnected) {
+    if (
+      callStatus === CallStatus.Connecting &&
+      (iceConnectionState === 'connected' || iceConnectionState === 'completed')
+    ) {
       console.info('Changing call status to InCall');
       setCallStatus(CallStatus.InCall);
       setVideoStatus(isVideoOn);
       setCallStartTime(new Date());
     }
-  }, [isConnected, callStatus, setVideoStatus, isVideoOn]);
+  }, [iceConnectionState, callStatus, setVideoStatus, isVideoOn]);
 
   const acceptCall = useCallback(
     (withVideoOn: boolean) => {
@@ -334,6 +335,13 @@ const CallProvider = ({
   }, [webSocket, contactUri, conversationId, quitCall]);
 
   useEffect(() => {
+    if (iceConnectionState === 'disconnected') {
+      console.info('ICE connection disconnected');
+      endCall();
+    }
+  }, [iceConnectionState, callStatus, setVideoStatus, isVideoOn, endCall]);
+
+  useEffect(() => {
     const checkStatusTimeout = () => {
       if (callStatus !== CallStatus.InCall) {
         endCall();
@@ -345,6 +353,13 @@ const CallProvider = ({
       clearTimeout(timeoutId);
     };
   }, [callStatus, endCall]);
+
+  useEffect(() => {
+    navigate('.', {
+      replace: true,
+      state: {},
+    });
+  }, [navigate]);
 
   if (!callRole || callStatus === undefined) {
     console.error('Invalid route. Redirecting...');
