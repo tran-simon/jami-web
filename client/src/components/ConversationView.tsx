@@ -22,7 +22,7 @@ import { useTranslation } from 'react-i18next';
 import { useAuthContext } from '../contexts/AuthProvider';
 import { useConversationContext } from '../contexts/ConversationProvider';
 import { useStartCall } from '../hooks/useStartCall';
-import { ConversationMember } from '../models/Conversation';
+import { ConversationMember } from '../models/conversation';
 import ChatInterface from '../pages/ChatInterface';
 import { translateEnumeration, TranslateEnumerationOptions } from '../utils/translations';
 import { AddParticipantButton, ShowOptionsMenuButton, StartAudioCallButton, StartVideoCallButton } from './Button';
@@ -46,7 +46,7 @@ const ConversationHeader = () => {
   const { conversation, conversationId } = useConversationContext();
   const { t } = useTranslation();
 
-  const members = conversation.getMembers();
+  const members = conversation.members;
   const adminTitle = conversation.infos.title as string;
 
   const title = useMemo(() => {

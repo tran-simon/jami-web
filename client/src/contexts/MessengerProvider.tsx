@@ -15,11 +15,11 @@
  * License along with this program.  If not, see
  * <https://www.gnu.org/licenses/>.
  */
-import { ConversationMessage, WebSocketMessageType } from 'jami-web-common';
+import { ConversationMessage, IConversation, LookupResult, WebSocketMessageType } from 'jami-web-common';
 import { createContext, ReactNode, useContext, useEffect, useState } from 'react';
 
-import { Contact } from '../models/Contact';
-import { Conversation } from '../models/Conversation';
+import { Contact } from '../models/contact';
+import { Conversation } from '../models/conversation';
 import { setRefreshFromSlice } from '../redux/appSlice';
 import { useAppDispatch, useAppSelector } from '../redux/hooks';
 import { SetState } from '../utils/utils';
@@ -61,11 +61,13 @@ export default ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     const controller = new AbortController();
     axiosInstance
-      .get<Conversation[]>('/conversations', {
+      .get<IConversation[]>('/conversations', {
         signal: controller.signal,
       })
       .then(({ data }) => {
-        setConversations(Object.values(data).map((c) => Conversation.from(accountId, c)));
+        setConversations(
+          Object.values(data).map((conversationInterface) => Conversation.fromInterface(conversationInterface))
+        );
       });
     // return () => controller.abort()
   }, [axiosInstance, accountId, refresh]);
@@ -89,15 +91,13 @@ export default ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     if (!searchQuery) return;
     const controller = new AbortController();
-    // TODO: Type properly https://git.jami.net/savoirfairelinux/jami-web/-/issues/92
     axiosInstance
-      .get<{ state: number; address: string; username: string }>(`/ns/username/${searchQuery}`, {
+      .get<LookupResult>(`/ns/username/${searchQuery}`, {
         signal: controller.signal,
       })
       .then(({ data }) => {
-        const contact = new Contact(data.address);
-        contact.setRegisteredName(data.username);
-        setSearchResults(contact ? Conversation.fromSingleContact(accountId, contact) : undefined);
+        const contact = new Contact(data.address, data.username);
+        setSearchResults(contact ? Conversation.fromSingleContact(contact) : undefined);
       })
       .catch(() => {
         setSearchResults(undefined);

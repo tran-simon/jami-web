@@ -18,24 +18,26 @@
 import { Request, Router } from 'express';
 import asyncHandler from 'express-async-handler';
 import { ParamsDictionary } from 'express-serve-static-core';
-import { HttpStatusCode } from 'jami-web-common';
+import {
+  ContactDetails,
+  HttpStatusCode,
+  IConversation,
+  IConversationMember,
+  NewConversationRequestBody,
+  NewMessageRequestBody,
+} from 'jami-web-common';
 import { Container } from 'typedi';
 
 import { Jamid } from '../jamid/jamid.js';
 import { authenticateToken } from '../middleware/auth.js';
 
-interface ConversationMembers {
-  members: string[];
-}
-
-interface ConversationMessage {
-  message: string;
-}
-
 const jamid = Container.get(Jamid);
 
-// TODO: Create interface for return type in common/ when Records and interfaces are refactored
-async function createConversationResponseObject(accountId: string, accountUri: string, conversationId: string) {
+async function createConversationResponseObject(
+  accountId: string,
+  accountUri: string,
+  conversationId: string
+): Promise<IConversation | undefined> {
   const infos = jamid.getConversationInfos(accountId, conversationId);
   if (Object.keys(infos).length === 0) {
     return undefined;
@@ -43,7 +45,7 @@ async function createConversationResponseObject(accountId: string, accountUri: s
 
   const members = jamid.getConversationMembers(accountId, conversationId);
 
-  const namedMembers = [];
+  const namedMembers: IConversationMember[] = [];
   for (const member of members) {
     // Exclude current user from returned conversation members
     if (member.uri === accountUri) {
@@ -51,7 +53,6 @@ async function createConversationResponseObject(accountId: string, accountUri: s
     }
 
     // Add usernames for conversation members
-    // TODO: Add caching in jamid to avoid too many address -> username lookups?
     const { username } = await jamid.lookupAddress(member.uri, accountId);
     namedMembers.push({
       role: member.role,
@@ -68,8 +69,8 @@ async function createConversationResponseObject(accountId: string, accountUri: s
 
   return {
     id: conversationId,
-    messages: messages,
     members: namedMembers,
+    messages: messages,
     infos: infos,
   };
 }
@@ -100,7 +101,7 @@ conversationRouter.get(
 
 conversationRouter.post(
   '/',
-  (req: Request<ParamsDictionary, Record<string, string> | string, ConversationMembers>, res) => {
+  (req: Request<ParamsDictionary, ContactDetails | string, Partial<NewConversationRequestBody>>, res) => {
     const { members } = req.body;
     if (members === undefined || members.length !== 1) {
       res.status(HttpStatusCode.BadRequest).send('Missing members or more than one member in body');
@@ -125,7 +126,6 @@ conversationRouter.post(
 );
 
 // TODO: Check if we actually need this endpoint to return messages.
-// Verify by checking what is truly needed in the client when migrating, to clean up the API.
 // At the moment, /conversations does a lot of work returning all the conversations with the same
 // level of detail as this, and /conversations/messages returns just the messages. Check whether or not
 // this is what we want, and if so, if we can be more economical with client requests.
@@ -167,7 +167,7 @@ conversationRouter.get(
 
 conversationRouter.post(
   '/:conversationId/messages',
-  (req: Request<ParamsDictionary, any, ConversationMessage>, res) => {
+  (req: Request<ParamsDictionary, string, Partial<NewMessageRequestBody>>, res) => {
     const { message } = req.body;
     if (message === undefined) {
       res.status(HttpStatusCode.BadRequest).send('Missing message in body');

@@ -214,7 +214,7 @@ const CallInterfaceInformation = () => {
   const { callStartTime } = useContext(CallContext);
   const { conversation } = useConversationContext();
   const [elapsedTime, setElapsedTime] = useState(0);
-  const memberName = useMemo(() => conversation.getFirstMember().contact.getRegisteredName(), [conversation]);
+  const memberName = useMemo(() => conversation.getFirstMember().contact.registeredName, [conversation]);
 
   useEffect(() => {
     if (callStartTime) {

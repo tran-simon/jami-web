@@ -156,7 +156,7 @@ const CallProvider = ({
   // TODO: This logic will have to change to support multiple people in a call. Could we move this logic to the server?
   //       The client could make a single request with the conversationId, and the server would be tasked with sending
   //       all the individual requests to the members of the conversation.
-  const contactUri = useMemo(() => conversation.getFirstMember().contact.getUri(), [conversation]);
+  const contactUri = useMemo(() => conversation.getFirstMember().contact.uri, [conversation]);
 
   useEffect(() => {
     if (callStatus !== CallStatus.InCall) {

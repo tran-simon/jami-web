@@ -17,7 +17,7 @@
  */
 import axios from 'axios';
 import { passwordStrength } from 'check-password-strength';
-import { HttpStatusCode } from 'jami-web-common';
+import { AccessToken, HttpStatusCode } from 'jami-web-common';
 
 import { PasswordStrength } from '../enums/passwordStrength';
 import { apiUrl } from './constants';
@@ -75,7 +75,7 @@ export async function registerUser(username: string, password: string, isJams: b
 
 export async function loginUser(username: string, password: string, isJams: boolean): Promise<string> {
   try {
-    const { data } = await axios.post('/auth/login', { username, password, isJams }, { baseURL: apiUrl });
+    const { data } = await axios.post<AccessToken>('/auth/login', { username, password, isJams }, { baseURL: apiUrl });
     return data.accessToken;
   } catch (e: any) {
     switch (e.response?.status) {

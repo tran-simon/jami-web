@@ -15,40 +15,27 @@
  * License along with this program.  If not, see
  * <https://www.gnu.org/licenses/>.
  */
-export class Contact {
-  private readonly uri: string;
-  private readonly displayName: string | undefined;
-  private registeredName: string | undefined;
+import { IContact } from 'jami-web-common';
 
-  constructor(uri: string) {
+export class Contact implements IContact {
+  readonly uri: string;
+  registeredName?: string;
+  displayName?: string;
+
+  constructor(uri: string, registeredName?: string) {
     this.uri = uri;
-    this.displayName = undefined;
-    this.registeredName = undefined;
+    this.registeredName = registeredName;
   }
 
-  static from(object: any) {
-    const contact = new Contact(object.uri);
-    if (object.registeredName) contact.setRegisteredName(object.registeredName);
-    return contact;
-  }
-
-  getUri() {
-    return this.uri;
-  }
-
-  getRegisteredName() {
-    return this.registeredName;
-  }
-
-  setRegisteredName(name: string | undefined) {
-    this.registeredName = name;
+  static fromInterface(contactInterface: IContact) {
+    return new Contact(contactInterface.uri, contactInterface.registeredName);
   }
 
   getDisplayName() {
-    return this.getDisplayNameNoFallback() || this.getUri();
+    return this.getDisplayNameNoFallback() ?? this.uri;
   }
 
   getDisplayNameNoFallback() {
-    return this.displayName || this.getRegisteredName();
+    return this.displayName ?? this.registeredName;
   }
 }

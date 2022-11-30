@@ -21,7 +21,7 @@ import { useContext, useEffect, useState } from 'react';
 import LoadingPage from '../components/Loading';
 import { createOptionalContext } from '../hooks/createOptionalContext';
 import { useUrlParams } from '../hooks/useUrlParams';
-import { Conversation } from '../models/Conversation';
+import { Conversation } from '../models/conversation';
 import { ConversationRouteParams } from '../router';
 import { useConversationQuery } from '../services/conversationQueries';
 import { WithChildren } from '../utils/utils';
@@ -51,7 +51,7 @@ export default ({ children }: WithChildren) => {
 
   useEffect(() => {
     if (conversationQuery.isSuccess) {
-      const conversation = Conversation.from(accountId, conversationQuery.data);
+      const conversation = Conversation.fromInterface(conversationQuery.data);
       setConversation(conversation);
     }
   }, [accountId, conversationQuery.isSuccess, conversationQuery.data]);

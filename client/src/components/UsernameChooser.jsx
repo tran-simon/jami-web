@@ -20,7 +20,7 @@ import { InputAdornment, TextField } from '@mui/material';
 import axios from 'axios';
 import { useEffect, useState } from 'react';
 
-import { apiUrl } from '../utils/constants.js';
+import { apiUrl } from '../utils/constants';
 
 const isInputValid = (input) => input && input.length > 2;
 

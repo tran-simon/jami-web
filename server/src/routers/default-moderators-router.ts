@@ -17,7 +17,7 @@
  */
 import { Router } from 'express';
 import asyncHandler from 'express-async-handler';
-import { HttpStatusCode } from 'jami-web-common';
+import { HttpStatusCode, IContact } from 'jami-web-common';
 import { Container } from 'typedi';
 
 import { Jamid } from '../jamid/jamid.js';
@@ -36,7 +36,7 @@ defaultModeratorsRouter.get(
 
     // Add usernames for default moderators
     const defaultModeratorUris = jamid.getDefaultModeratorUris(accountId);
-    const namedDefaultModerators = [];
+    const namedDefaultModerators: IContact[] = [];
     for (const defaultModeratorUri of defaultModeratorUris) {
       const { username } = await jamid.lookupAddress(defaultModeratorUri, accountId);
       namedDefaultModerators.push({

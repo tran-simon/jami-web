@@ -15,23 +15,8 @@
  * License along with this program.  If not, see
  * <https://www.gnu.org/licenses/>.
  */
-export interface Message {
-  id: string;
-  author: string;
-  timestamp: string;
-  type:
-    | 'application/call-history+json'
-    | 'application/data-transfer+json'
-    | 'application/update-profile'
-    | 'initial'
-    | 'member'
-    | 'merge'
-    | 'text/plain'
-    | 'vote';
-  linearizedParent: string;
-  parents: string;
-  body?: string;
-  duration?: string;
-  to?: string;
-  invited?: string;
+export interface LookupResult {
+  state: number; // TODO: Create enum for state
+  address: string;
+  username: string;
 }

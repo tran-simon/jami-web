@@ -16,11 +16,11 @@
  * <https://www.gnu.org/licenses/>.
  */
 import { Card, CardActionArea, CardContent, CircularProgress, Typography } from '@mui/material';
+import { IConversation } from 'jami-web-common';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
 
 import { useAuthContext } from '../contexts/AuthProvider';
-import { Conversation } from '../models/Conversation';
 
 export default function ConversationsOverviewCard() {
   const { axiosInstance, account } = useAuthContext();
@@ -28,12 +28,12 @@ export default function ConversationsOverviewCard() {
 
   const [conversationCount, setConversationCount] = useState<number | undefined>();
 
-  const accountId = account.getId();
+  const accountId = account.id;
 
   useEffect(() => {
     const controller = new AbortController();
     axiosInstance
-      .get<Conversation[]>('/conversations', {
+      .get<IConversation[]>('/conversations', {
         signal: controller.signal,
       })
       .then(({ data }) => {

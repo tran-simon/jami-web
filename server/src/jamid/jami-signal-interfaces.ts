@@ -15,9 +15,9 @@
  * License along with this program.  If not, see
  * <https://www.gnu.org/licenses/>.
  */
-import { AccountDetails, Message, VolatileDetails } from 'jami-web-common';
+import { AccountDetails, Devices, Message, VolatileDetails } from 'jami-web-common';
 
-import { Blob, StringMap } from './jami-swig.js';
+import { ConversationRequestMetadata } from './conversation-request-metadata.js';
 
 // These interfaces are used to hold all the parameters for signal handlers
 // These parameters' names and types can be found in daemon/bin/nodejs/callback.h
@@ -55,7 +55,7 @@ export interface RegisteredNameFound {
 
 export interface KnownDevicesChanged {
   accountId: string;
-  devices: Record<string, string>;
+  devices: Devices;
 }
 
 export interface IncomingAccountMessage {
@@ -75,7 +75,7 @@ export interface IncomingTrustRequest {
   accountId: string;
   conversationId: string;
   from: string;
-  payload: Blob;
+  payload: number[];
   received: number;
 }
 
@@ -94,7 +94,7 @@ export interface ContactRemoved {
 export interface ConversationRequestReceived {
   accountId: string;
   conversationId: string;
-  metadata: StringMap;
+  metadata: ConversationRequestMetadata;
 }
 
 export interface ConversationReady {

@@ -22,7 +22,7 @@ import Typography from '@mui/material/Typography';
 import { useContext, useEffect } from 'react';
 
 import { MessengerContext } from '../contexts/MessengerProvider';
-import { Conversation } from '../models/Conversation';
+import { Conversation } from '../models/conversation';
 import { useAppSelector } from '../redux/hooks';
 import ConversationListItem from './ConversationListItem';
 
@@ -48,7 +48,7 @@ export default function ConversationList({ conversations }: ConversationListProp
           </div>
         )}
         {conversations.map((conversation) => (
-          <ConversationListItem key={conversation.getId()} conversation={conversation} />
+          <ConversationListItem key={conversation.id} conversation={conversation} />
         ))}
         {conversations.length === 0 && (
           <div className="list-placeholder">

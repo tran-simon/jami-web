@@ -23,8 +23,8 @@ import { ReactElement, ReactNode, useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import dayjs from '../dayjsInitializer';
-import { Account } from '../models/Account';
-import { Contact } from '../models/Contact';
+import { Account } from '../models/account';
+import { Contact } from '../models/contact';
 import { EmojiButton, MoreButton, ReplyMessageButton } from './Button';
 import ConversationAvatar from './ConversationAvatar';
 import PopoverList, { PopoverListItemData } from './PopoverList';

@@ -16,13 +16,13 @@
  * <https://www.gnu.org/licenses/>.
  */
 import axios, { AxiosInstance } from 'axios';
-import { HttpStatusCode } from 'jami-web-common';
+import { HttpStatusCode, IAccount } from 'jami-web-common';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import ProcessingRequest from '../components/ProcessingRequest';
 import { createOptionalContext } from '../hooks/createOptionalContext';
-import { Account } from '../models/Account';
+import { Account } from '../models/account';
 import { apiUrl } from '../utils/constants';
 import { WithChildren } from '../utils/utils';
 
@@ -91,7 +91,7 @@ export default ({ children }: WithChildren) => {
       return;
     }
 
-    axiosInstance.get('/account').then(({ data }) => setAccount(Account.from(data)));
+    axiosInstance.get<IAccount>('/account').then(({ data }) => setAccount(Account.fromInterface(data)));
   }, [axiosInstance, logout]);
 
   if (!token || !account || !axiosInstance) {
@@ -104,7 +104,7 @@ export default ({ children }: WithChildren) => {
         token,
         logout,
         account,
-        accountId: account.getId(),
+        accountId: account.id,
         axiosInstance,
       }}
     >

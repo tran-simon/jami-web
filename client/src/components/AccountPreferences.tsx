@@ -39,7 +39,6 @@ import { AccountDetails } from 'jami-web-common';
 import { useState } from 'react';
 
 import { useAuthContext } from '../contexts/AuthProvider';
-import { Account } from '../models/Account';
 import ConversationAvatar from './ConversationAvatar';
 import ConversationsOverviewCard from './ConversationsOverviewCard';
 import JamiIdCard from './JamiIdCard';
@@ -60,17 +59,17 @@ export default function AccountPreferences() {
   const { account, axiosInstance } = useAuthContext();
 
   const devices: string[][] = [];
-  const accountDevices = account.getDevices();
+  const accountDevices = account.devices;
   for (const i in accountDevices) devices.push([i, accountDevices[i]]);
 
   console.log(devices);
 
-  const isJamiAccount = account.getType() === Account.TYPE_JAMI;
+  const isJamiAccount = account.getType() === 'RING';
   const alias = isJamiAccount ? 'Jami account' : 'SIP account';
-  const moderators = account.getDefaultModerators();
+  const moderators = account.defaultModerators;
   const [defaultModeratorUri, setDefaultModeratorUri] = useState('');
 
-  const [details, setDetails] = useState(account.getDetails());
+  const [details, setDetails] = useState(account.details);
 
   const addModerator = async () => {
     if (defaultModeratorUri) {
@@ -87,7 +86,8 @@ export default function AccountPreferences() {
     newDetails[key] = value ? 'true' : 'false';
     console.log(newDetails);
     await axiosInstance.patch('/account', newDetails);
-    setDetails({ ...account.updateDetails(newDetails) });
+    account.updateDetails(newDetails);
+    setDetails(account.details);
   };
 
   return (
@@ -219,19 +219,19 @@ export default function AccountPreferences() {
                   </IconButton>
                 </ListItemSecondaryAction>
               </ListItem>
-              {!moderators || moderators.length === 0 ? (
+              {moderators.length === 0 ? (
                 <ListItem key="placeholder">
                   <ListItemText primary="No default moderator" />
                 </ListItem>
               ) : (
                 moderators.map((moderator) => (
-                  <ListItem key={moderator.getUri()}>
+                  <ListItem key={moderator.uri}>
                     <ListItemAvatar>
                       <ConversationAvatar displayName={moderator.getDisplayName()} />
                     </ListItemAvatar>
                     <ListItemText primary={moderator.getDisplayName()} />
                     <ListItemSecondaryAction>
-                      <IconButton onClick={() => removeModerator(moderator.getUri())} size="large">
+                      <IconButton onClick={() => removeModerator(moderator.uri)} size="large">
                         <DeleteRounded />
                       </IconButton>
                     </ListItemSecondaryAction>

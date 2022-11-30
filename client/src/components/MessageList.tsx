@@ -23,7 +23,7 @@ import { useTranslation } from 'react-i18next';
 import { Waypoint } from 'react-waypoint';
 
 import { useAuthContext } from '../contexts/AuthProvider';
-import { ConversationMember } from '../models/Conversation';
+import { ConversationMember } from '../models/conversation';
 import { MessageRow } from './Message';
 import { ArrowDownIcon } from './SvgIcon';
 
@@ -56,7 +56,7 @@ export default function MessageList({ members, messages }: MessageListProps) {
               if (isAccountMessage) {
                 author = account;
               } else {
-                const member = members.find((member) => message.author === member.contact.getUri());
+                const member = members.find((member) => message.author === member.contact.uri);
                 author = member?.contact;
               }
               if (!author) {

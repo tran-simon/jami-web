@@ -25,7 +25,7 @@ import { apiUrl } from './utils/constants';
 
 export async function checkSetupStatus(): Promise<boolean> {
   try {
-    const { data } = await axios.get('/setup/check', { baseURL: apiUrl });
+    const { data } = await axios.get<{ isSetupComplete: boolean }>('/setup/check', { baseURL: apiUrl });
     return data.isSetupComplete;
   } catch (e) {
     throw new Error('Cannot connect to server', { cause: e });

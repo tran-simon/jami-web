@@ -19,7 +19,11 @@ import { createRequire } from 'node:module';
 
 import {
   AccountDetails,
+  ContactDetails,
+  ConversationInfos,
   ConversationMessage,
+  Devices,
+  LookupResult,
   Message,
   VolatileDetails,
   WebSocketMessage,
@@ -30,6 +34,8 @@ import { filter, firstValueFrom, map, Subject } from 'rxjs';
 import { Service } from 'typedi';
 
 import { WebSocketServer } from '../websocket/websocket-server.js';
+import { ConversationMemberInfos } from './conversation-member-infos.js';
+import { ConversationRequestMetadata } from './conversation-request-metadata.js';
 import { JamiSignal } from './jami-signal.js';
 import {
   AccountDetailsChanged,
@@ -52,8 +58,6 @@ import {
 import { JamiSwig, StringMap, stringMapToRecord, stringVectToArray, vectMapToRecordArray } from './jami-swig.js';
 
 const require = createRequire(import.meta.url);
-
-// TODO: Convert Records to interfaces and replace them in common/ (e.g. Contact)
 
 @Service()
 export class Jamid {
@@ -100,7 +104,7 @@ export class Jamid {
       onRegisteredNameFound.next({ accountId, state, address, username });
 
     const onKnownDevicesChanged = new Subject<KnownDevicesChanged>();
-    handlers.KnownDevicesChanged = (accountId: string, devices: Record<string, string>) =>
+    handlers.KnownDevicesChanged = (accountId: string, devices: Devices) =>
       onKnownDevicesChanged.next({ accountId, devices });
 
     const onIncomingAccountMessage = new Subject<IncomingAccountMessage>();
@@ -120,8 +124,11 @@ export class Jamid {
       onContactRemoved.next({ accountId, contactId, banned });
 
     const onConversationRequestReceived = new Subject<ConversationRequestReceived>();
-    handlers.ConversationRequestReceived = (accountId: string, conversationId: string, metadata: StringMap) =>
-      onConversationRequestReceived.next({ accountId, conversationId, metadata });
+    handlers.ConversationRequestReceived = (
+      accountId: string,
+      conversationId: string,
+      metadata: ConversationRequestMetadata
+    ) => onConversationRequestReceived.next({ accountId, conversationId, metadata });
 
     const onConversationReady = new Subject<ConversationReady>();
     handlers.ConversationReady = (accountId: string, conversationId: string) =>
@@ -232,8 +239,7 @@ export class Jamid {
     this.jamiSwig.sendAccountTextMessage(accountId, contactId, messageStringMap);
   }
 
-  // TODO: Add interface for returned type
-  async lookupUsername(username: string, accountId?: string) {
+  async lookupUsername(username: string, accountId?: string): Promise<LookupResult> {
     const hasRingNs = this.jamiSwig.lookupName(accountId || '', '', username);
     if (!hasRingNs) {
       throw new Error('Jami does not have NS');
@@ -246,8 +252,7 @@ export class Jamid {
     );
   }
 
-  // TODO: Add interface for returned type
-  async lookupAddress(address: string, accountId?: string) {
+  async lookupAddress(address: string, accountId?: string): Promise<LookupResult> {
     const hasRingNs = this.jamiSwig.lookupAddress(accountId || '', '', address);
     if (!hasRingNs) {
       throw new Error('Jami does not have NS');
@@ -274,7 +279,7 @@ export class Jamid {
     );
   }
 
-  getDevices(accountId: string): Record<string, string> {
+  getDevices(accountId: string): Devices {
     return stringMapToRecord(this.jamiSwig.getKnownRingDevices(accountId));
   }
 
@@ -294,14 +299,12 @@ export class Jamid {
     this.jamiSwig.removeContact(accountId, contactId, true);
   }
 
-  // TODO: Replace Record with interface
-  getContacts(accountId: string): Record<string, string>[] {
-    return vectMapToRecordArray(this.jamiSwig.getContacts(accountId));
+  getContacts(accountId: string): ContactDetails[] {
+    return vectMapToRecordArray(this.jamiSwig.getContacts(accountId)) as unknown as ContactDetails[];
   }
 
-  // TODO: Replace Record with interface
-  getContactDetails(accountId: string, contactId: string): Record<string, string> {
-    return stringMapToRecord(this.jamiSwig.getContactDetails(accountId, contactId));
+  getContactDetails(accountId: string, contactId: string): ContactDetails {
+    return stringMapToRecord(this.jamiSwig.getContactDetails(accountId, contactId)) as unknown as ContactDetails;
   }
 
   getDefaultModeratorUris(accountId: string): string[] {
@@ -320,14 +323,16 @@ export class Jamid {
     return stringVectToArray(this.jamiSwig.getConversations(accountId));
   }
 
-  // TODO: Replace Record with interface
-  getConversationInfos(accountId: string, conversationId: string): Record<string, string> {
-    return stringMapToRecord(this.jamiSwig.conversationInfos(accountId, conversationId));
+  getConversationInfos(accountId: string, conversationId: string): ConversationInfos {
+    return stringMapToRecord(
+      this.jamiSwig.conversationInfos(accountId, conversationId)
+    ) as unknown as ConversationInfos;
   }
 
-  // TODO: Replace Record with interface
-  getConversationMembers(accountId: string, conversationId: string): Record<string, string>[] {
-    return vectMapToRecordArray(this.jamiSwig.getConversationMembers(accountId, conversationId));
+  getConversationMembers(accountId: string, conversationId: string): ConversationMemberInfos[] {
+    return vectMapToRecordArray(
+      this.jamiSwig.getConversationMembers(accountId, conversationId)
+    ) as unknown as ConversationMemberInfos[];
   }
 
   async getConversationMessages(accountId: string, conversationId: string, fromMessage?: string): Promise<Message[]> {

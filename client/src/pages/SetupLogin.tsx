@@ -18,7 +18,7 @@
 import GroupAddRounded from '@mui/icons-material/GroupAddRounded';
 import { Box, Card, CardContent, Container, Fab, Input, Typography } from '@mui/material';
 import axios from 'axios';
-import { HttpStatusCode } from 'jami-web-common';
+import { AccessToken, HttpStatusCode } from 'jami-web-common';
 import { FormEvent, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
@@ -45,7 +45,7 @@ export default function SetupLogin() {
 
   const loginAdmin = async (password: string) => {
     try {
-      const { data } = await axios.post('/setup/admin/login', { password }, { baseURL: apiUrl });
+      const { data } = await axios.post<AccessToken>('/setup/admin/login', { password }, { baseURL: apiUrl });
       localStorage.setItem('adminAccessToken', data.accessToken);
     } catch (e: any) {
       if (e.response?.status === HttpStatusCode.Forbidden) {

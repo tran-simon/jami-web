@@ -16,6 +16,7 @@
  * <https://www.gnu.org/licenses/>.
  */
 import { Box, ListItem, ListItemAvatar, ListItemText } from '@mui/material';
+import { ContactDetails } from 'jami-web-common';
 import { QRCodeCanvas } from 'qrcode.react';
 import { useCallback, useContext, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -25,7 +26,7 @@ import { useAuthContext } from '../contexts/AuthProvider';
 import { useConversationContext } from '../contexts/ConversationProvider';
 import { MessengerContext } from '../contexts/MessengerProvider';
 import { useStartCall } from '../hooks/useStartCall';
-import { Conversation } from '../models/Conversation';
+import { Conversation } from '../models/conversation';
 import { setRefreshFromSlice } from '../redux/appSlice';
 import { useAppDispatch } from '../redux/hooks';
 import ContextMenu, { ContextMenuHandler, useContextMenuHandler } from './ContextMenu';
@@ -56,10 +57,10 @@ export default function ConversationListItem({ conversation }: ConversationListI
   const isSelected = conversation.getDisplayUri() === pathId;
 
   const navigate = useNavigate();
-  const userId = conversation?.getFirstMember()?.contact.getUri();
+  const userId = conversation?.getFirstMember()?.contact.uri;
 
   const onClick = useCallback(() => {
-    const newConversationId = conversation.getId();
+    const newConversationId = conversation.id;
     if (newConversationId) {
       navigate(`/conversation/${newConversationId}`);
     } else {
@@ -116,7 +117,7 @@ const ConversationMenu = ({
   const getContactDetails = useCallback(async () => {
     const controller = new AbortController();
     try {
-      const { data } = await axiosInstance.get(`/contacts/${userId}`, {
+      const { data } = await axiosInstance.get<ContactDetails>(`/contacts/${userId}`, {
         signal: controller.signal,
       });
       console.log('CONTACT LIST - DETAILS: ', data);
@@ -125,7 +126,7 @@ const ConversationMenu = ({
     }
   }, [axiosInstance, userId]);
 
-  const conversationId = conversation.getId();
+  const conversationId = conversation.id;
 
   const menuOptions: PopoverListItemData[] = useMemo(
     () => [

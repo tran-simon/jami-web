@@ -15,14 +15,24 @@
  * License along with this program.  If not, see
  * <https://www.gnu.org/licenses/>.
  */
+import { IContact } from './contact';
+
+export interface IAccount {
+  id: string;
+  details: AccountDetails;
+  volatileDetails: VolatileDetails;
+  defaultModerators: IContact[];
+  devices: Devices;
+}
 
 /**
- * Account parameters
+ * Account details.
  *
  * See `jami-daemon/src/account_schema.h`
  */
 export interface AccountDetails {
   // Common account parameters
+  'Account.id': string;
   'Account.type': string;
   'Account.alias': string;
   'Account.displayName': string;
@@ -31,20 +41,34 @@ export interface AccountDetails {
   'Account.autoAnswer': string;
   'Account.sendReadReceipt': string;
   'Account.rendezVous': string;
+  'Account.activeCallLimit': string;
   'Account.registrationExpire': string;
   'Account.dtmfType': string;
   'Account.ringtonePath': string;
   'Account.ringtoneEnabled': string;
   'Account.videoEnabled': string;
   'Account.keepAliveEnabled': string;
+  'Account.peerDiscovery': string;
+  'Account.accountDiscovery': string;
+  'Account.accountPublish': string;
   'Account.presenceEnabled': string;
   'Account.presencePublishSupported': string;
   'Account.presenceSubscribeSupported': string;
   'Account.presenceStatus': string;
   'Account.presenceNote': string;
   'Account.archivePassword': string;
+  'Account.archiveHasPassword': string;
+  'Account.archivePath': string;
+  'Account.archivePIN': string;
+  'Account.deviceID': string;
+  'Account.deviceName': string;
+  'Account.proxyEnabled': string;
+  'Account.proxyServer': string;
+  'Account.proxyPushToken': string;
   'Account.managerUri': string;
   'Account.managerUsername': string;
+  'Account.bootstrapListUrl': string;
+  'Account.dhtProxyListUrl': string;
 
   'Account.hostname': string;
   'Account.username': string;
@@ -54,6 +78,9 @@ export interface AccountDetails {
   'Account.realm': string;
   'Account.useragent': string;
   'Account.hasCustomUserAgent': string;
+  'Account.allowCertFromHistory': string;
+  'Account.allowCertFromContact': string;
+  'Account.allowCertFromTrusted': string;
   'Account.audioPortMin': string;
   'Account.audioPortMax': string;
   'Account.videoPortMin': string;
@@ -111,7 +138,7 @@ export interface AccountDetails {
 }
 
 /**
- * Volatile properties
+ * Volatile account details.
  *
  * See `jami-daemon/src/jami/account_const.h`
  */
@@ -121,70 +148,4 @@ export interface VolatileDetails {
   'Account.registeredName': string;
 }
 
-/**
- * See `ConfProperties` in `jami-daemon/src/jami/account_const.h
- */
-export interface AccountConfig {
-  id?: string;
-  type?: string;
-  alias?: string;
-  displayName?: string;
-  enable?: boolean;
-  mailbox?: string;
-  dtmfType?: string;
-  autoAnswer?: boolean;
-  sendReadReceipt?: string;
-  rendezVous?: boolean;
-  activeCallLimit?: string;
-  hostname?: string;
-  username?: string;
-  bindAddress?: string;
-  routeset?: string;
-  password?: string;
-  realm?: string;
-  localInterface?: string;
-  publishedSameAsLocal?: boolean;
-  localPort?: string;
-  publishedPort?: string;
-  publishedAddress?: string;
-  useragent?: string;
-  upnpEnabled?: boolean;
-  hasCustomUserAgent?: string;
-  allowCertFromHistory?: string;
-  allowCertFromContact?: string;
-  allowCertFromTrusted?: string;
-  archivePassword?: string;
-  archiveHasPassword?: string;
-  archivePath?: string;
-  archivePIN?: string;
-  deviceID?: string;
-  deviceName?: string;
-  proxyEnabled?: boolean;
-  proxyServer?: string;
-  proxyPushToken?: string;
-  keepAliveEnabled?: boolean;
-  peerDiscovery?: string;
-  accountDiscovery?: string;
-  accountPublish?: string;
-  managerUri?: string;
-  managerUsername?: string;
-  bootstrapListUrl?: string;
-  dhtProxyListUrl?: string;
-  defaultModerators?: string;
-  localModeratorsEnabled?: boolean;
-  allModeratorsEnabled?: boolean;
-  allowIPAutoRewrite?: string;
-
-  // Audio
-  audioPortMax?: string;
-  audioPortMin?: string;
-
-  // Video
-  videoEnabled?: boolean;
-  videoPortMax?: boolean;
-  videoPortMin?: string;
-
-  // Ringtone
-  ringtonePath?: string;
-  ringtoneEnabled?: boolean;
-}
+export type Devices = Record<string, string>;

@@ -19,7 +19,7 @@ import argon2 from 'argon2';
 import { Router } from 'express';
 import asyncHandler from 'express-async-handler';
 import { ParamsDictionary, Request } from 'express-serve-static-core';
-import { HttpStatusCode } from 'jami-web-common';
+import { AccessToken, AdminCredentials, HttpStatusCode } from 'jami-web-common';
 import { Container } from 'typedi';
 
 import { checkAdminSetup } from '../middleware/setup.js';
@@ -30,14 +30,14 @@ const adminAccount = Container.get(AdminAccount);
 
 export const setupRouter = Router();
 
-setupRouter.get('/check', (_req, res, _next) => {
+setupRouter.get('/check', (_req, res) => {
   const isSetupComplete = adminAccount.get() !== undefined;
   res.send({ isSetupComplete });
 });
 
 setupRouter.post(
   '/admin/create',
-  asyncHandler(async (req: Request<ParamsDictionary, string, { password?: string }>, res, _next) => {
+  asyncHandler(async (req: Request<ParamsDictionary, string, Partial<AdminCredentials>>, res) => {
     const { password } = req.body;
     if (password === undefined) {
       res.status(HttpStatusCode.BadRequest).send('Missing password in body');
@@ -71,28 +71,26 @@ setupRouter.use(checkAdminSetup);
 
 setupRouter.post(
   '/admin/login',
-  asyncHandler(
-    async (req: Request<ParamsDictionary, { accessToken: string } | string, { password: string }>, res, _next) => {
-      const { password } = req.body;
-      if (password === undefined) {
-        res.status(HttpStatusCode.BadRequest).send('Missing password in body');
-        return;
-      }
-
-      const hashedPassword = adminAccount.get();
-      if (hashedPassword === undefined) {
-        res.status(HttpStatusCode.InternalServerError).send('Admin password not found');
-        return;
-      }
-
-      const isPasswordVerified = await argon2.verify(hashedPassword, password);
-      if (!isPasswordVerified) {
-        res.status(HttpStatusCode.Forbidden).send('Incorrect password');
-        return;
-      }
-
-      const jwt = await signJwt('admin');
-      res.send({ accessToken: jwt });
+  asyncHandler(async (req: Request<ParamsDictionary, AccessToken | string, Partial<AdminCredentials>>, res) => {
+    const { password } = req.body;
+    if (password === undefined) {
+      res.status(HttpStatusCode.BadRequest).send('Missing password in body');
+      return;
     }
-  )
+
+    const hashedPassword = adminAccount.get();
+    if (hashedPassword === undefined) {
+      res.status(HttpStatusCode.InternalServerError).send('Admin password not found');
+      return;
+    }
+
+    const isPasswordVerified = await argon2.verify(hashedPassword, password);
+    if (!isPasswordVerified) {
+      res.status(HttpStatusCode.Forbidden).send('Incorrect password');
+      return;
+    }
+
+    const jwt = await signJwt('admin');
+    res.send({ accessToken: jwt });
+  })
 );

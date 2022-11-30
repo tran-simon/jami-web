@@ -16,6 +16,7 @@
  * <https://www.gnu.org/licenses/>.
  */
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { IConversation, Message } from 'jami-web-common';
 
 import { useAuthContext } from '../contexts/AuthProvider';
 
@@ -24,7 +25,7 @@ export const useConversationQuery = (conversationId: string) => {
   return useQuery(
     ['conversation', conversationId],
     async () => {
-      const { data } = await axiosInstance.get(`/conversations/${conversationId}`);
+      const { data } = await axiosInstance.get<IConversation>(`/conversations/${conversationId}`);
       return data;
     },
     {
@@ -38,7 +39,7 @@ export const useMessagesQuery = (conversationId: string) => {
   return useQuery(
     ['messages', conversationId],
     async () => {
-      const { data } = await axiosInstance.get(`/conversations/${conversationId}/messages`);
+      const { data } = await axiosInstance.get<Message[]>(`/conversations/${conversationId}/messages`);
       return data;
     },
     {

@@ -15,9 +15,10 @@
  * License along with this program.  If not, see
  * <https://www.gnu.org/licenses/>.
  */
-import { Router } from 'express';
+import { Request, Router } from 'express';
 import asyncHandler from 'express-async-handler';
-import { AccountDetails, HttpStatusCode } from 'jami-web-common';
+import { ParamsDictionary } from 'express-serve-static-core';
+import { AccountDetails, HttpStatusCode, IAccount, IContact } from 'jami-web-common';
 import { Container } from 'typedi';
 
 import { Jamid } from '../jamid/jamid.js';
@@ -38,7 +39,7 @@ accountRouter.get(
 
     // Add usernames for default moderators
     const defaultModeratorUris = jamid.getDefaultModeratorUris(accountId);
-    const namedDefaultModerators = [];
+    const namedDefaultModerators: IContact[] = [];
     for (const defaultModeratorUri of defaultModeratorUris) {
       const { username } = await jamid.lookupAddress(defaultModeratorUri, accountId);
       namedDefaultModerators.push({
@@ -47,17 +48,18 @@ accountRouter.get(
       });
     }
 
-    res.send({
+    const account: IAccount = {
       id: accountId,
       details: jamid.getAccountDetails(accountId),
       volatileDetails: jamid.getVolatileAccountDetails(accountId),
       defaultModerators: namedDefaultModerators,
       devices: jamid.getDevices(accountId),
-    });
+    };
+    res.send(account);
   })
 );
 
-accountRouter.patch('/', (req, res) => {
+accountRouter.patch('/', (req: Request<ParamsDictionary, string, Partial<AccountDetails>>, res) => {
   const accountId = res.locals.accountId;
 
   const currentAccountDetails = jamid.getAccountDetails(accountId);

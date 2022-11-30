@@ -17,6 +17,7 @@
  */
 import GroupAddRounded from '@mui/icons-material/GroupAddRounded';
 import { Box, Card, CardContent, Container, Fab, Typography } from '@mui/material';
+import { ContactDetails } from 'jami-web-common';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
@@ -36,7 +37,7 @@ export default function AddContactPage({ contactId }: AddContactPageProps) {
   const dispatch = useAppDispatch();
 
   const handleClick = async () => {
-    const { data } = await axiosInstance.put(`/contacts/${contactId}`);
+    const { data } = await axiosInstance.put<ContactDetails>(`/contacts/${contactId}`);
     dispatch(setRefreshFromSlice());
 
     if (data.conversationId) {

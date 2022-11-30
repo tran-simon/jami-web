@@ -149,7 +149,7 @@ export const CallPendingCallerInterface = () => {
   const { callStatus } = useContext(CallContext);
   const { t } = useTranslation();
   const { conversation } = useConversationContext();
-  const memberName = useMemo(() => conversation.getFirstMember().contact.getRegisteredName(), [conversation]);
+  const memberName = useMemo(() => conversation.getFirstMember().contact.registeredName, [conversation]);
 
   let title = t('loading');
 
@@ -183,7 +183,7 @@ export const CallPendingReceiverInterface = () => {
 
   const { t } = useTranslation();
   const { conversation } = useConversationContext();
-  const memberName = useMemo(() => conversation.getFirstMember().contact.getRegisteredName(), [conversation]);
+  const memberName = useMemo(() => conversation.getFirstMember().contact.registeredName, [conversation]);
 
   let title = t('loading');
 

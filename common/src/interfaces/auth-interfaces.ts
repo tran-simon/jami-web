@@ -15,33 +15,16 @@
  * License along with this program.  If not, see
  * <https://www.gnu.org/licenses/>.
  */
-import { Message } from './conversation.js';
-
-export interface ContactMessage {
-  contactId: string;
+export interface UserCredentials {
+  username: string;
+  password: string;
+  isJams: boolean;
 }
 
-export interface ConversationMessage {
-  conversationId: string;
-  message: Message;
+export interface AdminCredentials {
+  password: string;
 }
 
-export interface ConversationView {
-  conversationId: string;
-}
-
-export interface CallAction extends ContactMessage {
-  conversationId: string;
-}
-
-export interface CallBegin extends CallAction {
-  withVideoOn: boolean;
-}
-
-export interface WebRtcSdp extends CallAction {
-  sdp: RTCSessionDescriptionInit;
-}
-
-export interface WebRtcIceCandidate extends CallAction {
-  candidate: RTCIceCandidate;
+export interface AccessToken {
+  accessToken: string;
 }

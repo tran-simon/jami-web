@@ -105,7 +105,7 @@ const ChatInterface = () => {
     return <div>Error loading {conversationId}</div>;
   }
 
-  const members = conversation.getMembers();
+  const members = conversation.members;
 
   return (
     <Stack flex={1} overflow="hidden" {...getRootProps()} paddingBottom="16px">

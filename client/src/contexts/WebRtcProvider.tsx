@@ -66,17 +66,17 @@ export default ({ children }: WithChildren) => {
     if (!webRtcConnection && account) {
       const iceServers: RTCIceServer[] = [];
 
-      if (account.getDetails()['TURN.enable'] === 'true') {
+      if (account.details['TURN.enable'] === 'true') {
         iceServers.push({
-          urls: 'turn:' + account.getDetails()['TURN.server'],
-          username: account.getDetails()['TURN.username'],
-          credential: account.getDetails()['TURN.password'],
+          urls: 'turn:' + account.details['TURN.server'],
+          username: account.details['TURN.username'],
+          credential: account.details['TURN.password'],
         });
       }
 
-      if (account.getDetails()['STUN.enable'] === 'true') {
+      if (account.details['STUN.enable'] === 'true') {
         iceServers.push({
-          urls: 'stun:' + account.getDetails()['STUN.server'],
+          urls: 'stun:' + account.details['STUN.server'],
         });
       }
 
@@ -123,7 +123,7 @@ const WebRtcProvider = ({
   const [iceCandidateQueue, setIceCandidateQueue] = useState<RTCIceCandidate[]>([]);
 
   // TODO: This logic will have to change to support multiple people in a call
-  const contactUri = useMemo(() => conversation.getFirstMember().contact.getUri(), [conversation]);
+  const contactUri = useMemo(() => conversation.getFirstMember().contact.uri, [conversation]);
 
   const getMediaDevices = useCallback(async (): Promise<MediaDevicesInfo> => {
     try {
