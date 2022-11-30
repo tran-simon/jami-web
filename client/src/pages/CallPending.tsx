@@ -17,7 +17,7 @@
  */
 
 import { Box, CircularProgress, Grid, IconButtonProps, Stack, Typography } from '@mui/material';
-import { ComponentType, ReactNode, useContext, useMemo } from 'react';
+import { ComponentType, ReactNode, useContext, useEffect, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 
@@ -30,10 +30,20 @@ import {
 import ConversationAvatar from '../components/ConversationAvatar';
 import { CallContext, CallStatus } from '../contexts/CallProvider';
 import { ConversationContext } from '../contexts/ConversationProvider';
+import { WebRtcContext } from '../contexts/WebRtcProvider';
 
 export const CallPending = () => {
+  const { localStream } = useContext(WebRtcContext);
   const { conversation } = useContext(ConversationContext);
   const { callRole } = useContext(CallContext);
+  const localVideoRef = useRef<HTMLVideoElement | null>(null);
+
+  useEffect(() => {
+    if (localStream && localVideoRef.current) {
+      localVideoRef.current.srcObject = localStream;
+    }
+  }, [localStream]);
+
   return (
     <Stack
       direction="column"
@@ -43,9 +53,22 @@ export const CallPending = () => {
       spacing={4}
       flexGrow={1}
       sx={{
-        backgroundColor: 'black',
+        position: 'relative',
       }}
     >
+      <video
+        ref={localVideoRef}
+        autoPlay
+        muted
+        style={{
+          width: '100%',
+          height: '100%',
+          position: 'absolute',
+          objectFit: 'cover',
+          backgroundColor: 'black',
+          zIndex: -1,
+        }}
+      />
       <Box
         sx={{
           position: 'relative',
