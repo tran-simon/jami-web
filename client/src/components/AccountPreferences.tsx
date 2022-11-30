@@ -187,7 +187,7 @@ export default function AccountPreferences() {
             <ListItemIcon>
               <PhoneCallbackRounded />
             </ListItemIcon>
-            <ListItemText id="switch-list-label-publicin" primary="Allow connection from unkown peers" />
+            <ListItemText id="switch-list-label-publicin" primary="Allow connection from unknown peers" />
             <ListItemSecondaryAction>
               <Switch
                 edge="end"
