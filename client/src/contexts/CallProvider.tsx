@@ -51,7 +51,7 @@ export interface ICallContext {
   setIsFullscreen: SetState<boolean>;
   callRole: CallRole;
   callStatus: CallStatus;
-  callStartTime: Date | undefined;
+  callStartTime: number | undefined;
   isAnswerButtonDisabled: boolean;
 
   acceptCall: (withVideoOn: boolean) => void;
@@ -105,7 +105,7 @@ const CallProvider = ({
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [callStatus, setCallStatus] = useState(routeState?.callStatus);
   const [callRole] = useState(routeState?.role);
-  const [callStartTime, setCallStartTime] = useState<Date | undefined>(undefined);
+  const [callStartTime, setCallStartTime] = useState<number | undefined>(undefined);
   const [isAnswerButtonDisabled, setIsAnswerButtonDisabled] = useState(false);
 
   // TODO: This logic will have to change to support multiple people in a call. Could we move this logic to the server?
@@ -248,7 +248,7 @@ const CallProvider = ({
     ) {
       console.info('Changing call status to InCall');
       setCallStatus(CallStatus.InCall);
-      setCallStartTime(new Date());
+      setCallStartTime(Date.now());
     }
   }, [iceConnectionState, callStatus]);
 
