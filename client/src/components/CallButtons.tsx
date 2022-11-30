@@ -152,6 +152,7 @@ export const CallingScreenShareButton = (props: ExpandableButtonProps) => {
   return (
     <CallButton
       aria-label="screen share"
+      expandMenuOnClick
       Icon={ScreenShareArrowIcon}
       expandMenuOptions={[
         {
@@ -206,17 +207,13 @@ const useMediaDeviceExpandMenuOptions = (kind: MediaDeviceKind): ExpandMenuRadio
 
 export const CallingVolumeButton = (props: ExpandableButtonProps) => {
   const options = useMediaDeviceExpandMenuOptions('audiooutput');
-  const { remoteVideoRef } = useContext(CallContext);
-
-  // Audio out options are only available on chrome and other browsers that support `setSinkId`
-  // https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/setSinkId#browser_compatibility
-  const hasSetSinkId = remoteVideoRef.current?.setSinkId != null;
 
   return (
     <CallButton
       aria-label="volume options"
+      expandMenuOnClick
       Icon={VolumeIcon}
-      expandMenuOptions={hasSetSinkId ? options : undefined}
+      expandMenuOptions={options}
       {...props}
     />
   );

@@ -22,3 +22,14 @@ export type WithChildren = {
 };
 
 export type SetState<T> = Dispatch<SetStateAction<T>>;
+
+/**
+ * HTMLVideoElement with the `sinkId` and `setSinkId` optional properties.
+ *
+ * These properties are defined only on supported browsers
+ * https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/setSinkId#browser_compatibility
+ */
+export interface VideoElementWithSinkId extends HTMLVideoElement {
+  sinkId?: string;
+  setSinkId?: (deviceId: string) => void;
+}

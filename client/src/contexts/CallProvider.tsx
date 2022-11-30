@@ -16,7 +16,7 @@
  * <https://www.gnu.org/licenses/>.
  */
 import { CallAction, CallBegin, WebSocketMessageType } from 'jami-web-common';
-import { createContext, MutableRefObject, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
 
 import LoadingPage from '../components/Loading';
@@ -46,23 +46,9 @@ type MediaDeviceIdState = {
 };
 type CurrentMediaDeviceIds = Record<MediaDeviceKind, MediaDeviceIdState>;
 
-/**
- * HTMLVideoElement with the `sinkId` and `setSinkId` optional properties.
- *
- * These properties are defined only on supported browsers
- * https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/setSinkId#browser_compatibility
- */
-interface VideoElementWithSinkId extends HTMLVideoElement {
-  sinkId?: string;
-  setSinkId?: (deviceId: string) => void;
-}
-
 export interface ICallContext {
   mediaDevices: MediaDevicesInfo;
   currentMediaDeviceIds: CurrentMediaDeviceIds;
-
-  localVideoRef: MutableRefObject<VideoElementWithSinkId | null>;
-  remoteVideoRef: MutableRefObject<VideoElementWithSinkId | null>;
 
   isAudioOn: boolean;
   setIsAudioOn: SetState<boolean>;
@@ -100,9 +86,6 @@ const defaultCallContext: ICallContext = {
       setId: async () => {},
     },
   },
-
-  localVideoRef: { current: null },
-  remoteVideoRef: { current: null },
 
   isAudioOn: false,
   setIsAudioOn: () => {},
@@ -143,9 +126,6 @@ const CallProvider = ({
     useContext(WebRtcContext);
   const { conversationId, conversation } = useContext(ConversationContext);
   const navigate = useNavigate();
-
-  const localVideoRef = useRef<HTMLVideoElement | null>(null);
-  const remoteVideoRef = useRef<HTMLVideoElement | null>(null);
 
   const [mediaDevices, setMediaDevices] = useState(defaultCallContext.mediaDevices);
   const [audioInputDeviceId, setAudioInputDeviceId] = useState<string>();
@@ -404,8 +384,6 @@ const CallProvider = ({
       value={{
         mediaDevices,
         currentMediaDeviceIds,
-        localVideoRef,
-        remoteVideoRef,
         isAudioOn,
         setIsAudioOn,
         isVideoOn,

@@ -17,7 +17,7 @@
  */
 
 import { Box, CircularProgress, Grid, IconButtonProps, Stack, Typography } from '@mui/material';
-import { ComponentType, ReactNode, useContext, useEffect, useMemo } from 'react';
+import { ComponentType, ReactNode, useContext, useEffect, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 
@@ -31,11 +31,13 @@ import ConversationAvatar from '../components/ConversationAvatar';
 import { CallContext, CallStatus } from '../contexts/CallProvider';
 import { ConversationContext } from '../contexts/ConversationProvider';
 import { WebRtcContext } from '../contexts/WebRtcProvider';
+import { VideoElementWithSinkId } from '../utils/utils';
 
 export const CallPending = () => {
   const { localStream } = useContext(WebRtcContext);
   const { conversation } = useContext(ConversationContext);
-  const { callRole, localVideoRef } = useContext(CallContext);
+  const { callRole } = useContext(CallContext);
+  const localVideoRef = useRef<VideoElementWithSinkId | null>(null);
 
   useEffect(() => {
     if (localStream && localVideoRef.current) {

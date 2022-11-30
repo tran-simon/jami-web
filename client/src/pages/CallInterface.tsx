@@ -49,6 +49,7 @@ import CallChatDrawer from '../components/CallChatDrawer';
 import { CallContext, CallStatus } from '../contexts/CallProvider';
 import { ConversationContext } from '../contexts/ConversationProvider';
 import { WebRtcContext } from '../contexts/WebRtcProvider';
+import { VideoElementWithSinkId } from '../utils/utils';
 import { CallPending } from './CallPending';
 
 export default () => {
@@ -90,9 +91,9 @@ const CallInterface = () => {
     currentMediaDeviceIds: {
       audiooutput: { id: audioOutDeviceId },
     },
-    localVideoRef,
-    remoteVideoRef,
   } = useContext(CallContext);
+  const localVideoRef = useRef<VideoElementWithSinkId | null>(null);
+  const remoteVideoRef = useRef<VideoElementWithSinkId | null>(null);
   const gridItemRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -121,6 +122,8 @@ const CallInterface = () => {
       remoteVideoRef.current.setSinkId(audioOutDeviceId);
     }
   }, [audioOutDeviceId, remoteVideoRef]);
+
+  const hasSetSinkId = remoteVideoRef.current?.setSinkId != null;
 
   return (
     <Box display="flex" flexGrow={1}>
@@ -157,7 +160,7 @@ const CallInterface = () => {
             </div>
           </Grid>
           <Grid item xs sx={{ display: 'flex', justifyContent: 'flex-end' }} ref={gridItemRef}>
-            <CallInterfaceSecondaryButtons gridItemRef={gridItemRef} />
+            <CallInterfaceSecondaryButtons showVolumeButton={hasSetSinkId} gridItemRef={gridItemRef} />
           </Grid>
         </Grid>
       </Box>
@@ -233,24 +236,34 @@ const SECONDARY_BUTTONS = [
   CallingFullScreenButton,
 ];
 
-const CallInterfaceSecondaryButtons = (props: Props & { gridItemRef: RefObject<HTMLElement> }) => {
+const CallInterfaceSecondaryButtons = ({
+  gridItemRef,
+  showVolumeButton,
+}: Props & { showVolumeButton: boolean; gridItemRef: RefObject<HTMLElement> }) => {
   const stackRef = useRef<HTMLElement>(null);
 
   const [initialMeasurementDone, setInitialMeasurementDone] = useState(false);
   const [hiddenStackCount, setHiddenStackCount] = useState(0);
   const [hiddenMenuVisible, setHiddenMenuVisible] = useState(false);
 
+  // Audio out options are only available on Chrome and other browsers that support `setSinkId`.
+  // This removes the `CallingVolumeButton` if `setSinkId` is not defined.
+  // https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/setSinkId#browser_compatibility
+  const secondaryButtons = useMemo(() => {
+    return showVolumeButton ? SECONDARY_BUTTONS : SECONDARY_BUTTONS.slice(1);
+  }, [showVolumeButton]);
+
   const calculateStackCount = useCallback(() => {
-    if (stackRef?.current && props.gridItemRef?.current) {
+    if (stackRef?.current && gridItemRef?.current) {
       const buttonWidth = stackRef.current.children[0].clientWidth;
-      const availableSpace = props.gridItemRef.current.clientWidth;
+      const availableSpace = gridItemRef.current.clientWidth;
       let availableButtons = Math.floor((availableSpace - 1) / buttonWidth);
-      if (availableButtons < SECONDARY_BUTTONS.length) {
+      if (availableButtons < secondaryButtons.length) {
         availableButtons -= 1; // Leave room for CallingMoreVerticalButton
       }
-      setHiddenStackCount(SECONDARY_BUTTONS.length - availableButtons);
+      setHiddenStackCount(secondaryButtons.length - availableButtons);
     }
-  }, [props.gridItemRef]);
+  }, [gridItemRef, secondaryButtons]);
 
   useLayoutEffect(() => {
     // Run once, at the beginning, for initial measurements
@@ -271,19 +284,20 @@ const CallInterfaceSecondaryButtons = (props: Props & { gridItemRef: RefObject<H
   const { displayedButtons, hiddenButtons } = useMemo(() => {
     const displayedButtons: ComponentType<ExpandableButtonProps>[] = [];
     const hiddenButtons: ComponentType<ExpandableButtonProps>[] = [];
-    SECONDARY_BUTTONS.forEach((button, i) => {
-      if (i < SECONDARY_BUTTONS.length - hiddenStackCount) {
+    for (let i = 0; i < secondaryButtons.length; i++) {
+      const button = secondaryButtons[i];
+      if (i < secondaryButtons.length - hiddenStackCount) {
         displayedButtons.push(button);
       } else {
         hiddenButtons.push(button);
       }
-    });
+    }
 
     return {
       displayedButtons,
       hiddenButtons,
     };
-  }, [hiddenStackCount]);
+  }, [hiddenStackCount, secondaryButtons]);
 
   return (
     <Card sx={{ backgroundColor: '#00000088', overflow: 'visible', height: '100%' }}>

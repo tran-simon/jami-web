@@ -108,6 +108,7 @@ export type ExpandMenuRadioOption = RadioGroupProps & {
 
 export type ExpandableButtonProps = IconButtonProps & {
   isVertical?: boolean;
+  expandMenuOnClick?: boolean;
   Icon?: ComponentType<SvgIconProps>;
   expandMenuOptions?: (ExpandMenuOption | ExpandMenuRadioOption)[];
   IconButtonComp?: ComponentType<IconButtonProps>;
@@ -116,6 +117,7 @@ export type ExpandableButtonProps = IconButtonProps & {
 export const ExpandableButton = ({
   isVertical,
   Icon,
+  expandMenuOnClick,
   expandMenuOptions = undefined,
   IconButtonComp = IconButton,
   ...props
@@ -194,7 +196,18 @@ export const ExpandableButton = ({
             />
           </IconButton>
         )}
-        <IconButtonComp {...props}>{Icon && <Icon />}</IconButtonComp>
+        <IconButtonComp
+          onClick={
+            expandMenuOnClick
+              ? (event) => {
+                  setAnchorEl(event.currentTarget);
+                }
+              : undefined
+          }
+          {...props}
+        >
+          {Icon && <Icon />}
+        </IconButtonComp>
       </Box>
     </>
   );
