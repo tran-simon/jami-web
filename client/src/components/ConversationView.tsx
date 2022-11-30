@@ -16,13 +16,13 @@
  * <https://www.gnu.org/licenses/>.
  */
 import { Divider, Stack, Typography } from '@mui/material';
-import { ConversationMember } from 'jami-web-common';
 import { useContext, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { useAuthContext } from '../contexts/AuthProvider';
 import { ConversationContext } from '../contexts/ConversationProvider';
 import { useStartCall } from '../hooks/useStartCall';
+import { ConversationMember } from '../models/Conversation';
 import ChatInterface from '../pages/ChatInterface';
 import { translateEnumeration, TranslateEnumerationOptions } from '../utils/translations';
 import { AddParticipantButton, ShowOptionsMenuButton, StartAudioCallButton, StartVideoCallButton } from './Button';

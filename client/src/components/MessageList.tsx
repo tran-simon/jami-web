@@ -17,12 +17,13 @@
  */
 import { Typography } from '@mui/material';
 import { Box, Stack } from '@mui/system';
-import { ConversationMember, Message } from 'jami-web-common';
+import { Message } from 'jami-web-common';
 import { MutableRefObject, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Waypoint } from 'react-waypoint';
 
 import { useAuthContext } from '../contexts/AuthProvider';
+import { ConversationMember } from '../models/Conversation';
 import { MessageRow } from './Message';
 import { ArrowDownIcon } from './SvgIcon';
 

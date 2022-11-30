@@ -17,11 +17,11 @@
  */
 import { InputBase } from '@mui/material';
 import { Stack } from '@mui/system';
-import { ConversationMember } from 'jami-web-common';
 import { ChangeEvent, FormEvent, useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { useAuthContext } from '../contexts/AuthProvider';
+import { ConversationMember } from '../models/Conversation';
 import { translateEnumeration, TranslateEnumerationOptions } from '../utils/translations';
 import {
   RecordVideoMessageButton,

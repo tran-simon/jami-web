@@ -16,11 +16,11 @@
  * <https://www.gnu.org/licenses/>.
  */
 import { Card, CardActionArea, CardContent, CircularProgress, Typography } from '@mui/material';
-import { Conversation } from 'jami-web-common/dist/Conversation';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
 
 import { useAuthContext } from '../contexts/AuthProvider';
+import { Conversation } from '../models/Conversation';
 
 export default function ConversationsOverviewCard() {
   const { axiosInstance, account } = useAuthContext();

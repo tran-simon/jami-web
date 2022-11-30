@@ -16,7 +16,6 @@
  * <https://www.gnu.org/licenses/>.
  */
 import { Box, ListItem, ListItemAvatar, ListItemText } from '@mui/material';
-import { Conversation } from 'jami-web-common';
 import { QRCodeCanvas } from 'qrcode.react';
 import { useCallback, useContext, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -26,6 +25,7 @@ import { useAuthContext } from '../contexts/AuthProvider';
 import { MessengerContext } from '../contexts/MessengerProvider';
 import { useStartCall } from '../hooks/useStartCall';
 import { useUrlParams } from '../hooks/useUrlParams';
+import { Conversation } from '../models/Conversation';
 import { setRefreshFromSlice } from '../redux/appSlice';
 import { useAppDispatch } from '../redux/hooks';
 import { ConversationRouteParams } from '../router';

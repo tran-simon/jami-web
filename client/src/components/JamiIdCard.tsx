@@ -16,7 +16,8 @@
  * <https://www.gnu.org/licenses/>.
  */
 import { Box, Card, CardContent, Typography } from '@mui/material';
-import { Account } from 'jami-web-common';
+
+import { Account } from '../models/Account';
 
 type JamiIdCardProps = {
   account: Account;

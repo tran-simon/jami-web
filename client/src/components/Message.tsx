@@ -18,11 +18,13 @@
 import { Box, Chip, Divider, Stack, Tooltip, Typography } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { Dayjs } from 'dayjs';
-import { Account, Contact, Message } from 'jami-web-common';
+import { Message } from 'jami-web-common';
 import { ReactElement, ReactNode, useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import dayjs from '../dayjsInitializer';
+import { Account } from '../models/Account';
+import { Contact } from '../models/Contact';
 import { EmojiButton, MoreButton, ReplyMessageButton } from './Button';
 import ConversationAvatar from './ConversationAvatar';
 import PopoverList, { PopoverListItemData } from './PopoverList';

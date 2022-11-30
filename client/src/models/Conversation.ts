@@ -15,8 +15,9 @@
  * License along with this program.  If not, see
  * <https://www.gnu.org/licenses/>.
  */
-import { Contact } from './Contact.js';
-import { PromiseExecutor } from './util.js';
+import { Message } from 'jami-web-common';
+
+import { Contact } from './Contact';
 
 export interface ConversationMember {
   contact: Contact;
@@ -25,45 +26,12 @@ export interface ConversationMember {
 
 type ConversationInfos = Record<string, unknown>;
 
-export interface Message {
-  id: string;
-  author: string;
-  timestamp: string;
-  type:
-    | 'application/call-history+json'
-    | 'application/data-transfer+json'
-    | 'application/update-profile'
-    | 'initial'
-    | 'member'
-    | 'merge'
-    | 'text/plain'
-    | 'vote';
-  linearizedParent: string;
-  parents: string;
-  body?: string;
-  duration?: string;
-  to?: string;
-  invited?: string;
-}
-
-type ConversationRequest = PromiseExecutor<Message[]>;
-
-type ConversationListeners = Record<
-  string,
-  {
-    socket: any; // TODO: Improve typing
-    session: any;
-  }
->;
-
 export class Conversation {
   private readonly id: string | undefined;
   private readonly accountId: string;
   private readonly members: ConversationMember[];
   private messages: Message[];
   private _infos: ConversationInfos;
-  private _requests: Record<string, ConversationRequest>;
-  private _listeners: ConversationListeners;
 
   constructor(id: string | undefined, accountId: string, members?: ConversationMember[]) {
     this.id = id;
@@ -72,8 +40,6 @@ export class Conversation {
 
     this.messages = [];
     this._infos = {};
-    this._requests = {};
-    this._listeners = {};
   }
 
   static from(accountId: string, object: any) {
@@ -114,30 +80,6 @@ export class Conversation {
     }
   }
 
-  async getObject(params?: {
-    memberFilter: (value: ConversationMember, index: number, array: ConversationMember[]) => boolean;
-  }) {
-    const members = params?.memberFilter ? this.members.filter(params.memberFilter) : this.members;
-    return {
-      id: this.id,
-      messages: this.messages,
-      members: await Promise.all(
-        members.map(async (member) => {
-          //Object.assign({}, member);
-          return {
-            role: member.role,
-            contact: await member.contact.getObject(),
-          };
-        })
-      ),
-      infos: this._infos,
-    };
-  }
-
-  getSummary() {
-    return this.getObject();
-  }
-
   getDisplayUri() {
     return this.getId() || this.getFirstMember().contact.getUri();
   }
@@ -175,21 +117,5 @@ export class Conversation {
 
   set infos(infos: ConversationInfos) {
     this._infos = infos;
-  }
-
-  get requests(): Record<string, ConversationRequest> {
-    return this._requests;
-  }
-
-  set requests(value: Record<string, ConversationRequest>) {
-    this._requests = value;
-  }
-
-  get listeners(): ConversationListeners {
-    return this._listeners;
-  }
-
-  set listeners(listeners: ConversationListeners) {
-    this._listeners = listeners;
   }
 }

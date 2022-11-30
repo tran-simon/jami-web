@@ -15,18 +15,23 @@
  * License along with this program.  If not, see
  * <https://www.gnu.org/licenses/>.
  */
-export interface PromiseExecutor<T> {
-  resolve: (value: T) => void;
-  reject: (reason?: any) => void;
-}
-
-export interface LookupResolveValue {
-  address: string;
-  name: string;
-  state: number;
-}
-
-export interface Lookup extends PromiseExecutor<LookupResolveValue> {
-  name?: string;
-  address?: string;
+export interface Message {
+  id: string;
+  author: string;
+  timestamp: string;
+  type:
+    | 'application/call-history+json'
+    | 'application/data-transfer+json'
+    | 'application/update-profile'
+    | 'initial'
+    | 'member'
+    | 'merge'
+    | 'text/plain'
+    | 'vote';
+  linearizedParent: string;
+  parents: string;
+  body?: string;
+  duration?: string;
+  to?: string;
+  invited?: string;
 }

@@ -15,7 +15,7 @@
  * License along with this program.  If not, see
  * <https://www.gnu.org/licenses/>.
  */
-import { Message } from '../Conversation.js';
+import { Message } from './message.js';
 
 export interface ContactMessage {
   contactId: string;

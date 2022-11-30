@@ -15,10 +15,15 @@
  * License along with this program.  If not, see
  * <https://www.gnu.org/licenses/>.
  */
-export * from './enums/http-status-code.js';
-export * from './enums/registration-state.js';
-export * from './enums/websocket-message-type.js';
-export * from './interfaces/account-details.js';
-export * from './interfaces/message.js';
-export * from './interfaces/websocket-interfaces.js';
-export * from './interfaces/websocket-message.js';
+export enum RegistrationState {
+  Unregistered = 'UNREGISTERED',
+  Trying = 'TRYING',
+  Registered = 'REGISTERED',
+  ErrorGeneric = 'ERROR_GENERIC',
+  ErrorAuth = 'ERROR_AUTH',
+  ErrorNetwork = 'ERROR_NETWORK',
+  ErrorHost = 'ERROR_HOST',
+  ErrorServiceUnavailable = 'ERROR_SERVICE_UNAVAILABLE',
+  ErrorNeedMigration = 'ERROR_NEED_MIGRATION',
+  Initializing = 'INITIALIZING',
+}

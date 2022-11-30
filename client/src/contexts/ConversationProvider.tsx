@@ -15,13 +15,14 @@
  * License along with this program.  If not, see
  * <https://www.gnu.org/licenses/>.
  */
-import { Conversation, ConversationView, WebSocketMessageType } from 'jami-web-common';
+import { ConversationView, WebSocketMessageType } from 'jami-web-common';
 import { createContext, useContext, useEffect, useState } from 'react';
 
 import LoadingPage from '../components/Loading';
 import { useUrlParams } from '../hooks/useUrlParams';
+import { Conversation } from '../models/Conversation';
 import { ConversationRouteParams } from '../router';
-import { useConversationQuery } from '../services/Conversation';
+import { useConversationQuery } from '../services/conversationQueries';
 import { WithChildren } from '../utils/utils';
 import { useAuthContext } from './AuthProvider';
 import { WebSocketContext } from './WebSocketProvider';

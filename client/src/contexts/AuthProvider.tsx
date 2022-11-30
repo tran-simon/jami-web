@@ -16,12 +16,12 @@
  * <https://www.gnu.org/licenses/>.
  */
 import axios, { AxiosInstance } from 'axios';
-import { Account } from 'jami-web-common/dist/Account';
-import { HttpStatusCode } from 'jami-web-common/dist/enums/http-status-code';
+import { HttpStatusCode } from 'jami-web-common';
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import ProcessingRequest from '../components/ProcessingRequest';
+import { Account } from '../models/Account';
 import { apiUrl } from '../utils/constants';
 import { WithChildren } from '../utils/utils';
 

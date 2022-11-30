@@ -15,9 +15,11 @@
  * License along with this program.  If not, see
  * <https://www.gnu.org/licenses/>.
  */
-import { Contact, Conversation, ConversationMessage, WebSocketMessageType } from 'jami-web-common';
-import React, { createContext, ReactNode, useContext, useEffect, useState } from 'react';
+import { ConversationMessage, WebSocketMessageType } from 'jami-web-common';
+import { createContext, ReactNode, useContext, useEffect, useState } from 'react';
 
+import { Contact } from '../models/Contact';
+import { Conversation } from '../models/Conversation';
 import { setRefreshFromSlice } from '../redux/appSlice';
 import { useAppDispatch, useAppSelector } from '../redux/hooks';
 import { SetState } from '../utils/utils';

@@ -26,7 +26,7 @@ import MessageList from '../components/MessageList';
 import SendMessageForm from '../components/SendMessageForm';
 import { ConversationContext } from '../contexts/ConversationProvider';
 import { WebSocketContext } from '../contexts/WebSocketProvider';
-import { useMessagesQuery, useSendMessageMutation } from '../services/Conversation';
+import { useMessagesQuery, useSendMessageMutation } from '../services/conversationQueries';
 import { FileHandler } from '../utils/files';
 
 const ChatInterface = () => {
