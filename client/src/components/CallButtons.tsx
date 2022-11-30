@@ -21,7 +21,7 @@ import { styled, Theme } from '@mui/material/styles';
 import { useContext, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { CallContext } from '../contexts/CallProvider';
+import { CallContext, CallStatus } from '../contexts/CallProvider';
 import { WebRtcContext } from '../contexts/WebRtcProvider';
 import {
   ExpandableButton,
@@ -268,11 +268,11 @@ export const CallingCancelButton = (props: IconButtonProps) => {
 };
 
 export const CallingAnswerAudioButton = (props: IconButtonProps) => {
-  const { acceptCall, isAnswerButtonDisabled } = useContext(CallContext);
+  const { acceptCall, callStatus } = useContext(CallContext);
 
   return (
     <ColoredCallButton
-      disabled={isAnswerButtonDisabled}
+      disabled={callStatus === CallStatus.Loading || callStatus === CallStatus.Connecting}
       aria-label="answer call audio"
       onClick={() => {
         acceptCall(false);
@@ -285,10 +285,10 @@ export const CallingAnswerAudioButton = (props: IconButtonProps) => {
 };
 
 export const CallingAnswerVideoButton = (props: IconButtonProps) => {
-  const { acceptCall, isAnswerButtonDisabled } = useContext(CallContext);
+  const { acceptCall, callStatus } = useContext(CallContext);
   return (
     <ColoredCallButton
-      disabled={isAnswerButtonDisabled}
+      disabled={callStatus === CallStatus.Connecting || callStatus === CallStatus.Loading}
       aria-label="answer call video"
       onClick={() => {
         acceptCall(true);
