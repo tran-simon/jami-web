@@ -85,6 +85,9 @@ const ColoredCallButton = styled(
     '&:hover': {
       backgroundColor: paletteColor.main,
     },
+    '&:disabled': {
+      backgroundColor: theme.palette.action.disabled,
+    },
   };
 });
 

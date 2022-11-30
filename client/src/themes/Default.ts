@@ -162,6 +162,9 @@ const palettes = {
         main: '#A3C2DA',
         dark: '#06493F',
       },
+      action: {
+        disabled: '#7F7F7F',
+      },
     },
     InfoTooltip: {
       backgroundColor: {
@@ -190,6 +193,9 @@ const palettes = {
       secondary: {
         main: '#A3C2DA',
         dark: '#06493F',
+      },
+      action: {
+        disabled: '#7F7F7F',
       },
     },
     InfoTooltip: {
