@@ -17,7 +17,7 @@
  */
 import { Router } from 'express';
 import asyncHandler from 'express-async-handler';
-import { HttpStatusCode } from 'jami-web-common';
+import { HttpStatusCode, RegisteredNameFoundState } from 'jami-web-common';
 import { Container } from 'typedi';
 
 import { Jamid } from '../jamid/jamid.js';
@@ -34,10 +34,10 @@ nameserverRouter.get(
   asyncHandler(async (req, res) => {
     const result = await jamid.lookupUsername(req.params.username, res.locals.accountId);
     switch (result.state) {
-      case 0:
+      case RegisteredNameFoundState.Found:
         res.send(result);
         break;
-      case 1:
+      case RegisteredNameFoundState.InvalidResponse:
         res.status(HttpStatusCode.BadRequest).send('Invalid username');
         break;
       default:
@@ -52,10 +52,10 @@ nameserverRouter.get(
   asyncHandler(async (req, res) => {
     const result = await jamid.lookupAddress(req.params.address, res.locals.accountId);
     switch (result.state) {
-      case 0:
+      case RegisteredNameFoundState.Found:
         res.send(result);
         break;
-      case 1:
+      case RegisteredNameFoundState.InvalidResponse:
         res.status(HttpStatusCode.BadRequest).send('Invalid address');
         break;
       default:

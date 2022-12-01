@@ -16,7 +16,6 @@
  * <https://www.gnu.org/licenses/>.
  */
 export * from './enums/http-status-code.js';
-export * from './enums/registration-state.js';
 export * from './enums/websocket-message-type.js';
 export * from './interfaces/account.js';
 export * from './interfaces/auth-interfaces.js';

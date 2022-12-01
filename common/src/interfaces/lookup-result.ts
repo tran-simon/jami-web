@@ -16,7 +16,14 @@
  * <https://www.gnu.org/licenses/>.
  */
 export interface LookupResult {
-  state: number; // TODO: Create enum for state
+  state: RegisteredNameFoundState;
   address: string;
   username: string;
+}
+
+export enum RegisteredNameFoundState {
+  Found,
+  InvalidResponse,
+  NotFound,
+  Error,
 }

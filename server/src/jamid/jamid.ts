@@ -25,6 +25,7 @@ import {
   Devices,
   LookupResult,
   Message,
+  RegisteredNameFoundState,
   VolatileDetails,
   WebSocketMessage,
   WebSocketMessageType,
@@ -56,6 +57,12 @@ import {
   VolatileDetailsChanged,
 } from './jami-signal-interfaces.js';
 import { JamiSwig, StringMap, stringMapToRecord, stringVectToArray, vectMapToRecordArray } from './jami-swig.js';
+import {
+  ConversationMemberEventType,
+  MessageState,
+  NameRegistrationEndedState,
+  RegistrationState,
+} from './state-enums.js';
 
 const require = createRequire(import.meta.url);
 
@@ -92,16 +99,20 @@ export class Jamid {
       onVolatileDetailsChanged.next({ accountId, details });
 
     const onRegistrationStateChanged = new Subject<RegistrationStateChanged>();
-    handlers.RegistrationStateChanged = (accountId: string, state: string, code: number, details: string) =>
+    handlers.RegistrationStateChanged = (accountId: string, state: RegistrationState, code: number, details: string) =>
       onRegistrationStateChanged.next({ accountId, state, code, details });
 
     const onNameRegistrationEnded = new Subject<NameRegistrationEnded>();
-    handlers.NameRegistrationEnded = (accountId: string, state: number, username: string) =>
+    handlers.NameRegistrationEnded = (accountId: string, state: NameRegistrationEndedState, username: string) =>
       onNameRegistrationEnded.next({ accountId, state, username });
 
     const onRegisteredNameFound = new Subject<RegisteredNameFound>();
-    handlers.RegisteredNameFound = (accountId: string, state: number, address: string, username: string) =>
-      onRegisteredNameFound.next({ accountId, state, address, username });
+    handlers.RegisteredNameFound = (
+      accountId: string,
+      state: RegisteredNameFoundState,
+      address: string,
+      username: string
+    ) => onRegisteredNameFound.next({ accountId, state, address, username });
 
     const onKnownDevicesChanged = new Subject<KnownDevicesChanged>();
     handlers.KnownDevicesChanged = (accountId: string, devices: Devices) =>
@@ -112,7 +123,7 @@ export class Jamid {
       onIncomingAccountMessage.next({ accountId, from, payload });
 
     const onAccountMessageStatusChanged = new Subject<AccountMessageStatusChanged>();
-    handlers.AccountMessageStatusChanged = (accountId: string, messageId: string, peer: string, state: number) =>
+    handlers.AccountMessageStatusChanged = (accountId: string, messageId: string, peer: string, state: MessageState) =>
       onAccountMessageStatusChanged.next({ accountId, messageId, peer, state });
 
     const onContactAdded = new Subject<ContactAdded>();
@@ -147,7 +158,7 @@ export class Jamid {
       accountId: string,
       conversationId: string,
       memberUri: string,
-      event: number
+      event: ConversationMemberEventType
     ) => {
       onConversationMemberEvent.next({ accountId, conversationId, memberUri, event });
     };
@@ -209,18 +220,18 @@ export class Jamid {
   async addAccount(accountDetails: Partial<AccountDetails>): Promise<RegistrationStateChanged> {
     accountDetails['Account.type'] = 'RING';
 
-    const detailsStringMap: StringMap = new this.jamiSwig.StringMap();
+    const accountDetailsStringMap: StringMap = new this.jamiSwig.StringMap();
     for (const [key, value] of Object.entries(accountDetails)) {
-      detailsStringMap.set(key, value.toString());
+      accountDetailsStringMap.set(key, value.toString());
     }
 
-    const accountId = this.jamiSwig.addAccount(detailsStringMap);
+    const accountId = this.jamiSwig.addAccount(accountDetailsStringMap);
     return firstValueFrom(
       this.events.onRegistrationStateChanged.pipe(
         filter((value) => value.accountId === accountId),
-        // TODO: is it the only state?
-        // TODO: Replace with string enum in common/
-        filter((value) => value.state === 'REGISTERED' || value.state === 'ERROR_GENERIC')
+        filter(
+          (value) => value.state === RegistrationState.Registered || value.state === RegistrationState.ErrorGeneric
+        )
       )
     );
   }
@@ -242,7 +253,7 @@ export class Jamid {
   async lookupUsername(username: string, accountId?: string): Promise<LookupResult> {
     const hasRingNs = this.jamiSwig.lookupName(accountId || '', '', username);
     if (!hasRingNs) {
-      throw new Error('Jami does not have NS');
+      throw new Error('Jami does not have a nameserver');
     }
     return firstValueFrom(
       this.events.onRegisteredNameFound.pipe(
@@ -255,7 +266,7 @@ export class Jamid {
   async lookupAddress(address: string, accountId?: string): Promise<LookupResult> {
     const hasRingNs = this.jamiSwig.lookupAddress(accountId || '', '', address);
     if (!hasRingNs) {
-      throw new Error('Jami does not have NS');
+      throw new Error('Jami does not have a nameserver');
     }
     return firstValueFrom(
       this.events.onRegisteredNameFound.pipe(
@@ -265,11 +276,10 @@ export class Jamid {
     );
   }
 
-  // TODO: Create enum for state and return that rather than a number
-  async registerUsername(accountId: string, username: string, password: string): Promise<number> {
+  async registerUsername(accountId: string, username: string, password: string): Promise<NameRegistrationEndedState> {
     const hasRingNs = this.jamiSwig.registerName(accountId, password, username);
     if (!hasRingNs) {
-      throw new Error('Jami does not have NS');
+      throw new Error('Jami does not have a nameserver');
     }
     return firstValueFrom(
       this.events.onNameRegistrationEnded.pipe(
@@ -409,10 +419,10 @@ export class Jamid {
     this.events.onIncomingAccountMessage.subscribe(<T extends WebSocketMessageType>(signal: IncomingAccountMessage) => {
       log.debug('Received IncomingAccountMessage:', JSON.stringify(signal));
 
-      const message: WebSocketMessage<T> = JSON.parse(signal.payload['application/json']);
+      const message: Partial<WebSocketMessage<T>> = JSON.parse(signal.payload['application/json']);
 
-      if (message === undefined) {
-        log.warn('Undefined account message');
+      if (typeof message !== 'object' || message === null) {
+        log.warn('Account message is not an object');
         return;
       }
 

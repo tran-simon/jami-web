@@ -23,6 +23,7 @@ import { AccessToken, AccountDetails, HttpStatusCode, UserCredentials } from 'ja
 import { Container } from 'typedi';
 
 import { Jamid } from '../jamid/jamid.js';
+import { NameRegistrationEndedState, RegistrationState } from '../jamid/state-enums.js';
 import { Accounts } from '../storage/accounts.js';
 import { signJwt } from '../utils/jwt.js';
 
@@ -64,21 +65,24 @@ authRouter.post(
     const { accountId, state } = await jamid.addAccount(accountDetails);
 
     if (isJams) {
-      if (state === 'ERROR_GENERIC') {
+      if (state === RegistrationState.ErrorGeneric) {
         jamid.removeAccount(accountId);
         res.status(HttpStatusCode.Unauthorized).send('Invalid JAMS credentials');
         return;
       }
     } else {
       const state = await jamid.registerUsername(accountId, username, '');
-      if (state !== 0) {
+      if (state !== NameRegistrationEndedState.Success) {
         jamid.removeAccount(accountId);
-        if (state === 2) {
-          res.status(HttpStatusCode.BadRequest).send('Invalid username or password');
-        } else if (state === 3) {
-          res.status(HttpStatusCode.Conflict).send('Username already exists');
-        } else {
-          throw new Error(`Unhandled state ${state}`);
+        switch (state) {
+          case NameRegistrationEndedState.InvalidName:
+            res.status(HttpStatusCode.BadRequest).send('Invalid username or password');
+            break;
+          case NameRegistrationEndedState.AlreadyTaken:
+            res.status(HttpStatusCode.Conflict).send('Username already exists');
+            break;
+          default:
+            throw new Error(`Unhandled state ${state}`);
         }
         return;
       }

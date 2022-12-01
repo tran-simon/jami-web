@@ -16,8 +16,15 @@
  * <https://www.gnu.org/licenses/>.
  */
 import { AccountDetails, Devices, Message, VolatileDetails } from 'jami-web-common';
+import { RegisteredNameFoundState } from 'jami-web-common';
 
 import { ConversationRequestMetadata } from './conversation-request-metadata.js';
+import {
+  ConversationMemberEventType,
+  MessageState,
+  NameRegistrationEndedState,
+  RegistrationState,
+} from './state-enums.js';
 
 // These interfaces are used to hold all the parameters for signal handlers
 // These parameters' names and types can be found in daemon/bin/nodejs/callback.h
@@ -35,20 +42,20 @@ export interface VolatileDetailsChanged {
 
 export interface RegistrationStateChanged {
   accountId: string;
-  state: string;
+  state: RegistrationState;
   code: number;
   details: string;
 }
 
 export interface NameRegistrationEnded {
   accountId: string;
-  state: number;
+  state: NameRegistrationEndedState;
   username: string;
 }
 
 export interface RegisteredNameFound {
   accountId: string;
-  state: number;
+  state: RegisteredNameFoundState;
   address: string;
   username: string;
 }
@@ -68,7 +75,7 @@ export interface AccountMessageStatusChanged {
   accountId: string;
   messageId: string;
   peer: string;
-  state: number; // TODO: Replace state number with enum (see account_const.h)
+  state: MessageState;
 }
 
 export interface IncomingTrustRequest {
@@ -118,7 +125,7 @@ export interface ConversationMemberEvent {
   accountId: string;
   conversationId: string;
   memberUri: string;
-  event: number;
+  event: ConversationMemberEventType;
 }
 
 export interface MessageReceived {

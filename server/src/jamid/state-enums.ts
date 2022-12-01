@@ -27,3 +27,28 @@ export enum RegistrationState {
   ErrorNeedMigration = 'ERROR_NEED_MIGRATION',
   Initializing = 'INITIALIZING',
 }
+
+export enum NameRegistrationEndedState {
+  Success,
+  InvalidCredentials,
+  InvalidName,
+  AlreadyTaken,
+  Error,
+}
+
+export enum MessageState {
+  Unknown,
+  Sending,
+  Sent,
+  Displayed,
+  Failure,
+  Cancelled,
+}
+
+export enum ConversationMemberEventType {
+  Add,
+  Join,
+  Remove,
+  Ban,
+  Unban,
+}
