@@ -66,6 +66,7 @@
   "message_swarm_created": "Le Swarm a été créé",
   "message_user_joined": "{{user}} s'est joint",
   "messages_scroll_to_end": "Faire défiler jusqu'à la fin de la conversation",
+  "conversation_add_contact_form": "Ajouter un contact",
   "message_input_placeholder_one": "Écrire à {{member0}}",
   "message_input_placeholder_two": "Écrire à {{member0}} et {{member1}}",
   "message_input_placeholder_three": "Écrire à {{member0}}, {{member1}} et {{member2}}",

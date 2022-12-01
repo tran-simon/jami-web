@@ -18,12 +18,14 @@
 import { SearchRounded } from '@mui/icons-material';
 import { InputAdornment, InputBase } from '@mui/material';
 import { ChangeEvent, useContext, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { MessengerContext } from '../contexts/MessengerProvider';
 
 export default function NewContactForm() {
   const { setSearchQuery } = useContext(MessengerContext);
   const [value, setValue] = useState('');
+  const { t } = useTranslation();
 
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
     setValue(event.target.value);
@@ -31,11 +33,11 @@ export default function NewContactForm() {
   };
 
   return (
-    <form className="main-search" noValidate autoComplete="off">
+    <div className="main-search">
       <InputBase
         className="main-search-input"
         type="search"
-        placeholder="Ajouter un contact"
+        placeholder={t('conversation_add_contact_form')}
         value={value}
         onChange={handleChange}
         startAdornment={
@@ -44,6 +46,6 @@ export default function NewContactForm() {
           </InputAdornment>
         }
       />
-    </form>
+    </div>
   );
 }
