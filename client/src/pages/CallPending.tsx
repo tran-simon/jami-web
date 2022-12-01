@@ -29,13 +29,13 @@ import {
 } from '../components/CallButtons';
 import ConversationAvatar from '../components/ConversationAvatar';
 import { CallContext, CallStatus } from '../contexts/CallProvider';
-import { ConversationContext } from '../contexts/ConversationProvider';
+import { useConversationContext } from '../contexts/ConversationProvider';
 import { WebRtcContext } from '../contexts/WebRtcProvider';
 import { VideoElementWithSinkId } from '../utils/utils';
 
 export const CallPending = () => {
   const { localStream } = useContext(WebRtcContext);
-  const { conversation } = useContext(ConversationContext);
+  const { conversation } = useConversationContext();
   const { callRole } = useContext(CallContext);
   const localVideoRef = useRef<VideoElementWithSinkId | null>(null);
 
@@ -148,7 +148,7 @@ const CallPendingDetails = ({
 export const CallPendingCallerInterface = () => {
   const { callStatus } = useContext(CallContext);
   const { t } = useTranslation();
-  const { conversation } = useContext(ConversationContext);
+  const { conversation } = useConversationContext();
   const memberName = useMemo(() => conversation.getFirstMember().contact.getRegisteredName(), [conversation]);
 
   let title = t('loading');
@@ -182,7 +182,7 @@ export const CallPendingReceiverInterface = () => {
   const { callStatus } = useContext(CallContext);
 
   const { t } = useTranslation();
-  const { conversation } = useContext(ConversationContext);
+  const { conversation } = useConversationContext();
   const memberName = useMemo(() => conversation.getFirstMember().contact.getRegisteredName(), [conversation]);
 
   let title = t('loading');

@@ -22,13 +22,12 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
 import { useAuthContext } from '../contexts/AuthProvider';
+import { useConversationContext } from '../contexts/ConversationProvider';
 import { MessengerContext } from '../contexts/MessengerProvider';
 import { useStartCall } from '../hooks/useStartCall';
-import { useUrlParams } from '../hooks/useUrlParams';
 import { Conversation } from '../models/Conversation';
 import { setRefreshFromSlice } from '../redux/appSlice';
 import { useAppDispatch } from '../redux/hooks';
-import { ConversationRouteParams } from '../router';
 import ContextMenu, { ContextMenuHandler, useContextMenuHandler } from './ContextMenu';
 import ConversationAvatar from './ConversationAvatar';
 import { ConfirmationDialog, DialogContentList, InfosDialog, useDialogHandler } from './Dialog';
@@ -48,13 +47,12 @@ type ConversationListItemProps = {
 };
 
 export default function ConversationListItem({ conversation }: ConversationListItemProps) {
-  const {
-    urlParams: { conversationId },
-  } = useUrlParams<ConversationRouteParams>();
+  const conversationContext = useConversationContext(true);
+  const conversationId = conversationContext?.conversationId;
   const contextMenuHandler = useContextMenuHandler();
   const { newContactId, setNewContactId } = useContext(MessengerContext);
 
-  const pathId = conversationId || newContactId;
+  const pathId = conversationId ?? newContactId;
   const isSelected = conversation.getDisplayUri() === pathId;
 
   const navigate = useNavigate();

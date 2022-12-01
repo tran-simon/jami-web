@@ -24,14 +24,14 @@ import { FilePreviewRemovable } from '../components/FilePreview';
 import LoadingPage from '../components/Loading';
 import MessageList from '../components/MessageList';
 import SendMessageForm from '../components/SendMessageForm';
-import { ConversationContext } from '../contexts/ConversationProvider';
+import { useConversationContext } from '../contexts/ConversationProvider';
 import { WebSocketContext } from '../contexts/WebSocketProvider';
 import { useMessagesQuery, useSendMessageMutation } from '../services/conversationQueries';
 import { FileHandler } from '../utils/files';
 
 const ChatInterface = () => {
   const webSocket = useContext(WebSocketContext);
-  const { conversationId, conversation } = useContext(ConversationContext);
+  const { conversationId, conversation } = useConversationContext();
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(false);

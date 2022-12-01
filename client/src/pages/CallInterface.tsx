@@ -47,7 +47,7 @@ import {
 } from '../components/CallButtons';
 import CallChatDrawer from '../components/CallChatDrawer';
 import { CallContext, CallStatus } from '../contexts/CallProvider';
-import { ConversationContext } from '../contexts/ConversationProvider';
+import { useConversationContext } from '../contexts/ConversationProvider';
 import { WebRtcContext } from '../contexts/WebRtcProvider';
 import { VideoElementWithSinkId } from '../utils/utils';
 import { CallPending } from './CallPending';
@@ -63,7 +63,7 @@ export default () => {
 
     if (isFullscreen && document.fullscreenElement === null) {
       callInterfaceRef.current.requestFullscreen();
-    } else if (!isFullscreen && document.fullscreenEnabled !== null) {
+    } else if (!isFullscreen && document.fullscreenElement !== null) {
       document.exitFullscreen();
     }
   }, [isFullscreen]);
@@ -187,7 +187,7 @@ const formatElapsedSeconds = (elapsedSeconds: number): string => {
 
 const CallInterfaceInformation = () => {
   const { callStartTime } = useContext(CallContext);
-  const { conversation } = useContext(ConversationContext);
+  const { conversation } = useConversationContext();
   const [elapsedTime, setElapsedTime] = useState(0);
   const memberName = useMemo(() => conversation.getFirstMember().contact.getRegisteredName(), [conversation]);
 

@@ -16,9 +16,10 @@
  * <https://www.gnu.org/licenses/>.
  */
 import { ConversationView, WebSocketMessageType } from 'jami-web-common';
-import { createContext, useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 
 import LoadingPage from '../components/Loading';
+import { createOptionalContext } from '../hooks/createOptionalContext';
 import { useUrlParams } from '../hooks/useUrlParams';
 import { Conversation } from '../models/Conversation';
 import { ConversationRouteParams } from '../router';
@@ -27,12 +28,14 @@ import { WithChildren } from '../utils/utils';
 import { useAuthContext } from './AuthProvider';
 import { WebSocketContext } from './WebSocketProvider';
 
-interface IConversationProvider {
+interface IConversationContext {
   conversationId: string;
   conversation: Conversation;
 }
 
-export const ConversationContext = createContext<IConversationProvider>(undefined!);
+const optionalConversationContext = createOptionalContext<IConversationContext>('ConversationContext');
+const ConversationContext = optionalConversationContext.Context;
+export const useConversationContext = optionalConversationContext.useOptionalContext;
 
 export default ({ children }: WithChildren) => {
   const {

@@ -19,7 +19,7 @@ import { Divider, Stack, Typography } from '@mui/material';
 import { useContext } from 'react';
 
 import { CallContext } from '../contexts/CallProvider';
-import { ConversationContext } from '../contexts/ConversationProvider';
+import { useConversationContext } from '../contexts/ConversationProvider';
 import ChatInterface from '../pages/ChatInterface';
 import { CloseButton } from './Button';
 
@@ -45,7 +45,7 @@ export default () => {
 
 const CallChatDrawerHeader = () => {
   const { setIsChatShown } = useContext(CallContext);
-  const { conversation } = useContext(ConversationContext);
+  const { conversation } = useConversationContext();
 
   // TODO: Improve this to support multiple members
   const contact = conversation.getFirstMember().contact;

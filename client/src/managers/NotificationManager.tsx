@@ -19,7 +19,6 @@ import { CallBegin, WebSocketMessageType } from 'jami-web-common';
 import { useContext, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import { useAuthContext } from '../contexts/AuthProvider';
 import { CallStatus } from '../contexts/CallProvider';
 import { WebSocketContext } from '../contexts/WebSocketProvider';
 import { WithChildren } from '../utils/utils';
@@ -30,7 +29,6 @@ import { WithChildren } from '../utils/utils';
 export default ({ children }: WithChildren) => {
   const webSocket = useContext(WebSocketContext);
   const navigate = useNavigate();
-  const { axiosInstance } = useAuthContext();
 
   useEffect(() => {
     if (!webSocket) {
@@ -53,7 +51,7 @@ export default ({ children }: WithChildren) => {
     return () => {
       webSocket.unbind(WebSocketMessageType.CallBegin, callBeginListener);
     };
-  }, [webSocket, navigate, axiosInstance]);
+  }, [webSocket, navigate]);
 
   return <>{children}</>;
 };

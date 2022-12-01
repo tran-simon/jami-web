@@ -25,7 +25,7 @@ import CallPermissionDenied from '../pages/CallPermissionDenied';
 import { CallRouteParams } from '../router';
 import { callTimeoutMs } from '../utils/constants';
 import { SetState, WithChildren } from '../utils/utils';
-import { ConversationContext } from './ConversationProvider';
+import { useConversationContext } from './ConversationProvider';
 import { MediaDevicesInfo, MediaInputKind, WebRtcContext } from './WebRtcProvider';
 import { IWebSocketContext, WebSocketContext } from './WebSocketProvider';
 
@@ -124,7 +124,7 @@ const CallProvider = ({
   const { state: routeState } = useUrlParams<CallRouteParams>();
   const { localStream, sendWebRtcOffer, iceConnectionState, closeConnection, getMediaDevices, updateLocalStream } =
     useContext(WebRtcContext);
-  const { conversationId, conversation } = useContext(ConversationContext);
+  const { conversationId, conversation } = useConversationContext();
   const navigate = useNavigate();
 
   const [mediaDevices, setMediaDevices] = useState(defaultCallContext.mediaDevices);

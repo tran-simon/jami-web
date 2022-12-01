@@ -17,10 +17,11 @@
  */
 import axios, { AxiosInstance } from 'axios';
 import { HttpStatusCode } from 'jami-web-common';
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import ProcessingRequest from '../components/ProcessingRequest';
+import { createOptionalContext } from '../hooks/createOptionalContext';
 import { Account } from '../models/Account';
 import { apiUrl } from '../utils/constants';
 import { WithChildren } from '../utils/utils';
@@ -33,7 +34,9 @@ interface IAuthContext {
   axiosInstance: AxiosInstance;
 }
 
-const AuthContext = createContext<IAuthContext | undefined>(undefined);
+const optionalAuthContext = createOptionalContext<IAuthContext>('AuthContext');
+const AuthContext = optionalAuthContext.Context;
+export const useAuthContext = optionalAuthContext.useOptionalContext;
 
 export default ({ children }: WithChildren) => {
   const [token, setToken] = useState<string | undefined>();
@@ -109,13 +112,3 @@ export default ({ children }: WithChildren) => {
     </AuthContext.Provider>
   );
 };
-
-export function useAuthContext(dontThrowIfUndefined: true): IAuthContext | undefined;
-export function useAuthContext(): IAuthContext;
-export function useAuthContext(dontThrowIfUndefined?: true) {
-  const authContext = useContext(AuthContext);
-  if (!authContext && !dontThrowIfUndefined) {
-    throw new Error('AuthContext is not provided');
-  }
-  return authContext;
-}

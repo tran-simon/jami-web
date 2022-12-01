@@ -16,11 +16,11 @@
  * <https://www.gnu.org/licenses/>.
  */
 import { Divider, Stack, Typography } from '@mui/material';
-import { useContext, useMemo } from 'react';
+import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { useAuthContext } from '../contexts/AuthProvider';
-import { ConversationContext } from '../contexts/ConversationProvider';
+import { useConversationContext } from '../contexts/ConversationProvider';
 import { useStartCall } from '../hooks/useStartCall';
 import { ConversationMember } from '../models/Conversation';
 import ChatInterface from '../pages/ChatInterface';
@@ -43,7 +43,7 @@ const ConversationView = () => {
 
 const ConversationHeader = () => {
   const { account } = useAuthContext();
-  const { conversation, conversationId } = useContext(ConversationContext);
+  const { conversation, conversationId } = useConversationContext();
   const { t } = useTranslation();
 
   const members = conversation.getMembers();

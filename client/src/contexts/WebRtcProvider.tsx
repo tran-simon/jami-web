@@ -22,7 +22,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState } 
 import LoadingPage from '../components/Loading';
 import { WithChildren } from '../utils/utils';
 import { useAuthContext } from './AuthProvider';
-import { ConversationContext } from './ConversationProvider';
+import { useConversationContext } from './ConversationProvider';
 import { IWebSocketContext, WebSocketContext } from './WebSocketProvider';
 
 export type MediaDevicesInfo = Record<MediaDeviceKind, MediaDeviceInfo[]>;
@@ -99,7 +99,7 @@ const WebRtcProvider = ({
   webRtcConnection: RTCPeerConnection;
   webSocket: IWebSocketContext;
 }) => {
-  const { conversation, conversationId } = useContext(ConversationContext);
+  const { conversation, conversationId } = useConversationContext();
   const [localStream, setLocalStream] = useState<MediaStream>();
   const [remoteStreams, setRemoteStreams] = useState<readonly MediaStream[]>();
   const [iceConnectionState, setIceConnectionState] = useState<RTCIceConnectionState | undefined>();
