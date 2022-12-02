@@ -29,7 +29,6 @@ import {
   useRef,
   useState,
 } from 'react';
-import Draggable from 'react-draggable';
 
 import { ExpandableButtonProps } from '../components/Button';
 import {
@@ -46,6 +45,8 @@ import {
   CallingVolumeButton,
 } from '../components/CallButtons';
 import CallChatDrawer from '../components/CallChatDrawer';
+import VideoOverlay from '../components/VideoOverlay';
+import VideoStream from '../components/VideoStream';
 import { CallContext, CallStatus, VideoStatus } from '../contexts/CallProvider';
 import { useConversationContext } from '../contexts/ConversationProvider';
 import { WebRtcContext } from '../contexts/WebRtcProvider';
@@ -85,58 +86,51 @@ interface Props {
 }
 
 const CallInterface = () => {
-  const { remoteStreams } = useContext(WebRtcContext);
+  const { localStream, screenShareLocalStream, remoteStreams } = useContext(WebRtcContext);
   const {
     currentMediaDeviceIds: {
       audiooutput: { id: audioOutDeviceId },
     },
+    videoStatus,
   } = useContext(CallContext);
   const remoteVideoRef = useRef<VideoElementWithSinkId | null>(null);
   const gridItemRef = useRef<HTMLDivElement | null>(null);
+  const [isLocalVideoZoomed, setIsLocalVideoZoomed] = useState(false);
 
-  useEffect(() => {
-    // TODO: For now, `remoteStream` is the first remote stream in the array.
-    //       There should only be one in the array, but we should make sure this is right.
-    const remoteStream = remoteStreams?.at(0);
-    if (remoteStream && remoteVideoRef.current) {
-      remoteVideoRef.current.srcObject = remoteStream;
+  const stream = useMemo(() => {
+    switch (videoStatus) {
+      case VideoStatus.Camera:
+        return localStream;
+      case VideoStatus.ScreenShare:
+        return screenShareLocalStream;
     }
-  }, [remoteStreams, remoteVideoRef]);
-
-  useEffect(() => {
-    if (!audioOutDeviceId) {
-      return;
-    }
-
-    if (remoteVideoRef.current?.setSinkId) {
-      // This only work on chrome and other browsers that support `setSinkId`
-      // https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/setSinkId#browser_compatibility
-      remoteVideoRef.current.setSinkId(audioOutDeviceId);
-    }
-  }, [audioOutDeviceId, remoteVideoRef]);
+  }, [videoStatus, localStream, screenShareLocalStream]);
 
   const hasSetSinkId = remoteVideoRef.current?.setSinkId != null;
 
+  // TODO: For now, `remoteStream` is the first remote stream in the array.
+  //       There should only be one in the array, but we should make sure this is right.
+  const remoteStream = remoteStreams?.at(0);
+
   return (
     <Box display="flex" flexGrow={1}>
-      <video
+      <VideoStream
         ref={remoteVideoRef}
-        autoPlay
+        stream={remoteStream}
+        audioOutDeviceId={audioOutDeviceId}
         style={{ zIndex: -1, backgroundColor: 'black', position: 'absolute', height: '100%', width: '100%' }}
       />
       <Box flexGrow={1} margin={2} display="flex" flexDirection="column">
         {/* Guest video, takes the whole screen */}
         <CallInterfaceInformation />
         <Box flexGrow={1} marginY={2} position="relative">
-          <Box
-            sx={{
-              position: 'absolute',
-              width: '100%',
-              height: '100%',
-            }}
-          >
-            <LocalVideo />
-          </Box>
+          <VideoOverlay
+            stream={stream}
+            hidden={!stream}
+            muted
+            size={isLocalVideoZoomed ? 'large' : 'medium'}
+            onClick={() => setIsLocalVideoZoomed((v) => !v)}
+          />
         </Box>
         <Grid container>
           <Grid item xs />
@@ -151,45 +145,6 @@ const CallInterface = () => {
         </Grid>
       </Box>
     </Box>
-  );
-};
-
-const LocalVideo = () => {
-  const { localStream, screenShareLocalStream } = useContext(WebRtcContext);
-  const { videoStatus } = useContext(CallContext);
-  const videoRef = useRef<VideoElementWithSinkId | null>(null);
-
-  const stream = useMemo(() => {
-    switch (videoStatus) {
-      case VideoStatus.Camera:
-        return localStream;
-      case VideoStatus.ScreenShare:
-        return screenShareLocalStream;
-    }
-  }, [videoStatus, localStream, screenShareLocalStream]);
-
-  useEffect(() => {
-    if (stream && videoRef.current) {
-      videoRef.current.srcObject = stream;
-    }
-  }, [stream, videoRef]);
-
-  return (
-    <Draggable bounds="parent" nodeRef={videoRef ?? undefined}>
-      <video
-        ref={videoRef}
-        autoPlay
-        muted
-        style={{
-          position: 'absolute',
-          borderRadius: '12px',
-          maxHeight: '50%',
-          maxWidth: '50%',
-          right: 0,
-          visibility: stream ? 'visible' : 'hidden',
-        }}
-      />
-    </Draggable>
   );
 };
 
