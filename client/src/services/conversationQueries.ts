@@ -17,12 +17,14 @@
  */
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { IConversation, Message } from 'jami-web-common';
+import { useMemo } from 'react';
 
 import { useAuthContext } from '../contexts/AuthProvider';
+import { Conversation } from '../models/conversation';
 
-export const useConversationQuery = (conversationId: string) => {
+export const useConversationQuery = (conversationId?: string) => {
   const { axiosInstance } = useAuthContext();
-  return useQuery(
+  const conversationQuery = useQuery(
     ['conversation', conversationId],
     async () => {
       const { data } = await axiosInstance.get<IConversation>(`/conversations/${conversationId}`);
@@ -32,6 +34,17 @@ export const useConversationQuery = (conversationId: string) => {
       enabled: !!conversationId,
     }
   );
+
+  const conversation = useMemo(() => {
+    if (conversationQuery.isSuccess) {
+      return Conversation.fromInterface(conversationQuery.data);
+    }
+  }, [conversationQuery.isSuccess, conversationQuery.data]);
+
+  return {
+    conversation,
+    ...conversationQuery,
+  };
 };
 
 export const useMessagesQuery = (conversationId: string) => {

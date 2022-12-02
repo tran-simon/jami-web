@@ -16,18 +16,26 @@
  * <https://www.gnu.org/licenses/>.
  */
 import { Divider, Stack, Typography } from '@mui/material';
-import { useMemo } from 'react';
+import { useContext, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { useAuthContext } from '../contexts/AuthProvider';
+import { CallManagerContext } from '../contexts/CallManagerProvider';
 import { useConversationContext } from '../contexts/ConversationProvider';
-import { useStartCall } from '../hooks/useStartCall';
 import { ConversationMember } from '../models/conversation';
+import CallInterface from '../pages/CallInterface';
 import ChatInterface from '../pages/ChatInterface';
 import { translateEnumeration, TranslateEnumerationOptions } from '../utils/translations';
 import { AddParticipantButton, ShowOptionsMenuButton, StartAudioCallButton, StartVideoCallButton } from './Button';
 
 const ConversationView = () => {
+  const { conversationId } = useConversationContext();
+  const { callData } = useContext(CallManagerContext);
+
+  if (callData && callData.conversationId === conversationId) {
+    return <CallInterface />;
+  }
+
   return (
     <Stack flexGrow={1} height="100%">
       <ConversationHeader />
@@ -44,6 +52,7 @@ const ConversationView = () => {
 const ConversationHeader = () => {
   const { account } = useAuthContext();
   const { conversation, conversationId } = useConversationContext();
+  const { startCall } = useContext(CallManagerContext);
   const { t } = useTranslation();
 
   const members = conversation.members;
@@ -72,8 +81,6 @@ const ConversationHeader = () => {
     return translateEnumeration<ConversationMember>(members, options);
   }, [account, members, adminTitle, t]);
 
-  const startCall = useStartCall();
-
   return (
     <Stack direction="row" padding="16px" overflow="hidden">
       <Stack flex={1} justifyContent="center" whiteSpace="nowrap" overflow="hidden">
@@ -82,14 +89,8 @@ const ConversationHeader = () => {
         </Typography>
       </Stack>
       <Stack direction="row" spacing="20px">
-        <StartAudioCallButton onClick={() => startCall(conversationId)} />
-        <StartVideoCallButton
-          onClick={() =>
-            startCall(conversationId, {
-              isVideoOn: true,
-            })
-          }
-        />
+        <StartAudioCallButton onClick={() => startCall({ conversationId, role: 'caller' })} />
+        <StartVideoCallButton onClick={() => startCall({ conversationId, role: 'caller', withVideoOn: true })} />
         <AddParticipantButton />
         <ShowOptionsMenuButton />
       </Stack>

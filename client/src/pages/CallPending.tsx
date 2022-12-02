@@ -189,6 +189,7 @@ export const CallPendingReceiverInterface = () => {
 
   switch (callStatus) {
     case CallStatus.Ringing:
+    case CallStatus.Default:
       title = t('incoming_call', {
         context: state?.isVideoOn ? 'video' : 'audio',
         member0: memberName,

@@ -51,6 +51,7 @@ import { useConversationContext } from '../contexts/ConversationProvider';
 import { WebRtcContext } from '../contexts/WebRtcProvider';
 import { VideoElementWithSinkId } from '../utils/utils';
 import { CallPending } from './CallPending';
+import CallPermissionDenied from './CallPermissionDenied';
 
 export default () => {
   const { callStatus, isChatShown, isFullscreen } = useContext(CallContext);
@@ -68,6 +69,9 @@ export default () => {
     }
   }, [isFullscreen]);
 
+  if (callStatus === CallStatus.PermissionsDenied) {
+    return <CallPermissionDenied />;
+  }
   if (callStatus !== CallStatus.InCall) {
     return <CallPending />;
   }
@@ -213,7 +217,7 @@ const formatElapsedSeconds = (elapsedSeconds: number): string => {
 const CallInterfaceInformation = () => {
   const { callStartTime } = useContext(CallContext);
   const { conversation } = useConversationContext();
-  const [elapsedTime, setElapsedTime] = useState(0);
+  const [elapsedTime, setElapsedTime] = useState(callStartTime ? (Date.now() - callStartTime) / 1000 : 0);
   const memberName = useMemo(() => conversation.getFirstMember().contact.registeredName, [conversation]);
 
   useEffect(() => {
