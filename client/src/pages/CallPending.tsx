@@ -17,7 +17,7 @@
  */
 
 import { Box, CircularProgress, Grid, IconButtonProps, Stack, Typography } from '@mui/material';
-import { ComponentType, ReactNode, useContext, useEffect, useMemo, useRef } from 'react';
+import { ComponentType, ReactNode, useEffect, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 
@@ -28,15 +28,15 @@ import {
   CallingRefuseButton,
 } from '../components/CallButtons';
 import ConversationAvatar from '../components/ConversationAvatar';
-import { CallContext, CallStatus } from '../contexts/CallProvider';
+import { CallStatus, useCallContext } from '../contexts/CallProvider';
 import { useConversationContext } from '../contexts/ConversationProvider';
-import { WebRtcContext } from '../contexts/WebRtcProvider';
+import { useWebRtcContext } from '../contexts/WebRtcProvider';
 import { VideoElementWithSinkId } from '../utils/utils';
 
 export const CallPending = () => {
-  const { localStream } = useContext(WebRtcContext);
+  const { localStream } = useWebRtcContext();
   const { conversation } = useConversationContext();
-  const { callRole } = useContext(CallContext);
+  const { callRole } = useCallContext();
   const localVideoRef = useRef<VideoElementWithSinkId | null>(null);
 
   useEffect(() => {
@@ -146,7 +146,7 @@ const CallPendingDetails = ({
 };
 
 export const CallPendingCallerInterface = () => {
-  const { callStatus } = useContext(CallContext);
+  const { callStatus } = useCallContext();
   const { t } = useTranslation();
   const { conversation } = useConversationContext();
   const memberName = useMemo(() => conversation.getFirstMember().contact.registeredName, [conversation]);
@@ -179,7 +179,7 @@ export const CallPendingCallerInterface = () => {
 
 export const CallPendingReceiverInterface = () => {
   const { state } = useLocation();
-  const { callStatus } = useContext(CallContext);
+  const { callStatus } = useCallContext();
 
   const { t } = useTranslation();
   const { conversation } = useConversationContext();

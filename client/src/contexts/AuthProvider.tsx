@@ -94,21 +94,23 @@ export default ({ children }: WithChildren) => {
     axiosInstance.get<IAccount>('/account').then(({ data }) => setAccount(Account.fromInterface(data)));
   }, [axiosInstance, logout]);
 
-  if (!token || !account || !axiosInstance) {
+  const value = useMemo(() => {
+    if (!token || !account || !axiosInstance) {
+      return;
+    }
+
+    return {
+      token,
+      logout,
+      account,
+      accountId: account.id,
+      axiosInstance,
+    };
+  }, [token, logout, account, axiosInstance]);
+
+  if (!value) {
     return <ProcessingRequest open />;
   }
 
-  return (
-    <AuthContext.Provider
-      value={{
-        token,
-        logout,
-        account,
-        accountId: account.id,
-        axiosInstance,
-      }}
-    >
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

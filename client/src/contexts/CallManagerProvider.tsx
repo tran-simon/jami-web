@@ -16,7 +16,7 @@
  * <https://www.gnu.org/licenses/>.
  */
 import { CallBegin, WebSocketMessageType } from 'jami-web-common';
-import { createContext, useCallback, useContext, useEffect, useState } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { RemoteVideoOverlay } from '../components/VideoOverlay';
@@ -29,7 +29,7 @@ import CallProvider, { CallRole } from './CallProvider';
 import WebRtcProvider from './WebRtcProvider';
 import { WebSocketContext } from './WebSocketProvider';
 
-type CallData = {
+export type CallData = {
   conversationId: string;
   role: CallRole;
   withVideoOn?: boolean;
@@ -50,8 +50,8 @@ export default ({ children }: WithChildren) => {
   const [callData, setCallData] = useState<CallData>();
   const webSocket = useContext(WebSocketContext);
   const navigate = useNavigate();
-  const conversationId = callData?.conversationId;
-  const { conversation } = useConversationQuery(conversationId);
+  const { conversation } = useConversationQuery(callData?.conversationId);
+  const { urlParams } = useUrlParams<ConversationRouteParams>();
 
   const failStartCall = useCallback(() => {
     throw new Error('Cannot start call: Already in a call');
@@ -90,37 +90,26 @@ export default ({ children }: WithChildren) => {
     };
   }, [webSocket, navigate, startCall, callData]);
 
-  return (
-    <CallManagerContext.Provider
-      value={{
-        startCall,
-        callData,
-        callConversation: conversation,
-        exitCall,
-      }}
-    >
-      <CallManagerProvider>{children}</CallManagerProvider>
-    </CallManagerContext.Provider>
+  const value = useMemo(
+    () => ({
+      startCall,
+      callData,
+      callConversation: conversation,
+      exitCall,
+    }),
+    [startCall, callData, conversation, exitCall]
   );
-};
-
-const CallManagerProvider = ({ children }: WithChildren) => {
-  const { callData } = useContext(CallManagerContext);
-  const { urlParams } = useUrlParams<ConversationRouteParams>();
-  const conversationId = urlParams.conversationId;
-
-  if (!callData) {
-    return <>{children}</>;
-  }
 
   return (
-    <WebRtcProvider>
-      <CallProvider>
-        {callData.conversationId !== conversationId && (
-          <RemoteVideoOverlay callConversationId={callData.conversationId} />
-        )}
-        {children}
-      </CallProvider>
-    </WebRtcProvider>
+    <CallManagerContext.Provider value={value}>
+      <WebRtcProvider>
+        <CallProvider>
+          {callData && callData.conversationId !== urlParams.conversationId && (
+            <RemoteVideoOverlay callConversationId={callData.conversationId} />
+          )}
+          {children}
+        </CallProvider>
+      </WebRtcProvider>
+    </CallManagerContext.Provider>
   );
 };

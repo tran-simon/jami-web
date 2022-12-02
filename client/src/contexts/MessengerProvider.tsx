@@ -16,7 +16,7 @@
  * <https://www.gnu.org/licenses/>.
  */
 import { ConversationMessage, IConversation, LookupResult, WebSocketMessageType } from 'jami-web-common';
-import { createContext, ReactNode, useContext, useEffect, useState } from 'react';
+import { createContext, ReactNode, useContext, useEffect, useMemo, useState } from 'react';
 
 import { Contact } from '../models/contact';
 import { Conversation } from '../models/conversation';
@@ -105,17 +105,16 @@ export default ({ children }: { children: ReactNode }) => {
     // return () => controller.abort() // crash on React18
   }, [accountId, searchQuery, axiosInstance]);
 
-  return (
-    <MessengerContext.Provider
-      value={{
-        conversations,
-        setSearchQuery,
-        searchResult,
-        newContactId,
-        setNewContactId,
-      }}
-    >
-      {children}
-    </MessengerContext.Provider>
+  const value = useMemo(
+    () => ({
+      conversations,
+      setSearchQuery,
+      searchResult,
+      newContactId,
+      setNewContactId,
+    }),
+    [conversations, setSearchQuery, searchResult, newContactId, setNewContactId]
   );
+
+  return <MessengerContext.Provider value={value}>{children}</MessengerContext.Provider>;
 };
