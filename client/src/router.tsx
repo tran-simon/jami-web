@@ -79,11 +79,11 @@ export const router = createBrowserRouter(
           <Route
             path="conversation/:conversationId"
             element={
-              <ConversationProvider>
-                <Messenger>
+              <Messenger>
+                <ConversationProvider>
                   <Outlet />
-                </Messenger>
-              </ConversationProvider>
+                </ConversationProvider>
+              </Messenger>
             }
           >
             <Route index element={<ConversationView />} />
