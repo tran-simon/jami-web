@@ -17,15 +17,13 @@
  */
 import { CallAction, CallBegin, WebSocketMessageType } from 'jami-web-common';
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import { Navigate, useNavigate } from 'react-router-dom';
+import { Navigate } from 'react-router-dom';
 
 import LoadingPage from '../components/Loading';
-import { useUrlParams } from '../hooks/useUrlParams';
-import CallPermissionDenied from '../pages/CallPermissionDenied';
-import { CallRouteParams } from '../router';
+import { Conversation } from '../models/conversation';
 import { callTimeoutMs } from '../utils/constants';
 import { AsyncSetState, SetState, WithChildren } from '../utils/utils';
-import { useConversationContext } from './ConversationProvider';
+import { CallManagerContext } from './CallManagerProvider';
 import { MediaDevicesInfo, MediaInputKind, WebRtcContext } from './WebRtcProvider';
 import { IWebSocketContext, WebSocketContext } from './WebSocketProvider';
 
@@ -113,21 +111,30 @@ export const CallContext = createContext<ICallContext>(defaultCallContext);
 
 export default ({ children }: WithChildren) => {
   const webSocket = useContext(WebSocketContext);
+  const { callConversation, callData } = useContext(CallManagerContext);
 
-  if (!webSocket) {
+  if (!webSocket || !callConversation || !callData?.conversationId) {
     return <LoadingPage />;
   }
 
-  return <CallProvider webSocket={webSocket}>{children}</CallProvider>;
+  return (
+    <CallProvider webSocket={webSocket} conversation={callConversation} conversationId={callData?.conversationId}>
+      {children}
+    </CallProvider>
+  );
 };
 
 const CallProvider = ({
   children,
+  conversation,
+  conversationId,
   webSocket,
 }: WithChildren & {
   webSocket: IWebSocketContext;
+  conversation: Conversation;
+  conversationId: string;
 }) => {
-  const { state: routeState } = useUrlParams<CallRouteParams>();
+  const { callData, exitCall } = useContext(CallManagerContext);
   const {
     localStream,
     updateScreenShare,
@@ -137,8 +144,6 @@ const CallProvider = ({
     getMediaDevices,
     updateLocalStream,
   } = useContext(WebRtcContext);
-  const { conversationId, conversation } = useConversationContext();
-  const navigate = useNavigate();
 
   const [mediaDevices, setMediaDevices] = useState(defaultCallContext.mediaDevices);
   const [audioInputDeviceId, setAudioInputDeviceId] = useState<string>();
@@ -149,8 +154,8 @@ const CallProvider = ({
   const [videoStatus, setVideoStatus] = useState(VideoStatus.Off);
   const [isChatShown, setIsChatShown] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [callStatus, setCallStatus] = useState(routeState?.callStatus);
-  const [callRole] = useState(routeState?.role);
+  const [callStatus, setCallStatus] = useState(CallStatus.Default);
+  const [callRole] = useState(callData?.role);
   const [callStartTime, setCallStartTime] = useState<number | undefined>(undefined);
 
   // TODO: This logic will have to change to support multiple people in a call. Could we move this logic to the server?
@@ -243,7 +248,7 @@ const CallProvider = ({
 
   useEffect(() => {
     if (callRole === 'caller' && callStatus === CallStatus.Default) {
-      const withVideoOn = routeState?.isVideoOn ?? false;
+      const withVideoOn = callData?.withVideoOn ?? false;
       setCallStatus(CallStatus.Loading);
       updateLocalStream()
         .then(() => {
@@ -263,7 +268,7 @@ const CallProvider = ({
           setCallStatus(CallStatus.PermissionsDenied);
         });
     }
-  }, [webSocket, updateLocalStream, callRole, callStatus, contactUri, conversationId, routeState]);
+  }, [webSocket, updateLocalStream, callRole, callStatus, contactUri, conversationId, callData]);
 
   const acceptCall = useCallback(
     (withVideoOn: boolean) => {
@@ -319,9 +324,9 @@ const CallProvider = ({
     console.info('Sending CallEnd', callEnd);
     closeConnection();
     webSocket.send(WebSocketMessageType.CallEnd, callEnd);
-    navigate(`/conversation/${conversationId}`);
+    exitCall();
     // TODO: write in chat that the call ended
-  }, [webSocket, contactUri, conversationId, closeConnection, navigate]);
+  }, [webSocket, contactUri, conversationId, closeConnection, exitCall]);
 
   useEffect(() => {
     const callEndListener = (data: CallAction) => {
@@ -332,7 +337,7 @@ const CallProvider = ({
       }
 
       closeConnection();
-      navigate(`/conversation/${conversationId}`);
+      exitCall();
       // TODO: write in chat that the call ended
     };
 
@@ -340,7 +345,7 @@ const CallProvider = ({
     return () => {
       webSocket.unbind(WebSocketMessageType.CallEnd, callEndListener);
     };
-  }, [webSocket, navigate, conversationId, closeConnection]);
+  }, [webSocket, exitCall, conversationId, closeConnection]);
 
   useEffect(() => {
     if (
@@ -401,14 +406,7 @@ const CallProvider = ({
     };
   }, [updateLocalStream, audioInputDeviceId, audioOutputDeviceId, videoDeviceId]);
 
-  useEffect(() => {
-    navigate('.', {
-      replace: true,
-      state: {},
-    });
-  }, [navigate]);
-
-  if (!callRole || callStatus === undefined) {
+  if (!callData || !callRole) {
     console.error('Invalid route. Redirecting...');
     return <Navigate to={'/'} />;
   }
@@ -433,7 +431,7 @@ const CallProvider = ({
         endCall,
       }}
     >
-      {callStatus === CallStatus.PermissionsDenied ? <CallPermissionDenied /> : children}
+      {children}
     </CallContext.Provider>
   );
 };
