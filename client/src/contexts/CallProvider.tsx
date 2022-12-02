@@ -16,15 +16,15 @@
  * <https://www.gnu.org/licenses/>.
  */
 import { CallAction, CallBegin, WebSocketMessageType } from 'jami-web-common';
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import { Navigate } from 'react-router-dom';
+import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 
-import LoadingPage from '../components/Loading';
+import { createOptionalContext } from '../hooks/createOptionalContext';
 import { Conversation } from '../models/Conversation';
 import { callTimeoutMs } from '../utils/constants';
 import { AsyncSetState, SetState, WithChildren } from '../utils/utils';
-import { CallManagerContext } from './CallManagerProvider';
-import { MediaDevicesInfo, MediaInputKind, WebRtcContext } from './WebRtcProvider';
+import { CallData, CallManagerContext } from './CallManagerProvider';
+import ConditionalContextProvider from './ConditionalContextProvider';
+import { IWebRtcContext, MediaDevicesInfo, MediaInputKind, useWebRtcContext } from './WebRtcProvider';
 import { IWebSocketContext, WebSocketContext } from './WebSocketProvider';
 
 export type CallRole = 'caller' | 'receiver';
@@ -107,34 +107,48 @@ const defaultCallContext: ICallContext = {
   endCall: () => {},
 };
 
-export const CallContext = createContext<ICallContext>(defaultCallContext);
+const optionalCallContext = createOptionalContext<ICallContext>('CallContext');
+export const useCallContext = optionalCallContext.useOptionalContext;
 
 export default ({ children }: WithChildren) => {
   const webSocket = useContext(WebSocketContext);
-  const { callConversation, callData } = useContext(CallManagerContext);
-
-  if (!webSocket || !callConversation || !callData?.conversationId) {
-    return <LoadingPage />;
-  }
+  const { callConversation, callData, exitCall } = useContext(CallManagerContext);
+  const webRtcContext = useWebRtcContext(true);
 
   return (
-    <CallProvider webSocket={webSocket} conversation={callConversation} conversationId={callData?.conversationId}>
+    <ConditionalContextProvider
+      Context={optionalCallContext.Context}
+      initialValue={defaultCallContext}
+      conditions={{
+        webSocket,
+        webRtcContext,
+        callConversation,
+        callData,
+        exitCall,
+        conversationId: callData?.conversationId,
+      }}
+      useContextValue={CallProvider}
+    >
       {children}
-    </CallProvider>
+    </ConditionalContextProvider>
   );
 };
 
 const CallProvider = ({
-  children,
-  conversation,
+  webRtcContext,
+  callConversation,
+  callData,
+  exitCall,
   conversationId,
   webSocket,
-}: WithChildren & {
+}: {
   webSocket: IWebSocketContext;
-  conversation: Conversation;
+  webRtcContext: IWebRtcContext;
+  callConversation: Conversation;
+  callData: CallData;
+  exitCall: () => void;
   conversationId: string;
-}) => {
-  const { callData, exitCall } = useContext(CallManagerContext);
+}): ICallContext => {
   const {
     localStream,
     updateScreenShare,
@@ -143,7 +157,7 @@ const CallProvider = ({
     closeConnection,
     getMediaDevices,
     updateLocalStream,
-  } = useContext(WebRtcContext);
+  } = webRtcContext;
 
   const [mediaDevices, setMediaDevices] = useState(defaultCallContext.mediaDevices);
   const [audioInputDeviceId, setAudioInputDeviceId] = useState<string>();
@@ -161,7 +175,7 @@ const CallProvider = ({
   // TODO: This logic will have to change to support multiple people in a call. Could we move this logic to the server?
   //       The client could make a single request with the conversationId, and the server would be tasked with sending
   //       all the individual requests to the members of the conversation.
-  const contactUri = useMemo(() => conversation.getFirstMember().contact.getUri(), [conversation]);
+  const contactUri = useMemo(() => callConversation.getFirstMember().contact.getUri(), [callConversation]);
 
   useEffect(() => {
     if (callStatus !== CallStatus.InCall) {
@@ -406,32 +420,40 @@ const CallProvider = ({
     };
   }, [updateLocalStream, audioInputDeviceId, audioOutputDeviceId, videoDeviceId]);
 
-  if (!callData || !callRole) {
-    console.error('Invalid route. Redirecting...');
-    return <Navigate to={'/'} />;
-  }
-
-  return (
-    <CallContext.Provider
-      value={{
-        mediaDevices,
-        currentMediaDeviceIds,
-        isAudioOn,
-        setIsAudioOn,
-        videoStatus,
-        updateVideoStatus,
-        isChatShown,
-        setIsChatShown,
-        isFullscreen,
-        setIsFullscreen,
-        callRole,
-        callStatus,
-        callStartTime,
-        acceptCall,
-        endCall,
-      }}
-    >
-      {children}
-    </CallContext.Provider>
+  return useMemo(
+    () => ({
+      mediaDevices,
+      currentMediaDeviceIds,
+      isAudioOn,
+      setIsAudioOn,
+      videoStatus,
+      updateVideoStatus,
+      isChatShown,
+      setIsChatShown,
+      isFullscreen,
+      setIsFullscreen,
+      callRole,
+      callStatus,
+      callStartTime,
+      acceptCall,
+      endCall,
+    }),
+    [
+      mediaDevices,
+      currentMediaDeviceIds,
+      isAudioOn,
+      setIsAudioOn,
+      videoStatus,
+      updateVideoStatus,
+      isChatShown,
+      setIsChatShown,
+      isFullscreen,
+      setIsFullscreen,
+      callRole,
+      callStatus,
+      callStartTime,
+      acceptCall,
+      endCall,
+    ]
   );
 };

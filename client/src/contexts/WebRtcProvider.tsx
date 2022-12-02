@@ -17,20 +17,21 @@
  */
 
 import { WebRtcIceCandidate, WebRtcSdp, WebSocketMessageType } from 'jami-web-common';
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 
-import LoadingPage from '../components/Loading';
+import { createOptionalContext } from '../hooks/createOptionalContext';
 import { Conversation } from '../models/Conversation';
 import { WithChildren } from '../utils/utils';
 import { useAuthContext } from './AuthProvider';
 import { CallManagerContext } from './CallManagerProvider';
+import ConditionalContextProvider from './ConditionalContextProvider';
 import { IWebSocketContext, WebSocketContext } from './WebSocketProvider';
 
 export type MediaDevicesInfo = Record<MediaDeviceKind, MediaDeviceInfo[]>;
 export type MediaInputKind = 'audio' | 'video';
 export type MediaInputIds = Record<MediaInputKind, string | false | undefined>;
 
-interface IWebRtcContext {
+export interface IWebRtcContext {
   iceConnectionState: RTCIceConnectionState | undefined;
 
   localStream: MediaStream | undefined;
@@ -56,7 +57,8 @@ const defaultWebRtcContext: IWebRtcContext = {
   closeConnection: () => {},
 };
 
-export const WebRtcContext = createContext<IWebRtcContext>(defaultWebRtcContext);
+const optionalWebRtcContext = createOptionalContext<IWebRtcContext>('WebRtcContext');
+export const useWebRtcContext = optionalWebRtcContext.useOptionalContext;
 
 export default ({ children }: WithChildren) => {
   const { account } = useAuthContext();
@@ -86,29 +88,29 @@ export default ({ children }: WithChildren) => {
     }
   }, [account, webRtcConnection]);
 
-  if (!webRtcConnection || !webSocket || !callConversation || !callData?.conversationId) {
-    return <LoadingPage />;
-  }
-
   return (
-    <WebRtcProvider
-      webRtcConnection={webRtcConnection}
-      webSocket={webSocket}
-      conversation={callConversation}
-      conversationId={callData.conversationId}
+    <ConditionalContextProvider
+      Context={optionalWebRtcContext.Context}
+      initialValue={undefined}
+      conditions={{
+        webRtcConnection,
+        webSocket,
+        conversation: callConversation,
+        conversationId: callData?.conversationId,
+      }}
+      useContextValue={useWebRtcContextValue}
     >
       {children}
-    </WebRtcProvider>
+    </ConditionalContextProvider>
   );
 };
 
-const WebRtcProvider = ({
-  children,
+const useWebRtcContextValue = ({
   conversation,
   conversationId,
   webRtcConnection,
   webSocket,
-}: WithChildren & {
+}: {
   webRtcConnection: RTCPeerConnection;
   webSocket: IWebSocketContext;
   conversation: Conversation;
@@ -438,21 +440,28 @@ const WebRtcProvider = ({
     webRtcConnection.close();
   }, [webRtcConnection, localStream, screenShareLocalStream]);
 
-  return (
-    <WebRtcContext.Provider
-      value={{
-        iceConnectionState,
-        localStream,
-        screenShareLocalStream,
-        remoteStreams,
-        getMediaDevices,
-        updateLocalStream,
-        updateScreenShare,
-        sendWebRtcOffer,
-        closeConnection,
-      }}
-    >
-      {children}
-    </WebRtcContext.Provider>
+  return useMemo(
+    () => ({
+      iceConnectionState,
+      localStream,
+      screenShareLocalStream,
+      remoteStreams,
+      getMediaDevices,
+      updateLocalStream,
+      updateScreenShare,
+      sendWebRtcOffer,
+      closeConnection,
+    }),
+    [
+      iceConnectionState,
+      localStream,
+      screenShareLocalStream,
+      remoteStreams,
+      getMediaDevices,
+      updateLocalStream,
+      updateScreenShare,
+      sendWebRtcOffer,
+      closeConnection,
+    ]
   );
 };

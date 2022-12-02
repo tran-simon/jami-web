@@ -21,7 +21,9 @@ import { useTranslation } from 'react-i18next';
 
 import { useAuthContext } from '../contexts/AuthProvider';
 import { CallManagerContext } from '../contexts/CallManagerProvider';
+import { useCallContext } from '../contexts/CallProvider';
 import { useConversationContext } from '../contexts/ConversationProvider';
+import { useWebRtcContext } from '../contexts/WebRtcProvider';
 import { ConversationMember } from '../models/Conversation';
 import CallInterface from '../pages/CallInterface';
 import ChatInterface from '../pages/ChatInterface';
@@ -30,9 +32,11 @@ import { AddParticipantButton, ShowOptionsMenuButton, StartAudioCallButton, Star
 
 const ConversationView = () => {
   const { conversationId } = useConversationContext();
+  const webRtcContext = useWebRtcContext(true);
+  const callContext = useCallContext(true);
   const { callData } = useContext(CallManagerContext);
 
-  if (callData && callData.conversationId === conversationId) {
+  if (webRtcContext && callContext && callData?.conversationId === conversationId) {
     return <CallInterface />;
   }
 

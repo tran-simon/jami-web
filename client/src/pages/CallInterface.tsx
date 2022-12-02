@@ -22,7 +22,6 @@ import {
   ReactNode,
   RefObject,
   useCallback,
-  useContext,
   useEffect,
   useLayoutEffect,
   useMemo,
@@ -47,15 +46,15 @@ import {
 import CallChatDrawer from '../components/CallChatDrawer';
 import VideoOverlay from '../components/VideoOverlay';
 import VideoStream from '../components/VideoStream';
-import { CallContext, CallStatus, VideoStatus } from '../contexts/CallProvider';
+import { CallStatus, useCallContext, VideoStatus } from '../contexts/CallProvider';
 import { useConversationContext } from '../contexts/ConversationProvider';
-import { WebRtcContext } from '../contexts/WebRtcProvider';
+import { useWebRtcContext } from '../contexts/WebRtcProvider';
 import { VideoElementWithSinkId } from '../utils/utils';
 import { CallPending } from './CallPending';
 import CallPermissionDenied from './CallPermissionDenied';
 
 export default () => {
-  const { callStatus, isChatShown, isFullscreen } = useContext(CallContext);
+  const { callStatus, isChatShown, isFullscreen } = useCallContext();
   const callInterfaceRef = useRef<HTMLDivElement>();
 
   useEffect(() => {
@@ -90,13 +89,13 @@ interface Props {
 }
 
 const CallInterface = () => {
-  const { localStream, screenShareLocalStream, remoteStreams } = useContext(WebRtcContext);
+  const { localStream, screenShareLocalStream, remoteStreams } = useWebRtcContext();
   const {
     currentMediaDeviceIds: {
       audiooutput: { id: audioOutDeviceId },
     },
     videoStatus,
-  } = useContext(CallContext);
+  } = useCallContext();
   const remoteVideoRef = useRef<VideoElementWithSinkId | null>(null);
   const gridItemRef = useRef<HTMLDivElement | null>(null);
   const [isLocalVideoZoomed, setIsLocalVideoZoomed] = useState(false);
@@ -170,7 +169,7 @@ const formatElapsedSeconds = (elapsedSeconds: number): string => {
 };
 
 const CallInterfaceInformation = () => {
-  const { callStartTime } = useContext(CallContext);
+  const { callStartTime } = useCallContext();
   const { conversation } = useConversationContext();
   const [elapsedTime, setElapsedTime] = useState(0);
   const memberName = useMemo(() => conversation.getFirstMember().contact.getRegisteredName(), [conversation]);

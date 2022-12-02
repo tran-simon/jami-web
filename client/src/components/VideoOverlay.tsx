@@ -16,12 +16,12 @@
  * <https://www.gnu.org/licenses/>.
  */
 import { Box } from '@mui/material';
-import { useContext, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import Draggable, { DraggableEventHandler } from 'react-draggable';
 import { useNavigate } from 'react-router-dom';
 
-import { CallContext } from '../contexts/CallProvider';
-import { WebRtcContext } from '../contexts/WebRtcProvider';
+import { useCallContext } from '../contexts/CallProvider';
+import { useWebRtcContext } from '../contexts/WebRtcProvider';
 import { VideoElementWithSinkId } from '../utils/utils';
 import VideoStream, { VideoStreamProps } from './VideoStream';
 
@@ -75,12 +75,12 @@ const VideoOverlay = ({ onClick, size = 'medium', ...props }: VideoOverlayProps)
 };
 
 export const RemoteVideoOverlay = ({ callConversationId }: { callConversationId: string }) => {
-  const { remoteStreams } = useContext(WebRtcContext);
+  const { remoteStreams } = useWebRtcContext();
   const {
     currentMediaDeviceIds: {
       audiooutput: { id: audioOutDeviceId },
     },
-  } = useContext(CallContext);
+  } = useCallContext();
   const navigate = useNavigate();
 
   // TODO: For now, `remoteStream` is the first remote stream in the array.
