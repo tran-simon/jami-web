@@ -45,21 +45,10 @@ export interface IWebRtcContext {
   closeConnection: () => void;
 }
 
-const defaultWebRtcContext: IWebRtcContext = {
-  iceConnectionState: undefined,
-  localStream: undefined,
-  screenShareLocalStream: undefined,
-  remoteStreams: undefined,
-  getMediaDevices: async () => Promise.reject(),
-  updateLocalStream: async () => Promise.reject(),
-  updateScreenShare: async () => Promise.reject(),
-  sendWebRtcOffer: async () => Promise.reject(),
-  closeConnection: () => {},
-};
-
 const optionalWebRtcContext = createOptionalContext<IWebRtcContext>('WebRtcContext');
 export const useWebRtcContext = optionalWebRtcContext.useOptionalContext;
 
+// FIXME: Caller webcam not working for second call
 export default ({ children }: WithChildren) => {
   const { account } = useAuthContext();
   const [webRtcConnection, setWebRtcConnection] = useState<RTCPeerConnection | undefined>();
@@ -67,7 +56,12 @@ export default ({ children }: WithChildren) => {
   const { callConversation, callData } = useContext(CallManagerContext);
 
   useEffect(() => {
-    if (!webRtcConnection && account) {
+    if (webRtcConnection && !callData) {
+      setWebRtcConnection(undefined);
+      return;
+    }
+
+    if (!webRtcConnection && account && callData) {
       const iceServers: RTCIceServer[] = [];
 
       if (account.getDetails()['TURN.enable'] === 'true') {
@@ -86,7 +80,7 @@ export default ({ children }: WithChildren) => {
 
       setWebRtcConnection(new RTCPeerConnection({ iceServers }));
     }
-  }, [account, webRtcConnection]);
+  }, [account, webRtcConnection, callData]);
 
   return (
     <ConditionalContextProvider

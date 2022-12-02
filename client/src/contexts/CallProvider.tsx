@@ -70,43 +70,6 @@ export interface ICallContext {
   endCall: () => void;
 }
 
-const defaultCallContext: ICallContext = {
-  mediaDevices: {
-    audioinput: [],
-    audiooutput: [],
-    videoinput: [],
-  },
-  currentMediaDeviceIds: {
-    audioinput: {
-      id: undefined,
-      setId: async () => {},
-    },
-    audiooutput: {
-      id: undefined,
-      setId: async () => {},
-    },
-    videoinput: {
-      id: undefined,
-      setId: async () => {},
-    },
-  },
-
-  isAudioOn: false,
-  setIsAudioOn: () => {},
-  videoStatus: VideoStatus.Off,
-  updateVideoStatus: () => Promise.reject(),
-  isChatShown: false,
-  setIsChatShown: () => {},
-  isFullscreen: false,
-  setIsFullscreen: () => {},
-  callRole: 'caller',
-  callStatus: CallStatus.Default,
-  callStartTime: undefined,
-
-  acceptCall: (_: boolean) => {},
-  endCall: () => {},
-};
-
 const optionalCallContext = createOptionalContext<ICallContext>('CallContext');
 export const useCallContext = optionalCallContext.useOptionalContext;
 
@@ -118,7 +81,7 @@ export default ({ children }: WithChildren) => {
   return (
     <ConditionalContextProvider
       Context={optionalCallContext.Context}
-      initialValue={defaultCallContext}
+      initialValue={undefined}
       conditions={{
         webSocket,
         webRtcContext,
@@ -159,7 +122,11 @@ const CallProvider = ({
     updateLocalStream,
   } = webRtcContext;
 
-  const [mediaDevices, setMediaDevices] = useState(defaultCallContext.mediaDevices);
+  const [mediaDevices, setMediaDevices] = useState<MediaDevicesInfo>({
+    audioinput: [],
+    audiooutput: [],
+    videoinput: [],
+  });
   const [audioInputDeviceId, setAudioInputDeviceId] = useState<string>();
   const [audioOutputDeviceId, setAudioOutputDeviceId] = useState<string>();
   const [videoDeviceId, setVideoDeviceId] = useState<string>();

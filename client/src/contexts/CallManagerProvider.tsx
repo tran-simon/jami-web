@@ -20,7 +20,9 @@ import { createContext, useCallback, useContext, useEffect, useState } from 'rea
 import { useNavigate } from 'react-router-dom';
 
 import { RemoteVideoOverlay } from '../components/VideoOverlay';
+import { useUrlParams } from '../hooks/useUrlParams';
 import { Conversation } from '../models/Conversation';
+import { ConversationRouteParams } from '../router';
 import { useConversationQuery } from '../services/conversationQueries';
 import { SetState, WithChildren } from '../utils/utils';
 import CallProvider, { CallRole } from './CallProvider';
@@ -48,8 +50,8 @@ export default ({ children }: WithChildren) => {
   const [callData, setCallData] = useState<CallData>();
   const webSocket = useContext(WebSocketContext);
   const navigate = useNavigate();
-  const conversationId = callData?.conversationId;
-  const { conversation } = useConversationQuery(conversationId);
+  const { conversation } = useConversationQuery(callData?.conversationId);
+  const { urlParams } = useUrlParams<ConversationRouteParams>();
 
   const failStartCall = useCallback(() => {
     throw new Error('Cannot start call: Already in a call');
@@ -100,7 +102,7 @@ export default ({ children }: WithChildren) => {
     >
       <WebRtcProvider>
         <CallProvider>
-          {callData && callData.conversationId !== conversationId && (
+          {callData && callData.conversationId !== urlParams.conversationId && (
             <RemoteVideoOverlay callConversationId={callData.conversationId} />
           )}
           {children}
