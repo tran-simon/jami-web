@@ -42,13 +42,16 @@ export default ({ children }: WithChildren) => {
 
   const theme = useMemo(() => buildDefaultTheme(mode), [mode]);
 
+  const value = useMemo(
+    () => ({
+      mode,
+      toggleMode,
+    }),
+    [mode, toggleMode]
+  );
+
   return (
-    <CustomThemeContext.Provider
-      value={{
-        mode,
-        toggleMode,
-      }}
-    >
+    <CustomThemeContext.Provider value={value}>
       <ThemeProvider theme={theme}>{children}</ThemeProvider>
     </CustomThemeContext.Provider>
   );

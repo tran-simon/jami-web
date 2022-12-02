@@ -16,7 +16,7 @@
  * <https://www.gnu.org/licenses/>.
  */
 import { ConversationView, WebSocketMessageType } from 'jami-web-common';
-import { useContext, useEffect } from 'react';
+import { useContext, useEffect, useMemo } from 'react';
 
 import LoadingPage from '../components/Loading';
 import { createOptionalContext } from '../hooks/createOptionalContext';
@@ -58,21 +58,23 @@ export default ({ children }: WithChildren) => {
     webSocket.send(WebSocketMessageType.ConversationView, conversationView);
   }, [accountId, conversation, conversationId, webSocket]);
 
+  const value = useMemo(() => {
+    if (!conversation || !conversationId) {
+      return;
+    }
+
+    return {
+      conversationId,
+      conversation,
+    };
+  }, [conversationId, conversation]);
+
   if (isLoading) {
     return <LoadingPage />;
   }
-  if (isError || !conversation || !conversationId) {
+  if (isError || !value) {
     return <div>Error loading conversation: {conversationId}</div>;
   }
 
-  return (
-    <ConversationContext.Provider
-      value={{
-        conversationId,
-        conversation,
-      }}
-    >
-      {children}
-    </ConversationContext.Provider>
-  );
+  return <ConversationContext.Provider value={value}>{children}</ConversationContext.Provider>;
 };

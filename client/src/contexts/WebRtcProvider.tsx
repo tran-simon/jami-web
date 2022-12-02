@@ -17,20 +17,21 @@
  */
 
 import { WebRtcIceCandidate, WebRtcSdp, WebSocketMessageType } from 'jami-web-common';
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 
-import LoadingPage from '../components/Loading';
+import { createOptionalContext } from '../hooks/createOptionalContext';
 import { Conversation } from '../models/conversation';
 import { WithChildren } from '../utils/utils';
 import { useAuthContext } from './AuthProvider';
 import { CallManagerContext } from './CallManagerProvider';
+import ConditionalContextProvider from './ConditionalContextProvider';
 import { IWebSocketContext, WebSocketContext } from './WebSocketProvider';
 
 export type MediaDevicesInfo = Record<MediaDeviceKind, MediaDeviceInfo[]>;
 export type MediaInputKind = 'audio' | 'video';
 export type MediaInputIds = Record<MediaInputKind, string | false | undefined>;
 
-interface IWebRtcContext {
+export interface IWebRtcContext {
   iceConnectionState: RTCIceConnectionState | undefined;
 
   localStream: MediaStream | undefined;
@@ -44,19 +45,8 @@ interface IWebRtcContext {
   closeConnection: () => void;
 }
 
-const defaultWebRtcContext: IWebRtcContext = {
-  iceConnectionState: undefined,
-  localStream: undefined,
-  screenShareLocalStream: undefined,
-  remoteStreams: undefined,
-  getMediaDevices: async () => Promise.reject(),
-  updateLocalStream: async () => Promise.reject(),
-  updateScreenShare: async () => Promise.reject(),
-  sendWebRtcOffer: async () => Promise.reject(),
-  closeConnection: () => {},
-};
-
-export const WebRtcContext = createContext<IWebRtcContext>(defaultWebRtcContext);
+const optionalWebRtcContext = createOptionalContext<IWebRtcContext>('WebRtcContext');
+export const useWebRtcContext = optionalWebRtcContext.useOptionalContext;
 
 export default ({ children }: WithChildren) => {
   const { account } = useAuthContext();
@@ -65,7 +55,12 @@ export default ({ children }: WithChildren) => {
   const { callConversation, callData } = useContext(CallManagerContext);
 
   useEffect(() => {
-    if (!webRtcConnection && account) {
+    if (webRtcConnection && !callData) {
+      setWebRtcConnection(undefined);
+      return;
+    }
+
+    if (!webRtcConnection && account && callData) {
       const iceServers: RTCIceServer[] = [];
 
       if (account.details['TURN.enable'] === 'true') {
@@ -84,31 +79,36 @@ export default ({ children }: WithChildren) => {
 
       setWebRtcConnection(new RTCPeerConnection({ iceServers }));
     }
-  }, [account, webRtcConnection]);
+  }, [account, webRtcConnection, callData]);
 
-  if (!webRtcConnection || !webSocket || !callConversation || !callData?.conversationId) {
-    return <LoadingPage />;
-  }
+  const dependencies = useMemo(
+    () => ({
+      webRtcConnection,
+      webSocket,
+      conversation: callConversation,
+      conversationId: callData?.conversationId,
+    }),
+    [webRtcConnection, webSocket, callConversation, callData?.conversationId]
+  );
 
   return (
-    <WebRtcProvider
-      webRtcConnection={webRtcConnection}
-      webSocket={webSocket}
-      conversation={callConversation}
-      conversationId={callData.conversationId}
+    <ConditionalContextProvider
+      Context={optionalWebRtcContext.Context}
+      initialValue={undefined}
+      dependencies={dependencies}
+      useProviderValue={useWebRtcContextValue}
     >
       {children}
-    </WebRtcProvider>
+    </ConditionalContextProvider>
   );
 };
 
-const WebRtcProvider = ({
-  children,
+const useWebRtcContextValue = ({
   conversation,
   conversationId,
   webRtcConnection,
   webSocket,
-}: WithChildren & {
+}: {
   webRtcConnection: RTCPeerConnection;
   webSocket: IWebSocketContext;
   conversation: Conversation;
@@ -438,21 +438,28 @@ const WebRtcProvider = ({
     webRtcConnection.close();
   }, [webRtcConnection, localStream, screenShareLocalStream]);
 
-  return (
-    <WebRtcContext.Provider
-      value={{
-        iceConnectionState,
-        localStream,
-        screenShareLocalStream,
-        remoteStreams,
-        getMediaDevices,
-        updateLocalStream,
-        updateScreenShare,
-        sendWebRtcOffer,
-        closeConnection,
-      }}
-    >
-      {children}
-    </WebRtcContext.Provider>
+  return useMemo(
+    () => ({
+      iceConnectionState,
+      localStream,
+      screenShareLocalStream,
+      remoteStreams,
+      getMediaDevices,
+      updateLocalStream,
+      updateScreenShare,
+      sendWebRtcOffer,
+      closeConnection,
+    }),
+    [
+      iceConnectionState,
+      localStream,
+      screenShareLocalStream,
+      remoteStreams,
+      getMediaDevices,
+      updateLocalStream,
+      updateScreenShare,
+      sendWebRtcOffer,
+      closeConnection,
+    ]
   );
 };
