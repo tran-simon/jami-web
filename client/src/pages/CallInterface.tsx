@@ -46,7 +46,7 @@ import {
   CallingVolumeButton,
 } from '../components/CallButtons';
 import CallChatDrawer from '../components/CallChatDrawer';
-import { CallContext, CallStatus } from '../contexts/CallProvider';
+import { CallContext, CallStatus, VideoStatus } from '../contexts/CallProvider';
 import { useConversationContext } from '../contexts/ConversationProvider';
 import { WebRtcContext } from '../contexts/WebRtcProvider';
 import { VideoElementWithSinkId } from '../utils/utils';
@@ -85,22 +85,14 @@ interface Props {
 }
 
 const CallInterface = () => {
-  const { localStream, remoteStreams } = useContext(WebRtcContext);
+  const { remoteStreams } = useContext(WebRtcContext);
   const {
-    isVideoOn,
     currentMediaDeviceIds: {
       audiooutput: { id: audioOutDeviceId },
     },
   } = useContext(CallContext);
-  const localVideoRef = useRef<VideoElementWithSinkId | null>(null);
   const remoteVideoRef = useRef<VideoElementWithSinkId | null>(null);
   const gridItemRef = useRef<HTMLDivElement | null>(null);
-
-  useEffect(() => {
-    if (localStream && localVideoRef.current) {
-      localVideoRef.current.srcObject = localStream;
-    }
-  }, [localStream, localVideoRef]);
 
   useEffect(() => {
     // TODO: For now, `remoteStream` is the first remote stream in the array.
@@ -136,21 +128,15 @@ const CallInterface = () => {
         {/* Guest video, takes the whole screen */}
         <CallInterfaceInformation />
         <Box flexGrow={1} marginY={2} position="relative">
-          <Draggable bounds="parent" nodeRef={localVideoRef ?? undefined}>
-            <video
-              ref={localVideoRef}
-              autoPlay
-              muted
-              style={{
-                position: 'absolute',
-                right: 0,
-                borderRadius: '12px',
-                maxHeight: '50%',
-                maxWidth: '50%',
-                visibility: isVideoOn ? 'visible' : 'hidden',
-              }}
-            />
-          </Draggable>
+          <Box
+            sx={{
+              position: 'absolute',
+              width: '100%',
+              height: '100%',
+            }}
+          >
+            <LocalVideo />
+          </Box>
         </Box>
         <Grid container>
           <Grid item xs />
@@ -165,6 +151,45 @@ const CallInterface = () => {
         </Grid>
       </Box>
     </Box>
+  );
+};
+
+const LocalVideo = () => {
+  const { localStream, screenShareLocalStream } = useContext(WebRtcContext);
+  const { videoStatus } = useContext(CallContext);
+  const videoRef = useRef<VideoElementWithSinkId | null>(null);
+
+  const stream = useMemo(() => {
+    switch (videoStatus) {
+      case VideoStatus.Camera:
+        return localStream;
+      case VideoStatus.ScreenShare:
+        return screenShareLocalStream;
+    }
+  }, [videoStatus, localStream, screenShareLocalStream]);
+
+  useEffect(() => {
+    if (stream && videoRef.current) {
+      videoRef.current.srcObject = stream;
+    }
+  }, [stream, videoRef]);
+
+  return (
+    <Draggable bounds="parent" nodeRef={videoRef ?? undefined}>
+      <video
+        ref={videoRef}
+        autoPlay
+        muted
+        style={{
+          position: 'absolute',
+          borderRadius: '12px',
+          maxHeight: '50%',
+          maxWidth: '50%',
+          right: 0,
+          visibility: stream ? 'visible' : 'hidden',
+        }}
+      />
+    </Draggable>
   );
 };
 

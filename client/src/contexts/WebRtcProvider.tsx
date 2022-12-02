@@ -33,9 +33,11 @@ interface IWebRtcContext {
   iceConnectionState: RTCIceConnectionState | undefined;
 
   localStream: MediaStream | undefined;
+  screenShareLocalStream: MediaStream | undefined;
   remoteStreams: readonly MediaStream[] | undefined;
   getMediaDevices: () => Promise<MediaDevicesInfo>;
   updateLocalStream: (mediaDeviceIds?: MediaInputIds) => Promise<void>;
+  updateScreenShare: (active: boolean) => Promise<MediaStream | undefined>;
 
   sendWebRtcOffer: () => Promise<void>;
   closeConnection: () => void;
@@ -44,9 +46,11 @@ interface IWebRtcContext {
 const defaultWebRtcContext: IWebRtcContext = {
   iceConnectionState: undefined,
   localStream: undefined,
+  screenShareLocalStream: undefined,
   remoteStreams: undefined,
   getMediaDevices: async () => Promise.reject(),
   updateLocalStream: async () => Promise.reject(),
+  updateScreenShare: async () => Promise.reject(),
   sendWebRtcOffer: async () => Promise.reject(),
   closeConnection: () => {},
 };
@@ -101,6 +105,7 @@ const WebRtcProvider = ({
 }) => {
   const { conversation, conversationId } = useConversationContext();
   const [localStream, setLocalStream] = useState<MediaStream>();
+  const [screenShareLocalStream, setScreenShareLocalStream] = useState<MediaStream>();
   const [remoteStreams, setRemoteStreams] = useState<readonly MediaStream[]>();
   const [iceConnectionState, setIceConnectionState] = useState<RTCIceConnectionState | undefined>();
 
@@ -183,14 +188,37 @@ const WebRtcProvider = ({
     [getMediaDevices]
   );
 
+  const updateScreenShare = useCallback(
+    async (isOn: boolean) => {
+      if (isOn) {
+        const stream = await navigator.mediaDevices.getDisplayMedia({
+          video: true,
+          audio: false,
+        });
+
+        setScreenShareLocalStream(stream);
+        return stream;
+      } else {
+        if (screenShareLocalStream) {
+          for (const track of screenShareLocalStream.getTracks()) {
+            track.stop();
+          }
+        }
+
+        setScreenShareLocalStream(undefined);
+      }
+    },
+    [screenShareLocalStream]
+  );
+
   useEffect(() => {
-    if (!localStream || !webRtcConnection) {
+    if ((!localStream && !screenShareLocalStream) || !webRtcConnection) {
       return;
     }
 
-    const updateTracks = async (kind: 'audio' | 'video') => {
+    const updateTracks = async (stream: MediaStream, kind: 'audio' | 'video') => {
       const senders = kind === 'audio' ? audioRtcRtpSenders : videoRtcRtpSenders;
-      const tracks = kind === 'audio' ? localStream.getAudioTracks() : localStream.getVideoTracks();
+      const tracks = kind === 'audio' ? stream.getAudioTracks() : stream.getVideoTracks();
       if (senders) {
         const promises: Promise<void>[] = [];
         for (let i = 0; i < senders.length; i++) {
@@ -210,7 +238,7 @@ const WebRtcProvider = ({
       // TODO: Currently, we do not support adding new devices. To enable this feature, we would need to implement
       //       the "Perfect negotiation" pattern to renegotiate after `addTrack`.
       //       https://blog.mozilla.org/webrtc/perfect-negotiation-in-webrtc/
-      const newSenders = tracks.map((track) => webRtcConnection.addTrack(track, localStream));
+      const newSenders = tracks.map((track) => webRtcConnection.addTrack(track, stream));
       if (kind === 'audio') {
         setAudioRtcRtpSenders(newSenders);
       } else {
@@ -218,9 +246,15 @@ const WebRtcProvider = ({
       }
     };
 
-    updateTracks('audio');
-    updateTracks('video');
-  }, [localStream, webRtcConnection, audioRtcRtpSenders, videoRtcRtpSenders]);
+    if (localStream) {
+      updateTracks(localStream, 'audio');
+      updateTracks(localStream, 'video');
+    }
+
+    if (screenShareLocalStream) {
+      updateTracks(screenShareLocalStream, 'video');
+    }
+  }, [localStream, screenShareLocalStream, webRtcConnection, audioRtcRtpSenders, videoRtcRtpSenders]);
 
   const sendWebRtcOffer = useCallback(async () => {
     const sdp = await webRtcConnection.createOffer({
@@ -375,24 +409,35 @@ const WebRtcProvider = ({
   }, [webRtcConnection]);
 
   const closeConnection = useCallback(() => {
-    const localTracks = localStream?.getTracks();
-    if (localTracks) {
-      for (const track of localTracks) {
-        track.stop();
+    const stopStream = (stream: MediaStream) => {
+      const localTracks = stream.getTracks();
+      if (localTracks) {
+        for (const track of localTracks) {
+          track.stop();
+        }
       }
+    };
+
+    if (localStream) {
+      stopStream(localStream);
+    }
+    if (screenShareLocalStream) {
+      stopStream(screenShareLocalStream);
     }
 
     webRtcConnection.close();
-  }, [webRtcConnection, localStream]);
+  }, [webRtcConnection, localStream, screenShareLocalStream]);
 
   return (
     <WebRtcContext.Provider
       value={{
         iceConnectionState,
         localStream,
+        screenShareLocalStream,
         remoteStreams,
         getMediaDevices,
         updateLocalStream,
+        updateScreenShare,
         sendWebRtcOffer,
         closeConnection,
       }}

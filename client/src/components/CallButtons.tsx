@@ -19,9 +19,8 @@
 import { IconButton, IconButtonProps, PaletteColor } from '@mui/material';
 import { styled, Theme } from '@mui/material/styles';
 import { ChangeEvent, useContext, useMemo } from 'react';
-import { useTranslation } from 'react-i18next';
 
-import { CallContext, CallStatus } from '../contexts/CallProvider';
+import { CallContext, CallStatus, VideoStatus } from '../contexts/CallProvider';
 import {
   ExpandableButton,
   ExpandableButtonProps,
@@ -33,7 +32,6 @@ import {
   CallEndIcon,
   ChatBubbleIcon,
   ExtensionIcon,
-  FileIcon,
   FullScreenIcon,
   GroupAddIcon,
   MicroIcon,
@@ -43,12 +41,10 @@ import {
   RecordingIcon,
   RoundCloseIcon,
   ScreenShareArrowIcon,
-  ScreenShareRegularIcon,
-  ScreenShareScreenAreaIcon,
+  ScreenShareStopIcon,
   VideoCameraIcon,
   VideoCameraOffIcon,
   VolumeIcon,
-  WindowIcon,
 } from './SvgIcon';
 
 const CallButton = styled((props: ExpandableButtonProps) => {
@@ -151,30 +147,22 @@ export const CallingRecordButton = (props: ExpandableButtonProps) => {
 };
 
 export const CallingScreenShareButton = (props: ExpandableButtonProps) => {
-  const { t } = useTranslation();
   return (
-    <CallButton
-      aria-label="screen share"
-      expandMenuOnClick
-      Icon={ScreenShareArrowIcon}
-      expandMenuOptions={[
-        {
-          description: t('share_screen'),
-          icon: <ScreenShareRegularIcon />,
-        },
-        {
-          description: t('share_window'),
-          icon: <WindowIcon />,
-        },
-        {
-          description: t('share_screen_area'),
-          icon: <ScreenShareScreenAreaIcon />,
-        },
-        {
-          description: t('share_file'),
-          icon: <FileIcon />,
-        },
-      ]}
+    <CallButton aria-label="screen share" expandMenuOnClick IconButtonComp={ToggleScreenShareIconButton} {...props} />
+  );
+};
+
+const ToggleScreenShareIconButton = (props: IconButtonProps) => {
+  const { videoStatus, updateVideoStatus } = useContext(CallContext);
+
+  return (
+    <ToggleIconButton
+      IconOff={ScreenShareArrowIcon}
+      IconOn={ScreenShareStopIcon}
+      selected={videoStatus === VideoStatus.ScreenShare}
+      toggle={() => {
+        updateVideoStatus((v) => (v !== VideoStatus.ScreenShare ? VideoStatus.ScreenShare : VideoStatus.Off));
+      }}
       {...props}
     />
   );
@@ -262,13 +250,15 @@ export const CallingVideoCameraButton = (props: ExpandableButtonProps) => {
 };
 
 const ToggleVideoCameraIconButton = (props: IconButtonProps) => {
-  const { isVideoOn, setIsVideoOn } = useContext(CallContext);
+  const { videoStatus, updateVideoStatus } = useContext(CallContext);
   return (
     <ToggleIconButton
       IconOn={VideoCameraIcon}
       IconOff={VideoCameraOffIcon}
-      selected={isVideoOn}
-      toggle={() => setIsVideoOn((v) => !v)}
+      selected={videoStatus === VideoStatus.Camera}
+      toggle={() => {
+        updateVideoStatus((v) => (v !== VideoStatus.Camera ? VideoStatus.Camera : VideoStatus.Off));
+      }}
       {...props}
     />
   );

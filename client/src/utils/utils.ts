@@ -21,7 +21,9 @@ export type WithChildren = {
   children: ReactNode;
 };
 
+type AsyncDispatch<A> = (value: A) => Promise<void>;
 export type SetState<T> = Dispatch<SetStateAction<T>>;
+export type AsyncSetState<T> = AsyncDispatch<SetStateAction<T>>;
 
 /**
  * HTMLVideoElement with the `sinkId` and `setSinkId` optional properties.

@@ -24,7 +24,7 @@ import { useUrlParams } from '../hooks/useUrlParams';
 import CallPermissionDenied from '../pages/CallPermissionDenied';
 import { CallRouteParams } from '../router';
 import { callTimeoutMs } from '../utils/constants';
-import { SetState, WithChildren } from '../utils/utils';
+import { AsyncSetState, SetState, WithChildren } from '../utils/utils';
 import { useConversationContext } from './ConversationProvider';
 import { MediaDevicesInfo, MediaInputKind, WebRtcContext } from './WebRtcProvider';
 import { IWebSocketContext, WebSocketContext } from './WebSocketProvider';
@@ -40,6 +40,12 @@ export enum CallStatus {
   PermissionsDenied,
 }
 
+export enum VideoStatus {
+  Off,
+  Camera,
+  ScreenShare,
+}
+
 type MediaDeviceIdState = {
   id: string | undefined;
   setId: (id: string | undefined) => void | Promise<void>;
@@ -52,8 +58,8 @@ export interface ICallContext {
 
   isAudioOn: boolean;
   setIsAudioOn: SetState<boolean>;
-  isVideoOn: boolean;
-  setIsVideoOn: SetState<boolean>;
+  videoStatus: VideoStatus;
+  updateVideoStatus: AsyncSetState<VideoStatus>;
   isChatShown: boolean;
   setIsChatShown: SetState<boolean>;
   isFullscreen: boolean;
@@ -89,8 +95,8 @@ const defaultCallContext: ICallContext = {
 
   isAudioOn: false,
   setIsAudioOn: () => {},
-  isVideoOn: false,
-  setIsVideoOn: () => {},
+  videoStatus: VideoStatus.Off,
+  updateVideoStatus: () => Promise.reject(),
   isChatShown: false,
   setIsChatShown: () => {},
   isFullscreen: false,
@@ -122,8 +128,15 @@ const CallProvider = ({
   webSocket: IWebSocketContext;
 }) => {
   const { state: routeState } = useUrlParams<CallRouteParams>();
-  const { localStream, sendWebRtcOffer, iceConnectionState, closeConnection, getMediaDevices, updateLocalStream } =
-    useContext(WebRtcContext);
+  const {
+    localStream,
+    updateScreenShare,
+    sendWebRtcOffer,
+    iceConnectionState,
+    closeConnection,
+    getMediaDevices,
+    updateLocalStream,
+  } = useContext(WebRtcContext);
   const { conversationId, conversation } = useConversationContext();
   const navigate = useNavigate();
 
@@ -133,7 +146,7 @@ const CallProvider = ({
   const [videoDeviceId, setVideoDeviceId] = useState<string>();
 
   const [isAudioOn, setIsAudioOn] = useState(false);
-  const [isVideoOn, setIsVideoOn] = useState(false);
+  const [videoStatus, setVideoStatus] = useState(VideoStatus.Off);
   const [isChatShown, setIsChatShown] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [callStatus, setCallStatus] = useState(routeState?.callStatus);
@@ -187,14 +200,35 @@ const CallProvider = ({
   useEffect(() => {
     if (localStream) {
       for (const track of localStream.getVideoTracks()) {
-        track.enabled = isVideoOn;
+        track.enabled = videoStatus === VideoStatus.Camera;
         const deviceId = track.getSettings().deviceId;
         if (deviceId) {
           setVideoDeviceId(deviceId);
         }
       }
     }
-  }, [isVideoOn, localStream]);
+  }, [videoStatus, localStream]);
+
+  const updateVideoStatus = useCallback(
+    async (newStatus: ((prevState: VideoStatus) => VideoStatus) | VideoStatus) => {
+      if (typeof newStatus === 'function') {
+        newStatus = newStatus(videoStatus);
+      }
+
+      const stream = await updateScreenShare(newStatus === VideoStatus.ScreenShare);
+      if (stream) {
+        for (const track of stream.getTracks()) {
+          track.addEventListener('ended', () => {
+            console.warn('Browser ended screen sharing');
+            updateVideoStatus(VideoStatus.Off);
+          });
+        }
+      }
+
+      setVideoStatus(newStatus);
+    },
+    [videoStatus, updateScreenShare]
+  );
 
   useEffect(() => {
     const onFullscreenChange = () => {
@@ -220,7 +254,7 @@ const CallProvider = ({
           };
 
           setCallStatus(CallStatus.Ringing);
-          setIsVideoOn(withVideoOn);
+          setVideoStatus(withVideoOn ? VideoStatus.Camera : VideoStatus.Off);
           console.info('Sending CallBegin', callBegin);
           webSocket.send(WebSocketMessageType.CallBegin, callBegin);
         })
@@ -241,7 +275,7 @@ const CallProvider = ({
             conversationId,
           };
 
-          setIsVideoOn(withVideoOn);
+          setVideoStatus(withVideoOn ? VideoStatus.Camera : VideoStatus.Off);
           setCallStatus(CallStatus.Connecting);
           console.info('Sending CallAccept', callAccept);
           webSocket.send(WebSocketMessageType.CallAccept, callAccept);
@@ -324,7 +358,7 @@ const CallProvider = ({
       console.info('ICE connection disconnected or failed, ending call');
       endCall();
     }
-  }, [iceConnectionState, callStatus, isVideoOn, endCall]);
+  }, [iceConnectionState, callStatus, videoStatus, endCall]);
 
   useEffect(() => {
     const checkStatusTimeout = () => {
@@ -386,8 +420,8 @@ const CallProvider = ({
         currentMediaDeviceIds,
         isAudioOn,
         setIsAudioOn,
-        isVideoOn,
-        setIsVideoOn,
+        videoStatus,
+        updateVideoStatus,
         isChatShown,
         setIsChatShown,
         isFullscreen,
