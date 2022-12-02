@@ -22,9 +22,9 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
 import { useAuthContext } from '../contexts/AuthProvider';
+import { CallManagerContext } from '../contexts/CallManagerProvider';
 import { useConversationContext } from '../contexts/ConversationProvider';
 import { MessengerContext } from '../contexts/MessengerProvider';
-import { useStartCall } from '../hooks/useStartCall';
 import { Conversation } from '../models/Conversation';
 import { setRefreshFromSlice } from '../redux/appSlice';
 import { useAppDispatch } from '../redux/hooks';
@@ -103,6 +103,7 @@ const ConversationMenu = ({
 }: ConversationMenuProps) => {
   const { t } = useTranslation();
   const { axiosInstance } = useAuthContext();
+  const { startCall } = useContext(CallManagerContext);
   const [isSwarm] = useState(true);
 
   const detailsDialogHandler = useDialogHandler();
@@ -110,8 +111,6 @@ const ConversationMenu = ({
   const removeContactDialogHandler = useDialogHandler();
 
   const navigate = useNavigate();
-
-  const startCall = useStartCall();
 
   const getContactDetails = useCallback(async () => {
     const controller = new AbortController();
@@ -139,7 +138,10 @@ const ConversationMenu = ({
         Icon: AudioCallIcon,
         onClick: () => {
           if (conversationId) {
-            startCall(conversationId);
+            startCall({
+              conversationId,
+              role: 'caller',
+            });
           }
         },
       },
@@ -148,8 +150,10 @@ const ConversationMenu = ({
         Icon: VideoCallIcon,
         onClick: () => {
           if (conversationId) {
-            startCall(conversationId, {
-              isVideoOn: true,
+            startCall({
+              conversationId,
+              role: 'caller',
+              withVideoOn: true,
             });
           }
         },

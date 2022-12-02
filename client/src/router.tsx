@@ -21,15 +21,12 @@ import App, { appLoader } from './App';
 import ContactList from './components/ContactList';
 import ConversationView from './components/ConversationView';
 import AuthProvider from './contexts/AuthProvider';
-import CallProvider, { CallRole, CallStatus } from './contexts/CallProvider';
+import CallManagerProvider from './contexts/CallManagerProvider';
 import ConversationProvider from './contexts/ConversationProvider';
 import MessengerProvider from './contexts/MessengerProvider';
-import WebRtcProvider from './contexts/WebRtcProvider';
 import WebSocketProvider from './contexts/WebSocketProvider';
 import { RouteParams } from './hooks/useUrlParams';
-import NotificationManager from './managers/NotificationManager';
 import AccountSettings from './pages/AccountSettings';
-import CallInterface from './pages/CallInterface';
 import GeneralSettings from './pages/GeneralSettings';
 import Messenger from './pages/Messenger';
 import Setup from './pages/Setup';
@@ -38,16 +35,6 @@ import Welcome from './pages/Welcome';
 import { ThemeDemonstrator } from './themes/ThemeDemonstrator';
 
 export type ConversationRouteParams = RouteParams<{ conversationId?: string }, Record<string, never>>;
-
-export type CallRouteParams = RouteParams<
-  { conversationId?: string },
-  Record<string, never>,
-  {
-    role: CallRole;
-    isVideoOn?: boolean;
-    callStatus: CallStatus;
-  }
->;
 
 export const router = createBrowserRouter(
   createRoutesFromElements(
@@ -60,9 +47,9 @@ export const router = createBrowserRouter(
         element={
           <AuthProvider>
             <WebSocketProvider>
-              <NotificationManager>
+              <CallManagerProvider>
                 <Outlet />
-              </NotificationManager>
+              </CallManagerProvider>
             </WebSocketProvider>
           </AuthProvider>
         }
@@ -81,23 +68,11 @@ export const router = createBrowserRouter(
             element={
               <ConversationProvider>
                 <Messenger>
-                  <Outlet />
+                  <ConversationView />
                 </Messenger>
               </ConversationProvider>
             }
-          >
-            <Route index element={<ConversationView />} />
-            <Route
-              path="call"
-              element={
-                <WebRtcProvider>
-                  <CallProvider>
-                    <CallInterface />
-                  </CallProvider>
-                </WebRtcProvider>
-              }
-            />
-          </Route>
+          />
         </Route>
         <Route path="settings-account" element={<AccountSettings />} />
         <Route path="settings-general" element={<GeneralSettings />} />
