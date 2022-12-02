@@ -34,7 +34,7 @@ import {
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import EmojiPicker, { IEmojiData } from 'emoji-picker-react';
-import React, { ComponentType, MouseEvent, ReactNode, useCallback, useState } from 'react';
+import { ComponentType, MouseEvent, ReactNode, useCallback, useState } from 'react';
 
 import {
   Arrow2Icon,
