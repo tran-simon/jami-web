@@ -16,12 +16,14 @@
  * <https://www.gnu.org/licenses/>.
  */
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMemo } from 'react';
 
 import { useAuthContext } from '../contexts/AuthProvider';
+import { Conversation } from '../models/Conversation';
 
-export const useConversationQuery = (conversationId: string) => {
-  const { axiosInstance } = useAuthContext();
-  return useQuery(
+export const useConversationQuery = (conversationId?: string) => {
+  const { axiosInstance, accountId } = useAuthContext();
+  const conversationQuery = useQuery(
     ['conversation', conversationId],
     async () => {
       const { data } = await axiosInstance.get(`/conversations/${conversationId}`);
@@ -31,6 +33,17 @@ export const useConversationQuery = (conversationId: string) => {
       enabled: !!conversationId,
     }
   );
+
+  const conversation = useMemo(() => {
+    if (conversationQuery.isSuccess) {
+      return Conversation.from(accountId, conversationQuery.data);
+    }
+  }, [accountId, conversationQuery.isSuccess, conversationQuery.data]);
+
+  return {
+    conversation,
+    ...conversationQuery,
+  };
 };
 
 export const useMessagesQuery = (conversationId: string) => {

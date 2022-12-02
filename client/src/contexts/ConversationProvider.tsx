@@ -16,7 +16,7 @@
  * <https://www.gnu.org/licenses/>.
  */
 import { ConversationView, WebSocketMessageType } from 'jami-web-common';
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect } from 'react';
 
 import LoadingPage from '../components/Loading';
 import { createOptionalContext } from '../hooks/createOptionalContext';
@@ -43,26 +43,8 @@ export default ({ children }: WithChildren) => {
   } = useUrlParams<ConversationRouteParams>();
   const { accountId } = useAuthContext();
   const webSocket = useContext(WebSocketContext);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isError, setIsError] = useState(false);
-  const [conversation, setConversation] = useState<Conversation | undefined>();
 
-  const conversationQuery = useConversationQuery(conversationId!);
-
-  useEffect(() => {
-    if (conversationQuery.isSuccess) {
-      const conversation = Conversation.from(accountId, conversationQuery.data);
-      setConversation(conversation);
-    }
-  }, [accountId, conversationQuery.isSuccess, conversationQuery.data]);
-
-  useEffect(() => {
-    setIsLoading(conversationQuery.isLoading);
-  }, [conversationQuery.isLoading]);
-
-  useEffect(() => {
-    setIsError(conversationQuery.isError);
-  }, [conversationQuery.isError]);
+  const { conversation, isLoading, isError } = useConversationQuery(conversationId!);
 
   useEffect(() => {
     if (!conversation || !conversationId || !webSocket) {

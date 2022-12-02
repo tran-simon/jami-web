@@ -20,9 +20,10 @@ import { WebRtcIceCandidate, WebRtcSdp, WebSocketMessageType } from 'jami-web-co
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 
 import LoadingPage from '../components/Loading';
+import { Conversation } from '../models/Conversation';
 import { WithChildren } from '../utils/utils';
 import { useAuthContext } from './AuthProvider';
-import { useConversationContext } from './ConversationProvider';
+import { CallManagerContext } from './CallManagerProvider';
 import { IWebSocketContext, WebSocketContext } from './WebSocketProvider';
 
 export type MediaDevicesInfo = Record<MediaDeviceKind, MediaDeviceInfo[]>;
@@ -61,6 +62,7 @@ export default ({ children }: WithChildren) => {
   const { account } = useAuthContext();
   const [webRtcConnection, setWebRtcConnection] = useState<RTCPeerConnection | undefined>();
   const webSocket = useContext(WebSocketContext);
+  const { callConversation, callData } = useContext(CallManagerContext);
 
   useEffect(() => {
     if (!webRtcConnection && account) {
@@ -84,12 +86,17 @@ export default ({ children }: WithChildren) => {
     }
   }, [account, webRtcConnection]);
 
-  if (!webRtcConnection || !webSocket) {
+  if (!webRtcConnection || !webSocket || !callConversation || !callData?.conversationId) {
     return <LoadingPage />;
   }
 
   return (
-    <WebRtcProvider webRtcConnection={webRtcConnection} webSocket={webSocket}>
+    <WebRtcProvider
+      webRtcConnection={webRtcConnection}
+      webSocket={webSocket}
+      conversation={callConversation}
+      conversationId={callData.conversationId}
+    >
       {children}
     </WebRtcProvider>
   );
@@ -97,13 +104,16 @@ export default ({ children }: WithChildren) => {
 
 const WebRtcProvider = ({
   children,
+  conversation,
+  conversationId,
   webRtcConnection,
   webSocket,
 }: WithChildren & {
   webRtcConnection: RTCPeerConnection;
   webSocket: IWebSocketContext;
+  conversation: Conversation;
+  conversationId: string;
 }) => {
-  const { conversation, conversationId } = useConversationContext();
   const [localStream, setLocalStream] = useState<MediaStream>();
   const [screenShareLocalStream, setScreenShareLocalStream] = useState<MediaStream>();
   const [remoteStreams, setRemoteStreams] = useState<readonly MediaStream[]>();
