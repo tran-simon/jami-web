@@ -19,7 +19,10 @@ import { CallBegin, WebSocketMessageType } from 'jami-web-common';
 import { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
+import { RemoteVideoOverlay } from '../components/VideoOverlay';
+import { useUrlParams } from '../hooks/useUrlParams';
 import { Conversation } from '../models/Conversation';
+import { ConversationRouteParams } from '../router';
 import { useConversationQuery } from '../services/conversationQueries';
 import { SetState, WithChildren } from '../utils/utils';
 import CallProvider, { CallRole } from './CallProvider';
@@ -104,6 +107,8 @@ export default ({ children }: WithChildren) => {
 
 const CallManagerProvider = ({ children }: WithChildren) => {
   const { callData } = useContext(CallManagerContext);
+  const { urlParams } = useUrlParams<ConversationRouteParams>();
+  const conversationId = urlParams.conversationId;
 
   if (!callData) {
     return <>{children}</>;
@@ -111,7 +116,12 @@ const CallManagerProvider = ({ children }: WithChildren) => {
 
   return (
     <WebRtcProvider>
-      <CallProvider>{children}</CallProvider>
+      <CallProvider>
+        {callData.conversationId !== conversationId && (
+          <RemoteVideoOverlay callConversationId={callData.conversationId} />
+        )}
+        {children}
+      </CallProvider>
     </WebRtcProvider>
   );
 };
