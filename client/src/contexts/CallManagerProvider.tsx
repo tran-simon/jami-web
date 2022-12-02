@@ -29,7 +29,7 @@ import CallProvider, { CallRole } from './CallProvider';
 import WebRtcProvider from './WebRtcProvider';
 import { WebSocketContext } from './WebSocketProvider';
 
-type CallData = {
+export type CallData = {
   conversationId: string;
   role: CallRole;
   withVideoOn?: boolean;
@@ -50,8 +50,8 @@ export default ({ children }: WithChildren) => {
   const [callData, setCallData] = useState<CallData>();
   const webSocket = useContext(WebSocketContext);
   const navigate = useNavigate();
-  const conversationId = callData?.conversationId;
-  const { conversation } = useConversationQuery(conversationId);
+  const { conversation } = useConversationQuery(callData?.conversationId);
+  const { urlParams } = useUrlParams<ConversationRouteParams>();
 
   const failStartCall = useCallback(() => {
     throw new Error('Cannot start call: Already in a call');
@@ -99,28 +99,14 @@ export default ({ children }: WithChildren) => {
         exitCall,
       }}
     >
-      <CallManagerProvider>{children}</CallManagerProvider>
+      <WebRtcProvider>
+        <CallProvider>
+          {callData && callData.conversationId !== urlParams.conversationId && (
+            <RemoteVideoOverlay callConversationId={callData.conversationId} />
+          )}
+          {children}
+        </CallProvider>
+      </WebRtcProvider>
     </CallManagerContext.Provider>
-  );
-};
-
-const CallManagerProvider = ({ children }: WithChildren) => {
-  const { callData } = useContext(CallManagerContext);
-  const { urlParams } = useUrlParams<ConversationRouteParams>();
-  const conversationId = urlParams.conversationId;
-
-  if (!callData) {
-    return <>{children}</>;
-  }
-
-  return (
-    <WebRtcProvider>
-      <CallProvider>
-        {callData.conversationId !== conversationId && (
-          <RemoteVideoOverlay callConversationId={callData.conversationId} />
-        )}
-        {children}
-      </CallProvider>
-    </WebRtcProvider>
   );
 };

@@ -35,3 +35,11 @@ export interface VideoElementWithSinkId extends HTMLVideoElement {
   sinkId?: string;
   setSinkId?: (deviceId: string) => void;
 }
+
+export type PartialNotOptional<T> = {
+  [P in keyof T]: T[P] | undefined;
+};
+
+export const isRequired = <T>(obj: Partial<T>): obj is T => {
+  return Object.values(obj).every((v) => v !== undefined);
+};
