@@ -16,9 +16,8 @@
  * <https://www.gnu.org/licenses/>.
  */
 import { Divider, Stack, Typography } from '@mui/material';
-import { useContext } from 'react';
 
-import { CallContext } from '../contexts/CallProvider';
+import { useCallContext } from '../contexts/CallProvider';
 import { useConversationContext } from '../contexts/ConversationProvider';
 import ChatInterface from '../pages/ChatInterface';
 import { CloseButton } from './Button';
@@ -44,7 +43,7 @@ export default () => {
 };
 
 const CallChatDrawerHeader = () => {
-  const { setIsChatShown } = useContext(CallContext);
+  const { setIsChatShown } = useCallContext();
   const { conversation } = useConversationContext();
 
   // TODO: Improve this to support multiple members

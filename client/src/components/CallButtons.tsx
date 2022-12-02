@@ -18,9 +18,9 @@
 
 import { IconButton, IconButtonProps, PaletteColor } from '@mui/material';
 import { styled, Theme } from '@mui/material/styles';
-import { ChangeEvent, useContext, useMemo } from 'react';
+import { ChangeEvent, useMemo } from 'react';
 
-import { CallContext, CallStatus, VideoStatus } from '../contexts/CallProvider';
+import { CallStatus, useCallContext, VideoStatus } from '../contexts/CallProvider';
 import {
   ExpandableButton,
   ExpandableButtonProps,
@@ -88,7 +88,7 @@ const ColoredCallButton = styled(
 });
 
 export const CallingChatButton = (props: ExpandableButtonProps) => {
-  const { setIsChatShown } = useContext(CallContext);
+  const { setIsChatShown } = useCallContext();
   return (
     <CallButton
       aria-label="chat"
@@ -102,7 +102,7 @@ export const CallingChatButton = (props: ExpandableButtonProps) => {
 };
 
 export const CallingEndButton = (props: ExpandableButtonProps) => {
-  const { endCall } = useContext(CallContext);
+  const { endCall } = useCallContext();
   return (
     <ColoredCallButton
       paletteColor={(theme) => theme.palette.error}
@@ -121,7 +121,7 @@ export const CallingExtensionButton = (props: ExpandableButtonProps) => {
 };
 
 export const CallingFullScreenButton = (props: ExpandableButtonProps) => {
-  const { setIsFullscreen } = useContext(CallContext);
+  const { setIsFullscreen } = useCallContext();
   return (
     <CallButton
       aria-label="full screen"
@@ -153,7 +153,7 @@ export const CallingScreenShareButton = (props: ExpandableButtonProps) => {
 };
 
 const ToggleScreenShareIconButton = (props: IconButtonProps) => {
-  const { videoStatus, updateVideoStatus } = useContext(CallContext);
+  const { videoStatus, updateVideoStatus } = useCallContext();
 
   return (
     <ToggleIconButton
@@ -169,7 +169,7 @@ const ToggleScreenShareIconButton = (props: IconButtonProps) => {
 };
 
 const useMediaDeviceExpandMenuOptions = (kind: MediaDeviceKind): ExpandMenuRadioOption[] | undefined => {
-  const { currentMediaDeviceIds, mediaDevices } = useContext(CallContext);
+  const { currentMediaDeviceIds, mediaDevices } = useCallContext();
 
   const options = useMemo(
     () =>
@@ -224,7 +224,7 @@ export const CallingMicButton = (props: ExpandableButtonProps) => {
 };
 
 const ToggleAudioCameraIconButton = (props: IconButtonProps) => {
-  const { isAudioOn, setIsAudioOn } = useContext(CallContext);
+  const { isAudioOn, setIsAudioOn } = useCallContext();
   return (
     <ToggleIconButton
       IconOn={MicroIcon}
@@ -250,7 +250,7 @@ export const CallingVideoCameraButton = (props: ExpandableButtonProps) => {
 };
 
 const ToggleVideoCameraIconButton = (props: IconButtonProps) => {
-  const { videoStatus, updateVideoStatus } = useContext(CallContext);
+  const { videoStatus, updateVideoStatus } = useCallContext();
   return (
     <ToggleIconButton
       IconOn={VideoCameraIcon}
@@ -266,7 +266,7 @@ const ToggleVideoCameraIconButton = (props: IconButtonProps) => {
 
 // Calling pending/receiving interface
 export const CallingCancelButton = (props: IconButtonProps) => {
-  const { endCall } = useContext(CallContext);
+  const { endCall } = useCallContext();
 
   return (
     <ColoredCallButton
@@ -282,7 +282,7 @@ export const CallingCancelButton = (props: IconButtonProps) => {
 };
 
 export const CallingAnswerAudioButton = (props: IconButtonProps) => {
-  const { acceptCall, callStatus } = useContext(CallContext);
+  const { acceptCall, callStatus } = useCallContext();
 
   return (
     <ColoredCallButton
@@ -299,7 +299,7 @@ export const CallingAnswerAudioButton = (props: IconButtonProps) => {
 };
 
 export const CallingAnswerVideoButton = (props: IconButtonProps) => {
-  const { acceptCall, callStatus } = useContext(CallContext);
+  const { acceptCall, callStatus } = useCallContext();
   return (
     <ColoredCallButton
       disabled={callStatus === CallStatus.Connecting || callStatus === CallStatus.Loading}
@@ -315,7 +315,7 @@ export const CallingAnswerVideoButton = (props: IconButtonProps) => {
 };
 
 export const CallingRefuseButton = (props: IconButtonProps) => {
-  const { endCall } = useContext(CallContext);
+  const { endCall } = useCallContext();
   return (
     <ColoredCallButton
       aria-label="refuse call"
