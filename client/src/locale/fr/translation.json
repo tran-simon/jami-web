@@ -1,9 +1,10 @@
 {
   "severity": "",
-  "share_screen": "Partager votre écran",
-  "share_window": "Partager la fenêtre",
-  "share_screen_area": "Partager une partie de l'écran",
-  "share_file": "Partager le fichier",
+  "ongoing_call_unmuted": "Appel en cours",
+  "ongoing_call_muted": "Appel en cours (muet)",
+  "connecting_call": "Connexion...",
+  "outgoing_call": "Appel sortant",
+  "incoming_call": "Appel entrant",
   "conversation_message": "Envoyer un message",
   "conversation_start_audiocall": "Démarrer appel audio",
   "conversation_start_videocall": "Démarrer appel vidéo",
@@ -72,6 +73,7 @@
   "message_input_placeholder_three": "Écrire à {{member0}}, {{member1}} et {{member2}}",
   "message_input_placeholder_four": "Écrire à {{member0}}, {{member1}}, {{member2}}, +1 autre membre",
   "message_input_placeholder_more": "Écrire à {{member0}}, {{member1}}, {{member2}}, +{{excess}} autres membres",
+  "missed_incoming_call": "Appel manqué de la conversation {{conversationId}}",
   "conversation_add_contact": "Ajouter le contact",
   "loading": "Chargement...",
   "calling": "Appel vers {{member0}}",
@@ -111,8 +113,13 @@
   "setup_login_password_placeholder_creation": "Nouveau mot de passe",
   "setup_login_password_placeholder_repeat": "Répéter le mot de passe",
   "admin_creation_submit_button": "Créer un compte admin",
+  "share_screen": "Partager votre écran",
+  "share_window": "Partager la fenêtre",
+  "share_screen_area": "Partager une partie de l'écran",
+  "share_file": "Partager le fichier",
   "incoming_call_audio": "Appel audio entrant de {{member0}}",
   "incoming_call_video": "Appel vidéo entrant de {{member0}}",
   "severity_error": "Erreur",
-  "severity_success": "Succès"
+  "severity_success": "Succès",
+  "severity_info": "Info"
 }

@@ -1,9 +1,10 @@
 {
   "severity": "",
-  "share_screen": "Share your screen",
-  "share_window": "Share window",
-  "share_screen_area": "Share an area of your screen",
-  "share_file": "Share a file",
+  "ongoing_call_unmuted": "Ongoing call",
+  "ongoing_call_muted": "Ongoing call (muted)",
+  "connecting_call": "Connecting...",
+  "outgoing_call": "Outgoing call",
+  "incoming_call": "Incoming call",
   "conversation_message": "Message",
   "conversation_start_audiocall": "Start audio call",
   "conversation_start_videocall": "Start video call",
@@ -72,6 +73,7 @@
   "message_input_placeholder_three": "Write to {{member0}}, {{member1}} and {{member2}}",
   "message_input_placeholder_four": "Write to {{member0}}, {{member1}}, {{member2}}, +1 other member",
   "message_input_placeholder_more": "Write to {{member0}}, {{member1}}, {{member2}}, +{{excess}} other members",
+  "missed_incoming_call": "Missed incoming call from conversation {{conversationId}}",
   "conversation_add_contact": "Add contact",
   "loading": "Loading...",
   "calling": "Calling {{member0}}",
@@ -111,8 +113,13 @@
   "setup_login_password_placeholder_creation": "New password",
   "setup_login_password_placeholder_repeat": "Repeat password",
   "admin_creation_submit_button": "Create admin account",
+  "share_screen": "Share your screen",
+  "share_window": "Share window",
+  "share_screen_area": "Share an area of your screen",
+  "share_file": "Share a file",
   "incoming_call_audio": "Incoming audio call from {{member0}}",
   "incoming_call_video": "Incoming video call from {{member0}}",
   "severity_error": "Error",
-  "severity_success": "Success"
+  "severity_success": "Success",
+  "severity_info": "Info"
 }

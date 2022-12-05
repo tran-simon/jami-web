@@ -24,6 +24,7 @@ import { useNavigate } from 'react-router-dom';
 
 import { useAuthContext } from '../contexts/AuthProvider';
 import { CallManagerContext } from '../contexts/CallManagerProvider';
+import { CallStatus, useCallContext } from '../contexts/CallProvider';
 import { useConversationContext } from '../contexts/ConversationProvider';
 import { MessengerContext } from '../contexts/MessengerProvider';
 import { Conversation } from '../models/conversation';
@@ -52,6 +53,9 @@ export default function ConversationListItem({ conversation }: ConversationListI
   const conversationId = conversationContext?.conversationId;
   const contextMenuHandler = useContextMenuHandler();
   const { newContactId, setNewContactId } = useContext(MessengerContext);
+  const callContext = useCallContext(true);
+  const { callData } = useContext(CallManagerContext);
+  const { t } = useTranslation();
 
   const pathId = conversationId ?? newContactId;
   const isSelected = conversation.getDisplayUri() === pathId;
@@ -68,6 +72,28 @@ export default function ConversationListItem({ conversation }: ConversationListI
     }
   }, [navigate, conversation, userId, setNewContactId]);
 
+  const getSecondaryText = () => {
+    const propsConversationId = conversation.id;
+
+    if (!propsConversationId) {
+      return '';
+    }
+
+    if (!callContext || !callData || callData.conversationId !== propsConversationId) {
+      return conversation.getDisplayUri();
+    }
+
+    if (callContext.callStatus === CallStatus.InCall) {
+      return callContext.isAudioOn ? t('ongoing_call_unmuted') : t('ongoing_call_muted');
+    }
+
+    if (callContext.callStatus === CallStatus.Connecting) {
+      return t('connecting_call');
+    }
+
+    return callContext.callRole === 'caller' ? t('outgoing_call') : t('incoming_call');
+  };
+
   return (
     <Box onContextMenu={contextMenuHandler.handleAnchorPosition}>
       <ConversationMenu
@@ -81,7 +107,7 @@ export default function ConversationListItem({ conversation }: ConversationListI
         <ListItemAvatar>
           <ConversationAvatar displayName={conversation.getDisplayNameNoFallback()} />
         </ListItemAvatar>
-        <ListItemText primary={conversation.getDisplayName()} secondary={conversation.getDisplayUri()} />
+        <ListItemText primary={conversation.getDisplayName()} secondary={getSecondaryText()} />
       </ListItem>
     </Box>
   );

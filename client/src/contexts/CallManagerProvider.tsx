@@ -17,8 +17,10 @@
  */
 import { CallBegin, WebSocketMessageType } from 'jami-web-common';
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
+import { AlertSnackbar } from '../components/AlertSnackbar';
 import { RemoteVideoOverlay } from '../components/VideoOverlay';
 import { useUrlParams } from '../hooks/useUrlParams';
 import { Conversation } from '../models/conversation';
@@ -60,6 +62,8 @@ export default ({ children }: WithChildren) => {
   const navigate = useNavigate();
   const { conversation } = useConversationQuery(callData?.conversationId);
   const { urlParams } = useUrlParams<ConversationRouteParams>();
+  const [missedCallConversationId, setMissedCallConversationId] = useState<string>();
+  const { t } = useTranslation();
 
   const failStartCall = useCallback(() => {
     throw new Error('Cannot start call: Already in a call');
@@ -77,16 +81,18 @@ export default ({ children }: WithChildren) => {
   }, [callData]);
 
   useEffect(() => {
-    if (callData) {
-      // TODO: Currently, we simply do not bind the CallBegin listener if already in a call.
-      //       In the future, we should handle receiving a call while already in another.
-      return;
-    }
     if (!webSocket) {
       return;
     }
 
     const callBeginListener = ({ conversationId, withVideoOn }: CallBegin) => {
+      if (callData) {
+        // TODO: Currently, we display a notification if already in a call.
+        //       In the future, we should handle receiving a call while already in another.
+        setMissedCallConversationId(conversationId);
+        return;
+      }
+
       startCall({ conversationId: conversationId, role: 'receiver', withVideoOn });
       navigate(`/conversation/${conversationId}`);
     };
@@ -109,15 +115,24 @@ export default ({ children }: WithChildren) => {
   );
 
   return (
-    <CallManagerContext.Provider value={value}>
-      <WebRtcProvider>
-        <CallProvider>
-          {callData && callData.conversationId !== urlParams.conversationId && (
-            <RemoteVideoOverlay callConversationId={callData.conversationId} />
-          )}
-          {children}
-        </CallProvider>
-      </WebRtcProvider>
-    </CallManagerContext.Provider>
+    <>
+      <AlertSnackbar
+        severity={'info'}
+        open={missedCallConversationId !== undefined}
+        onClose={() => setMissedCallConversationId(undefined)}
+      >
+        {t('missed_incoming_call', { conversationId: missedCallConversationId })}
+      </AlertSnackbar>
+      <CallManagerContext.Provider value={value}>
+        <WebRtcProvider>
+          <CallProvider>
+            {callData && callData.conversationId !== urlParams.conversationId && (
+              <RemoteVideoOverlay callConversationId={callData.conversationId} />
+            )}
+            {children}
+          </CallProvider>
+        </WebRtcProvider>
+      </CallManagerContext.Provider>
+    </>
   );
 };
